@@ -16,17 +16,34 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
+import org.apache.pekko.http.scaladsl.model.DateTime
+import org.apache.pekko.http.scaladsl.model.headers.Date
+import java.time.format.DateTimeFormatter
+
 import scala.util.matching.Regex
 
-@Singleton()
 class Validator {
 
   def ninoValidator(nino: String): Option[String] = {
     val validationPattern: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D\s]?$""".r
     if (validationPattern.matches(nino)) Some(nino) else None
-
-
   }
+
+  def nameValidator(forename: String): Option[String] = {
+    if(forename.length > 10) Some(forename) else None
+  }
+
+  /*def dobValidator(dob: String): Option[Date] = {
+    val convertedDob = DateTimeFormatter.ofPattern("ddMMyyyy")
+    if(convertedDob)
+
+
+
+    val newDob = convertedDob.plus(568025136000L)
+    if(newDob < DateTime.now) Some(newDob) else None
+
+
+  }*/
 
 
 }

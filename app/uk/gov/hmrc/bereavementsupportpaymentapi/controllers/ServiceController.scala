@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import uk.gov.hmrc.bereavementsupportpaymentapi.utils.Validator
 
 @Singleton()
-class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector, validators: Validator)
+class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector, validator: Validator)
     extends BackendController(cc) {
 
 
@@ -38,12 +38,16 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
       case (key, values) => key -> values.mkString(",")
     }
 
-    val validatedNino = validators.ninoValidator(nino)
-    }
+    val validatedFlatQueryParams = flatQueryParams.map{
+        case ("nino", value) => validator.ninoValidator(value)
+        case ("forename", value) => validator.nameValidator(value)
+        case ("surname", value) => validator.nameValidator(value)
+        case ("dateOfBirth", value) => validator.dobValidator(value)
+      }
 
-    }
 
-    println(flatQueryParams)
+
+    println(validatedFlatQueryParams)
     // TODO call to backend
 
     Future.successful(Ok(connector.getCitizenInfo()))
