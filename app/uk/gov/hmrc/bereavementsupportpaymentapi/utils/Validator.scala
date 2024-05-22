@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
+package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
-class HipConnector() {
+import scala.util.matching.Regex
 
-  def getCitizenInfo(): String = {
-    "From the connector"
+@Singleton()
+class Validator {
+
+  def ninoValidator(nino: String): Option[String] = {
+    val validationPattern: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D\s]?$""".r
+    if (validationPattern.matches(nino)) Some(nino) else None
+
+
   }
+
 
 }
