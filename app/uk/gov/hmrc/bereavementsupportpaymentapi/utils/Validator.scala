@@ -31,7 +31,7 @@ class Validator {
   }
 
   def textValidator(forename: String): Option[String] = {
-    if(forename.length > 10) Some(forename) else None
+    if(forename.length < 10) Some(forename) else None
   }
 
   def dobValidator(dob: String): Option[LocalDate] = {
