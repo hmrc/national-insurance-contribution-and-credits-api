@@ -18,7 +18,7 @@ package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
 
 class HipConnector() {
 
-  def getCitizenInfo(): String = {
+  def getCitizenInfo(request: String): String = {
     "From the connector"
   }
 

@@ -42,7 +42,7 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
         case ("nino", value) => validator.ninoValidator(value)
         case ("forename", value) => validator.nameValidator(value)
         case ("surname", value) => validator.nameValidator(value)
-        case ("dateOfBirth", value) => validator.dobValidator(value)
+//        case ("dateOfBirth", value) => validator.dobValidator(value)
       }
 
 
@@ -50,6 +50,6 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
     println(validatedFlatQueryParams)
     // TODO call to backend
 
-    Future.successful(Ok(connector.getCitizenInfo()))
+    Future.successful(Ok(connector.getCitizenInfo("Valid request")))
   }
 }
