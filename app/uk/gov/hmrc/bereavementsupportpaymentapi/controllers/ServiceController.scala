@@ -31,7 +31,6 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
 
 
   def getCitizenInfo: Action[AnyContent] = Action.async { implicit request =>
-    // TODO add validation
     val queryParams: Map[String, Seq[String]] = request.queryString
 
     val flatQueryParams: Map[String, String] = queryParams.map {
@@ -40,15 +39,15 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
 
     val validatedFlatQueryParams = flatQueryParams.map{
         case ("nino", value) => validator.ninoValidator(value)
-        case ("forename", value) => validator.nameValidator(value)
-        case ("surname", value) => validator.nameValidator(value)
-//        case ("dateOfBirth", value) => validator.dobValidator(value)
-      }
+        case ("forename", value) => validator.textValidator(value)
+        case ("surname", value) => validator.textValidator(value)
+        case ("dateOfBirth", value) => validator.dobValidator(value)
+        case ("dateRange", value) => validator.textValidator(value)
+    }
 
 
 
     println(validatedFlatQueryParams)
-    // TODO call to backend
 
     Future.successful(Ok(connector.getCitizenInfo("Valid request")))
   }
