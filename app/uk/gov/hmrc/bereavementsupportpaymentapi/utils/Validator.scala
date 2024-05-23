@@ -18,8 +18,9 @@ package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
 import org.apache.pekko.http.scaladsl.model.DateTime
 import org.apache.pekko.http.scaladsl.model.headers.Date
-import java.time.format.DateTimeFormatter
 
+import java.time.{LocalDate, Period}
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import scala.util.matching.Regex
 
 class Validator {
@@ -29,21 +30,24 @@ class Validator {
     if (validationPattern.matches(nino)) Some(nino) else None
   }
 
-  def nameValidator(forename: String): Option[String] = {
+  def textValidator(forename: String): Option[String] = {
     if(forename.length > 10) Some(forename) else None
   }
 
-  /*def dobValidator(dob: String): Option[Date] = {
-    val convertedDob = DateTimeFormatter.ofPattern("ddMMyyyy")
-    if(convertedDob)
+  def dobValidator(dob: String): Option[LocalDate] = {
+    val dobFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+    val parsedDob = try {
+      Some(LocalDate.parse(dob, dobFormatter))
+    } catch {
+      case e: DateTimeParseException => None
+    }
 
-
-
-    val newDob = convertedDob.plus(568025136000L)
-    if(newDob < DateTime.now) Some(newDob) else None
-
-
-  }*/
+    parsedDob.filter { birthDate =>
+      val today = LocalDate.now()
+      val age = Period.between(birthDate, today).getYears
+      age >= 18
+    }
+  }
 
 
 }
