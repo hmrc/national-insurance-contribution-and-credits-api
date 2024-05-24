@@ -16,10 +16,14 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
 
-class HipConnector() {
+import uk.gov.hmrc.bereavementsupportpaymentapi.config.AppConfig
+
+import javax.inject.Inject
+
+class HipConnector @Inject()(config: AppConfig) {
 
   def getCitizenInfo(request: String): String = {
-    "From the connector"
+    s"From the connector, going to base url:${config.hipBaseUrl}"
   }
 
 }
