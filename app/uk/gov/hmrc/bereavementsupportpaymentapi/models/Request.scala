@@ -17,33 +17,34 @@
 package uk.gov.hmrc.bereavementsupportpaymentapi.models
 
 import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
-
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils.RequestParams
 import java.time.LocalDate
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
 
 case class Request(nino: String,
                    forename: String,
                    surname: String,
-                   datOfBirth: LocalDate,
+                   dateOfBirth: String,
                    dateRange: String,
                    correlationId: String)
 
 object Request {
   def fromMap(citizenInfo: Map[String, String]): Option[Request] = {
-    val dobFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+    val dobFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     for {
-      nino <- citizenInfo.get("nino")
-      forename <- citizenInfo.get("forename")
-      surname <- citizenInfo.get("surname")
-      dobAsString <- citizenInfo.get("dateOfBirth")
+      nino <- citizenInfo.get(RequestParams.NINO)
+      forename <- citizenInfo.get(RequestParams.FORENAME)
+      surname <- citizenInfo.get(RequestParams.SURNAME)
+      dobAsString <- citizenInfo.get(RequestParams.DATE_OF_BIRTH)
       dateOfBirth <- try {
-        Some(LocalDate.parse(dobAsString, dobFormatter))
+        LocalDate.parse(dobAsString, dobFormatter)
+        citizenInfo.get(RequestParams.DATE_OF_BIRTH)
       } catch {
         case _: DateTimeParseException => None
       }
-      dateRange <- citizenInfo.get("dateRange")
-      correlationId <- citizenInfo.get("correlationId")
+      dateRange <- citizenInfo.get(RequestParams.DATE_RANGE)
+      correlationId <- citizenInfo.get(AdditionalHeaderNames.CORRELATION_ID)
     } yield Request(nino, forename, surname, dateOfBirth, dateRange, correlationId)
   }
 }

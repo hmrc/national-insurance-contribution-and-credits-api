@@ -30,6 +30,7 @@ object Error {
     ) (Error.apply _)
 }
 
+//todo: adjust according to responses errors from backend
 object ApiServiceError
   extends Error("INTERNAL_SERVER_ERROR", "An error occurred whilst processing your request.")
 
