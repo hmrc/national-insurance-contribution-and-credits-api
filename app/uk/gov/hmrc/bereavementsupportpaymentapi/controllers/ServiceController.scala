@@ -20,9 +20,10 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.bereavementsupportpaymentapi.connectors.HipConnector
 import uk.gov.hmrc.bereavementsupportpaymentapi.models.Request
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.{AdditionalHeaderNames, Validator}
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils.{AdditionalHeaderNames, RequestParams, Validator}
 
 @Singleton()
 class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector, validator: Validator)
@@ -37,58 +38,34 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
       case (key, values) if values.nonEmpty => key -> values.mkString(",")
     }
 
-    val validatedFlatQueryParams = flatQueryParams.map{
-        case ("nino", value) => {
-          validator.ninoValidator(value) match {
-            case Some(value) => value
-            case None => println("issue validating nino") //throw exception, return error
-          }
-        }
-        case ("forename", value) => {
-          validator.textValidator(value) match {
-            case Some(value) => value
-            case None => println("issue validating forename") //throw exception, return error
-          }
-        }
-        case ("surname", value) => {
-        validator.textValidator(value) match {
-          case Some(value) => value
-          case None => println("issue validating lastname") //throw exception, return error
-        }
-      }
-        case ("dateOfBirth", value) => {
-          validator.dobValidator(value) match {
-            case Some(value) => value
-            case None => println("issue validating dateOfBirth") //throw exception, return error
-          }
-        }
-        case ("dateRange", value) => {
-          validator.textValidator(value) match {
-            case Some(value) => value
-            case None => println("issue validating dateRange") //throw exception, return error
-          }
-        }
-        case _ => //todo: throw exception with status code for any other parameter sent not expected
+    val validatedFlatQueryParams = flatQueryParams.flatMap{
+        case (RequestParams.NINO, value) =>
+          validator.ninoValidator(value).map( value => RequestParams.NINO -> value)
+        case (RequestParams.FORENAME, value) =>
+          validator.textValidator(value).map ( value => RequestParams.FORENAME -> value)
+        case (RequestParams.SURNAME, value) =>
+          validator.textValidator(value).map ( value => RequestParams.SURNAME -> value)
+        case (RequestParams.DATE_OF_BIRTH, value) =>
+          validator.dobValidator(value).map ( value => RequestParams.DATE_OF_BIRTH -> value.toString )
+        case (RequestParams.DATE_RANGE, value) =>
+          validator.textValidator(value).map ( value => RequestParams.DATE_RANGE -> value )
+        case _ => None //todo: throw exception with status code for any other parameter sent not expected
     }
 
     //Adding correlationId to Map and converting to Request model to process
-    val correlationId = request.headers.get(AdditionalHeaderNames.CORRELATION_ID).getOrElse("")
     val queryParamsAsMap = validatedFlatQueryParams.map {
-        case (key: String, value: String) => key -> value
+        case (key: String, value: String) => {
+          key -> value
+        }
       }.toMap
-    val queryParamsWithCorId = (queryParamsAsMap + ( AdditionalHeaderNames.CORRELATION_ID -> correlationId)).toMap
+    val correlationId = request.headers.get(AdditionalHeaderNames.CORRELATION_ID).getOrElse("")
+    val queryParamsWithCorId: Map[String, String] = (queryParamsAsMap + ( AdditionalHeaderNames.CORRELATION_ID -> correlationId)).toMap
     val processedRequest = Request.fromMap(queryParamsWithCorId)
 
-    println(s"flatQueryParams request is $flatQueryParams")
-    println(s"validatedFlatQueryParams request is $validatedFlatQueryParams")
-    println("queryParamsAsMap request is " + queryParamsAsMap.map {
-      case (key, values) => key -> values.mkString(",")
-    } )
-    println(s"queryParamsWithCorId request is $queryParamsWithCorId")
 
-
-    println(s"stored request is $processedRequest.toString")
-
-    Future.successful(Ok(connector.getCitizenInfo(processedRequest match { case Some(storedRequest) => storedRequest})))
+    processedRequest match {
+      case Some(processedRequest) => Future.successful(Ok(connector.getCitizenInfo(processedRequest)))
+      case None => Future.successful(InternalServerError("There's been a problem with connecting to the backend server."))
+    }
   }
 }
