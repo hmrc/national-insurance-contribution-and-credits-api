@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.config
+package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
-@Singleton
-class AppConfig @Inject()(config: ServicesConfig) {
-
-  private val hipServicePrefix = "microservice.services.hip"
-
-  lazy val hipBaseUrl: String = config.baseUrl("hip")
-  lazy val hipToken: String = config.getString(s"$hipServicePrefix.token")
-  lazy val hipEnvironment: String = config.getString(s"$hipServicePrefix.env")
+object AdditionalHeaderNames {
+  val CORRELATION_ID = "CorrelationId"
+  val ENVIRONMENT = "Environment"
 }

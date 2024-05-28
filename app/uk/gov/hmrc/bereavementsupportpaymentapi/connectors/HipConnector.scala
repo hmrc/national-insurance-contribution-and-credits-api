@@ -16,14 +16,28 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
 
+import play.api.http.HeaderNames
 import uk.gov.hmrc.bereavementsupportpaymentapi.config.AppConfig
+import uk.gov.hmrc.bereavementsupportpaymentapi.models.Request
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
 
 import javax.inject.Inject
 
 class HipConnector @Inject()(config: AppConfig) {
+  private[connectors] def hipHeaders(correlationId: String): Seq[(String, String)] =
+    Seq(
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.hipToken}",
+      AdditionalHeaderNames.ENVIRONMENT -> config.hipEnvironment,
+      AdditionalHeaderNames.CORRELATION_ID -> correlationId,
+      HeaderNames.CONTENT_TYPE -> "application/json"
+    )
 
-  def getCitizenInfo(request: String): String = {
-    s"From the connector, going to base url:${config.hipBaseUrl}"
+  def getCitizenInfo(request: Request)/*(implicit hc: HeaderCarrier, ec ExecutionContext)*/: String = {
+    //val url = s"${config.hipBaseUrl}"
+    s"""From the connector, going to base url:${config.hipBaseUrl}
+       |$request
+       |""".stripMargin
+
   }
 
 }
