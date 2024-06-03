@@ -1,8 +1,8 @@
-package uk.gov.hmrc.bereavementsupportpaymentapi.models
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.{AdditionalHeaderNames, RequestParams}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.{AdditionalHeaderNames, RequestParams}
 
 class RequestSpec extends AnyWordSpec with Matchers {
   val nino = "PA662387B"

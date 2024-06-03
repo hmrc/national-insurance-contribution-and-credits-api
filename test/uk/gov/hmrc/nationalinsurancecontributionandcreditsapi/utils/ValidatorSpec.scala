@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.utils
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

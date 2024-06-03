@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors
 
 import play.api.http.HeaderNames
-import uk.gov.hmrc.bereavementsupportpaymentapi.config.AppConfig
-import uk.gov.hmrc.bereavementsupportpaymentapi.models.{HIPOutcome, Request}
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, Request}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import java.util.concurrent.Future

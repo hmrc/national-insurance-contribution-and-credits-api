@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.controllers
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.bereavementsupportpaymentapi.connectors.HipConnector
-import uk.gov.hmrc.bereavementsupportpaymentapi.models.Request
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.Request
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames
 
 @Singleton()
 class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)

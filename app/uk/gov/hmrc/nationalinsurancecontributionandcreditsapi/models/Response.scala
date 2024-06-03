@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import com.google.inject.AbstractModule
-
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
-}
+case class Response(year: Int,
+                    niClass: String,
+                    niCategory: Char,
+                    niAmount: Long,
+                    amountOfContributions: Int,
+                    totalEarningsFactor: Long,
+                    primaryContributionValue: Long)

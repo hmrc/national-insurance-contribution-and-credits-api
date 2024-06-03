@@ -1,3 +1,3 @@
 # microservice specific routes
 
-GET        /nino-info             uk.gov.hmrc.bereavementsupportpaymentapi.controllers.ServiceController.getCitizenInfo
+GET        /nino-info             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.ServiceController.getCitizenInfo

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
 
-import uk.gov.hmrc.bereavementsupportpaymentapi.models.errors.Errors
-
-package object models {
-  type HIPOutcome = Either[Errors, Response]
+object AdditionalHeaderNames {
+  val CORRELATION_ID = "CorrelationId"
+  val ENVIRONMENT = "Environment"
 }

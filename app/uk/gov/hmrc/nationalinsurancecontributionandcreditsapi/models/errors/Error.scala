@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.models.errors
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._

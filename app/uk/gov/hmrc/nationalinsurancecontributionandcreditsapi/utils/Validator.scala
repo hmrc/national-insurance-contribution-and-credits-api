@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.utils
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
 
 import java.time.{LocalDate, Period}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
