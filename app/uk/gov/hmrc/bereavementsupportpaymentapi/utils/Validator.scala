@@ -16,18 +16,14 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
-import org.apache.pekko.http.scaladsl.model.DateTime
-import org.apache.pekko.http.scaladsl.model.headers.Date
-
 import java.time.{LocalDate, Period}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import scala.util.matching.Regex
 
 class Validator {
-
   def ninoValidator(nino: String): Option[String] = {
     val validationPattern: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D\s]?$""".r
-    if (validationPattern.matches(nino)) Some(nino) else None
+    Some(nino).filter(validationPattern.matches)
   }
 
   def textValidator(forename: String): Option[String] = {
@@ -48,6 +44,4 @@ class Validator {
       age >= 18
     }
   }
-
-
 }
