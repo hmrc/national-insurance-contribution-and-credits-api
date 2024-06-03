@@ -30,7 +30,7 @@ paths:
       description: |
         An endpoint that returns "Hello world"
       tags:
-        - bereavement-support-payment-api
+        - national-insurance-contribution-and-credits-api
       parameters:
         - $ref: '#/components/parameters/acceptHeader'
       responses:

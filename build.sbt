@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "2.13.12"
 
-lazy val microservice = Project("bereavement-support-payment-api", file("."))
+lazy val microservice = Project("national-insurance-contribution-and-credits-api", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
