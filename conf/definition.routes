@@ -1,2 +1,2 @@
-GET        /api/definition                 uk.gov.hmrc.bereavementsupportpaymentapi.controllers.DocumentationController.definition()
-GET        /api/conf/:version/*file        uk.gov.hmrc.bereavementsupportpaymentapi.controllers.DocumentationController.specification(version, file)
+GET        /api/definition                 uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.DocumentationController.definition()
+GET        /api/conf/:version/*file        uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.DocumentationController.specification(version, file)
