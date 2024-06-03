@@ -4,14 +4,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.bereavementsupportpaymentapi.utils.{AdditionalHeaderNames, RequestParams}
 
-import java.time.LocalDate
-
-
 class RequestSpec extends AnyWordSpec with Matchers {
   val nino = "PA662387B"
   val forename = "John"
   val surname = "Doe"
-  val dateOfBirth = "22052000"
+  val dateOfBirth = "2000-05-22"
   val dateRange = "someDate"
   val correlationId = "6c9aedff-4fac-44fd-bdf6-e786dfce07c6"
 
@@ -29,13 +26,12 @@ class RequestSpec extends AnyWordSpec with Matchers {
     "return a valid request object" in {
 
       val expectedRequest = new Request(nino, forename, surname, dateOfBirth, dateRange, correlationId)
-      val actualRequest = Request.fromMap(newPersonParams)
+      val actualRequest = Request.buildRequestFromMap(newPersonParams)
 
       actualRequest shouldBe Some(expectedRequest)
 
     }
   }
-
-  //todo: add testing for erroneous data
+  //todo: add testing for erroneous data...not added yet as behaviour for incorrect data input hasn't been confirmed yet
 
 }
