@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.utils
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
-object AdditionalHeaderNames {
-  val CORRELATION_ID = "correlationId"
-  val ENVIRONMENT = "Environment"
-  val ORIGINATING_SYSTEM = "gov-uk-originator-id"
+import play.api.libs.json.{JsValue, Json, Writes}
+
+case class Errors(errors: Seq[Error])
+
+object Errors {
+  def apply(error: Error): Errors = Errors(Seq(error))
+
+  implicit val writes: Writes[Errors] = new Writes[Errors] {
+    override def writes(data: Errors): JsValue = {
+      if (data.errors.size > 1) {
+        Json.obj("errors" -> Json.toJson(data.errors))
+      } else {
+        Json.toJson(data.errors.head)
+      }
+    }
+  }
 }

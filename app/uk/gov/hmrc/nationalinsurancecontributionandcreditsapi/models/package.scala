@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi
 
-import uk.gov.hmrc.bereavementsupportpaymentapi.models.errors.Errors
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Errors
 
 package object models {
   type HIPOutcome = Either[Errors, Response]

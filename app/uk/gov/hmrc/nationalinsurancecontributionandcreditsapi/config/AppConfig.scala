@@ -17,10 +17,14 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject()(config: Configuration) {
+class AppConfig @Inject()(config: ServicesConfig) {
 
-  val appName: String = config.get[String]("appName")
+  private val hipServicePrefix = "microservice.services.hip"
+
+  lazy val hipBaseUrl: String = config.baseUrl("hip")
+  lazy val hipToken: String = config.getString(s"$hipServicePrefix.token")
+  lazy val hipEnvironment: String = config.getString(s"$hipServicePrefix.env")
 }
