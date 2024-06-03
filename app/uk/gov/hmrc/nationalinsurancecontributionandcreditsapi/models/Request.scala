@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.models
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 import com.google.inject.Inject
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.{AdditionalHeaderNames, RequestParams, Validator}
+import java.time.LocalDate
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import play.api.libs.json.{Json, OFormat}
-
 
 case class Request(nationalInsuranceNumber: String,
                    startTaxYear: Int,

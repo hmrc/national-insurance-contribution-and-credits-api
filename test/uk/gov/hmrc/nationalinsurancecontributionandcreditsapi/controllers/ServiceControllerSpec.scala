@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.controllers
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
@@ -22,8 +22,8 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.http.Status
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.bereavementsupportpaymentapi.connectors.HipConnector
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.Validator
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.Validator
 
 class ServiceControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
