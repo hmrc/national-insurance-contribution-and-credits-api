@@ -22,6 +22,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.Request
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
@@ -30,13 +31,13 @@ import scala.concurrent.Future
 class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)
     extends BackendController(cc) {
 
-  def getCitizenInfo(nationalInsuranceNumber: Nino, startTaxYear: Int, endTaxYear: Int): Action[AnyContent] =
+  def getCitizenInfo(nationalInsuranceNumber: Nino, startTaxYear: TaxYear, endTaxYear: TaxYear): Action[AnyContent] =
     Action.async { implicit request =>
 
       val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
-      val dateOfBirth: Option[String] = ((jsonBody \ "dateOfBirth").asOpt[String])
+      val dateOfBirth: Option[String] = (jsonBody \ "dateOfBirth").asOpt[String]
 
-      val (nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr) = (nationalInsuranceNumber.toString, startTaxYear.toInt, endTaxYear.toInt)
+      val (nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr) = (nationalInsuranceNumber.toString, startTaxYear, endTaxYear)
 
       val newRequest = new Request(nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr, dateOfBirth match {
         case Some(dateOfBirth) => dateOfBirth
