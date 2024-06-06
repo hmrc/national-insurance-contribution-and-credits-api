@@ -1,3 +1,3 @@
 # microservice specific routes
 
-GET        /nino-info/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.ServiceController.getCitizenInfo(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: Int, endTaxYear: Int)
+GET        /nino-info/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.ServiceController.getCitizenInfo(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear, endTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear)
