@@ -30,13 +30,13 @@ class ServiceControllerSpec extends AnyWordSpec with Matchers with MockFactory {
   private val validator = new Validator
 
 
-  "GET /nino-info" should {
+  "GET /nationalInsuranceNumber-info" should {
     "return 200" in {
       val mockHipConnector: HipConnector = mock[HipConnector]
       (mockHipConnector.getCitizenInfo _).expects(*).returns("Valid mock response").once()
       val controller = new ServiceController(Helpers.stubControllerComponents(), mockHipConnector)
 
-      val fakeRequest = FakeRequest("GET", "/nino-info")
+      val fakeRequest = FakeRequest("GET", "/nationalInsuranceNumber-info")
 
       val response = controller.getCitizenInfo(fakeRequest)
       status(response) shouldBe Status.OK
@@ -47,7 +47,7 @@ class ServiceControllerSpec extends AnyWordSpec with Matchers with MockFactory {
       (mockHipConnector.getCitizenInfo _).expects(*).returns("Valid mock response").once()
       val controller = new ServiceController(Helpers.stubControllerComponents(), mockHipConnector)
 
-      val fakeRequest = FakeRequest("GET", "/nino-info")
+      val fakeRequest = FakeRequest("GET", "/nationalInsuranceNumber-info")
 
       val response = controller.getCitizenInfo(fakeRequest)
       contentAsString(response) shouldBe "Valid mock response"

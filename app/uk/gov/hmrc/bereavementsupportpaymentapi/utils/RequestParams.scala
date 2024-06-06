@@ -17,7 +17,7 @@
 package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
 object RequestParams {
-  val NINO = "nino"
+  val NINO = "nationalInsuranceNumber"
   val FORENAME = "forename"
   val SURNAME = "surname"
   val DATE_OF_BIRTH = "dateOfBirth"

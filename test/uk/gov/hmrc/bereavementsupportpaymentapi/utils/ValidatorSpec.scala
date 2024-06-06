@@ -24,7 +24,7 @@ import java.time.LocalDate
 class ValidatorSpec extends AnyWordSpec with Matchers {
   val validator = new Validator()
 
-  "Valid nino request" should {
+  "Valid nationalInsuranceNumber request" should {
     "return true" in {
       val expectedNino: String = "PA888629B"
       val actualResponse = validator.ninoValidator(expectedNino)
@@ -33,7 +33,7 @@ class ValidatorSpec extends AnyWordSpec with Matchers {
     }
   }
 
-  "Empty nino request" should {
+  "Empty nationalInsuranceNumber request" should {
     "return false" in {
       val expectedNino: String = ""
       val actualResponse = validator.ninoValidator(expectedNino)
@@ -42,7 +42,7 @@ class ValidatorSpec extends AnyWordSpec with Matchers {
     }
   }
 
-  "Short nino request" should {
+  "Short nationalInsuranceNumber request" should {
     "return false" in {
       val expectedNino: String = "PA8829B"
       val actualResponse = validator.ninoValidator(expectedNino)
