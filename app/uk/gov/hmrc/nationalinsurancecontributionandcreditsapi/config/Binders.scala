@@ -23,20 +23,18 @@ import uk.gov.hmrc.domain.Nino
 
 import scala.util.{Failure, Success, Try}
 
-class Binders {
+object Binders {
+  implicit val ninoBinder: PathBindable[Nino] = new PathBindable[Nino] {
 
-  object Binders {
-    implicit val ninoBinder: PathBindable[Nino] = new PathBindable[Nino] {
-
-      override def bind(key: String, value: String): Either[String, Nino] = {
-        Try[Nino](Nino.apply(value)) match {
-          case Success(nino) => Right(nino)
-          case Failure(e) => Left("Bad NINO")
-        }
+    override def bind(key: String, value: String): Either[String, Nino] = {
+      Try[Nino](Nino.apply(value)) match {
+        case Success(nino) => Right(nino)
+        case Failure(e) => Left("Bad NINO") // TODO Error response should be 400 with error message: Bad Nino
       }
-
-      override def unbind(key: String, value: Nino): String = value.value
     }
+
+    override def unbind(key: String, value: Nino): String = value.value
+  }
 
 //    implicit val taxYearBinder: PathBindable[TaxYear] = new PathBindable[TaxYear] {
 //
@@ -49,8 +47,6 @@ class Binders {
 //
 //      override def unbind(key: String, value: TaxYear): String = value.value
 //    }
-
-  }
 
 }
 
