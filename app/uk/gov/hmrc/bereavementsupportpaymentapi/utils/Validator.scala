@@ -18,15 +18,25 @@ package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
 import scala.util.matching.Regex
 
-@Singleton()
 class Validator {
-
   def ninoValidator(nino: String): Option[String] = {
     val validationPattern: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D\s]?$""".r
-    if (validationPattern.matches(nino)) Some(nino) else None
-
-
+    Some(nino).filter(validationPattern.matches)
   }
 
+  //DOB Validator
+  /*def dobValidator(dob: String): Option[LocalDate] = {
+    val dobFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+    val parsedDob = try {
+      Some(LocalDate.parse(dob, dobFormatter))
+    } catch {
+      case e: DateTimeParseException => None
+    }
 
+    parsedDob.filter { birthDate =>
+      val today = LocalDate.now()
+      val age = Period.between(birthDate, today).getYears
+      age >= 18
+    }
+  }*/
 }

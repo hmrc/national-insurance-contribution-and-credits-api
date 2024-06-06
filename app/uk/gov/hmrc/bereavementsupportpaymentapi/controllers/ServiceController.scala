@@ -1,35 +1,51 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.bereavementsupportpaymentapi.controllers
 
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.bereavementsupportpaymentapi.connectors.HipConnector
+import uk.gov.hmrc.bereavementsupportpaymentapi.models.Request
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.Validator
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
 
 @Singleton()
-class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector, validators: Validator)
+class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)
     extends BackendController(cc) {
 
+  def getCitizenInfo(nationalInsuranceNumber: String, startTaxYear: Int, endTaxYear: Int): Action[AnyContent] =
+    Action.async { implicit request =>
+
+      val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
+      val dateOfBirth: Option[String] = ((jsonBody \ "dateOfBirth").asOpt[String])
+
+      val newRequest = new Request(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth match {
+        case Some(dateOfBirth) => dateOfBirth
+        case _ => ""//throw an error
+      })
+      connector.getCitizenInfo(newRequest)
 
 
-  def getCitizenInfo: Action[AnyContent] = Action.async { implicit request =>
-    // TODO add validation
-    val queryParams: Map[String, Seq[String]] = request.queryString
+    val body = Json.toJson(newRequest)
+    val bodyStr = Json.fromJson[Request](body)
 
-    val flatQueryParams: Map[String, String] = queryParams.map {
-      case (key, values) => key -> values.mkString(",")
-    }
-
-    val validatedNino = validators.ninoValidator(nino)
-    }
-
-    }
-
-    println(flatQueryParams)
-    // TODO call to backend
-
-    Future.successful(Ok(connector.getCitizenInfo()))
+    Future.successful(Ok(s"Received = \nBody as Json = $body \nBody as String $bodyStr"))
   }
 }
