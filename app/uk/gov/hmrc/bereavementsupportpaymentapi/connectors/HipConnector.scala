@@ -16,10 +16,38 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
 
-class HipConnector() {
+import play.api.http.HeaderNames
+import uk.gov.hmrc.bereavementsupportpaymentapi.config.AppConfig
+import uk.gov.hmrc.bereavementsupportpaymentapi.models.{HIPOutcome, Request}
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
-  def getCitizenInfo(): String = {
-    "From the connector"
+import java.util.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
+
+class HipConnector @Inject()(http: HttpClient,
+                             config: AppConfig) {
+  private[connectors] def hipHeaders(correlationId: String): Seq[(String, String)] =
+    Seq(
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.hipToken}",
+      AdditionalHeaderNames.ENVIRONMENT -> config.hipEnvironment,
+      AdditionalHeaderNames.CORRELATION_ID -> correlationId,
+      HeaderNames.CONTENT_TYPE -> "application/json",
+      AdditionalHeaderNames.ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
+    )
+
+  def getCitizenInfo(request: Request)/*(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome]*/ : String = {
+    s"""From the connector, going to base url:${config.hipBaseUrl}
+       |$request
+       |""".stripMargin
+
+
+    /*val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
+    //erroring implicitly parameter below is missing response checker implementation
+    http.PUT(url, request, hipHeaders(request.correlationId))(implicitly, implicitly, hc, ec)*/
+
   }
 
 }
