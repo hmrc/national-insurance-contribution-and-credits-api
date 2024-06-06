@@ -14,29 +14,32 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bereavementsupportpaymentapi.controllers
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.bereavementsupportpaymentapi.connectors.HipConnector
-import uk.gov.hmrc.bereavementsupportpaymentapi.models.Request
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.Request
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
 
 @Singleton()
 class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)
     extends BackendController(cc) {
 
-  def getCitizenInfo(nationalInsuranceNumber: String, startTaxYear: Int, endTaxYear: Int): Action[AnyContent] =
+  def getCitizenInfo(nationalInsuranceNumber: Nino, startTaxYear: TaxYear, endTaxYear: TaxYear): Action[AnyContent] =
     Action.async { implicit request =>
 
       val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
-      val dateOfBirth: Option[String] = ((jsonBody \ "dateOfBirth").asOpt[String])
+      val dateOfBirth: Option[String] = (jsonBody \ "dateOfBirth").asOpt[String]
 
-      val newRequest = new Request(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth match {
+      val (nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr) = (nationalInsuranceNumber.toString, startTaxYear, endTaxYear)
+
+      val newRequest = new Request(nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr, dateOfBirth match {
         case Some(dateOfBirth) => dateOfBirth
         case _ => ""//throw an error
       })
