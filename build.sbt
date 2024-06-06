@@ -15,6 +15,7 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     //libraryDependencies += "uk.gov.hmrc" %% "play-auditing-play-x" % "3.0.0",
     //todo: confirm the play version we should be using, adjust the version on line 15 (i.e. 3.0.0 -> x.x.x & the alias version number (x) in "play-auditing-play-x"
     routesImport += "uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.Binders._",
+    libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
