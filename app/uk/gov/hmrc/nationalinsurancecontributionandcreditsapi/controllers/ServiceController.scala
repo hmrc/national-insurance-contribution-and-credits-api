@@ -39,12 +39,9 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
         case Some(dateOfBirth) => dateOfBirth
         case _ => ""//throw an error
       })
-      connector.getCitizenInfo(newRequest)
+     val response = connector.getCitizenInfo(newRequest)
 
 
-    val body = Json.toJson(newRequest)
-    val bodyStr = Json.fromJson[Request](body)
-
-    Future.successful(Ok(s"Received = \nBody as Json = $body \nBody as String $bodyStr"))
+    Future.successful(Ok(s"Received = \nBody as String $newRequest\nResponse: $response"))
   }
 }

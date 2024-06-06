@@ -9,6 +9,7 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
+    libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
