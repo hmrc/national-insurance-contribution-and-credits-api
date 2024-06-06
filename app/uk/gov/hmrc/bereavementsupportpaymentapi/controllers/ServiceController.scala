@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.controllers
 
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.bereavementsupportpaymentapi.connectors.HipConnector
 import uk.gov.hmrc.bereavementsupportpaymentapi.models.Request
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
@@ -28,25 +30,22 @@ import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
 class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)
     extends BackendController(cc) {
 
+  def getCitizenInfo(nationalInsuranceNumber: String, startTaxYear: Int, endTaxYear: Int): Action[AnyContent] =
+    Action.async { implicit request =>
+
+      val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
+      val dateOfBirth: Option[String] = ((jsonBody \ "dateOfBirth").asOpt[String])
+
+      val newRequest = new Request(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth match {
+        case Some(dateOfBirth) => dateOfBirth
+        case _ => ""//throw an error
+      })
+      connector.getCitizenInfo(newRequest)
 
 
-  def getCitizenInfo: Action[AnyContent] = Action.async { implicit request =>
-    val queryParams: Map[String, Seq[String]] = request.queryString
+    val body = Json.toJson(newRequest)
+    val bodyStr = Json.fromJson[Request](body)
 
-    val flatQueryParams: Map[String, String] = queryParams.collect {
-      case (key, values) if values.nonEmpty => key -> values.mkString(",")
-    }
-
-    //Adding correlationId to Map and converting to Request model to process
-    val correlationId = request.headers.get(AdditionalHeaderNames.CORRELATION_ID).getOrElse("")
-    val queryParamsWithCorId: Map[String, String] = (flatQueryParams + ( AdditionalHeaderNames.CORRELATION_ID -> correlationId)).toMap
-
-    val processedRequest = Request.buildRequestFromMap(queryParamsWithCorId)
-
-
-    processedRequest match {
-      case Some(processedRequest) => Future.successful(Ok(connector.getCitizenInfo(processedRequest)))
-      case None => Future.successful(InternalServerError("There's been a problem with connecting to the backend server."))
-    }
+    Future.successful(Ok(s"Received = \nBody as Json = $body \nBody as String $bodyStr"))
   }
 }

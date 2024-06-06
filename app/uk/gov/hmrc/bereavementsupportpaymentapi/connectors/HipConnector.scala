@@ -19,6 +19,7 @@ package uk.gov.hmrc.bereavementsupportpaymentapi.connectors
 import play.api.http.HeaderNames
 import uk.gov.hmrc.bereavementsupportpaymentapi.config.AppConfig
 import uk.gov.hmrc.bereavementsupportpaymentapi.models.{HIPOutcome, Request}
+import uk.gov.hmrc.bereavementsupportpaymentapi.utils
 import uk.gov.hmrc.bereavementsupportpaymentapi.utils.AdditionalHeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
@@ -33,7 +34,8 @@ class HipConnector @Inject()(http: HttpClient,
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.hipToken}",
       AdditionalHeaderNames.ENVIRONMENT -> config.hipEnvironment,
       AdditionalHeaderNames.CORRELATION_ID -> correlationId,
-      HeaderNames.CONTENT_TYPE -> "application/json"
+      HeaderNames.CONTENT_TYPE -> "application/json",
+      AdditionalHeaderNames.ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
     )
 
   def getCitizenInfo(request: Request)/*(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome]*/ : String = {
@@ -42,7 +44,7 @@ class HipConnector @Inject()(http: HttpClient,
        |""".stripMargin
 
 
-    /*val url = s"${config.hipBaseUrl}/uri/of/hip/or/test/stub/"
+    /*val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
     //erroring implicitly parameter below is missing response checker implementation
     http.PUT(url, request, hipHeaders(request.correlationId))(implicitly, implicitly, hc, ec)*/
 

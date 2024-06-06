@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.bereavementsupportpaymentapi.utils
 
-import java.time.{LocalDate, Period}
-import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import scala.util.matching.Regex
 
 class Validator {
@@ -26,11 +24,8 @@ class Validator {
     Some(nino).filter(validationPattern.matches)
   }
 
-  def textValidator(forename: String): Option[String] = {
-    if(forename.length < 10) Some(forename) else None
-  }
-
-  def dobValidator(dob: String): Option[LocalDate] = {
+  //DOB Validator
+  /*def dobValidator(dob: String): Option[LocalDate] = {
     val dobFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
     val parsedDob = try {
       Some(LocalDate.parse(dob, dobFormatter))
@@ -43,5 +38,5 @@ class Validator {
       val age = Period.between(birthDate, today).getYears
       age >= 18
     }
-  }
+  }*/
 }

@@ -26,7 +26,7 @@ class RequestSpec extends AnyWordSpec with Matchers {
     "return a valid request object" in {
 
       val expectedRequest = new Request(nino, forename, surname, dateOfBirth, dateRange, correlationId)
-      val actualRequest = Request.buildRequestFromMap(newPersonParams)
+      val actualRequest = Request.addQueryParamsFromMap(newPersonParams)
 
       actualRequest shouldBe Some(expectedRequest)
 
