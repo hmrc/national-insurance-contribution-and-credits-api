@@ -4,7 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.{AdditionalHeaderNames, RequestParams}
 
-class RequestSpec extends AnyWordSpec with Matchers {
+class NIRequestSpec extends AnyWordSpec with Matchers {
   val nino = "PA662387B"
   val forename = "John"
   val surname = "Doe"
@@ -25,8 +25,8 @@ class RequestSpec extends AnyWordSpec with Matchers {
 
     "return a valid request object" in {
 
-      val expectedRequest = new Request(nino, forename, surname, dateOfBirth, dateRange, correlationId)
-      val actualRequest = Request.addQueryParamsFromMap(newPersonParams)
+      val expectedRequest = new NIRequest(nino, forename, surname, dateOfBirth, dateRange, correlationId)
+      val actualRequest = NIRequest.addQueryParamsFromMap(newPersonParams)
 
       actualRequest shouldBe Some(expectedRequest)
 

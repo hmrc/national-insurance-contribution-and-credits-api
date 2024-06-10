@@ -16,19 +16,26 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
+import play.api.libs.functional.syntax._
 import com.google.inject.Inject
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json._
 
-case class Response(year: Int,
-                    niClass: String,
-                    niCategory: Char,
-                    niAmount: Long,
-                    amountOfContributions: Int,
-                    totalEarningsFactor: Long,
-                    primaryContributionValue: Long)
+case class NIResponse(niContribution: NIContribution,
+                      niCredit: NICredit)
 
 @Inject
-object Response {
-  //todo: using OFormat for local compilation purposes only, changes this to Reads and Writes types for responses back from HIP/stub
-  implicit val format: OFormat[Response] = Json.format[Response]
+object NIResponse {
+  implicit val reads: Reads[NIResponse] = (
+    (__ \ "niContribution").read[NIContribution] and
+      (__ \ "niCredit").read[NICredit]
+  ) (NIResponse.apply _)
+
+  implicit val writes: Writes[NIResponse] = new Writes[NIResponse] {
+    override def writes(data: NIResponse): JsValue = {
+      Json.obj(
+        "niContribution" -> Json.toJson(data.niContribution),
+        "niCredit" -> Json.toJson(data.niCredit)
+      )
+    }
+  }
 }

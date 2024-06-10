@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors
 
 import play.api.http.HeaderNames.{AUTHORIZATION, CONTENT_TYPE}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, Request}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NIRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{CORRELATION_ID, ENVIRONMENT, ORIGINATING_SYSTEM}
 
@@ -37,7 +37,7 @@ class HipConnector @Inject()(http: HttpClient,
       ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
     )
 
-  def fetchData(request: Request)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
+  def fetchData(request: NIRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
     val correlationId: String = UUID.randomUUID().toString
     val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
     import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
