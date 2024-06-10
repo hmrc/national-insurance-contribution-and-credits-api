@@ -15,20 +15,27 @@
  */
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
-
 import com.google.inject.Inject
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.{AdditionalHeaderNames, RequestParams, Validator}
 
-case class Response(year: Int,
-                    niClass: String,
-                    niCategory: Char,
-                    niAmount: Long,
-                    amountOfContributions: Int,
-                    totalEarningsFactor: Long,
-                    primaryContributionValue: Long)
+import java.time.LocalDate
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
+
+case class NIRequest(nationalInsuranceNumber: Nino,
+                     startTaxYear: TaxYear,
+                     endTaxYear: TaxYear,
+                     dateOfBirth: DateOfBirth,
+                     correlationId: String = "")
+
 
 @Inject
-object Response {
-  //todo: using OFormat for local compilation purposes only, changes this to Reads and Writes types for responses back from HIP/stub
-  implicit val format: OFormat[Response] = Json.format[Response]
+object NIRequest {
+  implicit val format: OFormat[NIRequest] = Json.format[NIRequest]
+
+
+
 }
+

@@ -22,7 +22,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.Request
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NIRequest
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +38,7 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
       val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
       val dateOfBirth: DateOfBirth = DateOfBirth((jsonBody \ "dateOfBirth").asOpt[String].toString)
 
-      val newRequest = new Request(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
+      val newRequest = new NIRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
 
 
     Future.successful(Ok(connector.fetchData(newRequest)))

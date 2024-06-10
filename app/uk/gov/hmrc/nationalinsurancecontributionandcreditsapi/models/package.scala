@@ -19,5 +19,5 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Errors
 
 package object models {
-  type HIPOutcome = Either[Errors, Response]
+  type HIPOutcome = Either[Errors, NIResponse]
 }
