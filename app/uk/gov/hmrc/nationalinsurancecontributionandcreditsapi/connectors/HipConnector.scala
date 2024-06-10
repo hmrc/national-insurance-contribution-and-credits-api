@@ -16,37 +16,33 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors
 
-import play.api.http.HeaderNames
+import play.api.http.HeaderNames.{AUTHORIZATION, CONTENT_TYPE}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, Request}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{CORRELATION_ID, ENVIRONMENT, ORIGINATING_SYSTEM}
 
-import java.util.concurrent.Future
+import java.util.UUID
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class HipConnector @Inject()(http: HttpClient,
                              config: AppConfig) {
   private[connectors] def hipHeaders(correlationId: String): Seq[(String, String)] =
     Seq(
-      HeaderNames.AUTHORIZATION -> s"Bearer ${config.hipToken}",
-      AdditionalHeaderNames.ENVIRONMENT -> config.hipEnvironment,
-      AdditionalHeaderNames.CORRELATION_ID -> correlationId,
-      HeaderNames.CONTENT_TYPE -> "application/json",
-      AdditionalHeaderNames.ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
+      AUTHORIZATION -> s"Bearer ${config.hipToken}",
+      ENVIRONMENT -> config.hipEnvironment,
+      CORRELATION_ID -> correlationId,
+      CONTENT_TYPE -> "application/json",
+      ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
     )
 
-  def getCitizenInfo(request: Request)/*(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome]*/ : String = {
-    s"""From the connector, going to base url:${config.hipBaseUrl}
-       |$request
-       |""".stripMargin
-
-
-    /*val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
-    //erroring implicitly parameter below is missing response checker implementation
-    http.PUT(url, request, hipHeaders(request.correlationId))(implicitly, implicitly, hc, ec)*/
-
+  def fetchData(request: Request)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
+    val correlationId: String = UUID.randomUUID().toString
+    val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
+    import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
+    http.PUT(url, request, hipHeaders(correlationId))(implicitly, apiHttpReads, implicitly, implicitly)
+    //todo: confirm what method this will be i.e. PUT or POST
   }
 
 }

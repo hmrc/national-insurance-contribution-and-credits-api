@@ -20,32 +20,27 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.Request
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
-
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)
+                                 (implicit hc: HeaderCarrier, ec: ExecutionContext)
     extends BackendController(cc) {
 
-  def getCitizenInfo(nationalInsuranceNumber: Nino, startTaxYear: TaxYear, endTaxYear: TaxYear): Action[AnyContent] =
+  def getContributionsAndCredits(nationalInsuranceNumber: Nino, startTaxYear: TaxYear, endTaxYear: TaxYear): Action[AnyContent] =
     Action.async { implicit request =>
 
       val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
-      val dateOfBirth: Option[String] = (jsonBody \ "dateOfBirth").asOpt[String]
+      val dateOfBirth: DateOfBirth = DateOfBirth((jsonBody \ "dateOfBirth").asOpt[String].toString)
 
-      val (nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr) = (nationalInsuranceNumber.toString, startTaxYear, endTaxYear)
-
-      val newRequest = new Request(nationalInsuranceNumberStr, startTaxYearStr, endTaxYearStr, dateOfBirth match {
-        case Some(dateOfBirth) => dateOfBirth
-        case _ => ""//throw an error
-      })
-     val response = connector.getCitizenInfo(newRequest)
+      val newRequest = new Request(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
 
 
-    Future.successful(Ok(s"Received = \nBody as String $newRequest\nResponse: $response"))
+    Future.successful(Ok(connector.fetchData(newRequest)))
   }
 }

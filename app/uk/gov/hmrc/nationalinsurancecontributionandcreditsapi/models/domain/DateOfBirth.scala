@@ -14,32 +14,39 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 
+import play.api.libs.json.{Reads, Writes}
+import uk.gov.hmrc.domain.{SimpleName, SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
 import java.time.{LocalDate, Period}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
-import scala.util.matching.Regex
 
-class Validator {
-  //todo: remove this, nino is now a datatype with its own model
-  def ninoValidator(nino: String): Option[String] = {
-    val validationPattern: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D\s]?$""".r
-    Some(nino).filter(validationPattern.matches)
-  }
+case class DateOfBirth(dateOfBirth: String) extends TaxIdentifier with SimpleName {
+  if (!DateOfBirth.isValid(dateOfBirth)) throw new IllegalArgumentException
 
-  //DOB Validator
-  def dobValidator(dob: String): String = {
+  override def value: String = dateOfBirth
+  override val name: String = "dateOfBirth"
+}
+
+object DateOfBirth {
+
+  implicit val dateOfBirthWrite: Writes[DateOfBirth] = new SimpleObjectWrites[DateOfBirth](_.value)
+  implicit val dateOfBirthRead: Reads[DateOfBirth] = new SimpleObjectReads[DateOfBirth]("dateOfBirth", DateOfBirth.apply)
+
+  def isValid(dateOfBirth: String): Boolean = {
     val dobFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     val parsedDob = try {
-      Some(LocalDate.parse(dob, dobFormatter))
+      Some(LocalDate.parse(dateOfBirth, dobFormatter))
     } catch {
       case e: DateTimeParseException => None
     }
 
-    parsedDob.filter { birthDate =>
+    parsedDob.exists { birthDate =>
       val today = LocalDate.now()
       val age = Period.between(birthDate, today).getYears
       age >= 18
-    }.toString
+    }
   }
+
 }
+
