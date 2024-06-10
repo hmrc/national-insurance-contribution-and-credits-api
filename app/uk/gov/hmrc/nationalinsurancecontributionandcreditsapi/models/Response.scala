@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
+import com.google.inject.Inject
+import play.api.libs.json.{Json, OFormat}
+
 case class Response(year: Int,
                     niClass: String,
                     niCategory: Char,
@@ -23,3 +26,9 @@ case class Response(year: Int,
                     amountOfContributions: Int,
                     totalEarningsFactor: Long,
                     primaryContributionValue: Long)
+
+@Inject
+object Response {
+  //todo: using OFormat for local compilation purposes only, changes this to Reads and Writes types for responses back from HIP/stub
+  implicit val format: OFormat[Response] = Json.format[Response]
+}

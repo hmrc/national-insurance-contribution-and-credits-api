@@ -21,12 +21,14 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.{AdditionalH
 import java.time.LocalDate
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
 
-case class Request(nationalInsuranceNumber: String,
+case class Request(nationalInsuranceNumber: Nino,
                    startTaxYear: TaxYear,
                    endTaxYear: TaxYear,
-                   dateOfBirth: String = "")
+                   dateOfBirth: DateOfBirth,
+                   correlationId: String = "")
 
 
 @Inject
