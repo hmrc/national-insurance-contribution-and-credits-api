@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Errors
+import play.api.libs.functional.syntax._
+import com.google.inject.Inject
+import play.api.libs.json._
 
-package object models {
-  type HIPOutcome = Either[Errors, NICCResponse]
+case class NICCResponse(niContribution: NICCContribution,
+                        niCredit: NICCCredit)
+
+@Inject
+object NICCResponse {
+  implicit val format: OFormat[NICCResponse] = Json.format[NICCResponse]
 }

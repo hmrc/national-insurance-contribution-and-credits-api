@@ -69,16 +69,6 @@ class ValidatorSpec extends AnyWordSpec with Matchers {
     }
   }
 
-  //todo: double check this is handled by regex from spec
-  /*"A empty name" should {
-    "return false" in {
-      val expectedName = ""
-      val actualResponse = validator.textValidator(expectedName)
-
-      actualResponse shouldBe None
-    }
-  }*/
-
   "A valid date of birth" should {
     "return true" in {
       val strDob = "22052000"

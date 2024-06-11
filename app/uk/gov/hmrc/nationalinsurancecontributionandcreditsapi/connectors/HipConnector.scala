@@ -17,8 +17,9 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors
 
 import play.api.http.HeaderNames.{AUTHORIZATION, CONTENT_TYPE}
+import play.api.http.MimeTypes.JSON
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NIRequest}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NICCRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{CORRELATION_ID, ENVIRONMENT, ORIGINATING_SYSTEM}
 
@@ -33,16 +34,16 @@ class HipConnector @Inject()(http: HttpClient,
       AUTHORIZATION -> s"Bearer ${config.hipToken}",
       ENVIRONMENT -> config.hipEnvironment,
       CORRELATION_ID -> correlationId,
-      CONTENT_TYPE -> "application/json",
+      CONTENT_TYPE -> JSON,
       ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
     )
 
-  def fetchData(request: NIRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
+  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
     val correlationId: String = UUID.randomUUID().toString
     val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
     import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
     http.PUT(url, request, hipHeaders(correlationId))(implicitly, apiHttpReads, implicitly, implicitly)
-    //todo: confirm what method this will be i.e. PUT or POST
+    //todo: change this to a POST
   }
 
 }

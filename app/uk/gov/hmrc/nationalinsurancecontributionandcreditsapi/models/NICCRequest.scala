@@ -15,27 +15,23 @@
  */
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
-
-import play.api.libs.functional.syntax._
 import com.google.inject.Inject
-import play.api.libs.json._
 
-case class NIResponse(niContribution: NIContribution,
-                      niCredit: NICredit)
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
+
+case class NICCRequest(nationalInsuranceNumber: Nino,
+                       startTaxYear: TaxYear,
+                       endTaxYear: TaxYear,
+                       dateOfBirth: DateOfBirth)
+
 
 @Inject
-object NIResponse {
-  implicit val reads: Reads[NIResponse] = (
-    (__ \ "niContribution").read[NIContribution] and
-      (__ \ "niCredit").read[NICredit]
-  ) (NIResponse.apply _)
+object NICCRequest {
+  implicit val format: OFormat[NICCRequest] = Json.format[NICCRequest]
 
-  implicit val writes: Writes[NIResponse] = new Writes[NIResponse] {
-    override def writes(data: NIResponse): JsValue = {
-      Json.obj(
-        "niContribution" -> Json.toJson(data.niContribution),
-        "niCredit" -> Json.toJson(data.niCredit)
-      )
-    }
-  }
+
+
 }
+

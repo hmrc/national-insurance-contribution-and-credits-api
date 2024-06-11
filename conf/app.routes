@@ -1,8 +1,5 @@
 # microservice specific routes
 
-GET        /nps-json-service/nps/v1/api/national-insurance/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.ServiceController.getContributionsAndCredits(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear, endTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear)
+GET        /nicc-json-service/nicc/v1/api/national-insurance/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.NICCController.getContributionsAndCredits(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear, endTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear)
 
-# Let's move the service files out of uk.gov.hmrc.nationalinsurancecontributionandcreditsapi package to source root (/app) package as it's effecting the readibility of this file??
-# Other services are mixed on this structuring though
-
-# Also, confirm what exposed endpoint will be i.e. GET or something else
+# change this to a POST

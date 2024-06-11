@@ -20,7 +20,7 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Api
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NIResponse
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCResponse
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.HIPOutcome
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.CORRELATION_ID
 
@@ -43,7 +43,7 @@ object ApiHttpParser extends HttpParser with Logging {
 
         response.status match {
 
-          case CREATED => response.validateJson[NIResponse] match {
+          case CREATED => response.validateJson[NICCResponse] match {
             case Some(result) => Right(result)
             case None => Left(Errors(ApiServiceError))
           }
