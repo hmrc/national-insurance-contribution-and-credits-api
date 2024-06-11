@@ -24,7 +24,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequest
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Errors
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

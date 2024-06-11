@@ -35,15 +35,13 @@ class HipConnector @Inject()(http: HttpClient,
       ENVIRONMENT -> config.hipEnvironment,
       CORRELATION_ID -> correlationId,
       CONTENT_TYPE -> JSON,
-      ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval
+      ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval from request headers...is this/should this be added to our API spec for DWP?
     )
 
   def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
     val correlationId: String = UUID.randomUUID().toString
     val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
     import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
-    http.PUT(url, request, hipHeaders(correlationId))(implicitly, apiHttpReads, implicitly, implicitly)
-    //todo: change this to a POST
+    http.POST(url, request, hipHeaders(correlationId))(implicitly, apiHttpReads, implicitly, implicitly)
   }
-
 }
