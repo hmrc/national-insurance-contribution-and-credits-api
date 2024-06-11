@@ -20,22 +20,10 @@ import play.api.libs.functional.syntax._
 import com.google.inject.Inject
 import play.api.libs.json._
 
-case class NIResponse(niContribution: NIContribution,
-                      niCredit: NICredit)
+case class NICCResponse(niContribution: NICCContribution,
+                        niCredit: NICCCredit)
 
 @Inject
-object NIResponse {
-  implicit val reads: Reads[NIResponse] = (
-    (__ \ "niContribution").read[NIContribution] and
-      (__ \ "niCredit").read[NICredit]
-  ) (NIResponse.apply _)
-
-  implicit val writes: Writes[NIResponse] = new Writes[NIResponse] {
-    override def writes(data: NIResponse): JsValue = {
-      Json.obj(
-        "niContribution" -> Json.toJson(data.niContribution),
-        "niCredit" -> Json.toJson(data.niCredit)
-      )
-    }
-  }
+object NICCResponse {
+  implicit val format: OFormat[NICCResponse] = Json.format[NICCResponse]
 }

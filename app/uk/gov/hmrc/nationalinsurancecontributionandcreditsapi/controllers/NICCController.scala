@@ -22,14 +22,16 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NIRequest
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequest
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Errors
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnector)
-                                 (implicit hc: HeaderCarrier, ec: ExecutionContext)
+class NICCController @Inject()(cc: ControllerComponents, connector: HipConnector)
+                              (implicit hc: HeaderCarrier, ec: ExecutionContext)
     extends BackendController(cc) {
 
   def getContributionsAndCredits(nationalInsuranceNumber: Nino, startTaxYear: TaxYear, endTaxYear: TaxYear): Action[AnyContent] =
@@ -38,9 +40,16 @@ class ServiceController @Inject()(cc: ControllerComponents, connector: HipConnec
       val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
       val dateOfBirth: DateOfBirth = DateOfBirth((jsonBody \ "dateOfBirth").asOpt[String].toString)
 
-      val newRequest = new NIRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
+      val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
+
+      /*val result = connector.fetchData(newRequest)
+
+      result.map {
+        case dataFetch@Right(_) => dataFetch
+        case Left(Errors(errors)) => None
+      }*/
 
 
-    Future.successful(Ok(connector.fetchData(newRequest)))
+    connector.fetchData(newRequest).map(Ok.apply)
   }
 }

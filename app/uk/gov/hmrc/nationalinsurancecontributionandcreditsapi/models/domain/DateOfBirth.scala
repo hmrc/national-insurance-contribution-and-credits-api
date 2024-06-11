@@ -41,6 +41,7 @@ object DateOfBirth {
       case e: DateTimeParseException => None
     }
 
+    //todo: potentially removing this business logic, remove it if not needed, Jacob to confirm with Tech Leads
     parsedDob.exists { birthDate =>
       val today = LocalDate.now()
       val age = Period.between(birthDate, today).getYears

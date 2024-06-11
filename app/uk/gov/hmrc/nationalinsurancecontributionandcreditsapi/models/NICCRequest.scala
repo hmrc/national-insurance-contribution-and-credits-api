@@ -16,24 +16,20 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 import com.google.inject.Inject
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.{AdditionalHeaderNames, RequestParams, Validator}
 
-import java.time.LocalDate
-import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
 
-case class NIRequest(nationalInsuranceNumber: Nino,
-                     startTaxYear: TaxYear,
-                     endTaxYear: TaxYear,
-                     dateOfBirth: DateOfBirth,
-                     correlationId: String = "")
+case class NICCRequest(nationalInsuranceNumber: Nino,
+                       startTaxYear: TaxYear,
+                       endTaxYear: TaxYear,
+                       dateOfBirth: DateOfBirth)
 
 
 @Inject
-object NIRequest {
-  implicit val format: OFormat[NIRequest] = Json.format[NIRequest]
+object NICCRequest {
+  implicit val format: OFormat[NICCRequest] = Json.format[NICCRequest]
 
 
 
