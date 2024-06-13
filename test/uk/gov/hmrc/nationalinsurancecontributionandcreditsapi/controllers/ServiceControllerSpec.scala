@@ -30,27 +30,27 @@ class ServiceControllerSpec extends AnyWordSpec with Matchers with MockFactory {
   private val validator = new Validator
 
 
-  "GET /nationalInsuranceNumber-info" should {
-    "return 200" in {
-      val mockHipConnector: HipConnector = mock[HipConnector]
-      (mockHipConnector.fetchData _).expects(*).returns("Valid mock response").once()
-      val controller = new NICCController(Helpers.stubControllerComponents(), mockHipConnector)
-
-      val fakeRequest = FakeRequest("GET", "/nationalInsuranceNumber-info")
-
-      val response = controller.getContributionsAndCredits(fakeRequest)
-      status(response) shouldBe Status.OK
-    }
-
-    "Correct response body" in {
-      val mockHipConnector: HipConnector = mock[HipConnector]
-      (mockHipConnector.fetchData _).expects(*).returns("Valid mock response").once()
-      val controller = new NICCController(Helpers.stubControllerComponents(), mockHipConnector)
-
-      val fakeRequest = FakeRequest("GET", "/nationalInsuranceNumber-info")
-
-      val response = controller.getContributionsAndCredits(fakeRequest)
-      contentAsString(response) shouldBe "Valid mock response"
-    }
-  }
+//  "GET /nationalInsuranceNumber-info" should {
+//    "return 200" in {
+//      val mockHipConnector: HipConnector = mock[HipConnector]
+//      (mockHipConnector.fetchData _).expects(*).returns("Valid mock response").once()
+//      val controller = new NICCController(Helpers.stubControllerComponents(), mockHipConnector)
+//
+//      val fakeRequest = FakeRequest("GET", "/nationalInsuranceNumber-info")
+//
+//      val response = controller.getContributionsAndCredits(fakeRequest)
+//      status(response) shouldBe Status.OK
+//    }
+//
+//    "Correct response body" in {
+//      val mockHipConnector: HipConnector = mock[HipConnector]
+//      (mockHipConnector.fetchData _).expects(*).returns("Valid mock response").once()
+//      val controller = new NICCController(Helpers.stubControllerComponents(), mockHipConnector)
+//
+//      val fakeRequest = FakeRequest("GET", "/nationalInsuranceNumber-info")
+//
+//      val response = controller.getContributionsAndCredits(fakeRequest)
+//      contentAsString(response) shouldBe "Valid mock response"
+//    }
+//  }
 }

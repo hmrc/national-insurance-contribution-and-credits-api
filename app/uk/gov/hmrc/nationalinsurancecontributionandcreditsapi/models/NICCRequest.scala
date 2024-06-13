@@ -24,7 +24,7 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{Dat
 case class NICCRequest(nationalInsuranceNumber: Nino,
                        startTaxYear: TaxYear,
                        endTaxYear: TaxYear,
-                       dateOfBirth: DateOfBirth)
+                       dateOfBirth: String)
 
 
 @Inject
