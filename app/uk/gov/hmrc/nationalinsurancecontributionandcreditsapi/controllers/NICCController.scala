@@ -19,46 +19,38 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequest
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, RequestPayload}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton()
-class NICCController @Inject()(cc: ControllerComponents)
-                              (ec: ExecutionContext)
+class NICCController @Inject()(cc: ControllerComponents,
+                               connector: HipConnector)
+                              (implicit ec: ExecutionContext)
   extends BackendController(cc) {
 
   def getContributionsAndCredits(nationalInsuranceNumber: Nino,
                                  startTaxYear: TaxYear,
-                                 endTaxYear: TaxYear): Action[AnyContent] = Action.async { implicit request =>
+                                 endTaxYear: TaxYear): Action[RequestPayload] = Action(parse.json[RequestPayload]).async { implicit request =>
 
-    val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
+    //    val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
+    val body = request.body
+    //
+    //    val dateOfBirth: String = (jsonBody("dateOfBirth")).as[String]
 
-    val dateOfBirth: String = (jsonBody("dateOfBirth")).as[String]
+    val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, body.dateOfBirth)
 
-    val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
+    // pseudo code
+    connector.fetchData(newRequest).map {
+      //      outcome.map(successResponse => Ok(Json.toJson(successResponse)))
 
-    /*val result = connector.fetchData(newRequest)
-
-    result.map {
-      case dataFetch@Right(_) => dataFetch
-      case Left(Errors(errors)) => None
-    }*/
-
-    //      connector.fetchData(newRequest) match {
-    //        case data: NICCResponse => {
-    //          val builder = Json.newBuilder
-    //          builder += ("", data)
-    //          val result = builder.result()
-    //          Future.successful(Ok(result))
-    //        }
-    //        case _ => Future.successful(BadRequest)
+      case Right(date) => Ok
+      case Left(errors) => InternalServerError
+    }
   }
-
-
-  //    connector.fetchData(newRequest).map(Ok.apply)
 
 }
