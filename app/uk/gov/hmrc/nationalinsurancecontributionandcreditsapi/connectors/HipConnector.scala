@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NICCRequest}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{CORRELATION_ID, ENVIRONMENT, ORIGINATING_SYSTEM}
 
@@ -31,28 +31,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class HipConnector @Inject()(httpClientV2: HttpClientV2,
-                             config: AppConfig) {
-  private[connectors] def hipHeaders(correlationId: String): Seq[(String, String)] =
-    Seq(
-      AUTHORIZATION -> s"Bearer ${config.hipToken}",
-      ENVIRONMENT -> config.hipEnvironment,
-      CORRELATION_ID -> correlationId,
-      CONTENT_TYPE -> JSON,
-      ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval from request headers...is this/should this be added to our API spec for DWP?
-    )
+                             config: AppConfig)(implicit ec: ExecutionContext) {
 
-  //  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
-  //    val correlationId: String = UUID.randomUUID().toString
-  //    val url = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
-  //    import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
-  //    http.POST(url, request, hipHeaders(correlationId))(implicitly, apiHttpReads, implicitly, implicitly)
-  //  }
-
-  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HIPOutcome] = {
+  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier): Future[HIPOutcome] = {
     val correlationId: String = UUID.randomUUID().toString
     val urlToRead = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
-    //    import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
-    //    http.POST(url, request, hipHeaders(correlationId))(implicitly, apiHttpReads, implicitly, implicitly)
 
     httpClientV2.post(url"$urlToRead")
       .setHeader(

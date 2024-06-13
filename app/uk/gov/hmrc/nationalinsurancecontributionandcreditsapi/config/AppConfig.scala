@@ -24,7 +24,7 @@ class AppConfig @Inject()(config: ServicesConfig) {
 
   private val hipServicePrefix = "microservice.services.hip"
 
-  lazy val hipBaseUrl: String = config.baseUrl("hip")
-  lazy val hipToken: String = config.getString(s"$hipServicePrefix.token")
-  lazy val hipEnvironment: String = config.getString(s"$hipServicePrefix.env")
+  val hipBaseUrl: String = config.baseUrl("hip")
+  val hipToken: String = config.getString(s"$hipServicePrefix.token")
+  val hipEnvironment: String = config.getString(s"$hipServicePrefix.env")
 }
