@@ -34,8 +34,8 @@ class NICCController @Inject()(cc: ControllerComponents,
   extends BackendController(cc) {
 
   def getContributionsAndCredits(nationalInsuranceNumber: Nino,
-                                 startTaxYear: TaxYear,
-                                 endTaxYear: TaxYear): Action[RequestPayload] = Action(parse.json[RequestPayload]).async { implicit request =>
+                                 startTaxYear: String,
+                                 endTaxYear: String): Action[RequestPayload] = Action(parse.json[RequestPayload]).async { implicit request =>
 
     //    val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
     val body = request.body
@@ -45,11 +45,12 @@ class NICCController @Inject()(cc: ControllerComponents,
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, body.dateOfBirth)
 
     // pseudo code
-    connector.fetchData(newRequest).map {
+    connector.fetchData(newRequest).map { outcome =>
       //      outcome.map(successResponse => Ok(Json.toJson(successResponse)))
-
+      outcome match {
       case Right(date) => Ok
       case Left(errors) => InternalServerError
+        }
     }
   }
 
