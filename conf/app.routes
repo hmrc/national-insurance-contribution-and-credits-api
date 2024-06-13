@@ -1,5 +1,6 @@
 # microservice specific routes
 
-POST        /nicc-json-service/nicc/v1/api/national-insurance/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.NICCController.getContributionsAndCredits(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear, endTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear)
+#POST        /nicc-json-service/nicc/v1/api/national-insurance/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.NICCController.getContributionsAndCredits(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear, endTaxYear: uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear)
+POST        /nicc-json-service/nicc/v1/api/national-insurance/:nationalInsuranceNumber/from/:startTaxYear/to/:endTaxYear             uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.NICCController.getContributionsAndCredits(nationalInsuranceNumber: uk.gov.hmrc.domain.Nino, startTaxYear: String, endTaxYear: String)
 
 # change this to a POST

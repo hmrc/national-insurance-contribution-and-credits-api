@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import play.api.libs.functional.syntax._
 import com.google.inject.Inject
 import play.api.libs.json._
 
-case class NICCResponse(niContribution: NICCContribution,
-                        niCredit: NICCCredit)
+case class NICCResponse(niContribution: Seq[NIContribution],
+                        niCredit: Seq[NICredit])
 
-@Inject
 object NICCResponse {
   implicit val format: OFormat[NICCResponse] = Json.format[NICCResponse]
 }
