@@ -25,6 +25,7 @@ case class DateOfBirth(dateOfBirth: String) extends TaxIdentifier with SimpleNam
   if (!DateOfBirth.isValid(dateOfBirth)) throw new IllegalArgumentException
 
   override def value: String = dateOfBirth
+
   override val name: String = "dateOfBirth"
 }
 
@@ -34,19 +35,27 @@ object DateOfBirth {
   implicit val dateOfBirthRead: Reads[DateOfBirth] = new SimpleObjectReads[DateOfBirth]("dateOfBirth", DateOfBirth.apply)
 
   def isValid(dateOfBirth: String): Boolean = {
-    val dobFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    val parsedDob = try {
-      Some(LocalDate.parse(dateOfBirth, dobFormatter))
+    val dobFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    try {
+      dobFormatter parse dateOfBirth
+      true
     } catch {
-      case e: DateTimeParseException => None
+      case _: DateTimeParseException => false
     }
+    //    val parsedDob = try {
+    //      dobFormatter parse dateOfBirth
+    //    } catch {
+    //      case e: DateTimeParseException => None
+    //    }
 
     //todo: potentially removing this business logic, remove it if not needed, Jacob to confirm with Tech Leads
-    parsedDob.exists { birthDate =>
-      val today = LocalDate.now()
-      val age = Period.between(birthDate, today).getYears
-      age >= 18
-    }
+
+//    parsedDob.exists { birthDate =>
+//      val today = LocalDate.now()
+//      val age = Period.between(birthDate, today).getYears
+//      age >= 18
+//    }
   }
 
 }

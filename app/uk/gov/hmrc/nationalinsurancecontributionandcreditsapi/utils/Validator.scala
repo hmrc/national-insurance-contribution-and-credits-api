@@ -29,7 +29,7 @@ class Validator {
 
   //DOB Validator
   def dobValidator(dob: String): String = {
-    val dobFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val dobFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val parsedDob = try {
       Some(LocalDate.parse(dob, dobFormatter))
     } catch {
