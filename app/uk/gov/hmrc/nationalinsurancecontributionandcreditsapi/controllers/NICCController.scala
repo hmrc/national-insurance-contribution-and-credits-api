@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.libs.json.Json
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, RequestPayload}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -37,20 +36,13 @@ class NICCController @Inject()(cc: ControllerComponents,
                                  startTaxYear: String,
                                  endTaxYear: String): Action[RequestPayload] = Action(parse.json[RequestPayload]).async { implicit request =>
 
-    //    val jsonBody: JsValue = request.body.asJson.getOrElse(Json.obj())
     val body = request.body
-    //
-    //    val dateOfBirth: String = (jsonBody("dateOfBirth")).as[String]
-
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, body.dateOfBirth)
 
     // pseudo code
-    connector.fetchData(newRequest).map { outcome =>
-      //      outcome.map(successResponse => Ok(Json.toJson(successResponse)))
-      outcome match {
-      case Right(date) => Ok
-      case Left(errors) => InternalServerError
-        }
+    connector.fetchData(newRequest).map {
+      case Right(data) => Ok(Json.toJson(data))
+      case Left(error) => InternalServerError
     }
   }
 

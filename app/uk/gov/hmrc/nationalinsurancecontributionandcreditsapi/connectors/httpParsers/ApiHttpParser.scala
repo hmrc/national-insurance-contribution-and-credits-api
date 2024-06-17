@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers
 
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ApiServiceError, Error, Errors, ThrottledError}
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCResponse
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.HIPOutcome
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NICCResponse}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ApiServiceError, Error, Errors, ThrottledError}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.CORRELATION_ID
 
 object ApiHttpParser extends HttpParser with Logging {
@@ -30,7 +29,7 @@ object ApiHttpParser extends HttpParser with Logging {
     new HttpReads[HIPOutcome] {
       override def read(method: String, url: String, response: HttpResponse): HIPOutcome = {
 
-        if (response.status != CREATED) {
+        if (response.status != OK) {
           val correlationId = response.header(CORRELATION_ID).getOrElse("NOT FOUND")
 
           logger.warn("[ApiHttpParser][read] - Error response received from HIP\n" +
@@ -43,7 +42,7 @@ object ApiHttpParser extends HttpParser with Logging {
 
         response.status match {
 
-          case CREATED => response.validateJson[NICCResponse] match {
+          case OK => response.validateJson[NICCResponse] match {
             case Some(result) => Right(result)
             case None => Left(Errors(ApiServiceError))
           }
