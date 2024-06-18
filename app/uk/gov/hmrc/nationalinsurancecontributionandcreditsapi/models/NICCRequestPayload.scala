@@ -25,8 +25,5 @@ final case class NICCRequestPayload(dateOfBirth: LocalDate) {
 
 object NICCRequestPayload {
 
-  implicit lazy val format: OFormat[NICCRequestPayload] = Json.format
   implicit val reads: Reads[NICCRequestPayload] = Json.reads[NICCRequestPayload]
-
-
 }

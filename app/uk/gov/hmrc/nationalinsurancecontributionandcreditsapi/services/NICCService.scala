@@ -16,6 +16,14 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
 
+import play.api.http.Status.OK
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.HttpResponse
+
 class NICCService {
+
+  def statusMapping(httpResponse: HttpResponse) = {
+    //TODO populate with logic from controller
+  }
 
 }

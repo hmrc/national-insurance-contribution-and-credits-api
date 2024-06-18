@@ -20,6 +20,8 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors._
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failure.ApiServiceFailure$
+
 import scala.util.{Success, Try}
 
 trait HttpParser extends Logging{
@@ -63,7 +65,7 @@ trait HttpParser extends Logging{
   def parseServiceUnavailableError(response: HttpResponse): Errors = {
     (response.json \ "incidentReference").asOpt[String] match {
       //todo: adjust
-      case Some("LTM000503") => Errors(ThrottledFailure$)
+      case Some("LTM000503") => Errors(ThrottledFailure)
       case _ => parseErrors(response)
     }
   }

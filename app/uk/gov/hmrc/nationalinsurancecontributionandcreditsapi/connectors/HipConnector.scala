@@ -22,8 +22,8 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NICCRequest}
-import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpParsers.ApiHttpParser.apiHttpReads
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{CORRELATION_ID, ENVIRONMENT, ORIGINATING_SYSTEM}
 
 import java.util.UUID
@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class HipConnector @Inject()(httpClientV2: HttpClientV2,
                              config: AppConfig)(implicit ec: ExecutionContext) {
 
-  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier): Future[HIPOutcome] = {
+  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val correlationId: String = UUID.randomUUID().toString
     val urlToRead = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
 
@@ -46,6 +46,6 @@ class HipConnector @Inject()(httpClientV2: HttpClientV2,
         ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval from request headers...is this/should this be added to our API spec for DWP?
       )
       .withBody(Json.toJson(request))
-      .execute[HIPOutcome]
+      .execute[HttpResponse]
   }
 }

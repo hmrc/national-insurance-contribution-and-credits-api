@@ -20,8 +20,9 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failure.ApiServiceFailure$
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NICCResponse}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ApiServiceFailure$, Failure, Errors, ThrottledFailure$}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Errors, Failure, ThrottledFailure}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.CORRELATION_ID
 
 object ApiHttpParser extends HttpParser with Logging {
@@ -32,6 +33,7 @@ object ApiHttpParser extends HttpParser with Logging {
       if (response.status != OK) {
         val correlationId = response.header(CORRELATION_ID).getOrElse("NOT FOUND")
 
+        //TODO remove log with sensitive data
         logger.warn("[ApiHttpParser][read] - Error response received from HIP\n" +
           s"URL: $url\n" +
           s"Status code: ${response.status}\n" +
@@ -47,7 +49,7 @@ object ApiHttpParser extends HttpParser with Logging {
           case None => Left(Errors(ApiServiceFailure$))
         }
         case BAD_REQUEST => Left(parseErrors(response))
-        case TOO_MANY_REQUESTS => Left(Errors(ThrottledFailure$))
+        case TOO_MANY_REQUESTS => Left(Errors(ThrottledFailure))
         case SERVICE_UNAVAILABLE => Left(parseServiceUnavailableError(response))
         case BAD_GATEWAY => Left(Errors(Seq(Failure(BAD_GATEWAY.toString, response.body))))
         case _ => Left(parseErrors(response))

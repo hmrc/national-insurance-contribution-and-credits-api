@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
 import com.google.inject.Inject
+import play.api.http.Writeable
 import play.api.libs.json._
 
 case class NICCResponse(niContribution: Seq[NIContribution],

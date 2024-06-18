@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
-import play.api.libs.json.Json
+import org.apache.pekko.http.scaladsl.model.HttpHeader.ParsingResult.Ok
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, NICCRequestPayload}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, NICCRequestPayload, NICCResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -31,7 +32,7 @@ import play.api.Logger
 class NICCController @Inject()(cc: ControllerComponents,
                                connector: HipConnector)
                               (implicit ec: ExecutionContext)
-  extends BackendController(cc){
+  extends BackendController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
@@ -44,9 +45,14 @@ class NICCController @Inject()(cc: ControllerComponents,
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, body.dateOfBirth.toString)
 
 
-    connector.fetchData(newRequest).map {
-      case Right(data) => Ok(Json.toJson(data))
-      case Left(data) => BadRequest(Json.toJson(data.errors))
+    connector.fetchData(newRequest).map { response => {
+      response.status match {
+        case OK => response.json.validate[NICCResponse] match {
+          case JsSuccess(data, _) => Ok(Json.toJson(data))
+          case JsError(errors) => InternalServerError
+        }
+      }
+    }
     }
   }
 

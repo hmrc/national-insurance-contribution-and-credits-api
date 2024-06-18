@@ -22,11 +22,14 @@ case class Failure(code: String, message: String)
 
 object Failure {
   implicit val format: OFormat[Failure] = Json.format[Failure]
+
+  final val ApiServiceFailure$ = new Failure("INTERNAL_SERVER_ERROR", "An error occurred whilst processing your request.")
 }
 
 //todo: adjust according to responses errors from backend
-object ApiServiceFailure$
-  extends Failure("INTERNAL_SERVER_ERROR", "An error occurred whilst processing your request.")
+//todo move below inside object above and turn into final vals
+
+
 
 object InvalidRequestFailure$
   extends Failure("INVALID_REQUEST", "The request is invalid.")
@@ -43,5 +46,5 @@ object MatchNotFoundFailure$
 object ServiceUnavailableFailure$
   extends Failure("SERVER_ERROR", "Service unavailable.")
 
-object ThrottledFailure$
+object ThrottledFailure
   extends Failure("MESSAGE_THROTTLED_OUT", "The application has reached its maximum rate limit.")
