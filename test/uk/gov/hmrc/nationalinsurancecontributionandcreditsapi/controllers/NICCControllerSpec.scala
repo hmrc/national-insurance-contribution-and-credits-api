@@ -39,22 +39,22 @@ class NICCControllerSpec extends AnyWordSpec with Matchers {
   implicit val materializer: Materializer = Materializer(ActorSystem())
 
 
-  "GET /nationalInsuranceNumber-info" should {
+  "POST /nationalInsuranceNumber-info" should {
     "return 200" in {
-      val requestNino = Nino("BB000020B")
+      val requestNino = Nino("BB 00 00 20 B")
       val requestStartYear = "2017"
       val requestEndYear = "2019"
       val requestDoB = "1998-04-23"
       val body = Json.obj(("dateOfBirth", "1998-04-23"))
       val requestObject = NICCRequest(requestNino, requestStartYear, requestEndYear, requestDoB)
-      val fakeRequest = FakeRequest("POST", "/nicc-json-service/nicc/v1/api/national-insurance/AA123456B/from/2017/to/2019", FakeHeaders(Seq((CONTENT_TYPE, "application/json"))), body)
+      val fakeRequest = FakeRequest("POST", "/nicc-json-service/nicc/v1/api/national-insurance/BB 00 00 20 B/from/2017/to/2019", FakeHeaders(Seq((CONTENT_TYPE, "application/json"))), body)
 
       val mockHipConnector: HipConnector = mock[HipConnector]
       val expectedResponseObject: HIPOutcome = Right(NICCResponse(Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))), Seq()))
       when(mockHipConnector.fetchData(requestObject)(HeaderCarrier())).thenReturn(Future(expectedResponseObject))
       val controller = new NICCController(Helpers.stubControllerComponents(), mockHipConnector)
 
-      val response = controller.getContributionsAndCredits(requestNino, requestStartYear, requestEndYear)(fakeRequest)
+      val response = controller.postContributionsAndCredits(requestNino, requestStartYear, requestEndYear)(fakeRequest)
       status(response) shouldBe Status.OK
     }
   }
