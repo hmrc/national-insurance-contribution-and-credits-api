@@ -1,0 +1,540 @@
+openapi: 3.0.3
+info:
+  title: NPS Interface Specification to retrieve Class 1 and Class 2 data.
+  description: |-
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  contact:
+    name: HMRC NPS Live Service
+    email: user@hmrc.gov.uk
+  version: 1.0.2 draft
+  license:
+    name: HMRC
+    url: https://license.example.hmrc.gov.uk
+servers:
+  - url: https://{hostname}:{port}
+    description: >-
+      The actual environment values to use will differ depending on the environment.
+    variables:
+      hostname:
+        default: hostname
+      port:
+        enum:
+          - '7008'
+        default: '7008'
+tags: []
+paths:
+  /nps-json-service/nps/v1/api/national-insurance/{nationalInsuranceNumber}/contributions-and-credits/from/{startTaxYear}/to/{endTaxYear}:
+    post:
+      tags:
+        - Contributions-and-credits
+      summary: NPS Interface Specification to retrieve Class 1 and Class 2 data.
+      security:
+        - basicAuth: []
+      description: |-
+        # Purpose
+        This API provides the capability to retrieve Class 1 and Class 2 data for an account.<br>
+        - This allows a search for Class 1 contributions and Class 2 credits for a given NINO (suffix optional) and range of tax years.
+        - Request payload will contain the date of birth.<br>
+        - This endpoint requires Mutual Authentication over TLS 1.2. <br><p>
+        - The API request must provide, in the path parameters:<br>
+          - A NINO<br>
+          - A start year for the tax year range, not before 1975 or after CY-1<br>
+          - An end year for the tax year range, not before the start year or after CY-1, and no more than five years after the start year (thereby allowing a range of six years inclusive).
+        - Example URL: /v1/api/national-insurance/AA123456/contributions-and-credits/from/2011/to/2016 <br>
+
+        Consumer : DIGITAL
+
+      operationId: PostNIContCreds
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/GovUkOriginatorId'
+        - $ref: '#/components/parameters/nationalInsuranceNumber'
+        - $ref: '#/components/parameters/startTaxYear'
+        - $ref: '#/components/parameters/endTaxYear'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostNIContCredRequest'
+      responses:
+        '200':
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/PostNIContCredResponse'
+        '400':
+          description: Bad Request
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_400'
+              examples:
+                Actual_Response:
+                  value:
+                    failures:
+                      - reason: HTTP message not readable
+                        code: '400.2'
+                      - reason: Constraint Violation - Invalid/Missing input parameter
+                        code: '400.1'
+        '403':
+          description: 'Forbidden'
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+              examples:
+                Actual_Response:
+                  value:
+                    reason: Forbidden
+                    code: '403.2'
+        '404':
+          $ref: '#/components/responses/notFoundErrorResponse'
+        '422':
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+              examples:
+                422_StartYearAfterEndYear:
+                  $ref: '#/components/examples/422_StartYearAfterEndYear'
+                422_StartYearPre1975:
+                  $ref: '#/components/examples/422_StartYearPre1975'
+                422_StartYearPostCY-1:
+                  $ref: '#/components/examples/422_StartYearPostCY-1'
+                422_EndYearPostCY-1:
+                  $ref: '#/components/examples/422_EndYearPostCY-1'
+                422_TaxYearRangeOver6:
+                  $ref: '#/components/examples/422_TaxYearRangeOver6'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
+components:
+  examples:
+    422_StartYearAfterEndYear:
+      summary: Start Year After End Year
+      value:
+        failures:
+          - reason: Start tax year after end tax year
+            code: '63496'
+    422_StartYearPre1975:
+      summary: Start Year Pre 1975
+      value:
+        failures:
+          - reason: Start tax year before 1975
+            code: '63497'
+    422_StartYearPostCY-1:
+      summary: Start Year Post CY-1
+      value:
+        failures:
+          - reason: Start tax year after CY-1
+            code: '63498'
+    422_EndYearPostCY-1:
+      summary: End Year Post CY-1
+      value:
+        failures:
+          - reason: End tax year after CY-1
+            code: '63499'
+    422_TaxYearRangeOver6:
+      summary: Tax Year Range Over 6 Years
+      value:
+        failures:
+          - reason: Tax year range greater than six years
+            code: '63500'
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: HTTPS with MTLS1.2
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    GovUkOriginatorId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+  parameters:
+    correlationId:
+      description:
+        Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      in: header
+      name: correlationId
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    GovUkOriginatorId:
+      description: Identity of the Originating System that made the API call.
+      in: header
+      name: gov-uk-originator-id
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    nationalInsuranceNumber:
+      description: NINO - unique for an individual - note not all individuals qualify to be issued with one.
+      in: path
+      name: nationalInsuranceNumber
+      required: true
+      schema:
+        $ref: '#/components/schemas/nationalInsuranceNumber'
+    startTaxYear:
+      description:
+        Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
+      in: path
+      name: startTaxYear
+      required: true
+      schema:
+        $ref: '#/components/schemas/taxYear'
+    endTaxYear:
+      description:
+        Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data up to and including.
+      in: path
+      name: endTaxYear
+      required: true
+      schema:
+        $ref: '#/components/schemas/taxYear'
+  responses:
+    notFoundErrorResponse:
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+      description: The requested resource could not be found
+    internalServerErrorResponse:
+      description: Internal Server Error
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+    unprocessableEntityResponse:
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/errorResponse_422'
+      description: Unprocessable Entity
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+  schemas:
+    correlationId:
+      description:
+        Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+      format: uuid
+      type: string
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      type: string
+    errorResponse:
+      description: Error Response Payload for this API
+      title: Error Response
+      properties:
+        failures:
+          items:
+            $ref: '#/components/schemas/errorResourceObj'
+          type: array
+      type: object
+    errorResourceObj:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          minLength: 1
+          description: Displays the reason of the failure passed from NPS.
+          type: string
+          maxLength: 120
+        code:
+          minLength: 1
+          description: The error code representing the error that has occurred passed from
+            NPS.
+          type: string
+          maxLength: 10
+    errorResponse_400:
+      description: Array of Error Response Failure Object in Error Response.
+      title: Error Response
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_400'
+    errorResponseFailure_400:
+      description: Array of Error Response Failure Object in Error Response.
+      title: Failure Object in Error Response
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_400:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          minLength: 1
+          description: Displays the reason of the failure.
+          type: string
+          maxLength: 120
+        code:
+          description:
+            "The error code representing the error that has occurred. Valid
+            values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing
+            input parameter path.to.field')\n400.2 - HTTP message not readable."
+          type: string
+          enum:
+            - '400.1'
+            - '400.2'
+    errorResponse_403:
+      items:
+        $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+      description: Error Response Payload for this API
+      title: Forbidden Error Response
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          type: string
+          enum:
+            - Forbidden
+        code:
+          description: 'The error code representing the Forbidden Error.'
+          type: string
+          enum:
+            - '403.2'
+    errorResponse_422:
+      description: Error Response Payload for this API
+      title: Error Response
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_422'
+    errorResponseFailure_422:
+      description: Array of Error Response Failure Object in Error Response.
+      title: Failure Object in Error Response
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_422'
+    errorResourceObj_422:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          minLength: 1
+          description: Displays the reason of the failure.
+          type: string
+          maxLength: 120
+        code:
+          minLength: 1
+          description:
+            "The error code representing the error that has occurred."
+          type: string
+          maxLength: 10
+    taxYear:
+      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+      type: integer
+    PostNIContCredResponse:
+      description: Success response payload for this API.
+      properties:
+        niContribution:
+          description: Contains an array of Class 1 Contributions.
+          items:
+            $ref: '#/components/schemas/niContribution'
+          type: array
+        niCredit:
+          description: Contains an array of Class 2 Credits.
+          items:
+            $ref: '#/components/schemas/niCredit'
+          type: array
+      type: object
+    niContribution:
+      description: Contains details of a Class 1 Contribution
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        contributionCategoryLetter:
+          $ref: '#/components/schemas/contributionCategoryLetter'
+        contributionCategory:
+          $ref: '#/components/schemas/EnumContCat'
+        totalContribution:
+          $ref: '#/components/schemas/unsignedMoney'
+        primaryContribution:
+          $ref: '#/components/schemas/unsignedMoney'
+        class1ContributionStatus:
+          $ref: '#/components/schemas/EnumCl1stat'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+      type: object
+    niCredit:
+      description: Contains details of a Class 2 Credit
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        numberOfCredits:
+          $ref: '#/components/schemas/numberOfCredits'
+        contributionCreditTypeCode:
+          $ref: '#/components/schemas/EnumCCTypeCode'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2NicAmount:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2Or3CreditStatus:
+          $ref: '#/components/schemas/EnumCredStat'
+      type: object
+    nationalInsuranceNumber:
+      description: NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix.
+      maxLength: 9
+      minLength: 8
+      pattern: ^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$
+      type: string
+    unsignedMoney:
+      description: Positive or zero monetary value.
+      maximum: 99999999999999.98
+      minimum: 0
+      multipleOf: 0.01
+      type: number
+    contributionCategoryLetter:
+      description: Letter associated with the contribution category.
+      maxLength: 1
+      minLength: 1
+      pattern: ^[A-Z]$
+      type: string
+    numberOfCredits:
+      description: Number of weekly credits that apply to the credit record.
+      minimum: 0
+      maximum: 53
+      type: integer
+    EnumContCat:
+      description: Denotes the contribution category.
+      enum:
+        - (NONE)
+        - CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS
+        - CONVERTED ACCOUNT - CONTRACTED OUT
+        - MARINER FOREIGN GOING REBATE ( REDUCED  CONTRACTED-OUT )
+        - MARINER FOREIGN GOING REBATE ( STANDARD CONTRACTED-OUT )
+        - MARINER FOREIGN GOING REBATE EQUIVALENT (REDUCED)
+        - MARINER FOREIGN GOING REBATE EQUIVALENT (SECONDARY ONLY)
+        - MARINER FOREIGN GOING REBATE EQUIVALENT (STANDARD)
+        - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( REDUCED C-OUT)
+        - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( STANDARD C-OUT)
+        - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE EQUIV.(SECONDARY ONLY)
+        - MARINER REDUNDANCY FUND & FRGN GNG REBATE EQUIV.(STD)
+        - MARINER REDUNDANCY FUND & FRGN GOING REBATE EQUIV.(RDCD)
+        - MARINER REDUNDANCY FUND REBATE ( REDUCED CONTRACTED-OUT )
+        - MARINER REDUNDANCY FUND REBATE ( STANDARD CONTRACTED-OUT )
+        - MARINER REDUNDANCY FUND REBATE EQUIV. (RDCD)
+        - MARINER REDUNDANCY FUND REBATE EQUIVALENT (SECONDARY ONLY)
+        - MARINER REDUNDANCY FUND REBATE EQUIVALENT (STANDARD)
+        - MARRIED WOMAN'S REDUCED RATE ELECTION
+        - NO LIABILITY
+        - OFFICE HOLDERS
+        - REDUCED RATE
+        - REDUCED RATE CONTRACTED-OUT
+        - STANDARD RATE
+        - STANDARD RATE CONTRACTED-OUT
+        - UNALLOCATED
+        - ZERO RATE
+      type: string
+    EnumCl1stat:
+      description: Denotes the status for the contribution.
+      enum:
+        - COMPLIANCE & YIELD INCOMPLETE
+        - CURRENT
+        - HISTORIC AMENDED
+        - HISTORIC CANCELLED
+        - INVALID - NO RCF
+        - INVALID - RCF
+        - INVALID COMPATIBILITY CHECK
+        - NOT KNOWN / NOT APPLICABLE
+        - POTENTIAL
+        - VALID
+        - VALID RCF
+      type: string
+    EnumCredStat:
+      description: Denotes the status for the credit.
+      enum:
+        - NOT KNOWN/NOT APPLICABLE
+        - VALID
+        - INVALID
+        - POTENTIAL
+        - INVALID COMPATIBILITY CHECK
+      type: string
+    EnumCCTypeCode:
+      description: Short code relating to the type of class 2 credit.
+      enum:
+        - C2
+        - C2W
+        - SF
+        - 2A
+        - 2B
+        - 2C
+        - 2D
+        - SFA
+        - SFB
+        - SFC
+        - SFD
+        - VDA
+        - VDB
+        - VDC
+        - VDD
+        - 2N
+      type: string
+    EnumCCType:
+      description: Type of class 2 credit.
+      enum:
+        - CLASS 2 - NORMAL RATE
+        - CLASS 2 - WOMAN'S RATE
+        - CLASS 2 - SHAREFISHERMAN'S RATE
+        - CLASS 2 - NORMAL RATE A
+        - CLASS 2 - NORMAL RATE B
+        - CLASS 2 - NORMAL RATE C
+        - CLASS 2 - NORMAL RATE D
+        - CLASS 2 - SHAREFISHERMAN'S RATE A
+        - CLASS 2 - SHAREFISHERMAN'S RATE B
+        - CLASS 2 - SHAREFISHERMAN'S RATE C
+        - CLASS 2 - SHAREFISHERMAN'S RATE D
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE A
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE B
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE C
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE D
+        - CLASS 2 CONTRIBUTION CONVERTED FROM NIRS1
+      type: string
+    PostNIContCredRequest:
+      description: Request payload for this API.
+      properties:
+        dateOfBirth:
+          $ref: '#/components/schemas/dateOfBirth'
+      required:
+        - dateOfBirth
+      additionalProperties: false
+      type: object
+    dateOfBirth:
+      description: The date of birth of the individual.
+      format: date
+      type: string
