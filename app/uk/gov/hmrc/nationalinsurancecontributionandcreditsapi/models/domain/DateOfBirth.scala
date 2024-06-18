@@ -22,7 +22,6 @@ import java.time.{LocalDate, Period}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
 
 case class DateOfBirth(dateOfBirth: String) extends TaxIdentifier with SimpleName {
-  if (!DateOfBirth.isValid(dateOfBirth)) throw new IllegalArgumentException
 
   override def value: String = dateOfBirth
 
@@ -34,21 +33,6 @@ object DateOfBirth {
   implicit val dateOfBirthWrite: Writes[DateOfBirth] = new SimpleObjectWrites[DateOfBirth](_.value)
   implicit val dateOfBirthRead: Reads[DateOfBirth] = new SimpleObjectReads[DateOfBirth]("dateOfBirth", DateOfBirth.apply)
 
-  def isValid(dateOfBirth: String): Boolean = {
-    val dobFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    try {
-      dobFormatter parse dateOfBirth
-      true
-    } catch {
-      case _: DateTimeParseException => false
-    }
-    //    val parsedDob = try {
-    //      dobFormatter parse dateOfBirth
-    //    } catch {
-    //      case e: DateTimeParseException => None
-    //    }
-
     //todo: potentially removing this business logic, remove it if not needed, Jacob to confirm with Tech Leads
 
 //    parsedDob.exists { birthDate =>
@@ -56,7 +40,7 @@ object DateOfBirth {
 //      val age = Period.between(birthDate, today).getYears
 //      age >= 18
 //    }
-  }
+
 
 }
 

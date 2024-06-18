@@ -43,18 +43,18 @@ trait HttpParser extends Logging{
     }
   }
 
-  private val multipleErrorReads: Reads[Seq[Error]] = (__ \ "failures").read[Seq[Error]]
+  private val multipleErrorReads: Reads[Seq[Failure]] = (__ \ "failures").read[Seq[Failure]]
 
   def parseErrors(response: HttpResponse): Errors = {
     val errors = if ((response.json \ "failures").isDefined) {
       response.validateJson(multipleErrorReads).map(Errors(_))
     } else {
-      response.validateJson[Error].map(Errors(_))
+      response.validateJson[Failure].map(Errors(_))
     }
 
     lazy val unableToParseJsonError = {
       logger.warn(s"unable to parse errors from response: ${response.body}")
-      Errors(ApiServiceError)
+      Errors(ApiServiceFailure$)
     }
 
     errors getOrElse unableToParseJsonError
@@ -63,7 +63,7 @@ trait HttpParser extends Logging{
   def parseServiceUnavailableError(response: HttpResponse): Errors = {
     (response.json \ "incidentReference").asOpt[String] match {
       //todo: adjust
-      case Some("LTM000503") => Errors(ThrottledError)
+      case Some("LTM000503") => Errors(ThrottledFailure$)
       case _ => parseErrors(response)
     }
   }

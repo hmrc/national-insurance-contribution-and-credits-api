@@ -16,12 +16,17 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OFormat, Reads}
 
-final case class RequestPayload(dateOfBirth: String)
+import java.time.LocalDate
 
-object RequestPayload {
+final case class NICCRequestPayload(dateOfBirth: LocalDate) {
+}
 
-  implicit lazy val format: OFormat[RequestPayload] = Json.format
+object NICCRequestPayload {
+
+  implicit lazy val format: OFormat[NICCRequestPayload] = Json.format
+  implicit val reads: Reads[NICCRequestPayload] = Json.reads[NICCRequestPayload]
+
 
 }

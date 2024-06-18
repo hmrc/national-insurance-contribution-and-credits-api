@@ -15,11 +15,12 @@
  */
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
-import com.google.inject.Inject
 
+import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{DateOfBirth, TaxYear}
+
+import java.time.format.DateTimeFormatter
 
 case class NICCRequest(nationalInsuranceNumber: Nino,
                        startTaxYear: String,
@@ -30,8 +31,6 @@ case class NICCRequest(nationalInsuranceNumber: Nino,
 @Inject
 object NICCRequest {
   implicit val format: OFormat[NICCRequest] = Json.format[NICCRequest]
-
-
 
 }
 

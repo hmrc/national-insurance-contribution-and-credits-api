@@ -18,39 +18,39 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.httpPa
 
 import play.api.Logging
 import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{HIPOutcome, NICCResponse}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ApiServiceError, Error, Errors, ThrottledError}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ApiServiceFailure$, Failure, Errors, ThrottledFailure$}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.CORRELATION_ID
 
 object ApiHttpParser extends HttpParser with Logging {
 
   implicit val apiHttpReads: HttpReads[HIPOutcome] =
-    new HttpReads[HIPOutcome] {
-      override def read(method: String, url: String, response: HttpResponse): HIPOutcome = {
+    (method: String, url: String, response: HttpResponse) => {
 
-        if (response.status != OK) {
-          val correlationId = response.header(CORRELATION_ID).getOrElse("NOT FOUND")
+      if (response.status != OK) {
+        val correlationId = response.header(CORRELATION_ID).getOrElse("NOT FOUND")
 
-          logger.warn("[ApiHttpParser][read] - Error response received from HIP\n" +
-            s"URL: $url\n" +
-            s"Status code: ${response.status}\n" +
-            s"Correlation ID: $correlationId\n" +
-            s"Body: ${response.body}"
-          )
+        logger.warn("[ApiHttpParser][read] - Error response received from HIP\n" +
+          s"URL: $url\n" +
+          s"Status code: ${response.status}\n" +
+          s"Correlation ID: $correlationId\n" +
+          s"Body: ${response.body}"
+        )
+      }
+
+      response.status match {
+
+        case OK => response.validateJson[NICCResponse] match {
+          case Some(result) => Right(result)
+          case None => Left(Errors(ApiServiceFailure$))
         }
-
-        response.status match {
-
-          case OK => response.validateJson[NICCResponse] match {
-            case Some(result) => Right(result)
-            case None => Left(Errors(ApiServiceError))
-          }
-          case TOO_MANY_REQUESTS => Left(Errors(ThrottledError))
-          case SERVICE_UNAVAILABLE => Left(parseServiceUnavailableError(response))
-          case BAD_GATEWAY => Left(Errors(Seq(Error(BAD_GATEWAY.toString, response.body))))
-          case _ => Left(parseErrors(response))
-        }
+        case BAD_REQUEST => Left(parseErrors(response))
+        case TOO_MANY_REQUESTS => Left(Errors(ThrottledFailure$))
+        case SERVICE_UNAVAILABLE => Left(parseServiceUnavailableError(response))
+        case BAD_GATEWAY => Left(Errors(Seq(Failure(BAD_GATEWAY.toString, response.body))))
+        case _ => Left(parseErrors(response))
       }
     }
 }
