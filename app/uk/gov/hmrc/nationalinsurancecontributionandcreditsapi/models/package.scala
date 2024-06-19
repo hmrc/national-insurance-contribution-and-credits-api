@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi
 
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Errors
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failures
 
 package object models {
-  type HIPOutcome = Either[Errors, NICCResponse]
+  type HIPOutcome = Either[Failures, NICCResponse]
 }

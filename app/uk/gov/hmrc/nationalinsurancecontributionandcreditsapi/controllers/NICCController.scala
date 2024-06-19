@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import play.api.Logger
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Failures, Failure}
 
 @Singleton()
 class NICCController @Inject()(cc: ControllerComponents,
@@ -51,9 +52,17 @@ class NICCController @Inject()(cc: ControllerComponents,
           case JsSuccess(data, _) => Ok(Json.toJson(data))
           case JsError(errors) => InternalServerError
         }
+        case BAD_REQUEST => response.json.validate[Failures] match {
+          case JsSuccess(data, _) => BadRequest(Json.toJson(data))
+          case JsError(errors) => InternalServerError
+        }
+        case UNPROCESSABLE_ENTITY => response.json.validate[Failures] match {
+          case JsSuccess(data, _) => UnprocessableEntity(Json.toJson(data))
+          case JsError(errors) => InternalServerError
+        }
+        case _ => InternalServerError
       }
     }
     }
   }
-
 }

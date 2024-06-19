@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
-import play.api.libs.json.{Json, OFormat}
+import com.google.inject.Inject
+import play.api.libs.json.{Json, OFormat, Reads}
 
-case class Errors(errors: Seq[Failure])
+case class Failures(failures: Seq[Failure])
 
-object Errors {
-  def apply(error: Failure): Errors = Errors(Seq(error))
-  def apply(errors: Errors): Errors = Errors(errors)
+@Inject
+object Failures {
 
-  implicit val format: OFormat[Errors] = Json.format[Errors]
+  implicit val format: OFormat[Failures] = Json.format[Failures]
 }

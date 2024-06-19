@@ -16,35 +16,35 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
+import com.google.inject.Inject
 import play.api.libs.json._
 
-case class Failure(code: String, message: String)
+case class Failure(reason: String, code: String)
 
+@Inject
 object Failure {
   implicit val format: OFormat[Failure] = Json.format[Failure]
 
-  final val ApiServiceFailure$ = new Failure("INTERNAL_SERVER_ERROR", "An error occurred whilst processing your request.")
+
+  final val ApiServiceFailure =
+    new Failure("INTERNAL_SERVER_ERROR", "An error occurred whilst processing your request.")
+
+  final val InvalidRequestFailure =
+    new Failure("INVALID_REQUEST", "The request is invalid.")
+
+  final val UnknownBusinessFailure =
+    new Failure("UNKNOWN_BUSINESS_ERROR", "The remote endpoint has returned an unknown business validation error.")
+
+  final val NinoNotFoundFailure =
+    new Failure("NOT_FOUND_NINO", "The remote endpoint has indicated that the Nino provided cannot be found.")
+
+  final val MatchNotFoundFailure =
+    new Failure("NOT_FOUND_MATCH", "The remote endpoint has indicated that there is no match for the person details provided.")
+
+  final val ServiceUnavailableFailure =
+    new Failure("SERVER_ERROR", "Service unavailable.")
+
+  final val ThrottledFailure =
+    new Failure("MESSAGE_THROTTLED_OUT", "The application has reached its maximum rate limit.")
 }
 
-//todo: adjust according to responses errors from backend
-//todo move below inside object above and turn into final vals
-
-
-
-object InvalidRequestFailure$
-  extends Failure("INVALID_REQUEST", "The request is invalid.")
-
-object UnknownBusinessFailure$
-  extends Failure("UNKNOWN_BUSINESS_ERROR", "The remote endpoint has returned an unknown business validation error.")
-
-object NinoNotFoundFailure$
-  extends Failure("NOT_FOUND_NINO", "The remote endpoint has indicated that the Nino provided cannot be found.")
-
-object MatchNotFoundFailure$
-  extends Failure("NOT_FOUND_MATCH", "The remote endpoint has indicated that there is no match for the person details provided.")
-
-object ServiceUnavailableFailure$
-  extends Failure("SERVER_ERROR", "Service unavailable.")
-
-object ThrottledFailure
-  extends Failure("MESSAGE_THROTTLED_OUT", "The application has reached its maximum rate limit.")
