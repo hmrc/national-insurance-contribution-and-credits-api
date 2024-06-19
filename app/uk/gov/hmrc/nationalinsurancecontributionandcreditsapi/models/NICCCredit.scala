@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import com.google.inject.AbstractModule
+import play.api.libs.json.{Json, OFormat}
 
-class Module extends AbstractModule {
+case class NICCCredit(taxYear: Int,
+                      contributionCategoryLetter: String,
+                      contributionCategory: String,
+                      totalContribution: BigDecimal,
+                      primaryContribution: BigDecimal,
+                      class1ContributionStatus: String,
+                      primaryPaidEarnings: BigDecimal)
 
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+object NICCCredit{
+  implicit val format: OFormat[NICCCredit] = Json.format[NICCCredit]
 }

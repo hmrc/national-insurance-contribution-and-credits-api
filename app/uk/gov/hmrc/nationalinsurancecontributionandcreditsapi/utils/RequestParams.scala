@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
 
-import com.google.inject.AbstractModule
-
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+object RequestParams {
+  val NINO = "nationalInsuranceNumber"
+  val FORENAME = "forename"
+  val SURNAME = "surname"
+  val DATE_OF_BIRTH = "dateOfBirth"
+  val DATE_RANGE = "dateRange"
 }

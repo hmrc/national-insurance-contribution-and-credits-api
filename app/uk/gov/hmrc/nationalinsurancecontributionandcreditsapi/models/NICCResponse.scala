@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import play.api.http.Writeable
+import play.api.libs.json._
 
-class Module extends AbstractModule {
+case class NICCResponse(niContribution: Seq[NIContribution],
+                        niCredit: Seq[NICredit])
 
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+object NICCResponse {
+  implicit val format: OFormat[NICCResponse] = Json.format[NICCResponse]
 }

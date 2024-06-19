@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
 
-import com.google.inject.AbstractModule
+import play.api.http.Status.OK
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.HttpResponse
 
-class Module extends AbstractModule {
+class NICCService {
 
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
+  def statusMapping(httpResponse: HttpResponse) = {
+    //TODO populate with logic from controller
   }
+
 }

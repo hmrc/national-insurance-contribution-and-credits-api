@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import com.google.inject.AbstractModule
+import play.api.libs.json.{Json, OFormat, Reads}
 
-class Module extends AbstractModule {
+import java.time.LocalDate
 
-  override def configure(): Unit = {
+final case class NICCRequestPayload(dateOfBirth: LocalDate) {
+}
 
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+object NICCRequestPayload {
+
+  implicit val reads: Reads[NICCRequestPayload] = Json.reads[NICCRequestPayload]
 }

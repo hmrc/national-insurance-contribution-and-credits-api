@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
-import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import play.api.libs.json.{Json, OFormat, Reads}
 
-class Module extends AbstractModule {
+case class Failures(failures: Seq[Failure])
 
-  override def configure(): Unit = {
+@Inject
+object Failures {
 
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+  implicit val format: OFormat[Failures] = Json.format[Failures]
 }

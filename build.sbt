@@ -1,5 +1,7 @@
 import uk.gov.hmrc.DefaultBuildSettings
 
+import scala.collection.immutable.Seq
+
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "2.13.12"
 
@@ -7,12 +9,19 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
+    libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
+    //libraryDependencies += "uk.gov.hmrc" %% "play-auditing-play-x" % "3.0.0",
+    //todo: confirm the play version we should be using, adjust the version on line 15 (i.e. 3.0.0 -> x.x.x & the alias version number (x) in "play-auditing-play-x"
+    routesImport += "uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.Binders._",
+    libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
-    scalacOptions += "-Wconf:src=routes/.*:s",
+    scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
   )
   .settings(resolvers += Resolver.jcenterRepo)
-  .settings(CodeCoverageSettings.settings: _*)
+  .settings(CodeCoverageSettings.settings *)
   .settings(
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
   )

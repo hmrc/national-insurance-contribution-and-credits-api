@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.domain.Nino
 
-class Module extends AbstractModule {
+import java.time.format.DateTimeFormatter
 
-  override def configure(): Unit = {
+case class NICCRequest(nationalInsuranceNumber: Nino,
+                       startTaxYear: String,
+                       endTaxYear: String,
+                       dateOfBirth: String)
 
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+
+@Inject
+object NICCRequest {
+  implicit val format: OFormat[NICCRequest] = Json.format[NICCRequest]
+
 }
+

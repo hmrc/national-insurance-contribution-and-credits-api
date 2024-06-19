@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
 
-import com.google.inject.AbstractModule
-
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+object AdditionalHeaderNames {
+  val CORRELATION_ID = "correlationId"
+  val ENVIRONMENT = "Environment"
+  val ORIGINATING_SYSTEM = "gov-uk-originator-id"
 }

@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi
 
-import com.google.inject.AbstractModule
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failures
 
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
+package object models {
+  type HIPOutcome = Either[Failures, NICCResponse]
 }
