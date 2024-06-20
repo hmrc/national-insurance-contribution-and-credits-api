@@ -20,8 +20,6 @@ import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
 
-import java.time.format.DateTimeFormatter
-
 case class NICCRequest(nationalInsuranceNumber: Nino,
                        startTaxYear: String,
                        endTaxYear: String,

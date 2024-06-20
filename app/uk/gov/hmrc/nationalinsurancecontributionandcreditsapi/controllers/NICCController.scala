@@ -16,23 +16,18 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
-import org.apache.pekko.http.scaladsl.model.HttpHeader.ParsingResult.Ok
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.Logger
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, NICCRequestPayload, NICCResponse}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import play.api.Logger
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Failures, Failure}
 
 @Singleton()
 class NICCController @Inject()(cc: ControllerComponents,
-                               connector: HipConnector)
-                              (implicit ec: ExecutionContext)
+                               niccService: NICCService)
   extends BackendController(cc) {
 
   val logger: Logger = Logger(this.getClass)
@@ -41,28 +36,10 @@ class NICCController @Inject()(cc: ControllerComponents,
                                   startTaxYear: String,
                                   endTaxYear: String): Action[NICCRequestPayload] = Action(parse.json[NICCRequestPayload]).async { implicit request =>
 
-    val body = request.body
+
     logger.info("Setting up request!")
-    val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, body.dateOfBirth.toString)
 
+    niccService.statusMapping(nationalInsuranceNumber, startTaxYear, endTaxYear, request.body.dateOfBirth.toString)
 
-    connector.fetchData(newRequest).map { response => {
-      response.status match {
-        case OK => response.json.validate[NICCResponse] match {
-          case JsSuccess(data, _) => Ok(Json.toJson(data))
-          case JsError(errors) => InternalServerError
-        }
-        case BAD_REQUEST => response.json.validate[Failures] match {
-          case JsSuccess(data, _) => BadRequest(Json.toJson(data))
-          case JsError(errors) => InternalServerError
-        }
-        case UNPROCESSABLE_ENTITY => response.json.validate[Failures] match {
-          case JsSuccess(data, _) => UnprocessableEntity(Json.toJson(data))
-          case JsError(errors) => InternalServerError
-        }
-        case _ => InternalServerError
-      }
-    }
-    }
   }
 }

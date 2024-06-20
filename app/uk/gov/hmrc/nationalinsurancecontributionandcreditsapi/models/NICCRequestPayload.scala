@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import play.api.libs.json.{Json, OFormat, Reads}
+import play.api.libs.json.{Json, Reads}
 
 import java.time.LocalDate
 

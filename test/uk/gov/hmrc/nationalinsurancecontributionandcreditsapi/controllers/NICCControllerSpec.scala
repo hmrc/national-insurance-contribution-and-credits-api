@@ -16,63 +16,277 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.Materializer
-import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
 import org.mockito.Mockito.{when, withSettings}
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import play.api.http.Status
-import play.api.http.Status.OK
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsJson, RequestHeader}
-import play.api.test.Helpers.{CONTENT_TYPE, defaultAwaitTimeout, status}
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
-import uk.gov.hmrc.domain.Nino
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import play.api.{Application, inject}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Failures}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCResponse, NIContribution}
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.Future
 
-class NICCControllerSpec extends AnyWordSpec with Matchers {
+class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with OptionValues with ScalaFutures with should.Matchers with BeforeAndAfterEach {
+  val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
 
-  implicit val executor: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
-  implicit val materializer: Materializer = Materializer(ActorSystem())
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      inject.bind[HipConnector].toInstance(mockHipConnector)
+    ).build()
 
-  "POST /nationalInsuranceNumber-info" should {
-    "return 200 when the request is valid" in {
-      val requestNino = Nino("BB 00 00 20 B")
-      val requestStartYear = "2017"
-      val requestEndYear = "2019"
-      val body = Json.obj("dateOfBirth" -> "1998-04-23")
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    Mockito.reset(mockHipConnector)
+  }
 
-      val requestHeader: RequestHeader = FakeRequest(
-        "POST",
-        "/nicc-json-service/nicc/v1/api/national-insurance/BB 00 00 20 B/from/2017/to/2019",
-      ).withHeaders(CONTENT_TYPE -> "application/json")
+  "return 200 when the request is valid and response is valid" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
 
-      val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
-      val expectedResponseObject: HttpResponse = HttpResponse.apply(
-        status = 200,
-        json = Json.toJson(NICCResponse(
-          Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
-          Seq(),
-        )),
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.toJson(NICCResponse(
+        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+        Seq(),
+      )),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(OK)
+
+  }
+
+  "return 500 when the request is valid but response body is not valid" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.parse("" +
+        "{" +
+        " \"niContribution\": [" +
+        "   {" +
+        "     \"taxYear\": 2022," +
+        "     \"numberOfCredits\": 53," +
+        "     \"contributionCreditTypeCode\": \"C2\"," +
+        "     \"contributionCreditType\": \"CLASS 2 - NORMAL RATE\"," +
+        "     \"class2Or3EarningsFactor\": 99999999999999.98," +
+        "     \"class2NicAmount\": 99999999999999.98," +
+        "     \"class2Or3CreditStatus\": \"NOT KNOWN/NOT APPLICABLE\"" +
+        "   }" +
+        " ]," +
+        " \"niCredit\": [" +
+        "   {" +
+        "     \"taxYear\": 2022," +
+        "     \"contributionCategoryLetter\": \"s\"," +
+        "     \"contributionCategory\": \"(NONE)\"," +
+        "     \"totalContribution\": 99999999999999.98," +
+        "     \"primaryContribution\": 99999999999999.98," +
+        "     \"class1ContributionStatus\": \"COMPLIANCE & YIELD INCOMPLETE\"," +
+        "     \"primaryPaidEarnings\": 99999999999999.98" +
+        "   }" +
+        " ]" +
+        "}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
+
+  }
+
+  "return 400 when the request is valid but response is 400 and response body is valid" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 400,
+      json = Json.toJson(Failures(
+        Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
+      )),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(BAD_REQUEST)
+
+  }
+
+  "return 500 when the request is valid but response is 400 and response body is invalid" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 400,
+      json = Json.parse("" +
+        "{" +
+        " \"errors\": [" +
+        "   {" +
+        "     \"message\": \"Constraint Violation - Invalid/Missing input parameter\"," +
+        "     \"reason\": \"BAD_REQUEST\"" +
+        "   }" +
+        " ]" +
+        "}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
+
+  }
+
+  "return 422 when the request is valid but response is 422 and response body is valid" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+        status = 422,
+        json = Json.toJson(Failures(
+          Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
+    )),
         headers = Map.empty
-      )
-      when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
-      val controller: NICCController = new NICCController(Helpers.stubControllerComponents(), mockHipConnector)
-      val result = controller.postContributionsAndCredits(requestNino, requestStartYear, requestEndYear)
-        .apply(requestHeader)
-        .run(ByteString(body.toString()))
-        .futureValue
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-      result.header.status should be(OK)
-    }
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
 
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(UNPROCESSABLE_ENTITY)
+
+  }
+
+  "return 500 when the request is valid but response is 422 and response body is invalid" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 422,
+      json = Json.parse("" +
+        "{" +
+        " \"errors\": [" +
+        "   {" +
+        "     \"message\": \"Constraint Violation - Invalid/Missing input parameter\"," +
+        "     \"reason\": \"BAD_REQUEST\"" +
+        "   }" +
+        " ]" +
+        "}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
+
+  }
+
+
+
+  "return 500 when the request is valid and response is not expected http status " in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 501,
+      json = Json.toJson(NICCResponse(
+        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+        Seq(),
+      )),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
+
+  }
+
+  "return 404 when the request is missing startTaxYear url value" in {
+    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(NOT_FOUND)
+
+  }
+
+
+  "return 400 when the request is mising a body" in {
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/nicc/v1/api/national-insurance/BB000020B/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(BAD_REQUEST)
   }
 }

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
 import com.google.inject.Inject
-import play.api.libs.json.{Json, OFormat, Reads}
+import play.api.libs.json.{Json, OFormat}
 
 case class Failures(failures: Seq[Failure])
 
