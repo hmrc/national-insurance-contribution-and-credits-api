@@ -2,10 +2,10 @@
   "scopes": [
   ],
   "api": {
-    "name": "Hello World",
-    "description": "A 'hello world' example of an API on the HMRC API Developer Hub.",
-    "context": "discuss-with-the-api-platform-team",
-    "categories": ["OTHER"],
+    "name": "National Insurance Contributions and Credits",
+    "description": "Allows for the retrieval of National Insurance Credits and Cotributions information based on Tax start and end year, national insurance number and date of birth.",
+    "context": "national-insurance/national-insurance-contributions-and-credits",
+    "categories": ["NATIONAL_INSURANCE"],
     "versions": [
       {
         "version": "1.0",
