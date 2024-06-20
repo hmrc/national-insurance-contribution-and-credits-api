@@ -16,14 +16,42 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
 
-import play.api.http.Status.OK
-import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpResponse
+import play.api.http.Status.{BAD_REQUEST, OK, UNPROCESSABLE_ENTITY}
+import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.mvc.Result
+import play.api.mvc.Results.{BadRequest, InternalServerError, Ok, UnprocessableEntity}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failures
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, NICCResponse}
 
-class NICCService {
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-  def statusMapping(httpResponse: HttpResponse) = {
-    //TODO populate with logic from controller
+class NICCService @Inject()(connector: HipConnector)(implicit ec: ExecutionContext) {
+
+  def statusMapping(nationalInsuranceNumber: Nino, startTaxYear: String, endTaxYear: String, dateOfBirth: String)(implicit hc: HeaderCarrier): Future[Result] = {
+    val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
+
+    connector.fetchData(newRequest).map { response => {
+      response.status match {
+        case OK => response.json.validate[NICCResponse] match {
+          case JsSuccess(data, _) => Ok(Json.toJson(data))
+          case JsError(_) => InternalServerError
+        }
+        case BAD_REQUEST => response.json.validate[Failures] match {
+          case JsSuccess(data, _) => BadRequest(Json.toJson(data))
+          case JsError(_) => InternalServerError
+        }
+        case UNPROCESSABLE_ENTITY => response.json.validate[Failures] match {
+          case JsSuccess(data, _) => UnprocessableEntity(Json.toJson(data))
+          case JsError(_) => InternalServerError
+        }
+        case _ => InternalServerError
+      }
+    }
+    }
   }
 
 }
