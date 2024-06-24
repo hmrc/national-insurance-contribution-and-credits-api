@@ -13,7 +13,7 @@
       description: Production
   tags: []
   paths:
-    /nicc-json-service/hmrc/v1/api/national-insurance/{nationalInsuranceNumber}/contributions-and-credits/from/{startTaxYear}/to/{endTaxYear}:
+    /nicc-json-service/v1/api/national-insurance/{nationalInsuranceNumber}/contributions-and-credits/from/{startTaxYear}/to/{endTaxYear}:
       post:
         tags:
           - Contributions-and-credits

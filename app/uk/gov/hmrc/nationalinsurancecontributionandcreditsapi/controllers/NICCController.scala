@@ -30,7 +30,7 @@ class NICCController @Inject()(cc: ControllerComponents,
                                niccService: NICCService)
   extends BackendController(cc) {
 
-  val logger: Logger = Logger(this.getClass)
+  private val logger: Logger = Logger(this.getClass)
 
   def postContributionsAndCredits(nationalInsuranceNumber: Nino,
                                   startTaxYear: String,
