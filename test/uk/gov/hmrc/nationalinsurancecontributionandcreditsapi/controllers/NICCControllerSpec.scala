@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.{when, withSettings}
+import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should
@@ -36,6 +37,9 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Fai
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCResponse, NIContribution}
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
 
 class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with OptionValues with ScalaFutures with should.Matchers with BeforeAndAfterEach {
   val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
@@ -279,7 +283,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   }
 
 
-  "return 400 when the request is mising a body" in {
+  "return 400 when the request is missing a body" in {
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
     val url = "/nicc-json-service/v1/api/national-insurance/BB000020B/from/2017/to/2019"
     val request = FakeRequest("POST", url)
