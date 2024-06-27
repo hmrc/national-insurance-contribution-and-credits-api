@@ -47,6 +47,9 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
       inject.bind[HipConnector].toInstance(mockHipConnector)
+    )
+    .configure(
+      "auditing.enabled" -> false
     ).build()
 
   override def beforeEach(): Unit = {
