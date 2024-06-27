@@ -20,6 +20,7 @@ import play.api.Logger
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -32,7 +33,7 @@ class NICCController @Inject()(cc: ControllerComponents,
 
   private val logger: Logger = Logger(this.getClass)
 
-  def postContributionsAndCredits(nationalInsuranceNumber: Nino,
+  def postContributionsAndCredits(nationalInsuranceNumber: NICCNino,
                                   startTaxYear: String,
                                   endTaxYear: String): Action[NICCRequestPayload] = Action(parse.json[NICCRequestPayload]).async { implicit request =>
 

@@ -23,6 +23,7 @@ import play.api.mvc.Results.{BadRequest, InternalServerError, Ok, UnprocessableE
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failures
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, NICCResponse}
 
@@ -31,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class NICCService @Inject()(connector: HipConnector)(implicit ec: ExecutionContext) {
 
-  def statusMapping(nationalInsuranceNumber: Nino, startTaxYear: String, endTaxYear: String, dateOfBirth: String)(implicit hc: HeaderCarrier): Future[Result] = {
+  def statusMapping(nationalInsuranceNumber: NICCNino, startTaxYear: String, endTaxYear: String, dateOfBirth: String)(implicit hc: HeaderCarrier): Future[Result] = {
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
 
     connector.fetchData(newRequest).map { response => {

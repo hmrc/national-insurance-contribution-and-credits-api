@@ -19,8 +19,9 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 
-case class NICCRequest(nationalInsuranceNumber: Nino,
+case class NICCRequest(nationalInsuranceNumber: NICCNino,
                        startTaxYear: String,
                        endTaxYear: String,
                        dateOfBirth: String)
