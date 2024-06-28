@@ -23,15 +23,9 @@ case class NICCNino(nino: String) extends TaxIdentifier with SimpleName {
   require(NICCNino.isValid(nino), s"$nino is not a valid nino.")
   override def toString = nino
 
-  private val LengthWithoutSuffix: Int = 8
-
   def value = nino
 
   val name = "nino"
-
-  def formatted = value.grouped(2).mkString(" ")
-
-  def withoutSuffix = value.take(LengthWithoutSuffix)
 }
 
 object NICCNino extends (String => NICCNino) {
@@ -46,8 +40,4 @@ object NICCNino extends (String => NICCNino) {
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.startsWith)
 
   def isValid(nino: String) = nino != null && hasValidPrefix(nino) && nino.matches(validNinoFormat)
-
-  private[domain] val validFirstCharacters = ('A' to 'Z').filterNot(List('D', 'F', 'I', 'Q', 'U', 'V').contains).map(_.toString)
-  private[domain] val validSecondCharacters = ('A' to 'Z').filterNot(List('D', 'F', 'I', 'O', 'Q', 'U', 'V').contains).map(_.toString)
-  val validPrefixes = validFirstCharacters.flatMap(a => validSecondCharacters.map(a + _)).filterNot(invalidPrefixes.contains(_))
 }
