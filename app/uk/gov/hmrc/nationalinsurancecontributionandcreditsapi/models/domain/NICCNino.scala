@@ -19,13 +19,12 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.domain.{SimpleName, SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
 
-case class NICCNino(nino: String) extends TaxIdentifier with SimpleName {
+case class NICCNino(nino: String) extends TaxIdentifier {
   require(NICCNino.isValid(nino), s"$nino is not a valid nino.")
+
   override def toString = nino
 
   def value = nino
-
-  val name = "nino"
 }
 
 object NICCNino extends (String => NICCNino) {
