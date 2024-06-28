@@ -45,7 +45,7 @@ class HipConnector @Inject()(httpClientV2: HttpClientV2,
         CONTENT_TYPE -> JSON,
         ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval from request headers...is this/should this be added to our API spec for DWP?
       )
-      .withBody(Json.toJson(request))
+      .withBody(Json.toJson("dateOfBirth" -> request.dateOfBirth))
       .execute[HttpResponse]
   }
 }

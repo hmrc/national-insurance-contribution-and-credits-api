@@ -12,19 +12,21 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
     libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
-    //libraryDependencies += "uk.gov.hmrc" %% "play-auditing-play-x" % "3.0.0",
-    //todo: confirm the play version we should be using, adjust the version on line 15 (i.e. 3.0.0 -> x.x.x & the alias version number (x) in "play-auditing-play-x"
+    libraryDependencies += "uk.gov.hmrc" %% "play-auditing-play-30" % "9.0.0",
     routesImport += "uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.Binders._",
     libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
   )
-  .settings(resolvers += Resolver.jcenterRepo)
+  .settings(resolvers ++= Seq(
+    MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2"),
+    Resolver.jcenterRepo))
   .settings(CodeCoverageSettings.settings *)
   .settings(
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
   )
+  .settings(PlayKeys.playDefaultPort := 16105)
 
 lazy val it = project
   .enablePlugins(PlayScala)
