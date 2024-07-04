@@ -17,10 +17,11 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
 import play.api.libs.json.{Json, Reads}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 
 import java.time.LocalDate
 
-final case class NICCRequestPayload(dateOfBirth: LocalDate) {
+final case class NICCRequestPayload(nationalInsuranceNumber: NICCNino, dateOfBirth: LocalDate, customerCorrelationId: String) {
 }
 
 object NICCRequestPayload {

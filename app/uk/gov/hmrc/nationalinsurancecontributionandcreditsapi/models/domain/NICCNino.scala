@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 
 import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.domain.{SimpleName, SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
+import uk.gov.hmrc.domain.{SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
 
 case class NICCNino(nino: String) extends TaxIdentifier {
   require(NICCNino.isValid(nino), s"$nino is not a valid nino.")

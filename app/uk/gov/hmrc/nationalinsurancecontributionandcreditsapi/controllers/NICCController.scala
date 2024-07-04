@@ -17,14 +17,14 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import play.api.Logger
-import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.domain.Nino
+import play.api.libs.json.{JsError, JsSuccess}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 
 @Singleton()
 class NICCController @Inject()(cc: ControllerComponents,
@@ -33,14 +33,15 @@ class NICCController @Inject()(cc: ControllerComponents,
 
   private val logger: Logger = Logger(this.getClass)
 
-  def postContributionsAndCredits(nationalInsuranceNumber: NICCNino,
-                                  startTaxYear: String,
-                                  endTaxYear: String): Action[NICCRequestPayload] = Action(parse.json[NICCRequestPayload]).async { implicit request =>
+  def postContributionsAndCredits(startTaxYear: String,
+                                  endTaxYear: String): Action[AnyContent] = Action.async { implicit request =>
 
 
     logger.info("Setting up request!")
 
-    niccService.statusMapping(nationalInsuranceNumber, startTaxYear, endTaxYear, request.body.dateOfBirth.toString)
-
+    request.body.asJson.get.validate[NICCRequestPayload] match {
+      case JsSuccess(data, _) => niccService.statusMapping (data.nationalInsuranceNumber, startTaxYear, endTaxYear, data.dateOfBirth.toString )
+      case JsError(_) => Future.successful(BadRequest("There was a problem with the request"))
+    }
   }
 }
