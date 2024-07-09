@@ -20,6 +20,9 @@ import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.IdentifierAction
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -28,13 +31,14 @@ import scala.concurrent.Future
 
 @Singleton()
 class NICCController @Inject()(cc: ControllerComponents,
+                               identity: IdentifierAction,
                                niccService: NICCService)
   extends BackendController(cc) {
 
   private val logger: Logger = Logger(this.getClass)
 
   def postContributionsAndCredits(startTaxYear: String,
-                                  endTaxYear: String): Action[AnyContent] = Action.async { implicit request =>
+                                  endTaxYear: String): Action[AnyContent] = identity.async { implicit request =>
 
 
     logger.info("Setting up request!")

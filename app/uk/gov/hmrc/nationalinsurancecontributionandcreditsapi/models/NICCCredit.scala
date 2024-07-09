@@ -26,6 +26,6 @@ case class NICCCredit(taxYear: Int,
                       class1ContributionStatus: String,
                       primaryPaidEarnings: BigDecimal)
 
-object NICCCredit{
+object NICCCredit {
   implicit val format: OFormat[NICCCredit] = Json.format[NICCCredit]
 }

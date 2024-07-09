@@ -19,11 +19,11 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors
 import play.api.http.HeaderNames.{AUTHORIZATION, CONTENT_TYPE}
 import play.api.http.MimeTypes.JSON
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequest
-import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{CORRELATION_ID, ENVIRONMENT, ORIGINATING_SYSTEM}
 
 import java.util.UUID
@@ -39,7 +39,7 @@ class HipConnector @Inject()(httpClientV2: HttpClientV2,
 
     httpClientV2.post(url"$urlToRead")
       .setHeader(
-        AUTHORIZATION -> s"Bearer ${config.hipToken}",
+        AUTHORIZATION -> s"Basic ${config.base64HipAuthToken}",
         ENVIRONMENT -> config.hipEnvironment,
         CORRELATION_ID -> correlationId,
         CONTENT_TYPE -> JSON,

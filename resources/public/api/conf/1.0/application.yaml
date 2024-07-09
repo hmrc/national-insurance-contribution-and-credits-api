@@ -12,7 +12,7 @@ servers:
   - url: https://api.service.hmrc.gov.uk
     description: Production
 paths:
-  /nicc-json-service/v1/api/national-insurance/{nationalInsuranceNumber}/contributions-and-credits/from/{startTaxYear}/to/{endTaxYear}:
+  /nicc-json-service/v1/api/contribution-and-credits/from/{startTaxYear}/to/{endTaxYear}:
     post:
       tags:
         - Contributions-and-credits
@@ -25,7 +25,6 @@ paths:
         - Request payload will contain the date of birth.<br>
         - This endpoint requires Mutual Authentication over TLS 1.2. <br><p>
         - The API request must provide, in the path parameters:<br>
-          - A NINO<br>
           - A start year for the tax year range, not before 1975 or after CY-1<br>
           - An end year for the tax year range, not before the start year or after CY-1, and no more than five years after the start year (thereby allowing a range of six years inclusive).
       security:
@@ -33,8 +32,6 @@ paths:
             - write:protect-connect
       operationId: PostNIContCreds
       parameters:
-        - $ref: "#/components/parameters/GovUkOriginatorId"
-        - $ref: "#/components/parameters/nationalInsuranceNumber"
         - $ref: "#/components/parameters/startTaxYear"
         - $ref: "#/components/parameters/endTaxYear"
       requestBody:
@@ -129,10 +126,6 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/correlationId"
-    GovUkOriginatorId:
-      required: true
-      schema:
-        $ref: "#/components/schemas/govUkOriginatorId"
   examples:
     422_StartYearAfterEndYear:
       summary: Start Year After End Year
@@ -174,20 +167,6 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/correlationId"
-    GovUkOriginatorId:
-      description: Identity of the Originating System that made the API call.
-      in: header
-      name: gov-uk-originator-id
-      required: true
-      schema:
-        $ref: "#/components/schemas/govUkOriginatorId"
-    nationalInsuranceNumber:
-      description: NINO - unique for an individual - note not all individuals qualify to be issued with one.
-      in: path
-      name: nationalInsuranceNumber
-      required: true
-      schema:
-        $ref: "#/components/schemas/nationalInsuranceNumber"
     startTaxYear:
       description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
       in: path
@@ -221,10 +200,6 @@ components:
       example: e470d658-99f7-4292-a4a1-ed12c72f1337
       format: uuid
       type: string
-    govUkOriginatorId:
-      description: Identity of the Originating System that made the API call
-      type: string
-      example: DWP
     taxYear:
       description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
       example: 2022
@@ -281,6 +256,11 @@ components:
         class2Or3CreditStatus:
           $ref: "#/components/schemas/EnumCredStat"
       type: object
+    dateOfBirth:
+      description: The date of birth of the individual.
+      format: date
+      type: string
+      pattern: yyyy-MM-dd
     nationalInsuranceNumber:
       description: NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix.
       maxLength: 9
@@ -288,6 +268,11 @@ components:
       pattern: ^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$
       type: string
       example: AB123456A
+    customerCorrelationID:
+      description: Correlation Id sent by customerCorrelationID.
+      format: string
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
     unsignedMoney:
       description: Positive or zero monetary value.
       maximum: 99999999999999.98
@@ -398,21 +383,21 @@ components:
         - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE B
         - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE C
         - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE D
-        - CLASS 2 CONTRIBUTION CONVERTED FROM NIRS1
+        - CLASS 2 - CONTRIBUTION CONVERTED FROM NIRS1
       type: string
     PostNIContCredRequest:
       description: Request payload for this API.
       properties:
         dateOfBirth:
           $ref: "#/components/schemas/dateOfBirth"
+        nationalInsuranceNumber:
+          $ref: "#/components/schemas/nationalInsuranceNumber"
+        customerCorelationID:
+          $ref: "#/components/schemas/customerCorrelationID"
       required:
         - dateOfBirth
       additionalProperties: false
       type: object
-    dateOfBirth:
-      description: The date of birth of the individual.
-      format: date
-      type: string
     errorResponse_400:
       description: Array of Error Response Failure Object in Error Response.
       title: Error Response

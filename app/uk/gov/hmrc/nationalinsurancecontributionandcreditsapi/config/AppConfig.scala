@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AppConfig @Inject()(config: ServicesConfig) {
@@ -27,4 +30,9 @@ class AppConfig @Inject()(config: ServicesConfig) {
   val hipBaseUrl: String = config.baseUrl("hip")
   val hipToken: String = config.getString(s"$hipServicePrefix.token")
   val hipEnvironment: String = config.getString(s"$hipServicePrefix.env")
+  private val hipClientId: String = config.getString(s"$hipServicePrefix.clientId")
+  private val hipClientSecret: String = config.getString(s"$hipServicePrefix.clientSecret")
+
+  val base64HipAuthToken: String =
+    Base64.getEncoder.encode(s"$hipClientId:$hipClientSecret".getBytes(StandardCharsets.UTF_8)).map(_.toChar).mkString
 }
