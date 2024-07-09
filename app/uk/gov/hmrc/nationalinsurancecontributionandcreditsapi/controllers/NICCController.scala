@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import play.api.Logger
-import play.api.libs.json.{JsError, JsSuccess}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
@@ -39,9 +39,13 @@ class NICCController @Inject()(cc: ControllerComponents,
 
     logger.info("Setting up request!")
 
-    request.body.asJson.get.validate[NICCRequestPayload] match {
-      case JsSuccess(data, _) => niccService.statusMapping (data.nationalInsuranceNumber, startTaxYear, endTaxYear, data.dateOfBirth.toString )
-      case JsError(_) => Future.successful(BadRequest("There was a problem with the request"))
+    request.body.asJson match {
+      case Some(json) =>
+        json.validate[NICCRequestPayload].fold (
+          errors => Future.successful(BadRequest("There was a problem with the request")),
+          requestObject => niccService.statusMapping (requestObject.nationalInsuranceNumber, startTaxYear, endTaxYear, requestObject.dateOfBirth.toString )
+        )
+      case None => Future.successful(BadRequest("Missing JSON data"))
     }
   }
 }
