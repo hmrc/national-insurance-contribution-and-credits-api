@@ -17,10 +17,9 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import play.api.Logger
-import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.IdentifierAction
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -28,19 +27,20 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton()
 class NICCController @Inject()(cc: ControllerComponents,
+                               identity: IdentifierAction,
                                niccService: NICCService)
   extends BackendController(cc) {
 
   private val logger: Logger = Logger(this.getClass)
 
   def postContributionsAndCredits(nationalInsuranceNumber: NICCNino,
-                                  startTaxYear: String,
-                                  endTaxYear: String): Action[NICCRequestPayload] = Action(parse.json[NICCRequestPayload]).async { implicit request =>
+                                  startTaxYear: TaxYear,
+                                  endTaxYear: TaxYear): Action[AnyContent] = identity.async { implicit request =>
 
 
     logger.info("Setting up request!")
 
-    niccService.statusMapping(nationalInsuranceNumber, startTaxYear, endTaxYear, request.body.dateOfBirth.toString)
+    niccService.statusMapping(nationalInsuranceNumber, startTaxYear.value, endTaxYear.value, request.dateOfBirth.toString)
 
   }
 }

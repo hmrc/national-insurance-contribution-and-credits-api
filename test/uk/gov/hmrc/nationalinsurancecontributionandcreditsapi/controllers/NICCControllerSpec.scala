@@ -19,7 +19,6 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.{when, withSettings}
-import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should
@@ -37,7 +36,6 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Fai
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCResponse, NIContribution}
 
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 

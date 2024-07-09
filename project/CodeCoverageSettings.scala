@@ -17,7 +17,7 @@ object CodeCoverageSettings {
   //todo: CHANGE CODECOVERAGE VALUE BACK TO 90 BEFORE PUSHING FOR LIVE
   val settings: Seq[Setting[?]] = Seq(
     ScoverageKeys.coverageExcludedPackages := excludedPackages.mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 40,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
