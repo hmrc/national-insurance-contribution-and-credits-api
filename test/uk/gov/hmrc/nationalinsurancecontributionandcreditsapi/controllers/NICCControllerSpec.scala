@@ -31,7 +31,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, inject}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.{FakeAuthAction, HipConnector}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.AuthAction
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Failures}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCResponse, NIContribution}
 
@@ -40,12 +41,14 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 
+// TODO add tests for IdentityAction
 class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with OptionValues with ScalaFutures with should.Matchers with BeforeAndAfterEach {
   val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
-      inject.bind[HipConnector].toInstance(mockHipConnector)
+      inject.bind[HipConnector].toInstance(mockHipConnector),
+      inject.bind[AuthAction].to[FakeAuthAction]
     )
     .configure(
       "auditing.enabled" -> false
@@ -184,11 +187,11 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   "return 422 when the request is valid but response is 422 and response body is valid" in {
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
-        status = 422,
-        json = Json.toJson(Failures(
-          Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
-    )),
-        headers = Map.empty
+      status = 422,
+      json = Json.toJson(Failures(
+        Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
+      )),
+      headers = Map.empty
     )
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
@@ -230,7 +233,6 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     result.header.status should be(INTERNAL_SERVER_ERROR)
 
   }
-
 
 
   "return 500 when the request is valid and response is not expected http status " in {
