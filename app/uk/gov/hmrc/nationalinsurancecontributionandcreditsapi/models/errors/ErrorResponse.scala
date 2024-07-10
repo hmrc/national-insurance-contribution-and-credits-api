@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
 import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 
-case class NICCRequest(nationalInsuranceNumber: NICCNino,
-                       startTaxYear: String,
-                       endTaxYear: String,
-                       dateOfBirth: String)
-
+case class ErrorResponse(origin: String, response: Errors)
 
 @Inject
-object NICCRequest {
-  implicit val format: OFormat[NICCRequest] = Json.format[NICCRequest]
+object ErrorResponse {
 
+  implicit val format: OFormat[ErrorResponse] = Json.format[ErrorResponse]
 }
-

@@ -18,16 +18,18 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.IdentifierAction
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.AuthAction
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 
 @Singleton()
 class NICCController @Inject()(cc: ControllerComponents,
-                               identity: IdentifierAction,
+                               identity: AuthAction,
                                niccService: NICCService)
   extends BackendController(cc) {
 
@@ -37,10 +39,17 @@ class NICCController @Inject()(cc: ControllerComponents,
                                   startTaxYear: TaxYear,
                                   endTaxYear: TaxYear): Action[AnyContent] = identity.async { implicit request =>
 
-
+    //TODO fix
     logger.info("Setting up request!")
 
-    niccService.statusMapping(nationalInsuranceNumber, startTaxYear.value, endTaxYear.value, request.dateOfBirth.toString)
+    request.body.asJson match {
+      case Some(json) =>
+        json.validate[NICCRequestPayload].fold (
+          errors => Future.successful(BadRequest("There was a problem with the request")),
+          requestObject => niccService.statusMapping (nationalInsuranceNumber, startTaxYear.taxYear, endTaxYear.taxYear, requestObject.dateOfBirth.toString )
+        )
+      case None => Future.successful(BadRequest("Missing JSON data"))
+    }
 
   }
 }

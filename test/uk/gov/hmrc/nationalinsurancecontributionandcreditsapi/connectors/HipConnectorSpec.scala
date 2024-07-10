@@ -32,9 +32,10 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.WireMockHelp
 
 class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockHelper with Injecting with Matchers {
 
+  //TODO add more tests
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .configure(
-      "hip.baseUrl" -> s"http://localhost:${server.port()}"
+      "microservice.services.hip.port" -> server.port(),
     ).build()
 
   lazy val connector: HipConnector = inject[HipConnector]
@@ -49,7 +50,6 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
         val payload = NICCRequest(NICCNino("BB000200B"), "2013", "2015", "1998-03-23")
 
         stubPostServer(aResponse().withStatus(200), s"/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
-
         await(connector.fetchData(payload)).status shouldBe OK
       }
     }
@@ -58,7 +58,6 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
         val payload = NICCRequest(NICCNino("BB000400B"), "2013", "2015", "1998-03-23")
 
         stubPostServer(aResponse().withStatus(400), s"/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
-
         await(connector.fetchData(payload)).status shouldBe BAD_REQUEST
       }
     }
