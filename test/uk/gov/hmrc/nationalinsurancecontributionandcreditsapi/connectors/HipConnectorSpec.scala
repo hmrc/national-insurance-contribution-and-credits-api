@@ -53,12 +53,25 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
         await(connector.fetchData(payload)).status shouldBe OK
       }
     }
-    "return 400" when {
+    "return 4xx" when {
       "400 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000400B"), "2013", "2015", "1998-03-23")
 
         stubPostServer(aResponse().withStatus(400), s"/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
         await(connector.fetchData(payload)).status shouldBe BAD_REQUEST
+      }
+
+      "403 is returned from downstream" in {
+        val payload = NICCRequest(NICCNino("BB000403B"), "2013", "2015", "1998-03-23")
+
+        stubPostServer(aResponse().withStatus(403), s"/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
+        await(connector.fetchData(payload)).status shouldBe FORBIDDEN
+      }
+      "422 is returned from downstream" in {
+        val payload = NICCRequest(NICCNino("BB000422B"), "2013", "2015", "1998-03-23")
+
+        stubPostServer(aResponse().withStatus(422), s"/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
+        await(connector.fetchData(payload)).status shouldBe UNPROCESSABLE_ENTITY
       }
     }
   }

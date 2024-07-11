@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
 
-case class ErrorResponse(origin: String, response: Errors)
+case class ErrorResponse(origin: String, response: Response)
 
 @Inject
 object ErrorResponse {

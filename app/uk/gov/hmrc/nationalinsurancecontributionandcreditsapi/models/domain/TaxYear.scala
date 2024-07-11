@@ -17,12 +17,11 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.domain.TaxIdentifier
 
-case class TaxYear(taxYear: String) extends TaxIdentifier {
+case class TaxYear(taxYear: String) {
   if (!TaxYear.isValid(taxYear)) throw new IllegalArgumentException
 
-  override def value: String = taxYear
+  def value: String = taxYear
 }
 
 object TaxYear {

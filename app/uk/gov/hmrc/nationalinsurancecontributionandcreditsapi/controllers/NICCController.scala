@@ -38,8 +38,9 @@ class NICCController @Inject()(cc: ControllerComponents,
 
   private val logger: Logger = Logger(this.getClass)
 
-  def postContributionsAndCredits(startTaxYear: String,
-                                  endTaxYear: String): Action[AnyContent] = identity.async { implicit request =>
+  def postContributionsAndCredits(nationalInsuranceNumber: NICCNino,
+                                  startTaxYear: TaxYear,
+                                  endTaxYear: TaxYear): Action[AnyContent] = identity.async { implicit request =>
 
 
     logger.info("Setting up request!")
@@ -47,8 +48,8 @@ class NICCController @Inject()(cc: ControllerComponents,
     request.body.asJson match {
       case Some(json) =>
         json.validate[NICCRequestPayload].fold (
-          errors => Future.successful(BadRequest("There was a problem with the request")),
-          requestObject => niccService.statusMapping (requestObject.nationalInsuranceNumber, startTaxYear, endTaxYear, requestObject.dateOfBirth.toString )
+          _ => Future.successful(BadRequest("There was a problem with the request")),
+          requestObject => niccService.statusMapping (nationalInsuranceNumber, startTaxYear.taxYear, endTaxYear.taxYear, requestObject.dateOfBirth.toString )
         )
       case None => Future.successful(BadRequest("Missing JSON data"))
     }
