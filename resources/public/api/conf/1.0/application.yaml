@@ -32,6 +32,7 @@ paths:
             - write:protect-connect
       operationId: PostNIContCreds
       parameters:
+        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/startTaxYear"
         - $ref: "#/components/parameters/endTaxYear"
       requestBody:
@@ -126,6 +127,10 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/correlationId"
+    Authorization:
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authorization"
   examples:
     422_StartYearAfterEndYear:
       summary: Start Year After End Year
@@ -167,6 +172,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/correlationId"
+    authorization:
+      description: Identity of the Originating System that made the API call.
+      in: header
+      name: Authorization
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authorization"
     startTaxYear:
       description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
       in: path
@@ -200,6 +212,10 @@ components:
       example: e470d658-99f7-4292-a4a1-ed12c72f1337
       format: uuid
       type: string
+    Authorization:
+      description: Authorization token used to contact api
+      type: string
+      example: Bearer <token>
     taxYear:
       description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
       example: 2022

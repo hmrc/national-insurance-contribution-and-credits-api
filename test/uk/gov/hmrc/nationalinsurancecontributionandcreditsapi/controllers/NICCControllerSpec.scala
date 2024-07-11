@@ -36,12 +36,9 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.action
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ErrorResponse, Failure, Failures, Response}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCResponse, NIContribution}
 
-import java.io.File
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-
-// TODO add tests for IdentityAction
 class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with OptionValues with ScalaFutures with should.Matchers with BeforeAndAfterEach {
   val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
 
@@ -104,7 +101,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/national-insurance/GB000020B/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -129,7 +126,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/national-insurance/BB000020B/from/2017B/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017B/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -154,7 +151,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/national-insurance/BB000020B/from/2017B/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017B/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -336,7 +333,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   "return 404 when the request is missing startTaxYear url value" in {
     val body = Json.obj("dateOfBirth" -> "1998-04-23")
 
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)

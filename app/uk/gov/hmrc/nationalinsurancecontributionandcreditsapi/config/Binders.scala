@@ -17,30 +17,18 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
 
 import play.api.mvc.PathBindable
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
 
 import scala.util.{Failure, Success, Try}
 
-//todo: Binders not being used anymore, consider deletion before going live - being kept in in case changes come in again for for nino to go back into path parameter
 object Binders {
-  implicit val ninoBinder: PathBindable[NICCNino] = new PathBindable[NICCNino] {
-
-    override def bind(key: String, value: String): Either[String, NICCNino] = {
-      Try[NICCNino](NICCNino.apply(value)) match {
-        case Success(nino) => Right(nino)
-        case Failure(e) => Left("Bad NINO") // TODO Error response should be 400 with error message: Bad Nino
-      }
-    }
-
-    override def unbind(key: String, value: NICCNino): String = value.value
-  }
 
   implicit val taxYearBinder: PathBindable[TaxYear] = new PathBindable[TaxYear] {
 
     override def bind(key: String, value: String): Either[String, TaxYear] = {
       Try[TaxYear](TaxYear.apply(value)) match {
         case Success(taxYear) => Right(taxYear)
-        case Failure(e) => Left("BAD TAX YEAR")
+        case Failure(_) => Left("BAD TAX YEAR")
       }
     }
 

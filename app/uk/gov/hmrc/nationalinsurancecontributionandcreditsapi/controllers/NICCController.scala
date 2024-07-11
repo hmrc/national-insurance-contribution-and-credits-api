@@ -17,13 +17,10 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 
 import play.api.Logger
-import play.api.libs.json.{JsError, JsSuccess, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.AuthAction
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.NICCRequestPayload
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -38,8 +35,7 @@ class NICCController @Inject()(cc: ControllerComponents,
 
   private val logger: Logger = Logger(this.getClass)
 
-  def postContributionsAndCredits(nationalInsuranceNumber: NICCNino,
-                                  startTaxYear: TaxYear,
+  def postContributionsAndCredits(startTaxYear: TaxYear,
                                   endTaxYear: TaxYear): Action[AnyContent] = identity.async { implicit request =>
 
 
@@ -47,9 +43,9 @@ class NICCController @Inject()(cc: ControllerComponents,
 
     request.body.asJson match {
       case Some(json) =>
-        json.validate[NICCRequestPayload].fold (
+        json.validate[NICCRequestPayload].fold(
           _ => Future.successful(BadRequest("There was a problem with the request")),
-          requestObject => niccService.statusMapping (nationalInsuranceNumber, startTaxYear.taxYear, endTaxYear.taxYear, requestObject.dateOfBirth.toString )
+          requestObject => niccService.statusMapping(requestObject.nationalInsuranceNumber, startTaxYear.taxYear, endTaxYear.taxYear, requestObject.dateOfBirth.toString)
         )
       case None => Future.successful(BadRequest("Missing JSON data"))
     }

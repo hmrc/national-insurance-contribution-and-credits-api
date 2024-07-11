@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 
 import java.time.LocalDate
@@ -26,5 +26,5 @@ final case class NICCRequestPayload(nationalInsuranceNumber: NICCNino, dateOfBir
 
 object NICCRequestPayload {
 
-  implicit val reads: Reads[NICCRequestPayload] = Json.reads[NICCRequestPayload]
+  implicit val format: OFormat[NICCRequestPayload] = Json.format[NICCRequestPayload]
 }
