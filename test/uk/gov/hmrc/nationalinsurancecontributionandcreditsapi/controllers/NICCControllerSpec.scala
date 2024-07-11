@@ -26,7 +26,7 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, inject}
@@ -55,7 +55,8 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     super.beforeEach()
     Mockito.reset(mockHipConnector)
   }
-  val body = Json.obj(
+
+  val body: JsObject = Json.obj(
     "nationalInsuranceNumber" -> "BB000000B",
     "dateOfBirth" -> "1998-04-23",
     "customerCorrelationId" -> "bb6b16c4-8a7b-42aa-a986-1ea5df66f576"
@@ -74,7 +75,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -119,7 +120,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -141,7 +142,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -169,7 +170,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     )
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -191,7 +192,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     )
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -219,7 +220,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     )
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -244,7 +245,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     )
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -271,7 +272,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
 //todo: fix!
   "return 400 when the request is missing a body" in {
-    val url = "/nicc-json-service/v1/api/national-insurance/contributions-and-credits/from/2017/to/2019"
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
