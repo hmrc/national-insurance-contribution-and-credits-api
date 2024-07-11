@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
-object RequestParams {
-  val NINO = "nationalInsuranceNumber"
-  val FORENAME = "forename"
-  val SURNAME = "surname"
-  val DATE_OF_BIRTH = "dateOfBirth"
-  val DATE_RANGE = "dateRange"
+import com.google.inject.Inject
+import play.api.libs.json.{Json, OFormat}
+
+case class ErrorResponse(origin: String, response: Response)
+
+@Inject
+object ErrorResponse {
+
+  implicit val format: OFormat[ErrorResponse] = Json.format[ErrorResponse]
 }

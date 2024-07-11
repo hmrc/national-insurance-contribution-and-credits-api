@@ -17,17 +17,15 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 
 import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.domain.{SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
+import uk.gov.hmrc.domain.{SimpleObjectReads, SimpleObjectWrites}
 
-case class NICCNino(nino: String) extends TaxIdentifier {
+case class NICCNino(nino: String) {
   require(NICCNino.isValid(nino), s"$nino is not a valid nino.")
 
-  override def toString = nino
-
-  def value = nino
+  def value: String = nino
 }
 
-object NICCNino extends (String => NICCNino) {
+object NICCNino {
   implicit val ninoWrite: Writes[NICCNino] = new SimpleObjectWrites[NICCNino](_.value)
   implicit val ninoRead: Reads[NICCNino] = new SimpleObjectReads[NICCNino]("nino", NICCNino.apply)
 

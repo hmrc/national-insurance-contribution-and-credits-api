@@ -23,7 +23,7 @@ import play.api.mvc.Results.{BadRequest, InternalServerError, Ok, UnprocessableE
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failures
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ErrorResponse, Failures}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCRequest, NICCResponse}
 
 import javax.inject.Inject
@@ -40,7 +40,7 @@ class NICCService @Inject()(connector: HipConnector)(implicit ec: ExecutionConte
           case JsSuccess(data, _) => Ok(Json.toJson(data))
           case JsError(_) => InternalServerError
         }
-        case BAD_REQUEST => response.json.validate[Failures] match {
+        case BAD_REQUEST => response.json.validate[ErrorResponse] match {
           case JsSuccess(data, _) => BadRequest(Json.toJson(data))
           case JsError(_) => InternalServerError
         }

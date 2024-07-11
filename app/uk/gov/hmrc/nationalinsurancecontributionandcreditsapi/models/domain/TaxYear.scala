@@ -16,28 +16,20 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 
-import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.domain.{SimpleName, SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
+import play.api.libs.json.{Json, OFormat}
 
-case class TaxYear(taxYear: String) extends TaxIdentifier with SimpleName {
-  if(!TaxYear.isValid(taxYear)) throw new IllegalArgumentException
+case class TaxYear(taxYear: String) {
+  if (!TaxYear.isValid(taxYear)) throw new IllegalArgumentException
 
-  override def value: String = taxYear
-  override val name: String = "taxYear"
+  def value: String = taxYear
 }
 
 object TaxYear {
 
-  implicit val taxYearWrite: Writes[TaxYear] = new SimpleObjectWrites[TaxYear](_.value)
-  implicit val taxYearRead: Reads[TaxYear] = new SimpleObjectReads[TaxYear]("taxYear", TaxYear.apply)
+  implicit val format: OFormat[TaxYear] = Json.format[TaxYear]
 
-  def isValid(taxYear: String): Boolean = {
-    try {
-      val taxYearInt = taxYear.toInt
-      (taxYearInt > 1900) && (taxYearInt < 2099)
-    } catch {
-      case _: NumberFormatException => false
-    }
-  }
+  private val validYearFormat = "^(19|[2-9][0-9])\\d{2}$"
+
+  def isValid(taxYear: String) = taxYear != null && taxYear.matches(validYearFormat)
 
 }
