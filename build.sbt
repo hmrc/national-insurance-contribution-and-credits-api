@@ -1,12 +1,11 @@
 import uk.gov.hmrc.DefaultBuildSettings
 
-import scala.collection.immutable.Seq
-
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "2.13.12"
 
 lazy val microservice = Project("national-insurance-contribution-and-credits-api", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test,
