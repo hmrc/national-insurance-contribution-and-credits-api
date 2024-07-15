@@ -20,9 +20,11 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.{when, withSettings}
 import org.scalatest.concurrent.Eventually.eventually
+import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -82,8 +84,10 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       .withJsonBody(body)
 
     val result = route(app, request).value.futureValue
-
-    eventually(result.header.status should be(OK))
+    eventually(
+      Timeout(5.seconds), Interval(1.second)) {
+      result.header.status should be(OK)
+    }
 
   }
 
