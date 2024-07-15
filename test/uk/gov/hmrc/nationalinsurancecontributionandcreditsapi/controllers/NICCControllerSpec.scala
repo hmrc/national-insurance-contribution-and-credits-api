@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.{when, withSettings}
+import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should
@@ -82,7 +83,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
 
-    result.header.status should be(OK)
+    eventually(result.header.status should be(OK))
 
   }
 
@@ -211,7 +212,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       status = 400,
       json = Json.toJson(ErrorResponse("HIP",
         Response(Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
-      ))),
+        ))),
       headers = Map.empty
     )
     when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
@@ -344,7 +345,6 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
   }
 
-//todo: fix!
   "return 400 when the request is missing a body" in {
     val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
     val request = FakeRequest("POST", url)
