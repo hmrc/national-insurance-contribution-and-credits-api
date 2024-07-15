@@ -19,12 +19,9 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.{when, withSettings}
-import org.scalatest.concurrent.Eventually.eventually
-import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should
-import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -64,32 +61,6 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     "dateOfBirth" -> "1998-04-23",
     "customerCorrelationId" -> "bb6b16c4-8a7b-42aa-a986-1ea5df66f576"
   )
-
-  "return 200 when the request is valid and response is valid" in {
-
-    val expectedResponseObject: HttpResponse = HttpResponse.apply(
-      status = 200,
-      json = Json.toJson(NICCResponse(
-        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
-        Seq(),
-      )),
-      headers = Map.empty
-    )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
-
-    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
-    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
-    val request = FakeRequest("POST", url)
-      .withHeaders(CONTENT_TYPE -> "application/json")
-      .withJsonBody(body)
-
-    val result = route(app, request).value.futureValue
-    eventually(
-      Timeout(15.seconds), Interval(1.second)) {
-      result.header.status should be(OK)
-    }
-
-  }
 
   "return 400 when the request nino is invalid" in {
     val body = Json.obj("dateOfBirth" -> "1998-04-23")
@@ -357,5 +328,27 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(BAD_REQUEST)
+  }
+
+  "return 200 when the request is valid and response is valid" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.toJson(NICCResponse(
+        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+        Seq(),
+      )),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    //      val url = routes.NICCController.postContributionsAndCredits(Nino("BB 00 00 20 B"), "2017", "2019").url
+    val url = "/nicc-json-service/v1/api/contribution-and-credits/from/2017/to/2019"
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+    result.header.status should be(OK)
   }
 }
