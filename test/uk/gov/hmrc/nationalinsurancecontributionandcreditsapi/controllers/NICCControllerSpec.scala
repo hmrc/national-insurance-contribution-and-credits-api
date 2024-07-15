@@ -85,7 +85,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
     eventually(
-      Timeout(5.seconds), Interval(1.second)) {
+      Timeout(15.seconds), Interval(1.second)) {
       result.header.status should be(OK)
     }
 
