@@ -35,7 +35,7 @@ class HipConnector @Inject()(httpClientV2: HttpClientV2,
 
   def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val correlationId: String = UUID.randomUUID().toString
-    val urlToRead = s"${config.hipBaseUrl}/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber.nino}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
+    val urlToRead = s"${config.hipBaseUrl}/nps/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber.nino}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
 
     httpClientV2.post(url"$urlToRead")
       .setHeader(
