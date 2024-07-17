@@ -444,10 +444,6 @@ components:
             values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing
             input parameter path.to.field')\n400.2 - HTTP message not readable."
           type: string
-          enum:
-            - "BAD_REQUEST"
-            - "MISSING_FIELD"
-            - "INVALID_DATE"
     errorResponse_401:
       items:
         $ref: "#/components/schemas/errorResourceObj_401_Unauthorised"

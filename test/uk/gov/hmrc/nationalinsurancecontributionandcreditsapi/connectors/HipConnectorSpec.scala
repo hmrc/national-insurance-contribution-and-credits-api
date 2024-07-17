@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalToJson, post, urlEqualTo}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -45,9 +45,13 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
     "return 200" when {
       "200 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000200B"), "2013", "2015", "1998-03-23")
-
-        stubPostServer(aResponse().withStatus(200), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
-        await(connector.fetchData(payload)).status shouldBe OK
+        val url = s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}"
+        server.stubFor(post(urlEqualTo(url)
+        ).withRequestBody(equalToJson("{ \"dateOfBirth\": \"1998-03-23\" }")).willReturn(
+          aResponse().withStatus(200))
+        )
+        val response = connector.fetchData(payload)
+        await(response).status shouldBe OK
       }
     }
     "return 4xx" when {

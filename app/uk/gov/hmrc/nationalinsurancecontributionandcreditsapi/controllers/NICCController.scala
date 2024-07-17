@@ -24,6 +24,7 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxY
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
@@ -45,7 +46,7 @@ class NICCController @Inject()(cc: ControllerComponents,
       case Some(json) =>
         json.validate[NICCRequestPayload].fold(
           _ => Future.successful(BadRequest("There was a problem with the request")),
-          requestObject => niccService.statusMapping(requestObject.nationalInsuranceNumber, startTaxYear.taxYear, endTaxYear.taxYear, requestObject.dateOfBirth.toString)
+          requestObject => niccService.statusMapping(requestObject.nationalInsuranceNumber, startTaxYear.taxYear, endTaxYear.taxYear, requestObject.dateOfBirth.format(ISO_LOCAL_DATE))
         )
       case None => Future.successful(BadRequest("Missing JSON data"))
     }

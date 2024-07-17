@@ -36,7 +36,7 @@ class HipConnector @Inject()(httpClientV2: HttpClientV2,
   def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val correlationId: String = UUID.randomUUID().toString
     val urlToRead = s"${config.hipBaseUrl}/nps/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber.nino}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
-
+    val requestBody = Json.obj("dateOfBirth" -> request.dateOfBirth)
     httpClientV2.post(url"$urlToRead")
       .setHeader(
         AUTHORIZATION -> s"Basic ${config.base64HipAuthToken}",
@@ -45,7 +45,7 @@ class HipConnector @Inject()(httpClientV2: HttpClientV2,
         CONTENT_TYPE -> JSON,
         ORIGINATING_SYSTEM -> "DWP" //todo: change to dynamic retrieval from request headers...is this/should this be added to our API spec for DWP?
       )
-      .withBody(Json.toJson("dateOfBirth" -> request.dateOfBirth))
+      .withBody(requestBody)
       .execute[HttpResponse]
   }
 }
