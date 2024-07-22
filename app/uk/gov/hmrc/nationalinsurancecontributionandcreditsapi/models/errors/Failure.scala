@@ -19,7 +19,12 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 import com.google.inject.Inject
 import play.api.libs.json._
 
-case class Failure(reason: String, code: String)
+case class Failure(reason: String, code: String) {
+  def this(hipFailure: HIPFailure) = {
+    this(hipFailure.`type`,
+      hipFailure.reason)
+  }
+}
 
 @Inject
 object Failure {

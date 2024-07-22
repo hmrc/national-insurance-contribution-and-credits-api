@@ -16,24 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
 
-import play.api.mvc.PathBindable
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
-
-import scala.util.{Failure, Success, Try}
-
 object Binders {
-
-  implicit val taxYearBinder: PathBindable[TaxYear] = new PathBindable[TaxYear] {
-
-    override def bind(key: String, value: String): Either[String, TaxYear] = {
-      Try[TaxYear](TaxYear.apply(value)) match {
-        case Success(taxYear) => Right(taxYear)
-        case Failure(_) => Left("BAD TAX YEAR")
-      }
-    }
-
-    override def unbind(key: String, value: TaxYear): String = value.value
-  }
 
 }
 

@@ -17,15 +17,9 @@
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
 
-import java.time.LocalDate
+case class NPSResponse(niClass1: Seq[NICCClass1], niClass2: Seq[NICCClass2])
 
-final case class NICCRequestPayload(startTaxYear: TaxYear,
-                                  endTaxYear: TaxYear, nationalInsuranceNumber: NICCNino, dateOfBirth: LocalDate, customerCorrelationId: String) {
-}
-
-object NICCRequestPayload {
-
-  implicit val format: OFormat[NICCRequestPayload] = Json.format[NICCRequestPayload]
+object NPSResponse {
+  implicit val format: OFormat[NPSResponse] = Json.format[NPSResponse]
 }

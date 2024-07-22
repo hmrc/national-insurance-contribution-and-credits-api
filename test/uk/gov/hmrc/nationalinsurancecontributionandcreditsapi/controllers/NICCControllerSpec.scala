@@ -33,8 +33,8 @@ import play.api.{Application, inject}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.{FakeAuthAction, HipConnector}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.actions.AuthAction
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.{ErrorResponse, Failure, Failures, Response}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCResponse, NIContribution}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors._
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCClass1, NICCClass2, NPSResponse}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -56,9 +56,11 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     Mockito.reset(mockHipConnector)
   }
 
-  def url(startTaxYear: String = "2017", endTaxYear: String = "2019"): String =  s"/v1/api/contribution-and-credits/from/$startTaxYear/to/$endTaxYear"
+  def url: String = s"/nicc-service/v1/api/contribution-and-credits"
 
   val body: JsObject = Json.obj(
+    "startTaxYear" -> "2017",
+    "endTaxYear" -> "2019",
     "nationalInsuranceNumber" -> "BB000000B",
     "dateOfBirth" -> "1998-04-23",
     "customerCorrelationId" -> "bb6b16c4-8a7b-42aa-a986-1ea5df66f576"
@@ -70,15 +72,15 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
-      json = Json.toJson(NICCResponse(
-        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+      json = Json.toJson(NPSResponse(
+        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
         Seq(),
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -93,15 +95,15 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
-      json = Json.toJson(NICCResponse(
-        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+      json = Json.toJson(NPSResponse(
+        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
         Seq(),
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url("2017B"))
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -116,14 +118,14 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
-      json = Json.toJson(NICCResponse(
-        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+      json = Json.toJson(NPSResponse(
+        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
         Seq(),
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
-    val request = FakeRequest("POST", url())
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -163,9 +165,9 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -175,17 +177,17 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
   }
 
-  "return 400 when the request is valid but response is 400 and response body is valid" in {
+  "return 400 when the request is valid but response is 400, origin is HIP and response body is valid" in {
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 400,
-      json = Json.toJson(ErrorResponse("HIP",
-        Response(Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
+      json = Json.toJson(HIPErrorResponse("HIP",
+        HIPResponse(Seq(HIPFailure("HTTP message not readable", ""), HIPFailure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
         ))),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -193,6 +195,94 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     result.header.status should be(BAD_REQUEST)
 
+  }
+
+  "return 500 when the request is valid but response is 400, origin is HIP and response body is invalid" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 400,
+      json = Json.parse("" +
+        "{" +
+        "  \"origin\": \"HIP\"," +
+        "  \"response\": {" +
+        "    \"failures\": [" +
+        "      {" +
+        "       \"code\": \"HTTP message not readable\", " +
+        "       \"reason\": \"\" " +
+        "      }," +
+        "      {" +
+        "        \"code\": \"Constraint Violation - Invalid/Missing input parameter\"," +
+        "        \"reason\": \"BAD_REQUEST\"" +
+        "      }" +
+        "    ]" +
+        "  }" +
+        "}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
+
+    println(result.header.status)
+  }
+
+  "return 400 when the request is valid but response is 400, origin is HoD and response body is valid" in {
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 400,
+      json = Json.toJson(ErrorResponse("HoD",
+        Response(Seq(Failure("HTTP message not readable", ""), Failure("Constraint Violation - Invalid/Missing input parameter", "BAD_REQUEST"))
+        ))),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(BAD_REQUEST)
+
+  }
+
+  "return 500 when the request is valid but response is 400, origin is HoD and response body is invalid" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 400,
+      json = Json.parse("" +
+        "{" +
+        "  \"origin\": \"HoD\"," +
+        "  \"response\": {" +
+        "    \"failures\": [" +
+        "      {" +
+        "         \"reason\": \"HTTP message not readable\"," +
+        "         \"type\": \"\"" +
+        "       }," +
+        "      {" +
+        "        \"reason\": \"Constraint Violation - Invalid/Missing input parameter\"," +
+        "        \"type\": \"BAD_REQUEST\"" +
+        "      }" +
+        "    ]" +
+        "  }" +
+        "}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
   }
 
   "return 500 when the request is valid but response is 400 and response body is invalid" in {
@@ -210,9 +300,9 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -231,9 +321,9 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -258,9 +348,9 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -275,15 +365,15 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 501,
-      json = Json.toJson(NICCResponse(
-        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
+      json = Json.toJson(NPSResponse(
+        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
         Seq(),
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -293,10 +383,10 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
   }
 
-  "return 404 when the request is missing startTaxYear url value" in {
-    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+  "return 404 when the request is missing a part of the url" in {
+    //    val body = Json.obj("dateOfBirth" -> "1998-04-23")
 
-    val request = FakeRequest("POST", url(""))
+    val request = FakeRequest("POST", "/nicc-service/v1/contribution-and-credits")
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
@@ -307,7 +397,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   }
 
   "return 400 when the request is missing a body" in {
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     val result = route(app, request).value.futureValue
@@ -319,15 +409,15 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
-      json = Json.toJson(NICCResponse(
-        Seq(NIContribution(2018, "A", "A", BigDecimal(1), BigDecimal(1), "A", BigDecimal(1))),
-        Seq(),
+      json = Json.toJson(NPSResponse(
+        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
+        Seq(NICCClass2(2022, 53, "C1", BigDecimal(99999999999999.98), BigDecimal(99999999999999.98), "NOT KNOWN/NOT APPLICABLE")),
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
-    val request = FakeRequest("POST", url())
+    val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
