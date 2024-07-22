@@ -73,8 +73,8 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
-        Seq(),
+        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq()),
       )),
       headers = Map.empty
     )
@@ -96,8 +96,8 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
-        Seq(),
+        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq())
       )),
       headers = Map.empty
     )
@@ -113,14 +113,21 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   }
 
   "return 400 when the body is invalid" in {
-    val body = Json.obj("dateOfBirth" -> "199B8-04-23")
+    val body = Json.parse("" +
+      "{" +
+      "    \"startTaxYear\": \"20B18\"," +
+      "    \"endTaxYear\": \"2023\"," +
+      "    \"nationalInsuranceNumber\": \"BB000200A\"," +
+      "    \"dateOfBirth\": \"1970-08-31\"," +
+      "    \"customerCorrelationId\": \"fbb53666-469c-4d36-8e6d-151ef3c424e1\"" +
+      "}")
 
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
-        Seq(),
+        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq())
       )),
       headers = Map.empty
     )
@@ -134,7 +141,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     result.header.status should be(400)
   }
 
-  "return 500 when the request is valid but response body is not valid" in {
+  "return 200 and empty object when the request is valid but response body is not valid " in {
 
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
@@ -145,7 +152,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "     \"taxYear\": 2022," +
         "     \"numberOfCredits\": 53," +
         "     \"contributionCreditTypeCode\": \"C2\"," +
-        "     \"contributionCreditType\": \"CLASS 2 - NORMAL RATE\"," +
+        "     \"class1ContributionStatus\": \"CLASS 2 - NORMAL RATE\"," +
         "     \"class2Or3EarningsFactor\": 99999999999999.98," +
         "     \"class2NicAmount\": 99999999999999.98," +
         "     \"class2Or3CreditStatus\": \"NOT KNOWN/NOT APPLICABLE\"" +
@@ -157,7 +164,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "     \"contributionCategoryLetter\": \"s\"," +
         "     \"contributionCategory\": \"(NONE)\"," +
         "     \"totalContribution\": 99999999999999.98," +
-        "     \"primaryContribution\": 99999999999999.98," +
+        "     \"class2Or3CreditStatus\": 99999999999999.98," +
         "     \"class1ContributionStatus\": \"COMPLIANCE & YIELD INCOMPLETE\"," +
         "     \"primaryPaidEarnings\": 99999999999999.98" +
         "   }" +
@@ -173,8 +180,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
 
-    result.header.status should be(INTERNAL_SERVER_ERROR)
-
+    result.header.status should be(OK)
   }
 
   "return 400 when the request is valid but response is 400, origin is HIP and response body is valid" in {
@@ -366,8 +372,8 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 501,
       json = Json.toJson(NPSResponse(
-        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
-        Seq(),
+        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq())
       )),
       headers = Map.empty
     )
@@ -410,9 +416,29 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98))),
-        Seq(NICCClass2(2022, 53, "C1", BigDecimal(99999999999999.98), BigDecimal(99999999999999.98), "NOT KNOWN/NOT APPLICABLE")),
+        Option(Seq(
+          NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)),
+          NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq(NICCClass2(2022, 53, "C1", BigDecimal(99999999999999.98), BigDecimal(99999999999999.98), "NOT KNOWN/NOT APPLICABLE")))
       )),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+    result.header.status should be(OK)
+  }
+
+
+  "return 200 when the request is valid and response is json and is valid" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.parse("{\"niClass1\":[{\"taxYear\":2018,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
       headers = Map.empty
     )
     when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
