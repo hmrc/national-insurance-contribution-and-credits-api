@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Reads, Writes}
+import uk.gov.hmrc.domain.{SimpleObjectReads, SimpleObjectWrites}
 
 case class TaxYear(taxYear: String) {
   if (!TaxYear.isValid(taxYear)) throw new IllegalArgumentException
@@ -26,7 +27,8 @@ case class TaxYear(taxYear: String) {
 
 object TaxYear {
 
-  implicit val format: OFormat[TaxYear] = Json.format[TaxYear]
+  implicit val taxYearWrite: Writes[TaxYear] = new SimpleObjectWrites[TaxYear](_.value)
+  implicit val taxYearRead: Reads[TaxYear] = new SimpleObjectReads[TaxYear]("taxYear", TaxYear.apply)
 
   private val validYearFormat = "^(19|[2-9][0-9])\\d{2}$"
 

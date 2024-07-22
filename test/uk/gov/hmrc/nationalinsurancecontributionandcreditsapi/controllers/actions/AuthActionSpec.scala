@@ -32,7 +32,7 @@ import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.auth.core.{AuthConnector, BearerTokenExpired, UnsupportedAuthProvider}
+import uk.gov.hmrc.auth.core.{AuthConnector, BearerTokenExpired, InvalidBearerToken, UnsupportedAuthProvider}
 import uk.gov.hmrc.http.SessionKeys.authToken
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
@@ -80,7 +80,7 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
       }
     }
     "the user is not logged in" when {
-      "must return 403" in {
+      "must return 403 when token is from Unsupported Auth Provider" in {
         when(
           mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
             any[HeaderCarrier](),
@@ -96,7 +96,7 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
         blockResult.futureValue.header.status shouldBe FORBIDDEN
       }
 
-      "must return 500" in {
+      "must return 403 when token is expired" in {
         when(
           mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
             any[HeaderCarrier](),
@@ -104,6 +104,22 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
           )
         )
           .thenReturn(Future.failed(new BearerTokenExpired))
+
+        val authAction = application.injector.instanceOf[AuthAction]
+        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => {
+          Future.successful(ImATeapot(""))
+        })
+        blockResult.futureValue.header.status shouldBe FORBIDDEN
+      }
+
+      "must return 500 when token is invalid" in {
+        when(
+          mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
+            any[HeaderCarrier](),
+            any[ExecutionContext]()
+          )
+        )
+          .thenReturn(Future.failed(new InvalidBearerToken))
 
         val authAction = application.injector.instanceOf[AuthAction]
         val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => {

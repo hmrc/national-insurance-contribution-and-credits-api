@@ -28,7 +28,7 @@ class AppConfig @Inject()(config: ServicesConfig) {
   private val hipServicePrefix = "microservice.services.hip"
 
   val hipBaseUrl: String = config.baseUrl("hip")
-  val hipEnvironment: String = config.getString(s"$hipServicePrefix.env")
+  val hipOriginatorId: String = config.getString(s"$hipServicePrefix.originatorId")
   private val hipClientId: String = config.getString(s"$hipServicePrefix.clientId")
   private val hipClientSecret: String = config.getString(s"$hipServicePrefix.clientSecret")
 

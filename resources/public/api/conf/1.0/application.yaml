@@ -8,11 +8,11 @@ info:
   contact: { }
 servers:
   - url: https://test-api.service.hmrc.gov.uk
-    description: Sandbox
+    description: QA
   - url: https://api.service.hmrc.gov.uk
     description: Production
 paths:
-  /nicc-json-service/v1/api/contribution-and-credits/from/{startTaxYear}/to/{endTaxYear}:
+  /misc/national-insurance-contributions-and-credits/nicc-service/v1/api/contribution-and-credits:
     post:
       tags:
         - Contributions-and-credits
@@ -22,19 +22,14 @@ paths:
         # Purpose
         This API provides the capability to retrieve Class 1 and Class 2 data for an account.<br>
         - This allows a search for Class 1 contributions and Class 2 credits for a given NINO (suffix optional) and range of tax years.
-        - Request payload will contain the date of birth.<br>
+        - Request payload will contain the start tax year, end tax year, national insurance number and date of birth.<br>
         - This endpoint requires Mutual Authentication over TLS 1.2. <br><p>
-        - The API request must provide, in the path parameters:<br>
-          - A start year for the tax year range, not before 1975 or after CY-1<br>
-          - An end year for the tax year range, not before the start year or after CY-1, and no more than five years after the start year (thereby allowing a range of six years inclusive).
       security:
         - applicationRestricted:
             - write:protect-connect
       operationId: PostNIContCreds
       parameters:
         - $ref: "#/components/parameters/authorization"
-        - $ref: "#/components/parameters/startTaxYear"
-        - $ref: "#/components/parameters/endTaxYear"
       requestBody:
         required: true
         content:
@@ -66,24 +61,24 @@ paths:
                     failures:
                       - reason: Bad request
                         code: "BAD_REQUEST"
-        "401":
-          description: "Unauthorised"
+        403:
+          description: "Forbidden"
           headers:
             correlationId:
               $ref: "#/components/headers/correlationId"
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: "#/components/schemas/errorResourceObj_401_Unauthorised"
+                $ref: "#/components/schemas/errorResourceObj_403_Forbidden"
               examples:
                 example response 1:
                   value:
                     reason: Unauthorized
-                    code: "UNAUTHORIZED"
+                    code: "FORBIDDEN"
                 example response 2:
                   value:
                     reason: Incorrect Access Token Type
-                    code: "UNAUTHORIZED"
+                    code: "FORBIDDEN"
         "422":
           description: Unprocessable Entity
           headers:
@@ -179,20 +174,6 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Authorization"
-    startTaxYear:
-      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
-      in: path
-      name: startTaxYear
-      required: true
-      schema:
-        $ref: "#/components/schemas/taxYear"
-    endTaxYear:
-      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data up to and including.
-      in: path
-      name: endTaxYear
-      required: true
-      schema:
-        $ref: "#/components/schemas/taxYear"
   responses:
     notFoundErrorResponse:
       headers:
@@ -225,53 +206,63 @@ components:
     PostNIContCredResponse:
       description: Success response payload for this API.
       properties:
-        niContribution:
-          description: Contains an array of Class 1 Contributions.
+        niClass1:
+          description: Contains an array of Class 1 records.
           items:
-            $ref: "#/components/schemas/niContribution"
+            $ref: "#/components/schemas/niClass1"
           type: array
-        niCredit:
+        niClass2:
           description: Contains an array of Class 2 Credits.
           items:
-            $ref: "#/components/schemas/niCredit"
+            $ref: "#/components/schemas/niClass2"
           type: array
       type: object
-    niContribution:
+    niClass1:
       description: Contains details of a Class 1 Contribution
       properties:
         taxYear:
           $ref: "#/components/schemas/taxYear"
-        contributionCategoryLetter:
-          $ref: "#/components/schemas/contributionCategoryLetter"
-        contributionCategory:
+        niContributionCategory:
+          $ref: "#/components/schemas/niContributionCategory"
+        niContributionCategoryName:
           $ref: "#/components/schemas/EnumContCat"
-        totalContribution:
+        niContributionType:
+          $ref: "#/components/schemas/EnumCCType"
+        totalPrimaryContribution:
           $ref: "#/components/schemas/unsignedMoney"
-        primaryContribution:
-          $ref: "#/components/schemas/unsignedMoney"
-        class1ContributionStatus:
+        contributionStatus:
           $ref: "#/components/schemas/EnumCl1stat"
-        primaryPaidEarnings:
+        totalEarningsFactor:
           $ref: "#/components/schemas/unsignedMoney"
       type: object
-    niCredit:
+    niClass2:
       description: Contains details of a Class 2 Credit
       properties:
         taxYear:
           $ref: "#/components/schemas/taxYear"
-        numberOfCredits:
-          $ref: "#/components/schemas/numberOfCredits"
-        contributionCreditTypeCode:
-          $ref: "#/components/schemas/EnumCCTypeCode"
-        contributionCreditType:
+        numberOfWeeks:
+          $ref: "#/components/schemas/numberOfWeeks"
+        niContributionType:
           $ref: "#/components/schemas/EnumCCType"
-        class2Or3EarningsFactor:
+        totalEarningsFactor:
           $ref: "#/components/schemas/unsignedMoney"
-        class2NicAmount:
+        totalPrimaryContribution:
           $ref: "#/components/schemas/unsignedMoney"
-        class2Or3CreditStatus:
-          $ref: "#/components/schemas/EnumCredStat"
+        contributionStatus:
+          $ref: "#/components/schemas/EnumCl2Stat"
       type: object
+    startTaxYear:
+      description: Denotes a start year for the tax year range (e.g. 2018 for a 2018/2019 tax period) to retrieve data from.
+      type: integer
+      format: year
+      pattern: yyyy
+      example: 2016
+    endTaxYear:
+      description: Denotes a end year for the tax year range (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
+      type: integer
+      format: year
+      pattern: yyyy
+      example: 2021
     dateOfBirth:
       description: The date of birth of the individual.
       format: date
@@ -295,13 +286,13 @@ components:
       minimum: 0
       multipleOf: 0.01
       type: number
-    contributionCategoryLetter:
+    niContributionCategory:
       description: Letter associated with the contribution category.
       maxLength: 1
       minLength: 1
       pattern: ^[A-Z]$
       type: string
-    numberOfCredits:
+    numberOfWeeks:
       description: Number of weekly credits that apply to the credit record.
       minimum: 0
       maximum: 53
@@ -352,7 +343,7 @@ components:
         - VALID
         - VALID RCF
       type: string
-    EnumCredStat:
+    EnumCl2Stat:
       description: Denotes the status for the credit.
       enum:
         - NOT KNOWN/NOT APPLICABLE
@@ -361,9 +352,15 @@ components:
         - POTENTIAL
         - INVALID COMPATIBILITY CHECK
       type: string
-    EnumCCTypeCode:
+    EnumCCType:
       description: Short code relating to the type of class 2 credit.
       enum:
+        - C1
+        - HMF
+        - MAR
+        - CS
+        - EON
+        - CR1
         - C2
         - C2W
         - SF
@@ -381,29 +378,13 @@ components:
         - VDD
         - 2N
       type: string
-    EnumCCType:
-      description: Type of class 2 credit.
-      enum:
-        - CLASS 2 - NORMAL RATE
-        - CLASS 2 - WOMAN'S RATE
-        - CLASS 2 - SHAREFISHERMAN'S RATE
-        - CLASS 2 - NORMAL RATE A
-        - CLASS 2 - NORMAL RATE B
-        - CLASS 2 - NORMAL RATE C
-        - CLASS 2 - NORMAL RATE D
-        - CLASS 2 - SHAREFISHERMAN'S RATE A
-        - CLASS 2 - SHAREFISHERMAN'S RATE B
-        - CLASS 2 - SHAREFISHERMAN'S RATE C
-        - CLASS 2 - SHAREFISHERMAN'S RATE D
-        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE A
-        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE B
-        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE C
-        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE D
-        - CLASS 2 - CONTRIBUTION CONVERTED FROM NIRS1
-      type: string
     PostNIContCredRequest:
       description: Request payload for this API.
       properties:
+        startTaxYear:
+          $ref: "#/components/schemas/startTaxYear"
+        endTaxYear:
+          $ref: "#/components/schemas/endTaxYear"
         dateOfBirth:
           $ref: "#/components/schemas/dateOfBirth"
         nationalInsuranceNumber:
@@ -411,7 +392,10 @@ components:
         customerCorelationID:
           $ref: "#/components/schemas/customerCorrelationID"
       required:
+        - startTaxYear
+        - endTaxYear
         - dateOfBirth
+        - nationalInsuranceNumber
       additionalProperties: false
       type: object
     errorResponse_400:
@@ -444,13 +428,13 @@ components:
             values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing
             input parameter path.to.field')\n400.2 - HTTP message not readable."
           type: string
-    errorResponse_401:
+    errorResponse_403:
       items:
-        $ref: "#/components/schemas/errorResourceObj_401_Unauthorised"
+        $ref: "#/components/schemas/errorResourceObj_403_Forbidden"
       description: Error Response Payload for this API
       title: Unauthorised Error Response
-    errorResourceObj_401_Unauthorised:
-      title: 401_Unauthorised
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
       type: object
       required:
         - code
@@ -460,12 +444,12 @@ components:
           description: Displays the reason of the failure.
           type: string
           enum:
-            - "UNAUTHORIZED"
+            - "Forbidden"
         code:
-          description: "The error code representing the unauthorised Error."
+          description: "The error code representing the firbidden Error."
           type: string
           enum:
-            - "UNAUTHORIZED"
+            - "FORBIDDEN"
     errorResponse_422:
       description: Error Response Payload for this API
       title: Error Response

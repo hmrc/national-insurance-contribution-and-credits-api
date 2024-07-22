@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors
 
+import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NICCNino, TaxYear}
 
-import java.time.LocalDate
+case class HIPResponse(failures: Seq[HIPFailure])
 
-final case class NICCRequestPayload(startTaxYear: TaxYear,
-                                  endTaxYear: TaxYear, nationalInsuranceNumber: NICCNino, dateOfBirth: LocalDate, customerCorrelationId: String) {
-}
+@Inject
+object HIPResponse {
 
-object NICCRequestPayload {
-
-  implicit val format: OFormat[NICCRequestPayload] = Json.format[NICCRequestPayload]
+  implicit val format: OFormat[HIPResponse] = Json.format[HIPResponse]
 }

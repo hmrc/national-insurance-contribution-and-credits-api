@@ -4,7 +4,7 @@
   "api": {
     "name": "National Insurance Contributions and Credits",
     "description": "Allows for the retrieval of National Insurance Credits and Contributions information based on Tax start and end year, national insurance number and date of birth.",
-    "context": "misc/nicc-json-service",
+    "context": "misc/national-insurance-contributions-and-credits",
     "categories": ["NATIONAL_INSURANCE"],
     "versions": [
       {
