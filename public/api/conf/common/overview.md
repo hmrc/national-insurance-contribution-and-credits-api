@@ -1,0 +1,1 @@
+This API provides National Insurance contribution and credit details for Bereavement Support Payment approval. It has been developed for the Department of Work and Pension (DWP) **only** and access is restricted to this government department.
