@@ -27,6 +27,7 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.NICCServi
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
@@ -43,18 +44,19 @@ class NICCController @Inject()(cc: ControllerComponents,
 
 
     logger.info("Setting up request!")
+    val correlationId: String = UUID.randomUUID().toString
+    val correlationIdHeader = "correlationId" -> correlationId
 
     request.body.asJson match {
       case Some(json) =>
         json.validate[NICCRequestPayload].fold(
-          _ => Future.successful(BadRequest(Json.toJson(new Response(Seq(new Failure("There was a problem with the request", "400"))))).withHeaders(generateResponseHeader())),
-          requestObject => niccService.statusMapping(requestObject.nationalInsuranceNumber, requestObject.startTaxYear.taxYear, requestObject.endTaxYear.taxYear, requestObject.dateOfBirth.format(ISO_LOCAL_DATE))
+          _ => Future.successful(BadRequest(Json.toJson(new Response(Seq(new Failure("There was a problem with the request", "400"))))).withHeaders(correlationIdHeader)),
+          requestObject => niccService.statusMapping(requestObject.nationalInsuranceNumber, requestObject.startTaxYear.taxYear, requestObject.endTaxYear.taxYear, requestObject.dateOfBirth.format(ISO_LOCAL_DATE), correlationId)
         )
-      case None => Future.successful(BadRequest(Json.toJson(new Response(Seq(new Failure("Missing JSON data", "400"))))).withHeaders(generateResponseHeader()))
+      case None => Future.successful(BadRequest(Json.toJson(new Response(Seq(new Failure("Missing JSON data", "400"))))).withHeaders(correlationIdHeader))
     }
   }
 
-  private def generateResponseHeader() = {
-    "correlationId" -> config.correlationId
-  }
+
+
 }

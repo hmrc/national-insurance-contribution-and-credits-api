@@ -78,7 +78,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -102,7 +102,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -133,7 +133,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -175,7 +175,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -195,7 +195,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         ))),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -229,7 +229,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -249,7 +249,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         ))),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -283,7 +283,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -310,7 +310,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -331,7 +331,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -358,7 +358,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -381,7 +381,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -428,7 +428,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -447,7 +447,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       json = Json.parse("{\"niClass1\":[{\"taxYear\":2018,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
