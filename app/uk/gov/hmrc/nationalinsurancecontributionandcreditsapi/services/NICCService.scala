@@ -35,7 +35,7 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
   def statusMapping(nationalInsuranceNumber: NICCNino, startTaxYear: String, endTaxYear: String, dateOfBirth: String)(implicit hc: HeaderCarrier): Future[Result] = {
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
 
-    connector.fetchData(newRequest, config.correlationId).map { response => {
+    connector.fetchData(newRequest).map { response => {
 
       response.status match {
         case OK => response.json.validate[NPSResponse] match {
@@ -44,6 +44,7 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
             val niccCredits: Option[Seq[NICCCredit]] = if (data.niClass2.nonEmpty) Option(data.niClass2.get.map(niClass2Obj => new NICCCredit(niClass2Obj))) else None
 
             Ok(Json.toJson(new NICCResponse(niccContributions, niccCredits))).withHeaders(config.correlationIdHeader)
+
           case JsError(_) => InternalServerError.withHeaders(config.correlationIdHeader)
         }
         case BAD_REQUEST =>
