@@ -32,13 +32,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class HipConnector @Inject()(httpClientV2: HttpClientV2,
                              config: AppConfig)(implicit ec: ExecutionContext) {
 
-  def fetchData(request: NICCRequest, correlationId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def fetchData(request: NICCRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val urlToRead = s"${config.hipBaseUrl}/nps/nps-json-service/nps/v1/api/national-insurance/${request.nationalInsuranceNumber.nino}/contributions-and-credits/from/${request.startTaxYear}/to/${request.endTaxYear}"
     val requestBody = Json.obj("dateOfBirth" -> request.dateOfBirth)
     httpClientV2.post(url"$urlToRead")
       .setHeader(
         AUTHORIZATION -> s"Basic ${config.base64HipAuthToken}",
-        CORRELATION_ID -> correlationId,
+        CORRELATION_ID -> config.correlationId,
         CONTENT_TYPE -> JSON,
         ORIGINATING_SYSTEM -> config.hipOriginatorId
       )

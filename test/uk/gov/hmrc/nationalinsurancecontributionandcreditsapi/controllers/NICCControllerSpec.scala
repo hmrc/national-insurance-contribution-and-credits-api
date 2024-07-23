@@ -78,7 +78,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -87,6 +87,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(400)
+    result.header.headers.contains("correlationId")
   }
 
   "return 400 when the request taxYear is invalid" in {
@@ -101,7 +102,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -110,6 +111,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(400)
+    result.header.headers.contains("correlationId")
   }
 
   "return 400 when the body is invalid" in {
@@ -131,7 +133,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
@@ -139,6 +141,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(400)
+    result.header.headers.contains("correlationId")
   }
 
   "return 200 and empty object when the request is valid but response body is not valid " in {
@@ -172,7 +175,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -181,6 +184,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(OK)
+    result.header.headers.contains("correlationId")
   }
 
   "return 400 when the request is valid but response is 400, origin is HIP and response body is valid" in {
@@ -191,7 +195,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         ))),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -200,7 +204,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(BAD_REQUEST)
-
+    result.header.headers.contains("correlationId")
   }
 
   "return 500 when the request is valid but response is 400, origin is HIP and response body is invalid" in {
@@ -225,7 +229,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -234,8 +238,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(INTERNAL_SERVER_ERROR)
-
-    println(result.header.status)
+    result.header.headers.contains("correlationId")
   }
 
   "return 400 when the request is valid but response is 400, origin is HoD and response body is valid" in {
@@ -246,7 +249,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         ))),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -255,7 +258,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(BAD_REQUEST)
-
+    result.header.headers.contains("correlationId")
   }
 
   "return 500 when the request is valid but response is 400, origin is HoD and response body is invalid" in {
@@ -280,7 +283,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -289,6 +292,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(INTERNAL_SERVER_ERROR)
+    result.header.headers.contains("correlationId")
   }
 
   "return 500 when the request is valid but response is 400 and response body is invalid" in {
@@ -306,7 +310,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -315,7 +319,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(INTERNAL_SERVER_ERROR)
-
+    result.header.headers.contains("correlationId")
   }
 
   "return 422 when the request is valid but response is 422 and response body is valid" in {
@@ -327,7 +331,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -336,7 +340,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(UNPROCESSABLE_ENTITY)
-
+    result.header.headers.contains("correlationId")
   }
 
   "return 500 when the request is valid but response is 422 and response body is invalid" in {
@@ -354,7 +358,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         "}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -363,7 +367,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(INTERNAL_SERVER_ERROR)
-
+    result.header.headers.contains("correlationId")
   }
 
 
@@ -377,7 +381,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -386,7 +390,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(INTERNAL_SERVER_ERROR)
-
+    result.header.headers.contains("correlationId")
   }
 
   "return 404 when the request is missing a part of the url" in {
@@ -399,7 +403,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(NOT_FOUND)
-
+    result.header.headers.contains("correlationId")
   }
 
   "return 400 when the request is missing a body" in {
@@ -409,6 +413,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val result = route(app, request).value.futureValue
 
     result.header.status should be(BAD_REQUEST)
+    result.header.headers.contains("correlationId")
   }
 
   "return 200 when the request is valid and response is valid" in {
@@ -423,7 +428,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       )),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -431,6 +436,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
     result.header.status should be(OK)
+    result.header.headers.contains("correlationId")
   }
 
 
@@ -441,7 +447,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       json = Json.parse("{\"niClass1\":[{\"taxYear\":2018,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
       headers = Map.empty
     )
-    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+    when(mockHipConnector.fetchData(any())(any())).thenReturn(Future.successful(expectedResponseObject))
 
     val request = FakeRequest("POST", url)
       .withHeaders(CONTENT_TYPE -> "application/json")
@@ -449,5 +455,6 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
     result.header.status should be(OK)
+    result.header.headers.contains("correlationId")
   }
 }

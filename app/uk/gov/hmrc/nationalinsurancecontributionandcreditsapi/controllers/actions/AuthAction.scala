@@ -21,6 +21,7 @@ import play.api.mvc.Results.{Forbidden, InternalServerError}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failure
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -29,7 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthAction @Inject()(
                             val authConnector: AuthConnector,
-                            val parser: BodyParsers.Default
+                            val parser: BodyParsers.Default,
+                            config: AppConfig
                           )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[Request, AnyContent] with ActionFunction[Request, Request] with AuthorisedFunctions {
 
@@ -41,10 +43,14 @@ class AuthAction @Inject()(
       block(request)
     }.recover({
       //TODO Implement 403s
-      case e: UnsupportedAuthProvider => Forbidden(Json.toJson(Failure(e.msg, "403")))
-      case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403")))
-      case _ => InternalServerError
+      case e: UnsupportedAuthProvider => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
+      case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
+      case _ => InternalServerError.withHeaders(generateResponseHeader())
     }
     )
+  }
+
+  private def generateResponseHeader() = {
+    "correlationId" -> config.correlationId
   }
 }

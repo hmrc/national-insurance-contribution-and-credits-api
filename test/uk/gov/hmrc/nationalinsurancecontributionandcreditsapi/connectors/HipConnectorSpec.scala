@@ -51,7 +51,7 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
         ).withRequestBody(equalToJson("{ \"dateOfBirth\": \"1998-03-23\" }")).withHeader(AUTHORIZATION, containing("Basic aWQ6c2VjcmV0")).willReturn(
           aResponse().withStatus(200))
         )
-        val response = connector.fetchData(payload, "test")
+        val response = connector.fetchData(payload)
         await(response).status shouldBe OK
       }
     }
@@ -60,20 +60,20 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
         val payload = NICCRequest(NICCNino("BB000400B"), "2013", "2015", "1998-03-23")
 
         stubPostServer(aResponse().withStatus(400), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
-        await(connector.fetchData(payload, "test")).status shouldBe BAD_REQUEST
+        await(connector.fetchData(payload)).status shouldBe BAD_REQUEST
       }
 
       "403 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000403B"), "2013", "2015", "1998-03-23")
 
         stubPostServer(aResponse().withStatus(403), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
-        await(connector.fetchData(payload, "test")).status shouldBe FORBIDDEN
+        await(connector.fetchData(payload)).status shouldBe FORBIDDEN
       }
       "422 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000422B"), "2013", "2015", "1998-03-23")
 
         stubPostServer(aResponse().withStatus(422), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
-        await(connector.fetchData(payload, "test")).status shouldBe UNPROCESSABLE_ENTITY
+        await(connector.fetchData(payload)).status shouldBe UNPROCESSABLE_ENTITY
       }
     }
   }
