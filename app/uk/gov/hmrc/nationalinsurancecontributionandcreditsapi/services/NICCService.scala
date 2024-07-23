@@ -40,10 +40,10 @@ class NICCService @Inject()(connector: HipConnector)(implicit ec: ExecutionConte
       response.status match {
         case OK => response.json.validate[NPSResponse] match {
           case JsSuccess(data, _) =>
-            val seq1: Seq[NICCContribution] = data.niClass1.map(niClass1Obj => new NICCContribution(niClass1Obj))
-            val seq2: Seq[NICCCredit] = data.niClass2.map(niClass2Obj => new NICCCredit(niClass2Obj))
+            val niccContributions: Option[Seq[NICCContribution]] = if (data.niClass1.nonEmpty) Option(data.niClass1.get.map(niClass1Obj => new NICCContribution(niClass1Obj))) else None
+            val niccCredits: Option[Seq[NICCCredit]] = if (data.niClass2.nonEmpty) Option(data.niClass2.get.map(niClass2Obj => new NICCCredit(niClass2Obj))) else None
 
-            Ok(Json.toJson(new NICCResponse(seq1, seq2))).withHeaders(responseHeader)
+            Ok(Json.toJson(new NICCResponse(niccContributions, niccCredits))).withHeaders(responseHeader)
           case JsError(_) => InternalServerError.withHeaders(responseHeader)
         }
         case BAD_REQUEST =>
