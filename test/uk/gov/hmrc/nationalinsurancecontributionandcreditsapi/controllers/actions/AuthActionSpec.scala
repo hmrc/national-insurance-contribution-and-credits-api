@@ -38,8 +38,9 @@ import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 
-class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockHelper with Injecting with Matchers with ScalaFutures {
+class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockHelper with Injecting with Matchers with ScalaFutures() {
 
   val authAction: AuthAction = inject[AuthAction]
 
@@ -77,6 +78,7 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
         })
 
         blockResult.futureValue.header.status shouldBe IM_A_TEAPOT
+        blockResult.futureValue.header.headers.contains("correlationId")
       }
     }
     "the user is not logged in" when {
@@ -94,6 +96,7 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
           Future.successful(ImATeapot(""))
         })
         blockResult.futureValue.header.status shouldBe FORBIDDEN
+        blockResult.futureValue.header.headers.contains("correlationId")
       }
 
       "must return 403 when token is expired" in {
@@ -110,6 +113,7 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
           Future.successful(ImATeapot(""))
         })
         blockResult.futureValue.header.status shouldBe FORBIDDEN
+        blockResult.futureValue.header.headers.contains("correlationId")
       }
 
       "must return 500 when token is invalid" in {
@@ -126,6 +130,7 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
           Future.successful(ImATeapot(""))
         })
         blockResult.futureValue.header.status shouldBe INTERNAL_SERVER_ERROR
+        blockResult.futureValue.header.headers.contains("correlationId")
       }
     }
   }
