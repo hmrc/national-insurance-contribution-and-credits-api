@@ -21,17 +21,16 @@ import play.api.mvc.Results.{Forbidden, InternalServerError}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors.Failure
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthAction @Inject()(
                             val authConnector: AuthConnector,
-                            val parser: BodyParsers.Default,
-                            config: AppConfig
+                            val parser: BodyParsers.Default
                           )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[Request, AnyContent] with ActionFunction[Request, Request] with AuthorisedFunctions {
 
@@ -51,6 +50,7 @@ class AuthAction @Inject()(
   }
 
   private def generateResponseHeader() = {
-    "correlationId" -> config.correlationId
+    val correlationId: String = UUID.randomUUID().toString
+    "correlationId" -> correlationId
   }
 }

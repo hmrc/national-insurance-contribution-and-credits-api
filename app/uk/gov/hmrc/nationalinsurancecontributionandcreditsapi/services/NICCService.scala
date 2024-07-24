@@ -32,41 +32,42 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit ec: ExecutionContext) {
 
-  def statusMapping(nationalInsuranceNumber: NICCNino, startTaxYear: String, endTaxYear: String, dateOfBirth: String)(implicit hc: HeaderCarrier): Future[Result] = {
+  def statusMapping(nationalInsuranceNumber: NICCNino, startTaxYear: String, endTaxYear: String, dateOfBirth: String, correlationId: String)(implicit hc: HeaderCarrier): Future[Result] = {
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
 
-    connector.fetchData(newRequest).map { response => {
 
+    connector.fetchData(newRequest, correlationId).map { response => {
+      val correlationIdHeader = "correlationId" -> correlationId
       response.status match {
         case OK => response.json.validate[NPSResponse] match {
           case JsSuccess(data, _) =>
             val niccContributions: Option[Seq[NICCContribution]] = if (data.niClass1.nonEmpty) Option(data.niClass1.get.map(niClass1Obj => new NICCContribution(niClass1Obj))) else None
             val niccCredits: Option[Seq[NICCCredit]] = if (data.niClass2.nonEmpty) Option(data.niClass2.get.map(niClass2Obj => new NICCCredit(niClass2Obj))) else None
 
-            Ok(Json.toJson(new NICCResponse(niccContributions, niccCredits))).withHeaders(config.correlationIdHeader)
+            Ok(Json.toJson(new NICCResponse(niccContributions, niccCredits))).withHeaders(correlationIdHeader)
 
-          case JsError(_) => InternalServerError.withHeaders(config.correlationIdHeader)
+          case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
         }
         case BAD_REQUEST =>
           if (response.json.toString().contains("HIP")) response.json.validate[HIPErrorResponse] match {
             case JsSuccess(data, _) =>
               val mappedFailures: Seq[Failure] = data.response.failures.map(hipFailure => new Failure(hipFailure))
-              BadRequest(Json.toJson(new Response(mappedFailures))).withHeaders(config.correlationIdHeader)
+              BadRequest(Json.toJson(new Response(mappedFailures))).withHeaders(correlationIdHeader)
 
-            case JsError(_) => InternalServerError.withHeaders(config.correlationIdHeader)
+            case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
           }
 
           else if (response.json.toString().contains("HoD")) response.json.validate[ErrorResponse] match {
-            case JsSuccess(data, _) => BadRequest(Json.toJson(new Response(data.response.failures))).withHeaders(config.correlationIdHeader)
-            case JsError(_) => InternalServerError.withHeaders(config.correlationIdHeader)
+            case JsSuccess(data, _) => BadRequest(Json.toJson(new Response(data.response.failures))).withHeaders(correlationIdHeader)
+            case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
           }
 
-          else InternalServerError.withHeaders(config.correlationIdHeader)
+          else InternalServerError.withHeaders(correlationIdHeader)
         case UNPROCESSABLE_ENTITY => response.json.validate[Failures] match {
-          case JsSuccess(data, _) => UnprocessableEntity(Json.toJson(data)).withHeaders(config.correlationIdHeader)
-          case JsError(_) => InternalServerError.withHeaders(config.correlationIdHeader)
+          case JsSuccess(data, _) => UnprocessableEntity(Json.toJson(data)).withHeaders(correlationIdHeader)
+          case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
         }
-        case _ => InternalServerError.withHeaders(config.correlationIdHeader)
+        case _ => InternalServerError.withHeaders(correlationIdHeader)
       }
     }
     }
