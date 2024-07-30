@@ -276,7 +276,7 @@ components:
       type: string
       example: AB123456A
     customerCorrelationID:
-      description: Correlation Id sent by customerCorrelationID.
+      description: Correlation Id sent by customer.
       format: string
       type: string
       example: e470d658-99f7-4292-a4a1-ed12c72f1337
