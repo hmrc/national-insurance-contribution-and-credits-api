@@ -41,7 +41,6 @@ class AuthAction @Inject()(
     authorised(AuthProviders(AuthProvider.PrivilegedApplication)) {
       block(request)
     }.recover({
-      //TODO Implement 403s
       case e: UnsupportedAuthProvider => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
       case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
       case _ => InternalServerError.withHeaders(generateResponseHeader())
