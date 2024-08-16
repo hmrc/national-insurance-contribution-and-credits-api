@@ -8,7 +8,7 @@ info:
   contact: { }
 servers:
   - url: https://test-api.service.hmrc.gov.uk
-    description: QA
+    description: External Test
   - url: https://api.service.hmrc.gov.uk
     description: Production
 paths:
