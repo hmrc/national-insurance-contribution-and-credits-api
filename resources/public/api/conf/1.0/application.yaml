@@ -8,11 +8,11 @@ info:
   contact: { }
 servers:
   - url: https://test-api.service.hmrc.gov.uk
-    description: External Test
+    description: Sandbox
   - url: https://api.service.hmrc.gov.uk
     description: Production
 paths:
-  /misc/national-insurance-contributions-and-credits/nicc-service/v1/api/contribution-and-credits:
+  /misc/national-insurance-contributions-and-credits/contribution-and-credits:
     post:
       tags:
         - Contributions-and-credits
@@ -30,6 +30,7 @@ paths:
       operationId: PostNIContCreds
       parameters:
         - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/accept"
       requestBody:
         required: true
         content:
@@ -126,6 +127,10 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Authorization"
+    Accept:
+      required: true
+      schema:
+        $ref: "#/components/schemas/Accept"
   examples:
     422_StartYearAfterEndYear:
       summary: Start Year After End Year
@@ -174,6 +179,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Authorization"
+    accept:
+      description: Request the version of the API you want to use by including an Accept header with a media type of.
+      in: header
+      name: Accept
+      required: true
+      schema:
+        $ref: "#/components/schemas/Accept"
   responses:
     notFoundErrorResponse:
       headers:
@@ -197,6 +209,11 @@ components:
       description: Authorization token used to contact api
       type: string
       example: Bearer <token>
+    Accept:
+      description: Request the version of the API you want to use by including an Accept header with a media type of
+      type: string
+      pattern: application/vnd.hmrc.[version]+[content-type]
+      example: application/vnd.hmrc.1.0+json
     taxYear:
       description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
       example: 2022

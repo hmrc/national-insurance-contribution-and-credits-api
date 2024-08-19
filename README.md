@@ -12,7 +12,7 @@ Run unit tests: `sbt test`
 
 ## Endpoints
 
-`POST /nicc-service/v1/api/contribution-and-credits`
+`POST /contribution-and-credits`
 
 Will return niClass1 and/or niClass2 collections
 
