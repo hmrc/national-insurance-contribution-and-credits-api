@@ -56,7 +56,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     Mockito.reset(mockHipConnector)
   }
 
-  def url: String = s"/nicc-service/v1/api/contribution-and-credits"
+  def url: String = s"/contribution-and-credits"
 
   val body: JsObject = Json.obj(
     "startTaxYear" -> "2017",
@@ -396,7 +396,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   "return 404 when the request is missing a part of the url" in {
     //    val body = Json.obj("dateOfBirth" -> "1998-04-23")
 
-    val request = FakeRequest("POST", "/nicc-service/v1/contribution-and-credits")
+    val request = FakeRequest("POST", "/contribution")
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withJsonBody(body)
 
