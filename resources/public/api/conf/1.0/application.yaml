@@ -406,7 +406,7 @@ components:
           $ref: "#/components/schemas/dateOfBirth"
         nationalInsuranceNumber:
           $ref: "#/components/schemas/nationalInsuranceNumber"
-        customerCorelationID:
+        customerCorrelationID:
           $ref: "#/components/schemas/customerCorrelationID"
       required:
         - startTaxYear

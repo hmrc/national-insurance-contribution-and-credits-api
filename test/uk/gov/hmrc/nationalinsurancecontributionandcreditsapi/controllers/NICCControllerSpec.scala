@@ -63,7 +63,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     "endTaxYear" -> "2019",
     "nationalInsuranceNumber" -> "BB000000B",
     "dateOfBirth" -> "1998-04-23",
-    "customerCorrelationId" -> "bb6b16c4-8a7b-42aa-a986-1ea5df66f576"
+    "customerCorrelationID" -> "bb6b16c4-8a7b-42aa-a986-1ea5df66f576"
   )
 
   "return 400 when the request nino is invalid" in {
@@ -121,7 +121,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       "    \"endTaxYear\": \"2023\"," +
       "    \"nationalInsuranceNumber\": \"BB000200A\"," +
       "    \"dateOfBirth\": \"1970-08-31\"," +
-      "    \"customerCorrelationId\": \"fbb53666-469c-4d36-8e6d-151ef3c424e1\"" +
+      "    \"customerCorrelationID\": \"fbb53666-469c-4d36-8e6d-151ef3c424e1\"" +
       "}")
 
 
@@ -459,7 +459,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
   }
 
 
-  "return 200 when the request is valid but missing a customerCorrelationId and response is json and is valid" in {
+  "return 200 when the request is valid but missing a customerCorrelationID and response is json and is valid" in {
 
     val noCorIdBody: JsObject = Json.obj(
       "startTaxYear" -> "2017",
