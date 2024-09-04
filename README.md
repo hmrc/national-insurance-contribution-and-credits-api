@@ -24,7 +24,7 @@ Request:
 | endTaxYear              | Denotes a end year for the tax year range.   | yes              |
 | nationalInsuranceNumber | NINO - unique for an individual.             | yes              |
 | dateOfBirth             | The date of birth of the individual.         | yes              |
-| customerCorrelationId   | Correlation Id sent by customer.             | optional         |
+| customerCorrelationID   | Correlation Id sent by customer.             | optional         |
 
 
 Example:
@@ -34,7 +34,7 @@ Example:
   "endTaxYear": "2023",
   "nationalInsuranceNumber": "BB000200B",
   "dateOfBirth": "1970-08-31",
-  "customerCorrelationId": "a3cf583f-9a4a-4587-bbd6-05e7e30bb7ee"
+  "customerCorrelationID": "a3cf583f-9a4a-4587-bbd6-05e7e30bb7ee"
 }
 ```
 
