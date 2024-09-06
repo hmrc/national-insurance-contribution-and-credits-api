@@ -5,7 +5,7 @@ info:
   description: |-
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  contact: { }
+  contact: {}
 servers:
   - url: https://test-api.service.hmrc.gov.uk
     description: Sandbox
@@ -164,8 +164,7 @@ components:
             code: "63500"
   parameters:
     correlationId:
-      description:
-        Correlation ID - used for traceability purposes - note that this
+      description: Correlation ID - used for traceability purposes - note that this
         value in the response matches that received in the request to allow correlation.
       in: header
       name: correlationId
@@ -199,8 +198,7 @@ components:
           $ref: "#/components/headers/correlationId"
   schemas:
     correlationId:
-      description:
-        Correlation ID - used for traceability purposes - note that this
+      description: Correlation ID - used for traceability purposes - note that this
         value in the response matches that received in the request to allow correlation.
       example: e470d658-99f7-4292-a4a1-ed12c72f1337
       format: uuid
@@ -270,13 +268,13 @@ components:
       type: object
     startTaxYear:
       description: Denotes a start year for the tax year range (e.g. 2018 for a 2018/2019 tax period) to retrieve data from.
-      type: integer
+      type: string
       format: year
       pattern: yyyy
       example: 2016
     endTaxYear:
       description: Denotes a end year for the tax year range (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
-      type: integer
+      type: string
       format: year
       pattern: yyyy
       example: 2021
@@ -440,8 +438,7 @@ components:
           type: string
           maxLength: 120
         code:
-          description:
-            "The error code representing the error that has occurred. Valid
+          description: "The error code representing the error that has occurred. Valid
             values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing
             input parameter path.to.field')\n400.2 - HTTP message not readable."
           type: string

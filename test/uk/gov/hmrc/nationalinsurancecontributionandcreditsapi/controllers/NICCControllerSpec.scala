@@ -37,7 +37,6 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors._
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.{NICCClass1, NICCClass2, NPSResponse}
 
 import scala.concurrent.Future
-import scala.language.postfixOps
 
 class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with OptionValues with ScalaFutures with should.Matchers with BeforeAndAfterEach {
   val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
@@ -86,7 +85,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
 
-    result.header.status should be(400)
+    result.header.status should be(BAD_REQUEST)
     result.header.headers.contains("correlationId")
   }
 
@@ -110,7 +109,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
 
-    result.header.status should be(400)
+    result.header.status should be(BAD_REQUEST)
     result.header.headers.contains("correlationId")
   }
 
@@ -140,7 +139,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
 
     val result = route(app, request).value.futureValue
 
-    result.header.status should be(400)
+    result.header.status should be(BAD_REQUEST)
     result.header.headers.contains("correlationId")
   }
 
@@ -379,6 +378,49 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
         Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
         Option(Seq())
       )),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(INTERNAL_SERVER_ERROR)
+    result.header.headers.contains("correlationId")
+  }
+
+  "return 404 when the request is valid but a valid 404 Not Found response is returned" in {
+    //    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 404,
+      json = Json.toJson(
+        Failure("Not Found", "404")
+      ),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+
+    result.header.status should be(NOT_FOUND)
+    result.header.headers.contains("correlationId")
+  }
+
+  "return 404 when the request is valid but an invalid 404 Not Found response is returned" in {
+    //    val body = Json.obj("dateOfBirth" -> "1998-04-23")
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 404,
+      json = Json.toJson(""
+      ),
       headers = Map.empty
     )
     when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
