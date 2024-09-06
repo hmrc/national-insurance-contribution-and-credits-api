@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
 
-import play.api.http.Status.{BAD_REQUEST, OK, UNPROCESSABLE_ENTITY}
+import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, UNPROCESSABLE_ENTITY}
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.Result
-import play.api.mvc.Results.{BadRequest, InternalServerError, Ok, UnprocessableEntity}
+import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, Ok, UnprocessableEntity}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
@@ -39,6 +39,7 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
     connector.fetchData(newRequest, correlationId).map { response => {
       val correlationIdHeader = "correlationId" -> correlationId
       response.status match {
+
         case OK => response.json.validate[NPSResponse] match {
           case JsSuccess(data, _) =>
             val niccContributions: Option[Seq[NICCContribution]] = if (data.niClass1.nonEmpty) Option(data.niClass1.get.map(niClass1Obj => new NICCContribution(niClass1Obj))) else None
@@ -48,7 +49,8 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
 
           case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
         }
-        case BAD_REQUEST =>
+
+        case BAD_REQUEST => {
           if (response.json.toString().contains("HIP")) response.json.validate[HIPErrorResponse] match {
             case JsSuccess(data, _) =>
               val mappedFailures: Seq[Failure] = data.response.failures.map(hipFailure => new Failure(hipFailure))
@@ -63,10 +65,18 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
           }
 
           else InternalServerError.withHeaders(correlationIdHeader)
+        }
+
+        case NOT_FOUND => response.json.validate[Failure] match {
+          case JsSuccess(data, _) => NotFound(Json.toJson(new Failures(Seq(data)))).withHeaders(correlationIdHeader)
+          case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
+        }
+
         case UNPROCESSABLE_ENTITY => response.json.validate[Failures] match {
           case JsSuccess(data, _) => UnprocessableEntity(Json.toJson(data)).withHeaders(correlationIdHeader)
           case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
         }
+
         case _ => InternalServerError.withHeaders(correlationIdHeader)
       }
     }
