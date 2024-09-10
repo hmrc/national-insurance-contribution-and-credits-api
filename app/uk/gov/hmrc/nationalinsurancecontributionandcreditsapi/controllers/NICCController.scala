@@ -38,6 +38,7 @@ class NICCController @Inject()(cc: ControllerComponents,
                                config: AppConfig)
   extends BackendController(cc) {
 
+
   private val logger: Logger = Logger(this.getClass)
 
   def postContributionsAndCredits: Action[AnyContent] = identity.async { implicit request =>
