@@ -43,6 +43,7 @@ class NICCController @Inject()(cc: ControllerComponents,
   def postContributionsAndCredits: Action[AnyContent] = identity.async { implicit request =>
 
 
+
     logger.info("Setting up request!")
     val correlationId: String = UUID.randomUUID().toString
     val correlationIdHeader = "correlationId" -> correlationId
