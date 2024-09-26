@@ -38,8 +38,6 @@ Example:
 }
 ```
 
-If "affinityGroup" is either Individual or Organisation and the "credentialStrength" is weak or none, a 400/BadRequest will be returned.
-
 Returns:
 
 HTTP 200, `correlationId` header containing correlationId originating from app throughout request the request journey, body:
