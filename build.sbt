@@ -8,10 +8,6 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    libraryDependencies += "org.scalamock" %% "scalamock" % "6.0.0" % Test,
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
-    libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
-    libraryDependencies += "uk.gov.hmrc" %% "play-auditing-play-30" % "9.0.0",
     routesImport += "uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.Binders._",
     libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html

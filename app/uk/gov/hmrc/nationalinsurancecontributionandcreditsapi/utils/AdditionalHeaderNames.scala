@@ -18,6 +18,5 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils
 
 object AdditionalHeaderNames {
   val CORRELATION_ID = "correlationId"
-  val ENVIRONMENT = "Environment"
   val ORIGINATING_SYSTEM = "gov-uk-originator-id"
 }

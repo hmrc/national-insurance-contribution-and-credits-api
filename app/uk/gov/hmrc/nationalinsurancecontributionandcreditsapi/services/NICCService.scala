@@ -21,7 +21,6 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, Ok, UnprocessableEntity}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.AppConfig
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models._
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
@@ -30,7 +29,7 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.errors._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit ec: ExecutionContext) {
+class NICCService @Inject()(connector: HipConnector)(implicit ec: ExecutionContext) {
 
   def statusMapping(nationalInsuranceNumber: NICCNino, startTaxYear: String, endTaxYear: String, dateOfBirth: String, correlationId: String)(implicit hc: HeaderCarrier): Future[Result] = {
     val newRequest = new NICCRequest(nationalInsuranceNumber, startTaxYear, endTaxYear, dateOfBirth)
@@ -42,8 +41,8 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
 
         case OK => response.json.validate[NPSResponse] match {
           case JsSuccess(data, _) =>
-            val niccContributions: Option[Seq[NICCContribution]] = if (data.niClass1.nonEmpty) Option(data.niClass1.get.map(niClass1Obj => new NICCContribution(niClass1Obj))) else None
-            val niccCredits: Option[Seq[NICCCredit]] = if (data.niClass2.nonEmpty) Option(data.niClass2.get.map(niClass2Obj => new NICCCredit(niClass2Obj))) else None
+            val niccContributions: Option[Seq[NICCContribution]] = data.niClass1.map(niClass1Seq => niClass1Seq.map(niClass1Obj => new NICCContribution(niClass1Obj)))
+            val niccCredits: Option[Seq[NICCCredit]] = data.niClass2.map(niClass2Seq => niClass2Seq.map(niClass2Obj => new NICCCredit(niClass2Obj)))
 
             Ok(Json.toJson(new NICCResponse(niccContributions, niccCredits))).withHeaders(correlationIdHeader)
 
@@ -55,7 +54,6 @@ class NICCService @Inject()(connector: HipConnector, config: AppConfig)(implicit
             case JsSuccess(data, _) =>
               val mappedFailures: Seq[Failure] = data.response.failures.map(hipFailure => new Failure(hipFailure))
               BadRequest(Json.toJson(new Response(mappedFailures))).withHeaders(correlationIdHeader)
-
             case JsError(_) => InternalServerError.withHeaders(correlationIdHeader)
           }
 
