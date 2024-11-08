@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 1.0.0 draft
+  version: 1.0.0
   title: National Insurance Contribution and Credits Interface Specification to retrieve Class 1 and Class 2 data.
   description: |-
     # Usage Terms
