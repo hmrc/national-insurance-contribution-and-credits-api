@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  version: 1.0.0 draft
-  title: National Insurance Contribution and Credits Interface Specification to retrieve Class 1 and Class 2 data.
+  version: 1.0.0
+  title: National Insurance Contribution and Credits Interface
   description: |-
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
