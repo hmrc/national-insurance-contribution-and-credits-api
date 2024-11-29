@@ -72,7 +72,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq(NICCClass1(Some(2022), Some("s"), Some("(NONE)"), Some("C1"), Some(BigDecimal(99999999999999.98)), Some("COMPLIANCE & YIELD INCOMPLETE"), Some(BigDecimal(99999999999999.98))))),
         Option(Seq()),
       )),
       headers = Map.empty
@@ -96,7 +96,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq(NICCClass1(Some(2022), Some("s"), Some("(NONE)"), Some("C1"), Some(BigDecimal(99999999999999.98)), Some("COMPLIANCE & YIELD INCOMPLETE"), Some(BigDecimal(99999999999999.98))))),
         Option(Seq())
       )),
       headers = Map.empty
@@ -113,7 +113,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     result.header.headers.contains("correlationId")
   }
 
-  "return 400 when the body is invalid" in {
+  "return 400 when the request body is invalid" in {
     val body = Json.parse("" +
       "{" +
       "    \"startTaxYear\": \"20B18\"," +
@@ -127,7 +127,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.toJson(NPSResponse(
-        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq(NICCClass1(Some(2022), Some("s"), Some("(NONE)"), Some("C1"), Some(BigDecimal(99999999999999.98)), Some("COMPLIANCE & YIELD INCOMPLETE"), Some(BigDecimal(99999999999999.98))))),
         Option(Seq())
       )),
       headers = Map.empty
@@ -375,7 +375,7 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 501,
       json = Json.toJson(NPSResponse(
-        Option(Seq(NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
+        Option(Seq(NICCClass1(Some(2022), Some("s"), Some("(NONE)"), Some("C1"), Some(BigDecimal(99999999999999.98)), Some("COMPLIANCE & YIELD INCOMPLETE"), Some(BigDecimal(99999999999999.98))))),
         Option(Seq())
       )),
       headers = Map.empty
@@ -464,9 +464,9 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
       status = 200,
       json = Json.toJson(NPSResponse(
         Option(Seq(
-          NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)),
-          NICCClass1(2022, "s", "(NONE)", "C1", BigDecimal(99999999999999.98), "COMPLIANCE & YIELD INCOMPLETE", BigDecimal(99999999999999.98)))),
-        Option(Seq(NICCClass2(2022, 53, "C1", BigDecimal(99999999999999.98), BigDecimal(99999999999999.98), "NOT KNOWN/NOT APPLICABLE")))
+          NICCClass1(Some(2022), Some("s"), Some("(NONE)"), Some("C1"), Some(BigDecimal(99999999999999.98)), Some("COMPLIANCE & YIELD INCOMPLETE"), Some(BigDecimal(99999999999999.98))),
+          NICCClass1(Some(2022), Some("s"), Some("(NONE)"), Some("C1"), Some(BigDecimal(99999999999999.98)), Some("COMPLIANCE & YIELD INCOMPLETE"), Some(BigDecimal(99999999999999.98))))),
+        Some(Seq(NICCClass2(Some(2022), Some(53), Some("C1"), Some(BigDecimal(99999999999999.98)), Some(BigDecimal(99999999999999.98)), Some("NOT KNOWN/NOT APPLICABLE"))))
       )),
       headers = Map.empty
     )
@@ -487,6 +487,63 @@ class NICCControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with Optio
     val expectedResponseObject: HttpResponse = HttpResponse.apply(
       status = 200,
       json = Json.parse("{\"niClass1\":[{\"taxYear\":2018,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+    result.header.status should be(OK)
+    result.header.headers.contains("correlationId")
+  }
+
+
+  "return 200 when the request is valid and response json is missing fields (tax year)" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.parse("{\"niClass1\":[{\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+    result.header.status should be(OK)
+    result.header.headers.contains("correlationId")
+  }
+
+
+  "return 200 when the request is valid and response json is missing fields (primaryPaidEarnings)" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.parse("{\"niClass1\":[{\"taxYear\":2018,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
+      headers = Map.empty
+    )
+    when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
+
+    val request = FakeRequest("POST", url)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withJsonBody(body)
+
+    val result = route(app, request).value.futureValue
+    result.header.status should be(OK)
+    result.header.headers.contains("correlationId")
+  }
+
+
+  "return 200 when the request is valid and response json is missing fields (contributionCategory)" in {
+
+    val expectedResponseObject: HttpResponse = HttpResponse.apply(
+      status = 200,
+      json = Json.parse("{\"niClass1\":[{\"taxYear\":2018,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":3189.12,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":35000.00,\"contributionCreditType\":\"EON\"},{\"taxYear\":2019,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"contributionCreditType\":\"EON\"},{\"taxYear\":2020,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2021,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"C1\"},{\"taxYear\":2022,\"contributionCategoryLetter\":\"A\",\"contributionCategory\":\"STANDARD RATE\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"CS\"},{\"taxYear\":2023,\"contributionCategoryLetter\":\"A\",\"primaryContribution\":1964.16,\"class1ContributionStatus\":\"VALID\",\"primaryPaidEarnings\":25000.00,\"contributionCreditType\":\"EON\"}]}"),
       headers = Map.empty
     )
     when(mockHipConnector.fetchData(any(), any())(any())).thenReturn(Future.successful(expectedResponseObject))
