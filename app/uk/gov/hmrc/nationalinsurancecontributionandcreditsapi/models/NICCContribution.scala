@@ -18,13 +18,13 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class NICCContribution(taxYear: Int,
-                            niContributionCategory: String,
-                            niContributionCategoryName: String,
-                            niContributionType: String,
-                            totalPrimaryContribution: BigDecimal,
-                            contributionStatus: String,
-                            totalEarningsFactor: BigDecimal) {
+case class NICCContribution(taxYear: Option[Int],
+                            niContributionCategory: Option[String],
+                            niContributionCategoryName: Option[String],
+                            niContributionType: Option[String],
+                            totalPrimaryContribution: Option[BigDecimal],
+                            contributionStatus: Option[String],
+                            totalEarningsFactor: Option[BigDecimal]) {
   def this(niClass1: NICCClass1) = {
     this(niClass1.taxYear,
       niClass1.contributionCategoryLetter,
