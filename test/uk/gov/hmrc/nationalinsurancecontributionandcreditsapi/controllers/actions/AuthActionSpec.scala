@@ -38,7 +38,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
 
 class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockHelper with Injecting with Matchers with ScalaFutures() {
 

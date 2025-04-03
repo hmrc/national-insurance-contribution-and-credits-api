@@ -1,7 +1,7 @@
 import uk.gov.hmrc.DefaultBuildSettings
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.16"
 
 lazy val microservice = Project("national-insurance-contribution-and-credits-api", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -9,7 +9,6 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     routesImport += "uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.Binders._",
-    libraryDependencies += "uk.gov.hmrc" %% "domain-play-30" % "9.0.0",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
