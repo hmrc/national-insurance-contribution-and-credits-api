@@ -13,12 +13,15 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
   )
-  .settings(resolvers ++= Seq(
-    MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2"),
-    Resolver.jcenterRepo))
+  .settings(
+    resolvers ++= Seq(
+      MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2"),
+      Resolver.jcenterRepo
+    )
+  )
   .settings(CodeCoverageSettings.settings *)
   .settings(
-    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources"
   )
   .settings(PlayKeys.playDefaultPort := 16105)
 
