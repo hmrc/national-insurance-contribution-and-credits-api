@@ -39,7 +39,13 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.utils.WireMockHelp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockHelper with Injecting with Matchers with ScalaFutures() {
+class AuthActionSpec
+    extends AnyWordSpec
+    with GuiceOneAppPerSuite
+    with WireMockHelper
+    with Injecting
+    with Matchers
+    with ScalaFutures() {
 
   val authAction: AuthAction = inject[AuthAction]
 
@@ -53,11 +59,12 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
       bind[AuthConnector].toInstance(mockAuthConnector)
     )
     .build()
+
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
   def mockRequest: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest().withSession(
-      SessionKeys.authToken -> authToken,
+      SessionKeys.authToken -> authToken
     )
 
   "Auth Action" should {
@@ -71,10 +78,8 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
         )
           .thenReturn(Future.successful(()))
 
-        val authAction = application.injector.instanceOf[AuthAction]
-        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => {
-          Future.successful(ImATeapot(""))
-        })
+        val authAction  = application.injector.instanceOf[AuthAction]
+        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
 
         blockResult.futureValue.header.status shouldBe IM_A_TEAPOT
         blockResult.futureValue.header.headers.contains("correlationId")
@@ -90,10 +95,8 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
         )
           .thenReturn(Future.failed(new UnsupportedAuthProvider))
 
-        val authAction = application.injector.instanceOf[AuthAction]
-        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => {
-          Future.successful(ImATeapot(""))
-        })
+        val authAction  = application.injector.instanceOf[AuthAction]
+        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
         blockResult.futureValue.header.status shouldBe FORBIDDEN
         blockResult.futureValue.header.headers.contains("correlationId")
       }
@@ -107,10 +110,8 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
         )
           .thenReturn(Future.failed(new BearerTokenExpired))
 
-        val authAction = application.injector.instanceOf[AuthAction]
-        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => {
-          Future.successful(ImATeapot(""))
-        })
+        val authAction  = application.injector.instanceOf[AuthAction]
+        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
         blockResult.futureValue.header.status shouldBe FORBIDDEN
         blockResult.futureValue.header.headers.contains("correlationId")
       }
@@ -124,13 +125,12 @@ class AuthActionSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMockH
         )
           .thenReturn(Future.failed(new InvalidBearerToken))
 
-        val authAction = application.injector.instanceOf[AuthAction]
-        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => {
-          Future.successful(ImATeapot(""))
-        })
+        val authAction  = application.injector.instanceOf[AuthAction]
+        val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
         blockResult.futureValue.header.status shouldBe INTERNAL_SERVER_ERROR
         blockResult.futureValue.header.headers.contains("correlationId")
       }
     }
   }
+
 }

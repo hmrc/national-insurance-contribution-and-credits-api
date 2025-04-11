@@ -27,11 +27,19 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{OK, route, writeableOf_AnyContentAsEmpty}
 
-class DocumentationControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite with OptionValues with ScalaFutures with should.Matchers with BeforeAndAfterEach {
+class DocumentationControllerSpec
+    extends AnyFreeSpec
+    with GuiceOneAppPerSuite
+    with OptionValues
+    with ScalaFutures
+    with should.Matchers
+    with BeforeAndAfterEach {
+
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .configure(
       "auditing.enabled" -> false
-    ).build()
+    )
+    .build()
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -40,7 +48,7 @@ class DocumentationControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite w
 
   "return 200 when requesting definition" in {
 
-    val url = "/api/definition"
+    val url     = "/api/definition"
     val request = FakeRequest("GET", url)
 
     val result = route(app, request).value.futureValue
@@ -50,7 +58,7 @@ class DocumentationControllerSpec extends AnyFreeSpec with GuiceOneAppPerSuite w
 
   "return 200 when requesting specification" in {
 
-    val url = s"/api/conf/1.0/application.yaml"
+    val url     = s"/api/conf/1.0/application.yaml"
     val request = FakeRequest("GET", url)
 
     val result = route(app, request).value.futureValue

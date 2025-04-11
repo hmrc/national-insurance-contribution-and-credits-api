@@ -23,9 +23,11 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.action
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeAuthAction @Inject()(override val parser: BodyParsers.Default, override val authConnector: AuthConnector)
-                              (implicit override val executionContext: ExecutionContext) extends AuthAction(authConnector, parser) {
+class FakeAuthAction @Inject() (override val parser: BodyParsers.Default, override val authConnector: AuthConnector)(
+    implicit override val executionContext: ExecutionContext
+) extends AuthAction(authConnector, parser) {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
     block(request)
+
 }

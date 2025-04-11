@@ -35,8 +35,9 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .configure(
-      "microservice.services.hip.port" -> server.port(),
-    ).build()
+      "microservice.services.hip.port" -> server.port()
+    )
+    .build()
 
   lazy val connector: HipConnector = inject[HipConnector]
 
@@ -46,10 +47,13 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
     "return 200" when {
       "200 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000200B"), "2013", "2015", "1998-03-23")
-        val url = s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}"
-        server.stubFor(post(urlEqualTo(url)
-        ).withRequestBody(equalToJson("{ \"dateOfBirth\": \"1998-03-23\" }")).withHeader(AUTHORIZATION, containing("Basic aWQ6c2VjcmV0")).willReturn(
-          aResponse().withStatus(200))
+        val url =
+          s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}"
+        server.stubFor(
+          post(urlEqualTo(url))
+            .withRequestBody(equalToJson("{ \"dateOfBirth\": \"1998-03-23\" }"))
+            .withHeader(AUTHORIZATION, containing("Basic aWQ6c2VjcmV0"))
+            .willReturn(aResponse().withStatus(200))
         )
         val response = connector.fetchData(payload, "test")
         await(response).status shouldBe OK
@@ -59,22 +63,32 @@ class HipConnectorSpec extends AnyWordSpec with GuiceOneAppPerSuite with WireMoc
       "400 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000400B"), "2013", "2015", "1998-03-23")
 
-        stubPostServer(aResponse().withStatus(400), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
+        stubPostServer(
+          aResponse().withStatus(400),
+          s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}"
+        )
         await(connector.fetchData(payload, "test")).status shouldBe BAD_REQUEST
       }
 
       "403 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000403B"), "2013", "2015", "1998-03-23")
 
-        stubPostServer(aResponse().withStatus(403), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
+        stubPostServer(
+          aResponse().withStatus(403),
+          s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}"
+        )
         await(connector.fetchData(payload, "test")).status shouldBe FORBIDDEN
       }
       "422 is returned from downstream" in {
         val payload = NICCRequest(NICCNino("BB000422B"), "2013", "2015", "1998-03-23")
 
-        stubPostServer(aResponse().withStatus(422), s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}")
+        stubPostServer(
+          aResponse().withStatus(422),
+          s"/nps/nps-json-service/nps/v1/api/national-insurance/${payload.nationalInsuranceNumber.nino}/contributions-and-credits/from/${payload.startTaxYear}/to/${payload.endTaxYear}"
+        )
         await(connector.fetchData(payload, "test")).status shouldBe UNPROCESSABLE_ENTITY
       }
     }
   }
+
 }

@@ -27,7 +27,7 @@ case class NICCNino(nino: String) {
 
 object NICCNino {
   implicit val ninoWrite: Writes[NICCNino] = new SimpleObjectWrites[NICCNino](_.value)
-  implicit val ninoRead: Reads[NICCNino] = new SimpleObjectReads[NICCNino]("nino", NICCNino.apply)
+  implicit val ninoRead: Reads[NICCNino]   = new SimpleObjectReads[NICCNino]("nino", NICCNino.apply)
 
   // New regex pattern
   private val validNinoFormat = "[[A-Z]&&[^DFIQUV]][[A-Z]&&[^DFIQUVO]] ?\\d{2} ?\\d{2} ?\\d{2} ?[A-D]?"

@@ -16,7 +16,4 @@
 
 package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config
 
-object Binders {
-
-}
-
+object Binders {}
