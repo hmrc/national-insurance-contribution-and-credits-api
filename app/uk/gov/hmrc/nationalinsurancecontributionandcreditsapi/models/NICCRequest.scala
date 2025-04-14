@@ -20,15 +20,10 @@ import com.google.inject.Inject
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 
-case class NICCRequest(nationalInsuranceNumber: NICCNino,
-                       startTaxYear: String,
-                       endTaxYear: String,
-                       dateOfBirth: String)
-
+case class NICCRequest(nationalInsuranceNumber: NICCNino, startTaxYear: String, endTaxYear: String, dateOfBirth: String)
 
 @Inject
 object NICCRequest {
   implicit val format: OFormat[NICCRequest] = Json.format[NICCRequest]
 
 }
-

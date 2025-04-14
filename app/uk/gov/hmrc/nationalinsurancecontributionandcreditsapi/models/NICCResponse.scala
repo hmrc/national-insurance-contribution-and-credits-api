@@ -18,8 +18,7 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models
 
 import play.api.libs.json._
 
-case class NICCResponse(niClass1: Option[Seq[NICCContribution]],
-                        niClass2: Option[Seq[NICCCredit]])
+case class NICCResponse(niClass1: Option[Seq[NICCContribution]], niClass2: Option[Seq[NICCCredit]])
 
 object NICCResponse {
   implicit val format: OFormat[NICCResponse] = Json.format[NICCResponse]

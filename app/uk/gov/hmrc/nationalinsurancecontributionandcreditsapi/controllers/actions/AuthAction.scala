@@ -28,11 +28,13 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthAction @Inject()(
-                            val authConnector: AuthConnector,
-                            val parser: BodyParsers.Default
-                          )(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[Request, AnyContent] with ActionFunction[Request, Request] with AuthorisedFunctions {
+class AuthAction @Inject() (
+    val authConnector: AuthConnector,
+    val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends ActionBuilder[Request, AnyContent]
+    with ActionFunction[Request, Request]
+    with AuthorisedFunctions {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
 
@@ -40,16 +42,17 @@ class AuthAction @Inject()(
 
     authorised(AuthProviders(AuthProvider.PrivilegedApplication)) {
       block(request)
-    }.recover({
-      case e: UnsupportedAuthProvider => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
+    }.recover {
+      case e: UnsupportedAuthProvider =>
+        Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
       case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
-      case _ => InternalServerError.withHeaders(generateResponseHeader())
+      case _                     => InternalServerError.withHeaders(generateResponseHeader())
     }
-    )
   }
 
   private def generateResponseHeader() = {
     val correlationId: String = UUID.randomUUID().toString
     "correlationId" -> correlationId
   }
+
 }

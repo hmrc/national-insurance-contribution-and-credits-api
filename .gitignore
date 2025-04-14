@@ -1,7 +1,6 @@
-.*
-
-!.gitignore
 !.scalafmt.conf
+.*
+!.gitignore
 bin
 .bloop/
 .cache
@@ -21,6 +20,7 @@ lib
 lib_managed
 log
 logs
+.bsp
 .metals/
 modules
 /out

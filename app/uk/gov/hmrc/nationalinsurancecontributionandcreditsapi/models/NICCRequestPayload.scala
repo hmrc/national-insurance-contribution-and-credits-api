@@ -21,9 +21,13 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{NIC
 
 import java.time.LocalDate
 
-final case class NICCRequestPayload(startTaxYear: TaxYear,
-                                  endTaxYear: TaxYear, nationalInsuranceNumber: NICCNino, dateOfBirth: LocalDate, customerCorrelationID: Option[String]) {
-}
+final case class NICCRequestPayload(
+    startTaxYear: TaxYear,
+    endTaxYear: TaxYear,
+    nationalInsuranceNumber: NICCNino,
+    dateOfBirth: LocalDate,
+    customerCorrelationID: Option[String]
+) {}
 
 object NICCRequestPayload {
 

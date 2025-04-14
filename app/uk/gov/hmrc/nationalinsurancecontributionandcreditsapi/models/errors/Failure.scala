@@ -20,14 +20,13 @@ import com.google.inject.Inject
 import play.api.libs.json._
 
 case class Failure(reason: String, code: String) {
-  def this(hipFailure: HIPFailure) = {
-    this(hipFailure.`type`,
-      hipFailure.reason)
-  }
+
+  def this(hipFailure: HIPFailure) =
+    this(hipFailure.`type`, hipFailure.reason)
+
 }
 
 @Inject
 object Failure {
   implicit val format: OFormat[Failure] = Json.format[Failure]
 }
-
