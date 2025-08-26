@@ -1,2 +1,2 @@
 #!/bin/bash
-sbt clean scalafmt test:scalafmt test
+sbt clean scalafmt Test/scalafmt test

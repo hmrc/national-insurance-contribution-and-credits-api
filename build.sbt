@@ -11,12 +11,16 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     routesImport += "uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.config.Binders._",
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
-    scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s"
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Wconf:cat=unused-imports&src=routes/.*:s",
+      "-Wconf:cat=unused-imports&src=html/.*:s",
+      "-Wconf:cat=unused&src=routes/.*:s"
+    ),
   )
   .settings(
     resolvers ++= Seq(
       MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2"),
-      Resolver.jcenterRepo
     )
   )
   .settings(CodeCoverageSettings.settings *)
