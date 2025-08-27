@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.definition
 
 import controllers.Assets
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
