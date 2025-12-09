@@ -37,7 +37,7 @@ class MaternityAllowanceDataRetrievalService(implicit ec: ExecutionContext)
   override def fetchEligibilityData(
       eligibilityCheckDataRequest: EligibilityCheckDataRequest
   ): EitherT[Future, Throwable, EligibilityCheckDataResult] =
-    EitherT.pure[Future, Throwable](EligibilityCheckDataResult(""))
+    EitherT.pure[Future, Throwable](EligibilityCheckDataResult("MaternityAllowanceDataRetrievalService Result"))
 
 }
 
@@ -47,7 +47,7 @@ class EmploymentSupportAllowanceDataRetrievalService(implicit ec: ExecutionConte
   override def fetchEligibilityData(
       eligibilityCheckDataRequest: EligibilityCheckDataRequest
   ): EitherT[Future, Throwable, EligibilityCheckDataResult] =
-    EitherT.pure[Future, Throwable](EligibilityCheckDataResult(""))
+    EitherT.pure[Future, Throwable](EligibilityCheckDataResult("EmploymentSupportAllowanceDataRetrievalService Result"))
 
 }
 
@@ -57,7 +57,7 @@ class JobSeekersAllowanceDataRetrievalService(implicit ec: ExecutionContext)
   override def fetchEligibilityData(
       eligibilityCheckDataRequest: EligibilityCheckDataRequest
   ): EitherT[Future, Throwable, EligibilityCheckDataResult] =
-    EitherT.pure[Future, Throwable](EligibilityCheckDataResult(""))
+    EitherT.pure[Future, Throwable](EligibilityCheckDataResult("JobSeekersAllowanceDataRetrievalService Result"))
 
 }
 
@@ -67,6 +67,6 @@ class GetYourStatePensionDataRetrievalService(implicit ec: ExecutionContext)
   override def fetchEligibilityData(
       eligibilityCheckDataRequest: EligibilityCheckDataRequest
   ): EitherT[Future, Throwable, EligibilityCheckDataResult] =
-    EitherT.pure[Future, Throwable](EligibilityCheckDataResult(""))
+    EitherT.pure[Future, Throwable](EligibilityCheckDataResult("GetYourStatePensionDataRetrievalService Result"))
 
 }
