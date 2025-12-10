@@ -22,6 +22,7 @@ import org.mockito.Mockito.{when, withSettings}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -45,6 +46,12 @@ class NICCControllerSpec
     with ScalaFutures
     with should.Matchers
     with BeforeAndAfterEach {
+
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
+    Span(5, Seconds),
+    Span(50, Millis)
+  )
+
   val mockHipConnector: HipConnector = mock[HipConnector](withSettings().verboseLogging())
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
