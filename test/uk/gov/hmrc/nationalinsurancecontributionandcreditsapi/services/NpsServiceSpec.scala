@@ -23,6 +23,12 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.api.EligibilityCheckDataRequest
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{BenefitType, EligibilityCheckDataResult}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.benefitEligibilityDataRetrieval.{
+  EmploymentSupportAllowanceDataRetrievalService,
+  GetYourStatePensionDataRetrievalService,
+  JobSeekersAllowanceDataRetrievalService,
+  MaternityAllowanceDataRetrievalService
+}
 
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}

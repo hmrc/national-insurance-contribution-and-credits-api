@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.benefitEligibilityDataRetrieval
 
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
@@ -25,12 +25,12 @@ import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{Ben
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 
-class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec {
+class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec {
 
   implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
-  val underTest = new EmploymentSupportAllowanceDataRetrievalService()
+  val underTest = new JobSeekersAllowanceDataRetrievalService()
 
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -38,9 +38,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec {
         underTest
           .fetchEligibilityData(EligibilityCheckDataRequest(BenefitType.MA))
           .value
-          .futureValue shouldBe Right(
-          EligibilityCheckDataResult("EmploymentSupportAllowanceDataRetrievalService Result")
-        )
+          .futureValue shouldBe Right(EligibilityCheckDataResult("JobSeekersAllowanceDataRetrievalService Result"))
 
       }
     }

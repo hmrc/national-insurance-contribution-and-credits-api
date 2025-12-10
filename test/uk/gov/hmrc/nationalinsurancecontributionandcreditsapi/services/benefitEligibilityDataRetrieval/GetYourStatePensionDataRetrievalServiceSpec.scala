@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
+package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.benefitEligibilityDataRetrieval
 
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers._
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.api.EligibilityCheckDataRequest
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{BenefitType, EligibilityCheckDataResult}
-import org.scalatest.matchers.should.Matchers._
 
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 
-class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec {
+class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec {
 
   implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
-  val underTest = new MaternityAllowanceDataRetrievalService()
+  val underTest = new GetYourStatePensionDataRetrievalService()
 
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -38,7 +38,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec {
         underTest
           .fetchEligibilityData(EligibilityCheckDataRequest(BenefitType.MA))
           .value
-          .futureValue shouldBe Right(EligibilityCheckDataResult("MaternityAllowanceDataRetrievalService Result"))
+          .futureValue shouldBe Right(EligibilityCheckDataResult("GetYourStatePensionDataRetrievalService Result"))
 
       }
     }

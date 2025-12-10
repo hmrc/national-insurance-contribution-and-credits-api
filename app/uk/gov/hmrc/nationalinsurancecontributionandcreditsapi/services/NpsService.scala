@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services
 import cats.data.EitherT
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.api.EligibilityCheckDataRequest
 import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.models.domain.{BenefitType, EligibilityCheckDataResult}
+import uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.services.benefitEligibilityDataRetrieval._
 
 import javax.inject.Inject
 import scala.concurrent.Future
