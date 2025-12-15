@@ -1,2 +1,2 @@
-GET        /api/definition                 uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.definition.DocumentationController.definition()
-GET        /api/conf/:version/*file        uk.gov.hmrc.nationalinsurancecontributionandcreditsapi.controllers.definition.DocumentationController.specification(version, file)
+GET        /api/definition                 uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.definition.DocumentationController.definition()
+GET        /api/conf/:version/*file        uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.definition.DocumentationController.specification(version, file)
