@@ -18,20 +18,35 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.instances.future.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
+import com.google.inject.Inject
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, CorrelationId}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
+import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GetYourStatePensionDataRetrievalService(implicit ec: ExecutionContext) {
+class GetYourStatePensionDataRetrievalService @Inject() (
+    marriageDetailsConnector: MarriageDetailsConnector,
+    marriageDetailsRequestHelper: MarriageDetailsRequestHelper,
+    appConfig: AppConfig
+)(implicit ec: ExecutionContext) {
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: GYSPEligibilityCheckDataRequest
-  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultGYSP] =
-    EitherT.pure[Future, BenefitEligibilityError](
-      EligibilityCheckDataResultGYSP()
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultGYSP] = {
+    val correlationId = CorrelationId.generate
+    for {
+      marriageDetailsResult <- marriageDetailsConnector.fetchMarriageDetails(
+        marriageDetailsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
+      )
+    } yield EligibilityCheckDataResultGYSP(
+      marriageDetailsResult
     )
+  }
 
 }

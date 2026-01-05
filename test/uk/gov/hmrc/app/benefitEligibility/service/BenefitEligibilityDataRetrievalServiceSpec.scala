@@ -35,7 +35,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseSta
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   Class2MaReceiptsResult,
   ContributionCreditResult,
-  LiabilityResult
+  LiabilityResult,
+  MarriageDetailsResult
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.MaternityAllowanceSortType.NinoDescending
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
@@ -73,6 +74,9 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   private implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
+
+  private val marriageDetailsResult =
+    MarriageDetailsResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
 
   private val class2MaReceiptsResult =
     Class2MaReceiptsResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
@@ -192,22 +196,32 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
       "should retrieve eligibility data for GYSP" in {
         (mockGetYourStatePensionDataRetrievalService
-          .fetchEligibilityData(_: GYSPEligibilityCheckDataRequest))
-          .expects(eligibilityCheckDataRequestGYSP)
-          .returning(EitherT.pure[Future, BenefitEligibilityError](EligibilityCheckDataResultGYSP()))
+          .fetchEligibilityData(_: GYSPEligibilityCheckDataRequest)(_: HeaderCarrier))
+          .expects(eligibilityCheckDataRequestGYSP, *)
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](
+              EligibilityCheckDataResultGYSP(
+                marriageDetailsResult
+              )
+            )
+          )
 
         underTest.getEligibilityData(eligibilityCheckDataRequestGYSP).value.futureValue shouldBe Right(
-          EligibilityCheckDataResultGYSP()
+          EligibilityCheckDataResultGYSP(
+            marriageDetailsResult
+          )
         )
       }
       "should retrieve eligibility data for BSP" in {
         (mockBspDataRetrievalService
-          .fetchEligibilityData(_: BSPEligibilityCheckDataRequest))
-          .expects(eligibilityCheckDataRequestBSP)
-          .returning(EitherT.pure[Future, BenefitEligibilityError](EligibilityCheckDataResultBSP()))
+          .fetchEligibilityData(_: BSPEligibilityCheckDataRequest)(_: HeaderCarrier))
+          .expects(eligibilityCheckDataRequestBSP, *)
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](EligibilityCheckDataResultBSP(marriageDetailsResult))
+          )
 
         underTest.getEligibilityData(eligibilityCheckDataRequestBSP).value.futureValue shouldBe Right(
-          EligibilityCheckDataResultBSP()
+          EligibilityCheckDataResultBSP(marriageDetailsResult)
         )
       }
     }

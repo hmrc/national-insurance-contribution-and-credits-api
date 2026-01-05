@@ -23,9 +23,9 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.AccessForbidden
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.GYSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.BSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
@@ -38,7 +38,7 @@ import java.time.LocalDate
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
-class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
+class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -57,13 +57,13 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   val appConfig: AppConfig = new AppConfig(config = mockServicesConfig)
 
-  val underTest = new GetYourStatePensionDataRetrievalService(
+  val underTest = new BspDataRetrievalService(
     mockMarriageDetailsConnector,
     mockMarriageDetailsRequestHelper,
     appConfig
   )
 
-  private val eligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+  private val eligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
     nationalInsuranceNumber = "GD379251T",
     dateOfBirth = LocalDate.parse("1992-08-23"),
     startTaxYear = 2025,
@@ -72,20 +72,13 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     searchStartYear = Some(2025),
     searchEndYear = Some(2025),
     latest = Some(true),
-    sequence = Some(12),
-    associatedCalculationSequenceNumber = 1123232,
-    benefitType = "SOME BENEFIT",
-    pensionProcessingArea = Some("pensionProcessingArea"),
-    schemeContractedOutNumber = 32324343,
-    schemeMembershipSequenceNumber = Some(4343343),
-    schemeMembershipTransferSequenceNumber = Some(435454545),
-    schemeMembershipOccurrenceNumber = Some(3289908)
+    sequence = Some(23)
   )
 
   private val marriageDetailsResult =
     MarriageDetailsResult(Failure, None, Some(NpsError(AccessForbidden, "", 403)))
 
-  "GetYourStatePensionDataRetrievalService" - {
+  "BspDataRetrievalService" - {
     ".fetchEligibilityData" - {
       "should retrieve data successfully" in {
 
@@ -99,14 +92,14 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           )
 
         (mockMarriageDetailsRequestHelper
-          .buildRequestPath(_: String, _: GYSPEligibilityCheckDataRequest))
+          .buildRequestPath(_: String, _: BSPEligibilityCheckDataRequest))
           .expects("hip", eligibilityCheckDataRequest)
           .returning("some url path")
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Right(EligibilityCheckDataResultGYSP(marriageDetailsResult))
+          .futureValue shouldBe Right(EligibilityCheckDataResultBSP(marriageDetailsResult))
 
       }
     }
