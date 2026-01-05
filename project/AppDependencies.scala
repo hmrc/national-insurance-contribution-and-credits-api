@@ -8,7 +8,8 @@ object AppDependencies {
     "uk.gov.hmrc"   %% "bootstrap-backend-play-30" % bootstrapVersion,
     "uk.gov.hmrc"   %% "domain-play-30"            % "11.0.0",
     "com.beachape"  %% "enumeratum-play-json"      % "1.9.0",
-    "org.typelevel" %% "cats-core"                 % "2.13.0"
+    "org.typelevel" %% "cats-core"                 % "2.13.0",
+    "io.scalaland"  %% "chimney"                   % "1.8.2"
   )
 
   val test = Seq(
