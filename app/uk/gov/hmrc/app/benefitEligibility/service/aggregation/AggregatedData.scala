@@ -16,7 +16,19 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation
 
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, GYSP, MA}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, Identifier, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.{
+  EndDate,
+  SpouseForename,
+  SpouseSurname,
+  StartDate
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.enums.{
+  MarriageEndDateStatus,
+  MarriageStartDateStatus,
+  MarriageStatus
+}
 
 sealed trait AggregatedData {
   def benefitType: BenefitType
@@ -33,7 +45,60 @@ object AggregatedData {
       //      startDate: LocalDate,
       //      endDate: LocalDate
   ) extends AggregatedData {
-    def benefitType: BenefitType = BenefitType.MA
+    def benefitType: BenefitType = MA
+  }
+
+  case class AggregatedDataBSP(
+      // primaryPaidEarnings: BigDecimal,
+      // contributionCategory: ContributionCategory,
+      // contributionCategoryLetter: ContributionCategoryLetter,
+      // primaryContribution: Int,
+      // class1ContributionStatus: Class1ContributionStatus,
+      // contributionCreditType: ContributionCreditType,
+      // taxYear: TaxYear,
+      // numberOfCreditsAndConts: Int,
+      status: MarriageStatus,
+      startDate: StartDate,
+      startDateStatus: MarriageStartDateStatus,
+      endDate: EndDate,
+      endDateStatus: MarriageEndDateStatus,
+      // terminationReason: String,
+      spouseIdentifier: Identifier,
+      spouseForename: SpouseForename,
+      spouseSurname: SpouseSurname
+  ) extends AggregatedData {
+    def benefitType: BenefitType = BSP
+  }
+
+  case class AggregatedDataGYSP(
+      // guaranteedMinimumPensionContractedOutDeductionsPre1988: Int,
+      // guaranteedMinimumPensionContractedOutDeductionsPost1988: Int,
+      // contractedOutDeductionsPre1988: Int,
+      // contractedOutDeductionsPost1988: Int,
+      // contributionCategory: ContributionCategory,
+      // contributionCategoryLetter: ContributionCategoryLetter,
+      // contributionCreditType: ContributionCreditType,
+      // taxYear: TaxYear,
+      // numberOfCreditsAndConts: Int,
+      // totalGraduatedPensionUnits: Int,
+      // employerName: String,
+      // longTermBenefitNotes: String,
+      status: MarriageStatus,
+      startDate: StartDate,
+      startDateStatus: MarriageStartDateStatus,
+      endDate: EndDate,
+      endDateStatus: MarriageEndDateStatus,
+      // terminationReason: String,
+      spouseIdentifier: Identifier,
+      spouseForename: SpouseForename,
+      spouseSurname: SpouseSurname
+      // schemeMembershipStartDate: StartDate,
+      // schemeMembershipEndDate: EndDate,
+      // employersContractedOutNumberDetails: Int,
+      // qualifyingTaxYear: TaxYear,
+      // primaryPainEarnings: BigDecimal
+  ) extends AggregatedData {
+    def benefitType: BenefitType = GYSP
   }
 
 }

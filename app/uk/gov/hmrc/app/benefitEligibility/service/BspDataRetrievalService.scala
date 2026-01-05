@@ -17,22 +17,38 @@
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.BSPEligibilityCheckDataRequest
+import com.google.inject.Inject
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, CorrelationId}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.{
+  BSPEligibilityCheckDataRequest,
+  EligibilityCheckDataRequest
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
+import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BspDataRetrievalService(
-    implicit ec: ExecutionContext
-) {
+class BspDataRetrievalService @Inject() (
+    marriageDetailsConnector: MarriageDetailsConnector,
+    marriageDetailsRequestHelper: MarriageDetailsRequestHelper,
+    appConfig: AppConfig
+)(implicit ec: ExecutionContext) {
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: BSPEligibilityCheckDataRequest
-  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] =
-    EitherT.pure[Future, BenefitEligibilityError](
-      EligibilityCheckDataResultBSP()
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] = {
+    val correlationId = CorrelationId.generate
+    for {
+      marriageDetailsResult <- marriageDetailsConnector.fetchMarriageDetails(
+        marriageDetailsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
+      )
+    } yield EligibilityCheckDataResultBSP(
+      marriageDetailsResult
     )
+  }
 
 }

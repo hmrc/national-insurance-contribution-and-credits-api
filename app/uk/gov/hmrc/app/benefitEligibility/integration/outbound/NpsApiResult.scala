@@ -18,9 +18,15 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, ContributionCredit, Liabilities}
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, TextualErrorStatusCode}
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
+  Class2MAReceipts,
+  ContributionCredit,
+  Liabilities,
+  MarriageDetails
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 
 import scala.collection.immutable
 
@@ -28,7 +34,9 @@ sealed abstract class NpsApiResponseStatus(override val entryName: String) exten
 
 object NpsApiResponseStatus extends Enum[NpsApiResponseStatus] with PlayJsonEnum[NpsApiResponseStatus] {
   val values: immutable.IndexedSeq[NpsApiResponseStatus] = findValues
+
   case object Success extends NpsApiResponseStatus("SUCCESS")
+
   case object Failure extends NpsApiResponseStatus("FAILURE")
 }
 
@@ -52,6 +60,14 @@ sealed trait NpsApiResult extends ApiResult {
 }
 
 object NpsApiResult {
+
+  case class MarriageDetailsResult(
+      status: NpsApiResponseStatus,
+      successResponse: Option[MarriageDetailsSuccessResponse],
+      error: Option[NpsError]
+  ) extends NpsApiResult {
+    val apiName: ApiName = MarriageDetails
+  }
 
   case class Class2MaReceiptsResult(
       status: NpsApiResponseStatus,

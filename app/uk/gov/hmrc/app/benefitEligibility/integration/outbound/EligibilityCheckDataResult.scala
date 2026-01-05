@@ -16,15 +16,20 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
-import uk.gov.hmrc.app.benefitEligibility.common.{OverallResultStatus, OverallResultSummary}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
+import uk.gov.hmrc.app.benefitEligibility.common.{CorrelationId, OverallResultStatus, OverallResultSummary}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   Class2MaReceiptsResult,
   ContributionCreditResult,
-  LiabilityResult
+  LiabilityResult,
+  MarriageDetailsResult
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators.AggregationServiceMA
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators.{
+  AggregationServiceBSP,
+  AggregationServiceGYSP,
+  AggregationServiceMA
+}
 
 sealed trait EligibilityCheckDataResult {
   def allResults: List[NpsApiResult]
@@ -48,8 +53,8 @@ object EligibilityCheckDataResult {
     case result: EligibilityCheckDataResultMA   => AggregationServiceMA.aggregator.aggregate(result)
     case result: EligibilityCheckDataResultESA  => ???
     case result: EligibilityCheckDataResultJSA  => ???
-    case result: EligibilityCheckDataResultGYSP => ???
-    case result: EligibilityCheckDataResultBSP  => ???
+    case result: EligibilityCheckDataResultGYSP => AggregationServiceGYSP.aggregator.aggregate(result)
+    case result: EligibilityCheckDataResultBSP  => AggregationServiceBSP.aggregator.aggregate(result)
   }
 
   case class EligibilityCheckDataResultMA(
@@ -70,12 +75,16 @@ object EligibilityCheckDataResult {
     override def allResults: List[NpsApiResult] = ???
   }
 
-  case class EligibilityCheckDataResultGYSP() extends EligibilityCheckDataResult {
-    override def allResults: List[NpsApiResult] = ???
+  case class EligibilityCheckDataResultGYSP(
+      marriageDetailsResult: MarriageDetailsResult
+  ) extends EligibilityCheckDataResult {
+    override def allResults: List[NpsApiResult] = List(marriageDetailsResult)
   }
 
-  case class EligibilityCheckDataResultBSP() extends EligibilityCheckDataResult {
-    override def allResults: List[NpsApiResult] = ???
+  case class EligibilityCheckDataResultBSP(
+      marriageDetailsResult: MarriageDetailsResult
+  ) extends EligibilityCheckDataResult {
+    override def allResults: List[NpsApiResult] = List(marriageDetailsResult)
   }
 
 }

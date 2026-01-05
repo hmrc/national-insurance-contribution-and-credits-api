@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.common
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.enums
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 
-sealed abstract class ApiName(override val entryName: String) extends EnumEntry
+sealed abstract class MarriageEndDateStatus(override val entryName: String) extends EnumEntry
 
-object ApiName extends Enum[ApiName] with PlayJsonEnum[ApiName] {
-  val values: immutable.IndexedSeq[ApiName] = findValues
+object MarriageEndDateStatus extends Enum[MarriageEndDateStatus] with PlayJsonEnum[MarriageEndDateStatus] {
+  val values: immutable.IndexedSeq[MarriageEndDateStatus] = findValues
 
-  case object Class2MAReceipts   extends ApiName("Class2 MA Receipts")
-  case object Liabilities        extends ApiName("Liabilities")
-  case object ContributionCredit extends ApiName("Contribution Credit")
-  case object MarriageDetails    extends ApiName("Marriage Details")
+  case object InEffect   extends MarriageEndDateStatus("IN EFFECT")
+  case object NotKnown   extends MarriageEndDateStatus("NOT KNOWN")
+  case object Unverified extends MarriageEndDateStatus("UNVERIFIED")
+  case object Verified   extends MarriageEndDateStatus("VERIFIED")
 }

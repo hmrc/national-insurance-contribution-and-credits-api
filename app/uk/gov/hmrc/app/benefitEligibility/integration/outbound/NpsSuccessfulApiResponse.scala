@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import play.api.libs.json.Writes
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 
 trait NpsSuccessfulApiResponse extends NpsApiResponse
 
@@ -26,6 +27,8 @@ object NpsSuccessfulApiResponse {
   implicit val npsSuccessfulApiResponseWrites: Writes[NpsSuccessfulApiResponse] = Writes {
     case r: Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse =>
       Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse.getClass2MAReceiptsResponseWrites.writes(r)
+    case m: MarriageDetailsSuccessResponse =>
+      MarriageDetailsSuccessResponse.getMarriageDetailsResponseWrites.writes(m)
   }
 
 }
