@@ -19,12 +19,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.inbound
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, NpsApiResponseStatus, NpsError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, NpsApiResponseStatus, NpsNormalizedError}
 
 case class SanitizedApiResult(
     apiName: ApiName,
     status: NpsApiResponseStatus,
-    error: Option[NpsError]
+    error: Option[NpsNormalizedError]
 )
 
 object SanitizedApiResult {

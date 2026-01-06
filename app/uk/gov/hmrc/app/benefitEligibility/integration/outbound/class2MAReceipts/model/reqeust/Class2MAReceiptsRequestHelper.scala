@@ -23,11 +23,11 @@ class Class2MAReceiptsRequestHelper {
 
   def buildRequestPath(host: String, req: MAEligibilityCheckDataRequest): String = {
     def latestFilter: Option[String]      = req.archived.map(l => s"latest=$l&")
-    def receiptDateFilter: Option[String] = req.receiptDate.map(r => s"receiptDate=$r&")
-    def typeFilter: Option[String]        = req.sortBy.map(t => s"type=$t")
+    def receiptDateFilter: Option[String] = req.receiptDate.map(r => s"receiptDate=${r.value}&")
+    def typeFilter: Option[String]        = req.sortBy.map(t => s"type=$t&")
 
-    val options = latestFilter.combine(receiptDateFilter).combine(typeFilter.map(result => s"?$result"))
-    s"$host/ni/class-2/${req.identifier}/maternity-allowance/receipts$options"
+    val options = latestFilter.combine(receiptDateFilter).combine(typeFilter).getOrElse("")
+    s"$host/ni/class-2/${req.identifier}/maternity-allowance/receipts?$options".dropRight(1)
   }
 
 }

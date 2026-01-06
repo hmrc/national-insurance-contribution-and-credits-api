@@ -22,9 +22,9 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.AccessForbidden
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.AccessForbidden
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
@@ -83,7 +83,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
   )
 
   private val marriageDetailsResult =
-    MarriageDetailsResult(Failure, None, Some(NpsError(AccessForbidden, "", 403)))
+    MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
 
   "GetYourStatePensionDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -94,7 +94,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .expects("some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              MarriageDetailsResult(Failure, None, Some(NpsError(AccessForbidden, "", 403)))
+              MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
             )
           )
 

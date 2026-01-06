@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode
 
 trait NpsResponseMapper[A <: NpsApiResponse, B <: NpsApiResult] {
   def toResult(response: A): B
 
-  def toResult(code: TextualErrorStatusCode): B
+  def toResult(code: NormalizedErrorStatusCode): B
 
 }
