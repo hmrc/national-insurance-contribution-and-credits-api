@@ -81,7 +81,7 @@ object Class2MAReceiptsError {
 
   }
 
-  final case class Reason private (value: String)
+  final case class Reason(value: String)
 
   object Reason {
     private val minLength = 1
@@ -108,7 +108,7 @@ object Class2MAReceiptsError {
 
   }
 
-  final case class ErrorCode422 private (value: String)
+  final case class ErrorCode422(value: String)
 
   object ErrorCode422 {
     private val minLength = 1

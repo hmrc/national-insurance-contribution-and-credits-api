@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, TextualErrorStatusCode}
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NormalizedError, NormalizedErrorStatusCode}
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   Class2MAReceipts,
   ContributionCredit,
@@ -40,22 +40,22 @@ object NpsApiResponseStatus extends Enum[NpsApiResponseStatus] with PlayJsonEnum
   case object Failure extends NpsApiResponseStatus("FAILURE")
 }
 
-case class NpsError(code: TextualErrorStatusCode, message: String, downstreamStatus: Int)
+case class NpsNormalizedError(code: NormalizedErrorStatusCode, message: String, downstreamStatus: Int)
 
-object NpsError {
-  implicit val writes: Writes[NpsError] = Json.writes[NpsError]
+object NpsNormalizedError {
+  implicit val writes: Writes[NpsNormalizedError] = Json.writes[NpsNormalizedError]
 }
 
 sealed trait ApiResult {
   val apiName: ApiName
   val status: NpsApiResponseStatus
-  val error: Option[NpsError]
+  val error: Option[NpsNormalizedError]
 }
 
 sealed trait NpsApiResult extends ApiResult {
   val apiName: ApiName
   val status: NpsApiResponseStatus
-  val error: Option[NpsError]
+  val error: Option[NpsNormalizedError]
   val successResponse: Option[NpsSuccessfulApiResponse]
 }
 
@@ -64,7 +64,7 @@ object NpsApiResult {
   case class MarriageDetailsResult(
       status: NpsApiResponseStatus,
       successResponse: Option[MarriageDetailsSuccessResponse],
-      error: Option[NpsError]
+      error: Option[NpsNormalizedError]
   ) extends NpsApiResult {
     val apiName: ApiName = MarriageDetails
   }
@@ -72,7 +72,7 @@ object NpsApiResult {
   case class Class2MaReceiptsResult(
       status: NpsApiResponseStatus,
       successResponse: Option[Class2MAReceiptsSuccessResponse],
-      error: Option[NpsError]
+      error: Option[NpsNormalizedError]
   ) extends NpsApiResult {
     val apiName: ApiName = Class2MAReceipts
   }
@@ -80,7 +80,7 @@ object NpsApiResult {
   case class ContributionCreditResult(
       status: NpsApiResponseStatus,
       successResponse: Option[Class2MAReceiptsSuccessResponse], // TODO ContributionCreditResponse will go here
-      error: Option[NpsError]
+      error: Option[NpsNormalizedError]
   ) extends NpsApiResult {
     val apiName: ApiName = ContributionCredit
   }
@@ -88,7 +88,7 @@ object NpsApiResult {
   case class LiabilityResult(
       status: NpsApiResponseStatus,
       successResponse: Option[Class2MAReceiptsSuccessResponse], // TODO LiabilityResult will go here
-      error: Option[NpsError]
+      error: Option[NpsNormalizedError]
   ) extends NpsApiResult {
     val apiName: ApiName = Liabilities
   }

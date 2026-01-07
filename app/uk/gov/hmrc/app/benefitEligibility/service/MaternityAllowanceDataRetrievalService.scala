@@ -19,14 +19,14 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.AccessForbidden
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.AccessForbidden
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ContributionCreditResult, LiabilityResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.Class2MAReceiptsRequestHelper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -47,11 +47,11 @@ class MaternityAllowanceDataRetrievalService @Inject() (
       class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
         class2MAReceiptsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
       )
-      liabilityResult = LiabilityResult(Failure, None, Some(NpsError(AccessForbidden, "", 403)))
+      liabilityResult = LiabilityResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
       contributionCreditResult = ContributionCreditResult(
         Failure,
         None,
-        Some(NpsError(AccessForbidden, "", 403))
+        Some(NpsNormalizedError(AccessForbidden, "", 403))
       )
     } yield EligibilityCheckDataResultMA(
       class2MaReceiptsResult,

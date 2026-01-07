@@ -33,7 +33,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.Class2MAReceiptsRequestHelper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -85,13 +85,17 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   private val class2MaReceiptsResult =
-    Class2MaReceiptsResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    Class2MaReceiptsResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
   private val liabilityResult =
-    LiabilityResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    LiabilityResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
   private val contributionCreditResult =
-    ContributionCreditResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    ContributionCreditResult(
+      Failure,
+      None,
+      Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
+    )
 
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -102,7 +106,11 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .expects("some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              Class2MaReceiptsResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+              Class2MaReceiptsResult(
+                Failure,
+                None,
+                Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
+              )
             )
           )
 

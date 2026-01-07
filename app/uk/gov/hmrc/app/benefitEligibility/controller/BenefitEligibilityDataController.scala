@@ -20,6 +20,7 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.AggregatorSyntax.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -50,7 +51,10 @@ class BenefitEligibilityDataController @Inject() (
                 BadRequest(Json.toJson(new Response(Seq(new Failure("There was a problem with the request", "400")))))
                   .withHeaders("correlationId" -> correlationId)
               }
-              .map(result => Ok("success"))
+              .map { result =>
+                result.aggregate
+                Ok("success")
+              }
               .value
               .map {
                 case Left(value)  => value

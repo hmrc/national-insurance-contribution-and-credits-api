@@ -17,50 +17,24 @@
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 
 import cats.syntax.all.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityDataFetchError, OverallResultStatus}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData.AggregatedDataMA
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
 
 object AggregationServiceMA {
 
-  val aggregator: ResultAggregator[EligibilityCheckDataResultMA] =
+  val aggregator: ResultAggregator[EligibilityCheckDataResultMA] = {
     (eligibilityCheckDataSuccessResultMA: EligibilityCheckDataResultMA) =>
-      if (eligibilityCheckDataSuccessResultMA.overallResultStatus == OverallResultStatus.Success) {
+      val class2MaReceiptsResult = eligibilityCheckDataSuccessResultMA.class2MaReceiptsResult
+      AggregatedDataMA(
+        class2MaReceiptsResult.successResponse
+          .map(_.class2MAReceiptDetails)
+          .sequence
+          .flatten
+          .flatMap(_.receiptDate)
+      )
 
-        val class2MaReceiptsResult = eligibilityCheckDataSuccessResultMA.class2MaReceiptsResult
-        Right(
-          AggregatedDataMA(
-            class2MaReceiptsResult.successResponse
-              .map(_.class2MAReceiptDetails)
-              .sequence
-              .flatten
-              .flatMap(_.receiptDate)
-          )
-        )
-
-      } else if (eligibilityCheckDataSuccessResultMA.overallResultStatus == OverallResultStatus.Failure) {
-        Left(
-          BenefitEligibilityDataFetchError(
-            OverallResultStatus.Failure,
-            MA,
-            eligibilityCheckDataSuccessResultMA.resultSummary,
-            eligibilityCheckDataSuccessResultMA.allResults.filter(_.status == Failure)
-          )
-        )
-      } else {
-        Left(
-          BenefitEligibilityDataFetchError(
-            OverallResultStatus.Partial,
-            MA,
-            eligibilityCheckDataSuccessResultMA.resultSummary,
-            eligibilityCheckDataSuccessResultMA.allResults.filter(_.status == Success) ++
-              eligibilityCheckDataSuccessResultMA.allResults.filter(_.status == Failure)
-          )
-        )
-      }
+  }
 
 }

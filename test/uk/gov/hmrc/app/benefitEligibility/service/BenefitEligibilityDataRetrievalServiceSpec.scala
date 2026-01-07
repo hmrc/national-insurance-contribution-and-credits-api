@@ -39,7 +39,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   MarriageDetailsResult
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -76,16 +76,20 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   private val marriageDetailsResult =
-    MarriageDetailsResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
   private val class2MaReceiptsResult =
-    Class2MaReceiptsResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    Class2MaReceiptsResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
   private val liabilityResult =
-    LiabilityResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    LiabilityResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
   private val contributionCreditResult =
-    ContributionCreditResult(Failure, None, Some(NpsError(TextualErrorStatusCode.AccessForbidden, "", 403)))
+    ContributionCreditResult(
+      Failure,
+      None,
+      Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
+    )
 
   private val eligibilityCheckDataRequestMA = MAEligibilityCheckDataRequest(
     nationalInsuranceNumber = "GD379251T",

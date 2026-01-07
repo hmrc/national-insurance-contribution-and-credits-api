@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.util
 import cats.implicits.catsSyntaxEitherId
 import play.api.libs.json.Reads
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, ParsingError, ValidationError}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.util.{Failure, Success, Try}
 
@@ -27,7 +27,7 @@ object HttpParsing {
 
   def attemptParse[T](
       response: HttpResponse
-  )(implicit reads: Reads[T]): Either[BenefitEligibilityError, T] =
+  )(implicit reads: Reads[T], headerCarrier: HeaderCarrier): Either[BenefitEligibilityError, T] =
     Try(response.json) match {
       case Success(value) =>
         value

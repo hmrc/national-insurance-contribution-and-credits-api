@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.{
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
   AccessForbidden,
   BadRequest,
   InternalServerError,
@@ -28,7 +28,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.{
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsError
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.ErrorCode403.ErrorCode403_2
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.ErrorReason403.Forbidden
@@ -64,7 +64,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           MarriageDetailsResult(
             Failure,
             None,
-            Some(NpsError(code = BadRequest, message = "", downstreamStatus = 400))
+            Some(NpsNormalizedError(code = BadRequest, message = "", downstreamStatus = 400))
           )
       }
 
@@ -77,7 +77,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           MarriageDetailsResult(
             Failure,
             None,
-            Some(NpsError(code = AccessForbidden, message = "Forbidden", downstreamStatus = 403))
+            Some(NpsNormalizedError(code = AccessForbidden, message = "Forbidden", downstreamStatus = 403))
           )
       }
 
@@ -90,7 +90,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
             Failure,
             None,
             Some(
-              NpsError(
+              NpsNormalizedError(
                 code = UnprocessableEntity,
                 message = "",
                 downstreamStatus = 422
@@ -107,7 +107,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           Failure,
           None,
           Some(
-            NpsError(
+            NpsNormalizedError(
               UnprocessableEntity,
               UnprocessableEntity.message,
               UnprocessableEntity.code
@@ -123,7 +123,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           Failure,
           None,
           Some(
-            NpsError(
+            NpsNormalizedError(
               BadRequest,
               BadRequest.message,
               BadRequest.code
@@ -139,7 +139,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           Failure,
           None,
           Some(
-            NpsError(
+            NpsNormalizedError(
               AccessForbidden,
               AccessForbidden.message,
               AccessForbidden.code
@@ -155,7 +155,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           Failure,
           None,
           Some(
-            NpsError(
+            NpsNormalizedError(
               NotFound,
               NotFound.message,
               NotFound.code
@@ -171,7 +171,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
           Failure,
           None,
           Some(
-            NpsError(
+            NpsNormalizedError(
               InternalServerError,
               InternalServerError.message,
               InternalServerError.code

@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper
 
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.{
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
   AccessForbidden,
   BadRequest,
   UnprocessableEntity
@@ -29,7 +29,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
   MarriageDetailsError,
   MarriageDetailsResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsError, NpsResponseMapper}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsNormalizedError, NpsResponseMapper}
 
 class MarriageDetailsResponseMapper extends NpsResponseMapper[MarriageDetailsResponse, MarriageDetailsResult] {
 
@@ -43,14 +43,20 @@ class MarriageDetailsResponseMapper extends NpsResponseMapper[MarriageDetailsRes
         MarriageDetailsResult(
           Failure,
           None,
-          Some(NpsError(code = BadRequest, message = failures.map(_.reason).mkString(","), downstreamStatus = 400))
+          Some(
+            NpsNormalizedError(
+              code = BadRequest,
+              message = failures.map(_.reason).mkString(","),
+              downstreamStatus = 400
+            )
+          )
         )
 
       case MarriageDetailsError.MarriageDetailsErrorResponse403(reason, code) =>
         MarriageDetailsResult(
           Failure,
           None,
-          Some(NpsError(code = AccessForbidden, message = reason.entryName, downstreamStatus = 403))
+          Some(NpsNormalizedError(code = AccessForbidden, message = reason.entryName, downstreamStatus = 403))
         )
 
       case MarriageDetailsError.MarriageDetailsErrorResponse422(failures) =>
@@ -58,7 +64,7 @@ class MarriageDetailsResponseMapper extends NpsResponseMapper[MarriageDetailsRes
           Failure,
           None,
           Some(
-            NpsError(
+            NpsNormalizedError(
               code = UnprocessableEntity,
               message = failures.map(_.reason).mkString(","),
               downstreamStatus = 422
@@ -67,12 +73,12 @@ class MarriageDetailsResponseMapper extends NpsResponseMapper[MarriageDetailsRes
         )
     }
 
-  def toResult(textualErrorStatusCode: TextualErrorStatusCode) =
+  def toResult(textualErrorStatusCode: NormalizedErrorStatusCode) =
     MarriageDetailsResult(
       Failure,
       None,
       Some(
-        NpsError(
+        NpsNormalizedError(
           textualErrorStatusCode,
           textualErrorStatusCode.message,
           textualErrorStatusCode.code

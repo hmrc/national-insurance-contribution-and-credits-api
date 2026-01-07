@@ -52,7 +52,7 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
         .withBody(body)
         .execute[HttpResponse]
         .attempt
-    ).leftMap(_ => DownstreamError())
+    ).leftMap(DownstreamError(_))
 
   def get(path: String)(
       implicit hc: HeaderCarrier
@@ -63,6 +63,6 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
         .setHeader(commonHeaders *)
         .execute[HttpResponse]
         .attempt
-    ).leftMap(_ => DownstreamError())
+    ).leftMap(DownstreamError(_))
 
 }

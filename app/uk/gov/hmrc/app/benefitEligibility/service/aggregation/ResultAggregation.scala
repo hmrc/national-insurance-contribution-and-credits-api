@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation
 
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityDataFetchError, OverallResultStatus}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 
 object ResultAggregation {
@@ -24,13 +24,19 @@ object ResultAggregation {
   private type AggregationResult = Either[BenefitEligibilityDataFetchError, AggregatedData]
 
   trait ResultAggregator[T <: EligibilityCheckDataResult] {
-    def aggregate(result: T): AggregationResult
+    def aggregate(result: T): AggregatedData
   }
 
   object AggregatorSyntax {
 
     implicit class AggregatorOps[T <: EligibilityCheckDataResult](private val result: T) extends AnyVal {
-      def aggregate(implicit aggregator: ResultAggregator[T]): AggregationResult = aggregator.aggregate(result)
+
+      def aggregate(implicit aggregator: ResultAggregator[T]): AggregationResult =
+        if (result.overallResultStatus == OverallResultStatus.Success) {
+          Right(aggregator.aggregate(result))
+        } else {
+          Left(BenefitEligibilityDataFetchError.from(result))
+        }
 
     }
 

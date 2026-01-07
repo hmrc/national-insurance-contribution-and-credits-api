@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.GYSP
-import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, Partial, Success}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData.AggregatedDataGYSP
@@ -27,45 +24,20 @@ import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.
 object AggregationServiceGYSP {
 
   val aggregator: ResultAggregator[EligibilityCheckDataResultGYSP] =
-    (eligibilityCheckDataSuccessResultGYSP: EligibilityCheckDataResultGYSP) =>
-      if (eligibilityCheckDataSuccessResultGYSP.overallResultStatus == Success) {
+    (eligibilityCheckDataSuccessResultGYSP: EligibilityCheckDataResultGYSP) => {
+      val marriageDetailsResult     = eligibilityCheckDataSuccessResultGYSP.marriageDetailsResult
+      val marriageDetailsResultList = marriageDetailsResult.successResponse.flatMap(_.marriageDetailsList)
 
-        val marriageDetailsResult     = eligibilityCheckDataSuccessResultGYSP.marriageDetailsResult
-        val marriageDetailsResultList = marriageDetailsResult.successResponse.flatMap(_.marriageDetailsList)
-
-        Right(
-          AggregatedDataGYSP(
-            marriageDetailsResultList.flatMap(_.status).get,
-            marriageDetailsResultList.flatMap(_.startDate).get,
-            marriageDetailsResultList.flatMap(_.startDateStatus).get,
-            marriageDetailsResultList.flatMap(_.endDate).get,
-            marriageDetailsResultList.flatMap(_.endDateStatus).get,
-            marriageDetailsResultList.flatMap(_.spouseIdentifier).get,
-            marriageDetailsResultList.flatMap(_.spouseForename).get,
-            marriageDetailsResultList.flatMap(_.spouseSurname).get
-          )
-        )
-
-      } else if (eligibilityCheckDataSuccessResultGYSP.overallResultStatus == Failure) {
-        Left(
-          BenefitEligibilityDataFetchError(
-            Failure,
-            GYSP,
-            eligibilityCheckDataSuccessResultGYSP.resultSummary,
-            eligibilityCheckDataSuccessResultGYSP.allResults.filter(_.status == Failure)
-          )
-        )
-
-      } else {
-        Left(
-          BenefitEligibilityDataFetchError(
-            Partial,
-            GYSP,
-            eligibilityCheckDataSuccessResultGYSP.resultSummary,
-            eligibilityCheckDataSuccessResultGYSP.allResults.filter(_.status == Success) ++
-              eligibilityCheckDataSuccessResultGYSP.allResults.filter(_.status == Failure)
-          )
-        )
-      }
+      AggregatedDataGYSP(
+        marriageDetailsResultList.flatMap(_.status).get,
+        marriageDetailsResultList.flatMap(_.startDate).get,
+        marriageDetailsResultList.flatMap(_.startDateStatus).get,
+        marriageDetailsResultList.flatMap(_.endDate).get,
+        marriageDetailsResultList.flatMap(_.endDateStatus).get,
+        marriageDetailsResultList.flatMap(_.spouseIdentifier).get,
+        marriageDetailsResultList.flatMap(_.spouseForename).get,
+        marriageDetailsResultList.flatMap(_.spouseSurname).get
+      )
+    }
 
 }

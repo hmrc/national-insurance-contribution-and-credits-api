@@ -17,10 +17,23 @@
 package uk.gov.hmrc.app.benefitEligibility.common
 
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ApiResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, EligibilityCheckDataResult}
+import io.scalaland.chimney.dsl.into
 
-sealed trait ServiceError extends Exception {
+trait WithLoggableDebugString {
+  def toStringSafeToLogInProd: String
+}
+
+sealed trait ServiceError extends Exception with WithLoggableDebugString {
   this: Product & Serializable & (BenefitEligibilityError | DownstreamError) =>
+  def toStringSafeToLogInProd: String = this.toString
+
+  override final def toString: String = {
+    val elements: Seq[(String, Any)] = this.productElementNames.zip(this.productIterator).toSeq
+    s"${this.getClass.getName}(${elements.map { case (name, value) => s"$name = $value" }.mkString(", ")})"
+  }
+
 }
 
 sealed trait BenefitEligibilityError extends ServiceError { this: Product with Serializable => }
@@ -29,7 +42,7 @@ case class ValidationError(errors: List[String]) extends BenefitEligibilityError
 
 case class ParsingError(throwable: Throwable) extends BenefitEligibilityError
 
-case class DownstreamError() extends BenefitEligibilityError
+case class DownstreamError(throwable: Throwable) extends BenefitEligibilityError
 
 case class OverallResultSummary(totalCalls: Int, successful: Int, failed: Int)
 
@@ -43,3 +56,28 @@ case class BenefitEligibilityDataFetchError(
     overallResultSummary: OverallResultSummary,
     downStreams: List[ApiResult]
 ) extends BenefitEligibilityError
+
+object BenefitEligibilityDataFetchError {
+
+  def from(
+      eligibilityCheckDataResult: EligibilityCheckDataResult
+  ): BenefitEligibilityDataFetchError =
+
+    if (eligibilityCheckDataResult.overallResultStatus == OverallResultStatus.Failure) {
+      BenefitEligibilityDataFetchError(
+        overallResultStatus = OverallResultStatus.Failure,
+        benefitType = eligibilityCheckDataResult.benefitType,
+        overallResultSummary = eligibilityCheckDataResult.resultSummary,
+        downStreams = eligibilityCheckDataResult.allResults.filter(_.status == Failure)
+      )
+    } else {
+      BenefitEligibilityDataFetchError(
+        overallResultStatus = OverallResultStatus.Partial,
+        benefitType = eligibilityCheckDataResult.benefitType,
+        overallResultSummary = eligibilityCheckDataResult.resultSummary,
+        downStreams = eligibilityCheckDataResult.allResults.filter(_.status == Success) ++
+          eligibilityCheckDataResult.allResults.filter(_.status == Failure)
+      )
+    }
+
+}

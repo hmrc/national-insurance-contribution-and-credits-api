@@ -20,38 +20,44 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 
-sealed abstract class TextualErrorStatusCode(override val entryName: String) extends EnumEntry {
+case class NormalizedError(code: NormalizedErrorStatusCode, message: String, downstreamStatus: Int)
+
+sealed abstract class NormalizedErrorStatusCode(override val entryName: String) extends EnumEntry {
   val message: String
   val code: Int
 }
 
-object TextualErrorStatusCode extends Enum[TextualErrorStatusCode] with PlayJsonEnum[TextualErrorStatusCode] {
+object NormalizedErrorStatusCode extends Enum[NormalizedErrorStatusCode] with PlayJsonEnum[NormalizedErrorStatusCode] {
 
-  val values: immutable.IndexedSeq[TextualErrorStatusCode] = findValues
+  val values: immutable.IndexedSeq[NormalizedErrorStatusCode] = findValues
 
-  case object UnprocessableEntity extends TextualErrorStatusCode("UNPROCESSABLE_ENTITY") {
+  case object UnprocessableEntity extends NormalizedErrorStatusCode("UNPROCESSABLE_ENTITY") {
     val message = "downstream could not process data in request"
     val code    = 422
   }
 
-  case object BadRequest extends TextualErrorStatusCode("BAD_REQUEST") {
+  case object BadRequest extends NormalizedErrorStatusCode("BAD_REQUEST") {
     val message = "downstream received a malformed request"
     val code    = 400
   }
 
-  case object AccessForbidden extends TextualErrorStatusCode("ACCESS_FORBIDDEN") {
+  case object AccessForbidden extends NormalizedErrorStatusCode("ACCESS_FORBIDDEN") {
     val message = "downstream resource cannot be accessed by the calling client"
     val code    = 403
   }
 
-  case object NotFound extends TextualErrorStatusCode("NOT_FOUND") {
+  case object NotFound extends NormalizedErrorStatusCode("NOT_FOUND") {
     val message = "downstream could not not find the specified resource"
     val code    = 404
   }
 
-  case object InternalServerError extends TextualErrorStatusCode("NOT_FOUND") {
+  case object InternalServerError extends NormalizedErrorStatusCode("INTERNAL_SERVER_ERROR") {
     val message = "downstream failed to fulfil request"
     val code    = 500
+  }
+
+  case class UnexpectedStatus(code: Int) extends NormalizedErrorStatusCode("UNEXPECTED_STATUS_CODE") {
+    val message = "downstream returned an unexpected status"
   }
 
 }

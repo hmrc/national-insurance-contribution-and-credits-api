@@ -21,7 +21,11 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.{InternalServerError, NotFound}
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
+  InternalServerError,
+  NotFound,
+  UnexpectedStatus
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.Class2MaReceiptsResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.mapper.Class2MAReceiptsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
@@ -29,10 +33,10 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
   Class2MAReceiptsErrorResponse400,
   Class2MAReceiptsErrorResponse403
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResult, NpsClient}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptParse
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,28 +46,49 @@ class Class2MAReceiptsConnector @Inject() (
     class2MAReceiptsResponseMapper: Class2MAReceiptsResponseMapper
 )(implicit ec: ExecutionContext) {
 
+  private val logger = new RequestAwareLogger(this.getClass)
+
   def fetchClass2MAReceipts(
       path: String
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] =
     npsClient
       .get(path)
       .flatMap { response =>
-        val class2MAReceiptsResponse =
+        val class2MAReceiptsResult =
           response.status match {
             case OK =>
               attemptParse[Class2MAReceiptsSuccessResponse](response).map(class2MAReceiptsResponseMapper.toResult)
             case BAD_REQUEST =>
-              attemptParse[Class2MAReceiptsErrorResponse400](response).map(class2MAReceiptsResponseMapper.toResult)
+              attemptParse[Class2MAReceiptsErrorResponse400](response).map { resp =>
+                logger.warn(s"Class2MAReceipts returned a 400: ${resp.failures.mkString(",")}")
+                class2MAReceiptsResponseMapper.toResult(resp)
+              }
             case FORBIDDEN =>
-              attemptParse[Class2MAReceiptsErrorResponse403](response).map(class2MAReceiptsResponseMapper.toResult)
+              attemptParse[Class2MAReceiptsErrorResponse403](response).map { resp =>
+                logger.warn(
+                  s"Class2MAReceipts returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                )
+                class2MAReceiptsResponseMapper.toResult(resp)
+              }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[Class2MAReceiptsError422Response](response).map(class2MAReceiptsResponseMapper.toResult)
-            case NOT_FOUND => Right(class2MAReceiptsResponseMapper.toResult(NotFound))
-            case _         => Right(class2MAReceiptsResponseMapper.toResult(InternalServerError))
+              attemptParse[Class2MAReceiptsError422Response](response).map { resp =>
+                logger.warn(s"Class2MAReceipts returned a 422: ${resp.failures.mkString(",")}")
+                class2MAReceiptsResponseMapper.toResult(resp)
+              }
+            case NOT_FOUND             => Right(class2MAReceiptsResponseMapper.toResult(NotFound))
+            case INTERNAL_SERVER_ERROR => Right(class2MAReceiptsResponseMapper.toResult(InternalServerError))
+            case code                  => Right(class2MAReceiptsResponseMapper.toResult(UnexpectedStatus(code)))
           }
 
-        EitherT.fromEither[Future](class2MAReceiptsResponse)
+        EitherT.fromEither[Future](class2MAReceiptsResult).leftMap { error =>
+          logger.error(s"failed to process response from class2MAReceipts: ${error.toString}")
+          error
+        }
 
+      }
+      .leftMap { error =>
+        logger.error(s"call to downstream service failed: ${error.toString}")
+        error
       }
 
 }

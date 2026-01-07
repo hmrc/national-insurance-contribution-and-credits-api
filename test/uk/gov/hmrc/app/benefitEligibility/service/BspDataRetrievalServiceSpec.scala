@@ -22,9 +22,9 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.TextualErrorStatusCode.AccessForbidden
+import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.AccessForbidden
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.BSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
@@ -76,7 +76,7 @@ class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
   )
 
   private val marriageDetailsResult =
-    MarriageDetailsResult(Failure, None, Some(NpsError(AccessForbidden, "", 403)))
+    MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
 
   "BspDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -87,7 +87,7 @@ class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
           .expects("some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              MarriageDetailsResult(Failure, None, Some(NpsError(AccessForbidden, "", 403)))
+              MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
             )
           )
 
