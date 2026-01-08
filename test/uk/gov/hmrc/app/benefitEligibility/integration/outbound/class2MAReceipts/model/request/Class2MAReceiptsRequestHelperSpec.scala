@@ -30,7 +30,7 @@ import java.time.LocalDate
 class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
 
   private val underTest      = new Class2MAReceiptsRequestHelper()
-  private val baseHost       = "https://api.example.com"
+  private val baseUrl        = "https://api.example.com"
   private val testIdentifier = Identifier("AB123456C")
 
   "Class2MAReceiptsRequestHelper" - {
@@ -39,9 +39,9 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
         "should build basic path with identifier only" in {
           val request = createBaseRequest()
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts"
         }
       }
 
@@ -49,9 +49,9 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
         "should build path with archived filter only" in {
           val request = createBaseRequest().copy(archived = Some(true))
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=true"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=true"
         }
 
         "should build path with receiptDate filter only" in {
@@ -59,17 +59,17 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
           val receiptDate = LocalDate.of(2023, 6, 15)
           val request     = createBaseRequest().copy(receiptDate = Some(ReceiptDate(receiptDate)))
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?receiptDate=$receiptDate"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?receiptDate=$receiptDate"
         }
 
         "should build path with sortBy filter only" in {
           val request = createBaseRequest().copy(sortBy = Some(MaternityAllowanceSortType.NinoDescending))
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?type=NinoDescending"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?type=NinoDescending"
         }
       }
 
@@ -81,9 +81,9 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
             receiptDate = Some(ReceiptDate(receiptDate))
           )
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=false&receiptDate=$receiptDate"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=false&receiptDate=$receiptDate"
         }
 
         "should build path with archived and sortBy filters" in {
@@ -92,9 +92,9 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
             sortBy = Some(MaternityAllowanceSortType.NinoDescending)
           )
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=true&type=NinoDescending"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=true&type=NinoDescending"
         }
 
         "should build path with receiptDate and sortBy filters" in {
@@ -104,9 +104,9 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
             sortBy = Some(MaternityAllowanceSortType.NinoDescending)
           )
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?receiptDate=$receiptDate&type=NinoDescending"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?receiptDate=$receiptDate&type=NinoDescending"
         }
 
         "should build path with all filters" in {
@@ -117,9 +117,9 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
             sortBy = Some(MaternityAllowanceSortType.NinoDescending)
           )
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
-          result shouldBe s"$baseHost/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=false&receiptDate=$receiptDate&type=NinoDescending"
+          result shouldBe s"$baseUrl/ni/class-2/$testIdentifier/maternity-allowance/receipts?latest=false&receiptDate=$receiptDate&type=NinoDescending"
         }
       }
 
@@ -145,7 +145,7 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
         "should handle archived=true correctly" in {
           val request = createBaseRequest().copy(archived = Some(true))
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
           result should include("latest=true")
         }
@@ -153,7 +153,7 @@ class Class2MAReceiptsRequestHelperSpec extends AnyFreeSpec with Matchers {
         "should handle archived=false correctly" in {
           val request = createBaseRequest().copy(archived = Some(false))
 
-          val result = underTest.buildRequestPath(baseHost, request)
+          val result = underTest.buildRequestPath(baseUrl, request)
 
           result should include("latest=false")
         }

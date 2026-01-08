@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.common.Identifier
+import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, Reason}
 import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
   AccessForbidden,
   BadRequest,
@@ -28,15 +28,13 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseSta
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.Class2MaReceiptsResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
-  Class2MAReceiptsError400,
-  Class2MAReceiptsError422,
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.enums.{
   ErrorCode400,
   ErrorCode403,
-  ErrorCode422,
   ErrorReason403
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 
 class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
 
@@ -77,7 +75,7 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
 
       "should map Class2MAReceiptsErrorResponse400 to BadRequest error" in {
         val failures =
-          List(Class2MAReceiptsError400(Class2MAReceiptsError.Reason(""), ErrorCode400.Invalid_Destination_Header))
+          List(Class2MAReceiptsError400(Reason(""), ErrorCode400.Invalid_Destination_Header))
         val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse400(failures)
 
         val result = underTest.toResult(errorResponse)
@@ -92,8 +90,8 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
       }
 
       "should map Class2MAReceiptsError422Response to UnprocessableEntity error" in {
-        val failures      = List(Class2MAReceiptsError422(Class2MAReceiptsError.Reason(""), ErrorCode422("dsds")))
-        val errorResponse = Class2MAReceiptsError.Class2MAReceiptsError422Response(failures)
+        val failures      = List(Class2MAReceiptsError422(Reason(""), ErrorCode422("dsds")))
+        val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse422(failures)
 
         val result = underTest.toResult(errorResponse)
 

@@ -25,6 +25,11 @@ import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.Class2MaReceiptsResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
+  Class2MAReceiptsErrorResponse400,
+  Class2MAReceiptsErrorResponse403,
+  Class2MAReceiptsErrorResponse422
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.{
   Class2MAReceiptsError,
@@ -42,10 +47,10 @@ class Class2MAReceiptsResponseMapper extends NpsResponseMapper[Class2MAReceiptsR
 
   def toResult(response: Class2MAReceiptsResponse): Class2MaReceiptsResult =
     response match {
-      case response: Class2MAReceiptsSuccessResponse => Class2MaReceiptsResult(Success, Some(response), None)
-      case Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(reason, code) => toResult(AccessForbidden)
-      case Class2MAReceiptsError.Class2MAReceiptsErrorResponse400(failures)     => toResult(BadRequest)
-      case Class2MAReceiptsError.Class2MAReceiptsError422Response(failures)     => toResult(UnprocessableEntity)
+      case resp: Class2MAReceiptsSuccessResponse => Class2MaReceiptsResult(Success, Some(resp), None)
+      case _: Class2MAReceiptsErrorResponse403   => toResult(AccessForbidden)
+      case _: Class2MAReceiptsErrorResponse400   => toResult(BadRequest)
+      case _: Class2MAReceiptsErrorResponse422   => toResult(UnprocessableEntity)
     }
 
   def toResult(normalizedErrorStatusCode: NormalizedErrorStatusCode) =

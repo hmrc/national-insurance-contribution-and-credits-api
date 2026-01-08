@@ -1,0 +1,76 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response
+
+import cats.data.{Validated, ValidatedNel}
+import cats.implicits.{catsSyntaxNestedFoldable, toFunctorOps}
+import uk.gov.hmrc.app.benefitEligibility.common.Identifier
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
+  Class2MAReceiptsErrorResponse400,
+  Class2MAReceiptsErrorResponse403,
+  Class2MAReceiptsErrorResponse422
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult.SuccessfulResult
+import uk.gov.hmrc.app.benefitEligibility.util.validation.{
+  MoneyValidation,
+  StringLengthValidation,
+  StringPatternValidation
+}
+import uk.gov.hmrc.app.benefitEligibility.util.{NpsResponseValidator, SuccessfulResult}
+
+object Class2MAReceiptsResponseValidation {
+
+  implicit val class2MAReceiptsSuccessResponseValidator: NpsResponseValidator[Class2MAReceiptsSuccessResponse] =
+    (response: Class2MAReceiptsSuccessResponse) =>
+      (response.class2MAReceiptDetails.flatMap { el =>
+        List(
+          el.surname.map(s => StringPatternValidation.validate(s, "^([A-Za-z '-])+$".r)),
+          el.surname.map(s => StringLengthValidation.validate(s, 2, 99)),
+          el.initials.map(i => StringPatternValidation.validate(i, "^([A-Za-z '-])+$".r)),
+          el.initials.map(i => StringLengthValidation.validate(i, 1, 2)),
+          el.billAmount.map(MoneyValidation.validate),
+          el.receivablePayment.map(MoneyValidation.validate)
+        ).flatten
+      } ++
+        List(
+          StringPatternValidation.validate(response.identifier, Identifier.pattern)
+        )).sequence_.as(SuccessfulResult)
+
+  implicit val class2MAReceiptsError422ResponseValidator: NpsResponseValidator[Class2MAReceiptsErrorResponse422] =
+    (t: Class2MAReceiptsErrorResponse422) =>
+      t.failures
+        .flatMap { f =>
+          List(
+            StringLengthValidation.validate(f.reason, minLength = 1, maxLength = 128),
+            StringLengthValidation.validate(f.code, minLength = 1, maxLength = 10)
+          )
+        }
+        .sequence_
+        .as(SuccessfulResult)
+
+  implicit val class2MAReceiptsErrorResponse400Validator: NpsResponseValidator[Class2MAReceiptsErrorResponse400] =
+    (t: Class2MAReceiptsErrorResponse400) =>
+      t.failures
+        .map(f => StringLengthValidation.validate(f.reason, minLength = 1, maxLength = 128))
+        .sequence_
+        .as(SuccessfulResult)
+
+  implicit val class2MAReceiptsErrorResponse403Validator: NpsResponseValidator[Class2MAReceiptsErrorResponse403] =
+    (t: Class2MAReceiptsErrorResponse403) => Validated.validNel(SuccessfulResult)
+
+}

@@ -30,8 +30,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseSta
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.ErrorCode403.ErrorCode403_2
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.ErrorReason403.Forbidden
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.{
   MarriageDetailsErrorResponse400,
   MarriageDetailsErrorResponse403,
@@ -58,32 +56,37 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
 
       "should successfully return a Failure result when given an ErrorResponse400" in {
 
-        (() => mockMarriageDetailsErrorResponse400._1).expects().returning(List.empty)
-
         underTest.toResult(mockMarriageDetailsErrorResponse400) shouldBe
           MarriageDetailsResult(
             Failure,
             None,
-            Some(NpsNormalizedError(code = BadRequest, message = "", downstreamStatus = 400))
+            Some(
+              NpsNormalizedError(
+                code = BadRequest,
+                message = "downstream received a malformed request",
+                downstreamStatus = 400
+              )
+            )
           )
       }
 
       "should successfully return a Failure result when given a ErrorResponse403" in {
 
-        (() => mockMarriageDetailsErrorResponse403._1).expects().returning(Forbidden)
-        (() => mockMarriageDetailsErrorResponse403._2).expects().returning(ErrorCode403_2)
-
         underTest.toResult(mockMarriageDetailsErrorResponse403) shouldBe
           MarriageDetailsResult(
             Failure,
             None,
-            Some(NpsNormalizedError(code = AccessForbidden, message = "Forbidden", downstreamStatus = 403))
+            Some(
+              NpsNormalizedError(
+                code = AccessForbidden,
+                message = "downstream resource cannot be accessed by the calling client",
+                downstreamStatus = 403
+              )
+            )
           )
       }
 
       "should successfully return a Failure result when given a ErrorResponse422" in {
-
-        (() => mockMarriageDetailsErrorResponse422._1).expects().returning(List.empty)
 
         underTest.toResult(mockMarriageDetailsErrorResponse422) shouldBe
           MarriageDetailsResult(
@@ -92,7 +95,7 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
             Some(
               NpsNormalizedError(
                 code = UnprocessableEntity,
-                message = "",
+                message = "downstream could not process data in request",
                 downstreamStatus = 422
               )
             )

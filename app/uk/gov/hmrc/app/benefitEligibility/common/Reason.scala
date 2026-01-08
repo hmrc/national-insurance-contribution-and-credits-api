@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,10 @@
 
 package uk.gov.hmrc.app.benefitEligibility.common
 
-import play.api.libs.json.*
+import play.api.libs.json.{Format, Json}
 
-/** Represents either a national insurance number (NINO) or Temporary Reference Number (TRN). */
-case class Identifier(value: String) extends AnyVal
+final case class Reason(value: String) extends AnyVal
 
-object Identifier {
-
-  implicit val identifierFormat: Format[Identifier] = Json.valueFormat[Identifier]
-
-  val pattern =
-    """^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$""".r
-
+object Reason {
+  implicit val reads: Format[Reason] = Json.valueFormat[Reason]
 }

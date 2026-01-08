@@ -71,7 +71,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     nationalInsuranceNumber = "GD379251T",
     dateOfBirth = LocalDate.parse("1992-08-23"),
     startTaxYear = 2025,
-    endTaxYear = 2025,
+    endTaxYear = 2026,
     identifier = Identifier("GD379251T"),
     liabilitySearchCategoryHyphenated = true,
     liabilityOccurrenceNumber = Some(233232323),
@@ -90,12 +90,13 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   private val liabilityResult =
     LiabilityResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
-  private val contributionCreditResult =
+  private val contributionCreditResult = List(
     ContributionCreditResult(
       Failure,
       None,
       Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
     )
+  )
 
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {

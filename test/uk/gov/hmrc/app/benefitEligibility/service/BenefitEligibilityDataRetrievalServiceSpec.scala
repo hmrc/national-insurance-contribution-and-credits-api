@@ -85,10 +85,12 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     LiabilityResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
 
   private val contributionCreditResult =
-    ContributionCreditResult(
-      Failure,
-      None,
-      Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
+    List(
+      ContributionCreditResult(
+        Failure,
+        None,
+        Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
+      )
     )
 
   private val eligibilityCheckDataRequestMA = MAEligibilityCheckDataRequest(

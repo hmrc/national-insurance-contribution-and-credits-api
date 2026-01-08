@@ -18,12 +18,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 
 import cats.data.EitherT
 import play.api.http.Status.*
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
   InternalServerError,
   NotFound,
   UnexpectedStatus
 }
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsClient
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper.MarriageDetailsResponseMapper
@@ -32,8 +32,10 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
   MarriageDetailsErrorResponse403,
   MarriageDetailsErrorResponse422
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptParse
+import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptStrictParse
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -44,28 +46,48 @@ class MarriageDetailsConnector @Inject() (
     marriageDetailsResponseMapper: MarriageDetailsResponseMapper
 )(implicit ec: ExecutionContext) {
 
+  private val logger = new RequestAwareLogger(this.getClass)
+
   def fetchMarriageDetails(
       path: String
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] =
     npsClient
       .get(path)
       .flatMap { response =>
-        val marriageDetailsResponse =
+        val marriageDetailsResult =
           response.status match {
             case OK =>
-              attemptParse[MarriageDetailsSuccessResponse](response).map(marriageDetailsResponseMapper.toResult)
+              attemptStrictParse[MarriageDetailsSuccessResponse](response).map(marriageDetailsResponseMapper.toResult)
             case BAD_REQUEST =>
-              attemptParse[MarriageDetailsErrorResponse400](response).map(marriageDetailsResponseMapper.toResult)
+              attemptStrictParse[MarriageDetailsErrorResponse400](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 400: ${resp.failures.mkString(",")}")
+                marriageDetailsResponseMapper.toResult(resp)
+              }
             case FORBIDDEN =>
-              attemptParse[MarriageDetailsErrorResponse403](response).map(marriageDetailsResponseMapper.toResult)
+              attemptStrictParse[MarriageDetailsErrorResponse403](response).map { resp =>
+                logger.warn(
+                  s"MarriageDetails returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                )
+                marriageDetailsResponseMapper.toResult(resp)
+              }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[MarriageDetailsErrorResponse422](response).map(marriageDetailsResponseMapper.toResult)
+              attemptStrictParse[MarriageDetailsErrorResponse422](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 422: ${resp.failures.mkString(",")}")
+                marriageDetailsResponseMapper.toResult(resp)
+              }
             case NOT_FOUND             => Right(marriageDetailsResponseMapper.toResult(NotFound))
             case INTERNAL_SERVER_ERROR => Right(marriageDetailsResponseMapper.toResult(InternalServerError))
             case code                  => Right(marriageDetailsResponseMapper.toResult(UnexpectedStatus(code)))
           }
 
-        EitherT.fromEither[Future](marriageDetailsResponse)
+        EitherT.fromEither[Future](marriageDetailsResult).leftMap { error =>
+          logger.error(s"failed to process response from MarriageDetails: ${error.toString}")
+          error
+        }
+      }
+      .leftMap { error =>
+        logger.error(s"call to downstream service failed: ${error.toString}")
+        error
       }
 
 }
