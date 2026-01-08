@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.common
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.enums
 
-import play.api.libs.json.*
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-/** Represents either a national insurance number (NINO) or Temporary Reference Number (TRN). */
-case class Identifier(value: String) extends AnyVal
+import scala.collection.immutable
 
-object Identifier {
+sealed abstract class ErrorReason403(override val entryName: String) extends EnumEntry
 
-  implicit val identifierFormat: Format[Identifier] = Json.valueFormat[Identifier]
+object ErrorReason403 extends Enum[ErrorReason403] with PlayJsonEnum[ErrorReason403] {
+  val values: immutable.IndexedSeq[ErrorReason403] = findValues
 
-  val pattern =
-    """^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$""".r
-
+  case object Forbidden extends ErrorReason403("Forbidden")
 }

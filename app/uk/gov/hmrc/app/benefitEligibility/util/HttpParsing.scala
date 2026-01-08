@@ -16,23 +16,46 @@
 
 package uk.gov.hmrc.app.benefitEligibility.util
 
+import cats.data.Validated
 import cats.implicits.catsSyntaxEitherId
 import play.api.libs.json.Reads
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, ParsingError, ValidationError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponse
+import uk.gov.hmrc.app.benefitEligibility.util.ValidatorSyntax.ValidatorOps
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.util.{Failure, Success, Try}
 
 object HttpParsing {
 
-  def attemptParse[T](
+  def attemptStrictParse[T <: NpsApiResponse](
       response: HttpResponse
-  )(implicit reads: Reads[T], headerCarrier: HeaderCarrier): Either[BenefitEligibilityError, T] =
+  )(
+      implicit reads: Reads[T],
+      headerCarrier: HeaderCarrier,
+      validator: NpsResponseValidator[T]
+  ): Either[BenefitEligibilityError, T] =
+    attemptParse(response).flatMap { value =>
+      value.validate match {
+        case Validated.Valid(a)   => Right(value)
+        case Validated.Invalid(e) => Left(ValidationError(e.toList))
+      }
+    }
+
+  def attemptParse[T <: NpsApiResponse](
+      response: HttpResponse
+  )(
+      implicit reads: Reads[T],
+      headerCarrier: HeaderCarrier
+  ): Either[BenefitEligibilityError, T] =
     Try(response.json) match {
       case Success(value) =>
         value
           .validate[T]
-          .fold(errors => ValidationError(errors.flatMap(_._2.flatMap(_.messages)).toList).asLeft[T], Right(_))
+          .fold(
+            errors => ValidationError(errors.flatMap(_._2.flatMap(_.messages)).toList).asLeft[T],
+            value => Right(value)
+          )
       case Failure(exception) => ParsingError(exception).asLeft[T]
     }
 

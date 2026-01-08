@@ -28,7 +28,7 @@ object NpsSuccessfulApiResponse {
     case r: Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse =>
       Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse.getClass2MAReceiptsResponseWrites.writes(r)
     case m: MarriageDetailsSuccessResponse =>
-      MarriageDetailsSuccessResponse.getMarriageDetailsResponseWrites.writes(m)
+      MarriageDetailsSuccessResponse.marriageDetailsSuccessResponseFormat.writes(m)
   }
 
 }

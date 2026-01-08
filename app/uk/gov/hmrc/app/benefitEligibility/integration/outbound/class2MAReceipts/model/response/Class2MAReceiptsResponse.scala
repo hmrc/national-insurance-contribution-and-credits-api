@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response
 
-import cats.data.{Validated, ValidatedNel}
-import cats.implicits.catsSyntaxTuple2Semigroupal
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{Identifier, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, Reason, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.enums.{
+  ErrorCode400,
+  ErrorCode403,
+  ErrorReason403
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
-import uk.gov.hmrc.app.benefitEligibility.util.{MoneyValidation, SuccessfulResult}
 
 import java.time.LocalDate
 import scala.collection.immutable
@@ -31,41 +33,7 @@ sealed trait Class2MAReceiptsResponse extends NpsApiResponse
 
 object Class2MAReceiptsError {
 
-  sealed abstract class ErrorCode403(override val entryName: String) extends EnumEntry
-
-  object ErrorCode403 extends Enum[ErrorCode403] with PlayJsonEnum[ErrorCode403] {
-    val values: immutable.IndexedSeq[ErrorCode403] = findValues
-    case object ErrorCode403_2 extends ErrorCode403("403.2")
-    case object ErrorCode403_1 extends ErrorCode403("403.1")
-  }
-
-  sealed abstract class ErrorReason403(override val entryName: String) extends EnumEntry
-
-  object ErrorReason403 extends Enum[ErrorReason403] with PlayJsonEnum[ErrorReason403] {
-    val values: immutable.IndexedSeq[ErrorReason403] = findValues
-    case object Forbidden        extends ErrorReason403("Forbidden")
-    case object UserUnauthorised extends ErrorReason403("User Not Authorised")
-  }
-
-  case class Class2MAReceiptsErrorResponse403(reason: ErrorReason403, code: ErrorCode403)
-      extends Class2MAReceiptsResponse
-      with NpsApiResponse
-
-  object Class2MAReceiptsErrorResponse403 {
-
-    implicit val npsFailureResponse403Reads: Reads[Class2MAReceiptsErrorResponse403] =
-      Json.reads[Class2MAReceiptsErrorResponse403]
-
-  }
-
-  sealed abstract class ErrorCode400(override val entryName: String) extends EnumEntry
-
-  object ErrorCode400 extends Enum[ErrorCode400] with PlayJsonEnum[ErrorCode400] {
-    val values: immutable.IndexedSeq[ErrorCode400] = findValues
-    case object Invalid_Destination_Header extends ErrorCode400("400.1")
-    case object Invalid_Depth_Header       extends ErrorCode400("400.2")
-  }
-
+  // 400 start
   case class Class2MAReceiptsError400(reason: Reason, code: ErrorCode400)
 
   object Class2MAReceiptsError400 {
@@ -81,157 +49,64 @@ object Class2MAReceiptsError {
 
   }
 
-  final case class Reason(value: String)
+  // 400 end
 
-  object Reason {
-    private val minLength = 1
-    private val maxLength = 128
+  // 403 start
+  case class Class2MAReceiptsErrorResponse403(reason: ErrorReason403, code: ErrorCode403)
+      extends Class2MAReceiptsResponse
+      with NpsApiResponse
 
-    private def from(value: String): ValidatedNel[String, Reason] =
-      (
-        Validated.condNel(
-          value.length >= minLength,
-          SuccessfulResult,
-          "provided value is below the minimum length limit"
-        ),
-        Validated.condNel(value.length <= maxLength, SuccessfulResult, "provided value exceeds the max length limit")
-      ).mapN((_, _) => Reason(value))
+  object Class2MAReceiptsErrorResponse403 {
 
-    implicit val reads: Reads[Reason] = {
-      case JsString(value) =>
-        Reason
-          .from(value)
-          .leftMap(errors => JsError(__ -> JsonValidationError(errors.toList.mkString(","))))
-          .fold(identity, JsSuccess(_))
-      case _ => JsError(__ -> JsonValidationError("wrong data type, expected String"))
-    }
+    implicit val npsFailureResponse403Reads: Reads[Class2MAReceiptsErrorResponse403] =
+      Json.reads[Class2MAReceiptsErrorResponse403]
 
   }
+  // 403 end
 
-  final case class ErrorCode422(value: String)
-
-  object ErrorCode422 {
-    private val minLength = 1
-    private val maxLength = 10
-
-    private def from(value: String): ValidatedNel[String, ErrorCode422] =
-      (
-        Validated.condNel(
-          value.length >= minLength,
-          SuccessfulResult,
-          "provided value is below the minimum length limit"
-        ),
-        Validated.condNel(value.length <= maxLength, SuccessfulResult, "provided value exceeds the max length limit")
-      ).mapN((_, _) => ErrorCode422(value))
-
-    implicit val reads: Reads[ErrorCode422] = {
-      case JsString(value) =>
-        ErrorCode422
-          .from(value)
-          .leftMap(errors => JsError(__ -> JsonValidationError(errors.toList.mkString(","))))
-          .fold(identity, JsSuccess(_))
-      case _ => JsError(__ -> JsonValidationError("wrong data type, expected String"))
-    }
-
-  }
-
+  // 422 start
   case class Class2MAReceiptsError422(reason: Reason, code: ErrorCode422)
 
   object Class2MAReceiptsError422 {
     implicit val NpsErrorResponse422Reads: Reads[Class2MAReceiptsError422] = Json.reads[Class2MAReceiptsError422]
   }
 
-  case class Class2MAReceiptsError422Response(failures: List[Class2MAReceiptsError422]) extends Class2MAReceiptsResponse
+  case class Class2MAReceiptsErrorResponse422(failures: List[Class2MAReceiptsError422]) extends Class2MAReceiptsResponse
 
-  object Class2MAReceiptsError422Response {
+  object Class2MAReceiptsErrorResponse422 {
 
-    implicit val npsFailureResponse422Reads: Reads[Class2MAReceiptsError422Response] =
-      Json.reads[Class2MAReceiptsError422Response]
+    implicit val npsFailureResponse422Reads: Reads[Class2MAReceiptsErrorResponse422] =
+      Json.reads[Class2MAReceiptsErrorResponse422]
 
   }
+  // 422 end
 
 }
 
 object Class2MAReceiptsSuccess {
-  final case class Initials private (value: String)
+
+  final case class Initials(value: String) extends AnyVal
 
   object Initials {
-    private val pattern = "^[A-Za-z' -]{1,2}$".r
-
-    private def from(value: String): ValidatedNel[String, Initials] =
-      Validated.condNel(pattern.matches(value), Initials(value), "invalid initials")
-
-    implicit val initialsReads: Reads[Initials] = {
-      case JsString(value) =>
-        Initials
-          .from(value)
-          .leftMap(errors => JsError(__ -> JsonValidationError(errors.toList.mkString(","))))
-          .fold(identity, JsSuccess(_))
-      case _ => JsError(__ -> JsonValidationError("wrong data type, expected String"))
-    }
-
-    implicit val initialsWrites: Writes[Initials] =
-      Json.writes[Initials]
-
+    implicit val initialsFormat: Format[Initials] = Json.valueFormat[Initials]
   }
 
-  final case class Surname private (value: String)
+  final case class Surname(value: String) extends AnyVal
 
   object Surname {
-    private val pattern = "^[A-Za-z' -]{2,99}$".r
-
-    private def from(value: String): ValidatedNel[String, Surname] =
-      Validated.condNel(pattern.matches(value), Surname(value), "invalid surname")
-
-    implicit val surnameReads: Reads[Surname] = {
-      case JsString(value) =>
-        Surname
-          .from(value)
-          .leftMap(errors => JsError(__ -> JsonValidationError(errors.toList.mkString(","))))
-          .fold(identity, JsSuccess(_))
-      case _ => JsError(__ -> JsonValidationError("wrong data type, expected String"))
-    }
-
-    implicit val surname: Writes[Surname] =
-      Json.writes[Surname]
-
+    implicit val surnameFormat: Format[Surname] = Json.valueFormat[Surname]
   }
 
-  case class ReceivablePayment(value: BigDecimal)
+  case class ReceivablePayment(value: BigDecimal) extends AnyVal
 
   object ReceivablePayment {
-
-    implicit val receivablePaymentReads: Reads[ReceivablePayment] = {
-      case JsNumber(value) =>
-        MoneyValidation
-          .validate(value)(ReceivablePayment.apply)
-          .leftMap(errors => JsError(__ -> JsonValidationError(errors.toList.mkString(","))))
-          .fold(identity, JsSuccess(_))
-      case _ => JsError(__ -> JsonValidationError("wrong data type, expected Number"))
-    }
-
-    implicit val receivablePaymentWrites: Writes[ReceivablePayment] =
-      Json.writes[ReceivablePayment]
-
+    implicit val receivablePaymentFormat: Format[ReceivablePayment] = Json.valueFormat[ReceivablePayment]
   }
 
-  case class BillAmount(value: BigDecimal)
+  case class BillAmount(value: BigDecimal) extends AnyVal
 
   object BillAmount {
-
-    implicit val billAmountReads: Reads[BillAmount] = {
-      case JsNumber(value) =>
-        MoneyValidation
-          .validate(value)(BillAmount.apply)
-          .leftMap(errors => JsError(__ -> JsonValidationError(errors.toList.mkString(","))))
-          .fold(identity, JsSuccess(_))
-
-      case _ => JsError(__ -> JsonValidationError("wrong data type, expected Number"))
-    }
-
-    implicit val billAmountWrites: Writes[BillAmount] =
-      Json.writes[BillAmount]
-
+    implicit val billAmountFormats: Format[BillAmount] = Json.valueFormat[BillAmount]
   }
 
   case class ReceivablePeriodStartDate(value: LocalDate) extends AnyVal
@@ -299,10 +174,8 @@ object Class2MAReceiptsSuccess {
 
   object Class2MAReceiptDetails {
 
-    implicit val class2MAReceiptDetailsReads: Reads[Class2MAReceiptDetails] =
-      Json.reads[Class2MAReceiptDetails]
-
-    implicit val class2MAReceiptDetailsWrites: Writes[Class2MAReceiptDetails] = Json.writes[Class2MAReceiptDetails]
+    implicit val class2MAReceiptDetailsFormat: Format[Class2MAReceiptDetails] =
+      Json.format[Class2MAReceiptDetails]
 
   }
 
@@ -314,11 +187,8 @@ object Class2MAReceiptsSuccess {
 
   object Class2MAReceiptsSuccessResponse {
 
-    implicit val getClass2MAReceiptsResponseReads: Reads[Class2MAReceiptsSuccessResponse] =
-      Json.reads[Class2MAReceiptsSuccessResponse]
-
-    implicit val getClass2MAReceiptsResponseWrites: Writes[Class2MAReceiptsSuccessResponse] =
-      Json.writes[Class2MAReceiptsSuccessResponse]
+    implicit val getClass2MAReceiptsResponseWrites: Format[Class2MAReceiptsSuccessResponse] =
+      Json.format[Class2MAReceiptsSuccessResponse]
 
   }
 

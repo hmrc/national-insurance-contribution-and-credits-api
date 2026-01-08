@@ -61,10 +61,10 @@ object EligibilityCheckDataResult {
   case class EligibilityCheckDataResultMA(
       class2MaReceiptsResult: Class2MaReceiptsResult,
       liabilityResult: LiabilityResult,
-      contributionCreditResult: ContributionCreditResult
+      contributionCreditResult: List[ContributionCreditResult]
   ) extends EligibilityCheckDataResult {
     val benefitType: BenefitType       = BenefitType.MA
-    val allResults: List[NpsApiResult] = List(class2MaReceiptsResult, liabilityResult, contributionCreditResult)
+    val allResults: List[NpsApiResult] = List(class2MaReceiptsResult, liabilityResult) ++ contributionCreditResult
 
   }
 
