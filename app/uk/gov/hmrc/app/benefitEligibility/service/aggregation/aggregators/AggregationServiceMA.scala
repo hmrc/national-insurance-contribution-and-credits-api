@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 
-import cats.syntax.all.*
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData.AggregatedDataMA
@@ -26,14 +26,15 @@ object AggregationServiceMA {
 
   val aggregator: ResultAggregator[EligibilityCheckDataResultMA] = {
     (eligibilityCheckDataSuccessResultMA: EligibilityCheckDataResultMA) =>
-      val class2MaReceiptsResult = eligibilityCheckDataSuccessResultMA.class2MaReceiptsResult
-      AggregatedDataMA(
-        class2MaReceiptsResult.successResponse
-          .map(_.class2MAReceiptDetails)
-          .sequence
-          .flatten
-          .flatMap(_.receiptDate)
-      )
+      if (eligibilityCheckDataSuccessResultMA.allResults.forall(_.isSuccess)) {
+
+        val class2MaReceiptsResult = eligibilityCheckDataSuccessResultMA.class2MaReceiptsResult.getSuccess.get
+        Right(
+          AggregatedDataMA(
+            class2MaReceiptsResult.class2MAReceiptDetails.flatMap(_.receiptDate)
+          )
+        )
+      } else Left(BenefitEligibilityDataFetchError.from(eligibilityCheckDataSuccessResultMA))
 
   }
 

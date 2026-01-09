@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, postRequestedFor, urlEqualTo}
 import com.github.tomakehurst.wiremock.http.Fault
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
@@ -30,21 +30,34 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.test.Helpers.*
+import play.api.test.Helpers.{
+  BAD_REQUEST,
+  FORBIDDEN,
+  INTERNAL_SERVER_ERROR,
+  METHOD_NOT_ALLOWED,
+  MULTIPLE_CHOICES,
+  MULTI_STATUS,
+  NOT_FOUND,
+  OK,
+  SERVICE_UNAVAILABLE,
+  UNPROCESSABLE_ENTITY
+}
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamErrorReport,
   DownstreamSuccessResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
-class Class2MAReceiptsConnectorItSpec
+class NiContributionsAndCreditsConnectorItSpec
     extends AnyFreeSpec
     with EitherValues
     with GuiceOneAppPerSuite
@@ -67,36 +80,88 @@ class Class2MAReceiptsConnectorItSpec
       )
       .build()
 
-  private lazy val connector: Class2MAReceiptsConnector = inject[Class2MAReceiptsConnector]
+  private lazy val connector: NiContributionsAndCreditsConnector = inject[NiContributionsAndCreditsConnector]
 
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
 
-  "Class2MAReceiptsConnector" - {
+  "NiContributionsAndCreditsConnector" - {
 
-    ".fetchClass2MAReceipts" - {
+    ".fetchContributionsAndCredits" - {
 
-      val testPath                                     = "/ni/class-2/AB123456C/maternity-allowance/receipts"
-      val identifier: Identifier                       = Identifier("AB123456C")
-      val archived: Option[Boolean]                    = None
-      val receiptDate: Option[ReceiptDate]             = None
-      val sortType: Option[MaternityAllowanceSortType] = None
+      val testPath = "/national-insurance/contributions-and-credits"
 
-      "when the Class2MAReceipts endpoint returns OK (200) with valid response" - {
+      val requestBody = NiContributionsAndCreditsRequest(
+        Identifier(""),
+        DateOfBirth(LocalDate.parse("2025-10-10")),
+        StartTaxYear(2025),
+        EndTaxYear(2026)
+      )
+
+      "when the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
-          val successResponse = Class2MAReceiptsSuccessResponse(
-            identifier = Identifier("AB123456C"),
-            class2MAReceiptDetails = List()
+          val successResponse = NiContributionsAndCreditsSuccessResponse(
+            List(
+              NicClass1(
+                taxYear = Some(TaxYear(2022)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(ContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            ),
+            List(
+              NicClass2(
+                taxYear = Some(TaxYear(2022)),
+                noOfCreditsAndConts = Some(NumberOfCreditsAndConts(53)),
+                contributionCreditType = Some(ContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
           )
 
-          val successResponseJson = """{
-                                      |"identifier":"AB123456C",
-                                      |"class2MAReceiptDetails":[]
-                                      |}""".stripMargin
+          val successResponseJson =
+            """{
+              |  "niClass1": [
+              |    {
+              |      "taxYear": 2022,
+              |      "contributionCategoryLetter": "U",
+              |      "contributionCategory": "(NONE)",
+              |      "contributionCreditType": "C1",
+              |      "primaryContribution": 99999999999999.98,
+              |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+              |      "primaryPaidEarnings": 99999999999999.98,
+              |      "creditSource": "NOT KNOWN",
+              |      "employerName": "ipOpMs",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ],
+              |  "niClass2": [
+              |    {
+              |      "taxYear": 2022,
+              |      "noOfCreditsAndConts": 53,
+              |      "contributionCreditType": "C1",
+              |      "class2Or3EarningsFactor": 99999999999999.98,
+              |      "class2NIContributionAmount": 99999999999999.98,
+              |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+              |      "creditSource": "NOT KNOWN",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ]
+              |}""".stripMargin
 
           val responseBody = Json.parse(successResponseJson).toString()
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -105,17 +170,17 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
-          result shouldBe Right(DownstreamSuccessResponse(Class2MAReceipts, successResponse))
+          result shouldBe Right(DownstreamSuccessResponse(NiContributionAndCredits, successResponse))
           server.verify(
-            getRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(testPath))
           )
 
         }
       }
 
-      "when the Class2MAReceipts endpoint returns BAD_REQUEST (400)" - {
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (400)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -131,7 +196,7 @@ class Class2MAReceiptsConnectorItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_REQUEST)
@@ -140,19 +205,19 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.BadRequest)
+            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
-            getRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(testPath))
           )
         }
       }
 
-      "when the Class2MAReceipts endpoint returns BAD_REQUEST (403)" - {
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (403)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -164,7 +229,7 @@ class Class2MAReceiptsConnectorItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(FORBIDDEN)
@@ -173,23 +238,23 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
-            getRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(testPath))
           )
         }
       }
 
-      "when the Class2MAReceipts endpoint returns BAD_REQUEST (404)" - {
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (404)" - {
         "should parse error response and map to result" in {
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(NOT_FOUND)
@@ -197,19 +262,19 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.NotFound)
+            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.NotFound)
           )
 
           server.verify(
-            getRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(testPath))
           )
         }
       }
 
-      "when the Class2MAReceipts endpoint returns BAD_REQUEST (422)" - {
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (422)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -225,7 +290,7 @@ class Class2MAReceiptsConnectorItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(UNPROCESSABLE_ENTITY)
@@ -234,37 +299,37 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnprocessableEntity)
+            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
           )
 
           server.verify(
-            getRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(testPath))
           )
         }
       }
 
-      "when the Class2MAReceipts endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
+      "when the NiContributionsAndCredits endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
         "should map to InternalServerError result" in {
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(INTERNAL_SERVER_ERROR)
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.InternalServerError)
+            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.InternalServerError)
           )
         }
       }
 
-      "when the Class2MAReceipts endpoint returns an unexpected statusCode" - {
+      "when the NiContributionsAndCredits endpoint returns an unexpected statusCode" - {
         "should map to InternalServerError result" in {
 
           val statusCodes: TableFor1[Int] =
@@ -272,27 +337,27 @@ class Class2MAReceiptsConnectorItSpec
 
           forAll(statusCodes) { statusCode =>
             server.stubFor(
-              get(urlEqualTo(testPath))
+              post(urlEqualTo(testPath))
                 .willReturn(
                   aResponse()
                     .withStatus(statusCode)
                 )
             )
 
-            val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+            val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnexpectedStatus(statusCode))
+              DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 
         }
       }
 
-      "when the Class2MAReceipts endpoint returns malformed JSON" - {
+      "when the NiContributionsAndCredits endpoint returns malformed JSON" - {
         "should return parsing error" in {
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -301,20 +366,20 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ParsingError]
         }
       }
 
-      "when the Class2MAReceipts endpoint returns valid JSON with missing required fields" - {
+      "when the NiContributionsAndCredits endpoint returns valid JSON with missing required fields" - {
         "should return validation error" in {
 
           val incompleteResponse = """{"identifier":"AB123456C"}"""
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -323,7 +388,7 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ValidationError]
@@ -333,7 +398,7 @@ class Class2MAReceiptsConnectorItSpec
       "when the request to the downstream fails unexpectedly" - {
         "should return downstream error" in {
           server.stubFor(
-            get(urlEqualTo(testPath))
+            post(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -341,7 +406,7 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[DownstreamError]

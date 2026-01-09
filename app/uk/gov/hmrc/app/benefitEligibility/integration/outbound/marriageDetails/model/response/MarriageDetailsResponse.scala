@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode400, ErrorCode422, Identifier, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
@@ -31,16 +31,6 @@ sealed trait MarriageDetailsResponse extends NpsApiResponse
 object MarriageDetailsError {
 
   // region Error400
-
-  sealed abstract class ErrorCode400(override val entryName: String) extends EnumEntry
-
-  object ErrorCode400 extends Enum[ErrorCode400] with PlayJsonEnum[ErrorCode400] {
-    val values: immutable.IndexedSeq[ErrorCode400] = findValues
-
-    case object Constraint_Violation extends ErrorCode400("400.1")
-
-    case object Message_Not_Readable extends ErrorCode400("400.2")
-  }
 
   case class MarriageDetailsError400(reason: Reason, code: ErrorCode400) extends NpsApiResponse
 

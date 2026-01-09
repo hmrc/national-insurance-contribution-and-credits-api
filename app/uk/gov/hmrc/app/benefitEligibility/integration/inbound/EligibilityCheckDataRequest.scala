@@ -17,8 +17,15 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.inbound
 
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, Identifier, ReceiptDate}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.MaternityAllowanceSortType
+import uk.gov.hmrc.app.benefitEligibility.common.{
+  BenefitType,
+  DateOfBirth,
+  EndTaxYear,
+  Identifier,
+  MaternityAllowanceSortType,
+  ReceiptDate,
+  StartTaxYear
+}
 
 import java.time.LocalDate
 
@@ -40,9 +47,9 @@ sealed trait EligibilityCheckDataRequest
 
 case class MAEligibilityCheckDataRequest(
     nationalInsuranceNumber: String,            // contribution credit api
-    dateOfBirth: LocalDate,                     // contribution credit api
-    startTaxYear: Int,                          // contribution credit api
-    endTaxYear: Int,                            // contribution credit api
+    dateOfBirth: DateOfBirth,                   // contribution credit api
+    startTaxYear: StartTaxYear,                 // contribution credit api
+    endTaxYear: EndTaxYear,                     // contribution credit api
     identifier: Identifier,                     // maybe trn or nino (required by both the liability and ma receipt api)
     liabilitySearchCategoryHyphenated: Boolean, // liability api
     liabilityOccurrenceNumber: Option[Int],     // liability api

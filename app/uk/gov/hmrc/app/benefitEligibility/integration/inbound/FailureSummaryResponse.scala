@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.inbound
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, NpsApiResponseStatus, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponseStatus, NpsApiResult}
 
 case class SanitizedApiResult(
     apiName: ApiName,
@@ -46,6 +46,7 @@ object FailureSummaryResponse {
       benefitEligibilityDataFetchError: BenefitEligibilityDataFetchError,
       correlationId: CorrelationId
   ): FailureSummaryResponse =
+
     benefitEligibilityDataFetchError
       .into[FailureSummaryResponse]
       .withFieldConst(_.correlationId, correlationId)
@@ -55,8 +56,11 @@ object FailureSummaryResponse {
         _.downStreams.map(
           _.into[SanitizedApiResult]
             .withFieldComputed(_.apiName, _.apiName)
-            .withFieldComputed(_.status, _.status)
-            .withFieldComputed(_.error, _.error)
+            .withFieldComputed(
+              _.status,
+              result => if (result.isSuccess) NpsApiResponseStatus.Success else NpsApiResponseStatus.Failure
+            )
+            .withFieldComputed(_.error, result => result.getFailure)
             .transform
         )
       )

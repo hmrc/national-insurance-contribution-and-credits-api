@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.common
 
 import play.api.libs.json.{Format, Json}
 
+/** minimal representation of a tax year i.e EndTaxYear(2005) == taxYear (2005/2006)  * */
 case class EndTaxYear(value: Int) extends AnyVal
 
 object EndTaxYear {

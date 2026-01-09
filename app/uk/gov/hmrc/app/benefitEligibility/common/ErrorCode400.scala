@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.enums
+package uk.gov.hmrc.app.benefitEligibility.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import play.api.libs.json.*
 
 import scala.collection.immutable
 
-sealed abstract class ErrorReason403(override val entryName: String) extends EnumEntry
+sealed abstract class ErrorCode400(override val entryName: String) extends EnumEntry
 
-object ErrorReason403 extends Enum[ErrorReason403] with PlayJsonEnum[ErrorReason403] {
-  val values: immutable.IndexedSeq[ErrorReason403] = findValues
-  case object Forbidden        extends ErrorReason403("Forbidden")
-  case object UserUnauthorised extends ErrorReason403("User Not Authorised")
+object ErrorCode400 extends Enum[ErrorCode400] with PlayJsonEnum[ErrorCode400] {
+  val values: immutable.IndexedSeq[ErrorCode400] = findValues
+
+  case object ErrorCode400_1 extends ErrorCode400("400.1")
+
+  case object ErrorCode400_2 extends ErrorCode400("400.2")
 }

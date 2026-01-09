@@ -22,18 +22,20 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, Liabilities, NiContributionAndCredits}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, UnexpectedStatus}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.MAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  Class2MaReceiptsResult,
-  ContributionCreditResult,
-  LiabilityResult
+  DownstreamErrorReport,
+  DownstreamSuccessResponse
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.Class2MAReceiptsRequestHelper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
+import MaternityAllowanceSortType.NinoDescending
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -49,8 +51,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
-  val mockClass2MAReceiptsConnector: Class2MAReceiptsConnector         = mock[Class2MAReceiptsConnector]
-  val mockClass2MAReceiptsRequestHelper: Class2MAReceiptsRequestHelper = mock[Class2MAReceiptsRequestHelper]
+  val mockClass2MAReceiptsConnector: Class2MAReceiptsConnector = mock[Class2MAReceiptsConnector]
 
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
 
@@ -61,17 +62,19 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   val appConfig: AppConfig = new AppConfig(config = mockServicesConfig)
 
-  val underTest = new MaternityAllowanceDataRetrievalService(
+  lazy val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
+    mock[NiContributionsAndCreditsConnector]
+
+  lazy val underTest = new MaternityAllowanceDataRetrievalService(
     mockClass2MAReceiptsConnector,
-    mockClass2MAReceiptsRequestHelper,
-    appConfig
+    mockNiContributionsAndCreditsConnector
   )
 
   private val eligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
     nationalInsuranceNumber = "GD379251T",
-    dateOfBirth = LocalDate.parse("1992-08-23"),
-    startTaxYear = 2025,
-    endTaxYear = 2026,
+    dateOfBirth = DateOfBirth(LocalDate.parse("1992-08-23")),
+    startTaxYear = StartTaxYear(2025),
+    endTaxYear = EndTaxYear(2026),
     identifier = Identifier("GD379251T"),
     liabilitySearchCategoryHyphenated = true,
     liabilityOccurrenceNumber = Some(233232323),
@@ -84,48 +87,75 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     sortBy = Some(NinoDescending)
   )
 
-  private val class2MaReceiptsResult =
-    Class2MaReceiptsResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
-
-  private val liabilityResult =
-    LiabilityResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
-
-  private val contributionCreditResult = List(
-    ContributionCreditResult(
-      Failure,
-      None,
-      Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
-    )
-  )
+//  private val class2MaReceiptsResult =
+//    DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+//
+//  private val liabilityResult =
+//    DownstreamErrorReport(Liabilities, NpsNormalizedError.AccessForbidden)
+//
+//  private val contributionCreditResult = List(
+//    DownstreamErrorReport(ContributionCredit, NpsNormalizedError.AccessForbidden)
+//  )
 
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
       "should retrieve data successfully" in {
 
-        (mockClass2MAReceiptsConnector
-          .fetchClass2MAReceipts(_: String)(_: HeaderCarrier))
-          .expects("some url path", *)
+        (mockNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
+          .expects(
+            NiContributionsAndCreditsRequest(
+              nationalInsuranceNumber = Identifier("GD379251T"),
+              dateOfBirth = DateOfBirth(LocalDate.parse("1992-08-23")),
+              startTaxYear = StartTaxYear(2025),
+              endTaxYear = EndTaxYear(2026)
+            ),
+            *
+          )
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              Class2MaReceiptsResult(
-                Failure,
-                None,
-                Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
+              DownstreamSuccessResponse(
+                NiContributionAndCredits,
+                NiContributionsAndCreditsSuccessResponse(List(), List())
               )
             )
           )
-
-        (mockClass2MAReceiptsRequestHelper
-          .buildRequestPath(_: String, _: MAEligibilityCheckDataRequest))
-          .expects("hip", eligibilityCheckDataRequest)
-          .returning("some url path")
+        (mockClass2MAReceiptsConnector
+          .fetchClass2MAReceipts(
+            _: Identifier,
+            _: Option[Boolean],
+            _: Option[ReceiptDate],
+            _: Option[MaternityAllowanceSortType]
+          )(_: HeaderCarrier))
+          .expects(
+            Identifier("GD379251T"),
+            Some(true),
+            Some(ReceiptDate(LocalDate.parse("1992-08-23"))),
+            Some(NinoDescending),
+            *
+          )
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](
+              DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+            )
+          )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Right(
-          EligibilityCheckDataResultMA(class2MaReceiptsResult, liabilityResult, contributionCreditResult)
-        )
+          .futureValue shouldBe
+          Right(
+            EligibilityCheckDataResultMA(
+              DownstreamErrorReport(Class2MAReceipts, AccessForbidden),
+              DownstreamErrorReport(Liabilities, UnexpectedStatus(207)),
+              List(
+                DownstreamSuccessResponse(
+                  NiContributionAndCredits,
+                  NiContributionsAndCreditsSuccessResponse(List(), List())
+                )
+              )
+            )
+          )
 
       }
     }

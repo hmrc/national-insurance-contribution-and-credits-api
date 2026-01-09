@@ -17,26 +17,26 @@
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
+import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.AccessForbidden
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, EndTaxYear, StartTaxYear}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ContributionCreditResult, LiabilityResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.Class2MAReceiptsRequestHelper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
-import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MaternityAllowanceDataRetrievalService @Inject() (
     class2MAReceiptsConnector: Class2MAReceiptsConnector,
-    class2MAReceiptsRequestHelper: Class2MAReceiptsRequestHelper,
-    appConfig: AppConfig
+    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector
 )(
     implicit ec: ExecutionContext
 ) {
@@ -45,27 +45,35 @@ class MaternityAllowanceDataRetrievalService @Inject() (
       eligibilityCheckDataRequest: MAEligibilityCheckDataRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] = {
 
-    val windows = ContributionCreditTaxWindowCalculator.createWindows(
-      StartTaxYear(eligibilityCheckDataRequest.startTaxYear),
-      EndTaxYear(eligibilityCheckDataRequest.endTaxYear)
+    val taxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
+      eligibilityCheckDataRequest.startTaxYear,
+      eligibilityCheckDataRequest.endTaxYear
     )
 
     for {
       class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
-        class2MAReceiptsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
+        eligibilityCheckDataRequest.identifier,
+        eligibilityCheckDataRequest.archived,
+        eligibilityCheckDataRequest.receiptDate,
+        eligibilityCheckDataRequest.sortBy
       )
-      liabilityResult = LiabilityResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
-      contributionCreditResult = windows.map { windows =>
-        ContributionCreditResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(AccessForbidden, "", 403))
+
+      contributionsAndCreditResult <- taxWindows.map { taxWindow =>
+        val request = NiContributionsAndCreditsRequest(
+          eligibilityCheckDataRequest.identifier,
+          eligibilityCheckDataRequest.dateOfBirth,
+          taxWindow.startTaxYear,
+          taxWindow.endTaxYear
         )
-      }
+        niContributionsAndCreditsConnector.fetchContributionsAndCredits(request)
+      }.sequence
+
+      liabilityResult = DownstreamErrorReport(Liabilities, UnexpectedStatus(207))
+
     } yield EligibilityCheckDataResultMA(
       class2MaReceiptsResult,
       liabilityResult,
-      contributionCreditResult
+      contributionsAndCreditResult
     )
   }
 
