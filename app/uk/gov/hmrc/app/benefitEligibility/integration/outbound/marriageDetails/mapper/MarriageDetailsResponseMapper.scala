@@ -16,38 +16,32 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper
 
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
-  AccessForbidden,
-  BadRequest,
-  UnprocessableEntity
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
+  DownstreamErrorReport,
+  DownstreamSuccessResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.MarriageDetailsResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.{
   MarriageDetailsError,
   MarriageDetailsResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsNormalizedError, NpsResponseMapper}
 
 class MarriageDetailsResponseMapper extends NpsResponseMapper[MarriageDetailsResponse, MarriageDetailsResult] {
 
-  def toResult(response: MarriageDetailsResponse): MarriageDetailsResult =
+  def toApiResult(response: MarriageDetailsResponse): MarriageDetailsResult =
     response match {
-      case response: MarriageDetailsSuccessResponse => MarriageDetailsResult(Success, Some(response), None)
-      case _: MarriageDetailsError.MarriageDetailsErrorResponse400 => toResult(BadRequest)
-      case _: MarriageDetailsError.MarriageDetailsErrorResponse422 => toResult(UnprocessableEntity)
-      case _: MarriageDetailsError.MarriageDetailsErrorResponse403 => toResult(AccessForbidden)
+      case MarriageDetailsError.MarriageDetailsErrorResponse400(failures) =>
+        DownstreamErrorReport(MarriageDetails, BadRequest)
+      case MarriageDetailsError.MarriageDetailsErrorResponse403(reason, code) =>
+        DownstreamErrorReport(MarriageDetails, AccessForbidden)
+      case MarriageDetailsError.MarriageDetailsErrorResponse422(failures) =>
+        DownstreamErrorReport(MarriageDetails, UnprocessableEntity)
+      case response: MarriageDetailsSuccessResponse => DownstreamSuccessResponse(MarriageDetails, response)
     }
-
-  def toResult(normalizedErrorStatusCode: NormalizedErrorStatusCode) =
-    MarriageDetailsResult(
-      Failure,
-      None,
-      Some(
-        NpsNormalizedError(normalizedErrorStatusCode, normalizedErrorStatusCode.message, normalizedErrorStatusCode.code)
-      )
-    )
 
 }

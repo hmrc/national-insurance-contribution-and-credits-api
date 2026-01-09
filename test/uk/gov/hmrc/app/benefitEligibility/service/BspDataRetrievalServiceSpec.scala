@@ -20,14 +20,12 @@ import cats.data.EitherT
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers.*
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.AccessForbidden
+import org.scalatest.matchers.should.Matchers.shouldBe
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Identifier, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.BSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.config.AppConfig
@@ -76,7 +74,7 @@ class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
   )
 
   private val marriageDetailsResult =
-    MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
+    DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
 
   "BspDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -87,7 +85,7 @@ class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
           .expects("some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
+              DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
             )
           )
 

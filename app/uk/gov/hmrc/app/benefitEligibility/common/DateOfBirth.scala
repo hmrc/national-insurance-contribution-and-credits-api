@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound
+package uk.gov.hmrc.app.benefitEligibility.common
 
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
+import play.api.libs.json.{Format, Json}
 
-trait NpsResponseMapper[A <: NpsApiResponse, B <: NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]] {
-  def toApiResult(response: A): B
+import java.time.LocalDate
+
+case class DateOfBirth(value: LocalDate) extends AnyVal
+
+object DateOfBirth {
+  implicit val receiptDateReads: Format[DateOfBirth] = Json.valueFormat[DateOfBirth]
 }

@@ -18,18 +18,17 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, Reason}
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
-  AccessForbidden,
-  BadRequest,
-  UnprocessableEntity
+import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
+  DownstreamErrorReport,
+  DownstreamSuccessResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.Class2MaReceiptsResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.enums.ErrorCode403.ErrorCode403_1
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.enums.{
   ErrorCode400,
   ErrorCode403,
@@ -42,18 +41,14 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
 
   "Class2MAReceiptsResponseMapper" - {
 
-    ".toResult" - {
+    ".toApiResult" - {
 
       "should map Class2MAReceiptsSuccessResponse to success result" in {
         val successResponse = Class2MAReceiptsSuccessResponse(Identifier("AB123456C"), List())
 
-        val result = underTest.toResult(successResponse)
+        val result = underTest.toApiResult(successResponse)
 
-        val expected = Class2MaReceiptsResult(
-          Success,
-          Some(successResponse),
-          None
-        )
+        val expected = DownstreamSuccessResponse(Class2MAReceipts, successResponse)
 
         result shouldBe expected
       }
@@ -62,13 +57,9 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
         val errorResponse =
           Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_1)
 
-        val result = underTest.toResult(errorResponse)
+        val result = underTest.toApiResult(errorResponse)
 
-        val expected = Class2MaReceiptsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(AccessForbidden, "downstream resource cannot be accessed by the calling client", 403))
-        )
+        val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
 
         result shouldBe expected
       }
@@ -78,13 +69,9 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
           List(Class2MAReceiptsError400(Reason(""), ErrorCode400.Invalid_Destination_Header))
         val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse400(failures)
 
-        val result = underTest.toResult(errorResponse)
+        val result = underTest.toApiResult(errorResponse)
 
-        val expected = Class2MaReceiptsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(BadRequest, "downstream received a malformed request", 400))
-        )
+        val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.BadRequest)
 
         result shouldBe expected
       }
@@ -93,13 +80,9 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
         val failures      = List(Class2MAReceiptsError422(Reason(""), ErrorCode422("dsds")))
         val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse422(failures)
 
-        val result = underTest.toResult(errorResponse)
+        val result = underTest.toApiResult(errorResponse)
 
-        val expected = Class2MaReceiptsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(UnprocessableEntity, "downstream could not process data in request", 422))
-        )
+        val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnprocessableEntity)
 
         result shouldBe expected
       }
@@ -108,37 +91,31 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
     "toResult(normalizedErrorStatusCode: NormalizedErrorStatusCode)" - {
 
       "should create failure result with AccessForbidden error" in {
-        val result = underTest.toResult(AccessForbidden)
 
-        val expected = Class2MaReceiptsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(AccessForbidden, "downstream resource cannot be accessed by the calling client", 403))
-        )
+        val errorResponse =
+          Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403_1)
+        val result = underTest.toApiResult(errorResponse)
+
+        val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
 
         result shouldBe expected
       }
 
       "should create failure result with BadRequest error" in {
-        val result = underTest.toResult(BadRequest)
 
-        val expected = Class2MaReceiptsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(BadRequest, "downstream received a malformed request", 400))
-        )
+        val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse400(List())
+        val result        = underTest.toApiResult(errorResponse)
+
+        val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.BadRequest)
 
         result shouldBe expected
       }
 
       "should create failure result with UnprocessableEntity error" in {
-        val result = underTest.toResult(UnprocessableEntity)
+        val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse422(List())
+        val result        = underTest.toApiResult(errorResponse)
 
-        val expected = Class2MaReceiptsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(UnprocessableEntity, "downstream could not process data in request", 422))
-        )
+        val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnprocessableEntity)
 
         result shouldBe expected
       }

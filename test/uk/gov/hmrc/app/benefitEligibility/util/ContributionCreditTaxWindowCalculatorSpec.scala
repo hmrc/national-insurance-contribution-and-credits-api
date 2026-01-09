@@ -28,7 +28,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
     ".createWindows" - {
 
       "should return empty list when start year equals end year" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2020)
         )
@@ -36,7 +36,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should return empty list when start year is greater than end year" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2025),
           EndTaxYear(2020)
         )
@@ -44,7 +44,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should create single window when range is less than 6 years" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2024)
         )
@@ -52,7 +52,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should create single window when range is exactly 6 years" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2026)
         )
@@ -60,7 +60,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should create multiple windows when range is greater than 6 years" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2030)
         )
@@ -71,7 +71,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should create multiple windows for exactly 12 years" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2032)
         )
@@ -82,7 +82,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should create three windows for 13 years range" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2033)
         )
@@ -94,7 +94,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should create three windows for exactly 18 years" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2020),
           EndTaxYear(2038)
         )
@@ -106,7 +106,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
       }
 
       "should handle large ranges correctly" in {
-        val result = ContributionCreditTaxWindowCalculator.createWindows(
+        val result = ContributionCreditTaxWindowCalculator.createTaxWindows(
           StartTaxYear(2000),
           EndTaxYear(2025)
         )

@@ -30,7 +30,8 @@ import java.time.LocalDate
 
 class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
 
-  val class2MaReceiptsOpenApiSpec = "test/resources/schemas/class2MaReceipts/Class_2_Maternity_Allowance_Receipts.json"
+  val class2MaReceiptsOpenApiSpec =
+    "test/resources/schemas/api/class2MaReceipts/Class_2_Maternity_Allowance_Receipts.json"
 
   def class2MaReceiptsOpenApi: SimpleJsonSchema =
     SimpleJsonSchema(

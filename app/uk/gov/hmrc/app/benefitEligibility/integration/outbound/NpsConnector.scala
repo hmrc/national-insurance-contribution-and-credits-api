@@ -18,17 +18,21 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import cats.data.EitherT
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ApiResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class NpsConnector[Response <: NpsApiResponse, Result <: NpsApiResult](npsClient: NpsClient) {
+abstract class NpsConnector[Response <: NpsApiResponse](npsClient: NpsClient) {
 
-  def handleResponse(response: HttpResponse): Either[BenefitEligibilityError, Result]
+  def handleResponse(response: HttpResponse): Either[BenefitEligibilityError, ApiResult]
 
   def fetchResult(
       path: String
-  )(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): EitherT[Future, BenefitEligibilityError, Result] =
+  )(
+      implicit headerCarrier: HeaderCarrier,
+      ec: ExecutionContext
+  ): EitherT[Future, BenefitEligibilityError, ApiResult] =
     npsClient
       .get(path)
       .flatMap(response => EitherT.fromEither[Future](handleResponse(response)))

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData.AggregatedDataBSP
@@ -24,20 +25,23 @@ import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.
 object AggregationServiceBSP {
 
   val aggregator: ResultAggregator[EligibilityCheckDataResultBSP] =
-    (eligibilityCheckDataSuccessResultBSP: EligibilityCheckDataResultBSP) => {
-      val marriageDetailsResult     = eligibilityCheckDataSuccessResultBSP.marriageDetailsResult
-      val marriageDetailsResultList = marriageDetailsResult.successResponse.flatMap(_.marriageDetailsList)
+    (eligibilityCheckDataResultBSP: EligibilityCheckDataResultBSP) =>
+      if (eligibilityCheckDataResultBSP.allResults.forall(_.isSuccess)) {
 
-      AggregatedDataBSP(
-        marriageDetailsResultList.flatMap(_.status).get,
-        marriageDetailsResultList.flatMap(_.startDate).get,
-        marriageDetailsResultList.flatMap(_.startDateStatus).get,
-        marriageDetailsResultList.flatMap(_.endDate).get,
-        marriageDetailsResultList.flatMap(_.endDateStatus).get,
-        marriageDetailsResultList.flatMap(_.spouseIdentifier).get,
-        marriageDetailsResultList.flatMap(_.spouseForename).get,
-        marriageDetailsResultList.flatMap(_.spouseSurname).get
-      )
-    }
+        val marriageDetailsResult = eligibilityCheckDataResultBSP.marriageDetailsResult.getSuccess.get
+
+        Right(
+          AggregatedDataBSP(
+            marriageDetailsResult.marriageDetailsList.flatMap(_.status).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.startDate).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.startDateStatus).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.endDate).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.endDateStatus).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.spouseIdentifier).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.spouseForename).get,
+            marriageDetailsResult.marriageDetailsList.flatMap(_.spouseSurname).get
+          )
+        )
+      } else Left(BenefitEligibilityDataFetchError.from(eligibilityCheckDataResultBSP))
 
 }

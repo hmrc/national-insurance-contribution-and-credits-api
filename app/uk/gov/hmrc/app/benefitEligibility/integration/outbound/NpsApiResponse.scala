@@ -16,4 +16,5 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
+trait NpsApiSuccessResponse
 trait NpsApiResponse {}

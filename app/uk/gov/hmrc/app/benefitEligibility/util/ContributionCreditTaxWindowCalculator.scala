@@ -24,7 +24,7 @@ object ContributionCreditTaxWindowCalculator {
 
   case class TaxWindow(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear)
 
-  def createWindows(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear): List[TaxWindow] = {
+  def createTaxWindows(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear): List[TaxWindow] = {
     @tailrec
     def loop(start: StartTaxYear, windows: List[TaxWindow]): List[TaxWindow] = {
 
