@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.common
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.enums
 
-import play.api.libs.json.{Format, Json}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import play.api.libs.json.*
 
-/** minimal representation of a tax year i.e StartTaxYear(2005) == taxYear (2005/2006)  * */
-case class StartTaxYear(value: Int) extends AnyVal
+import scala.collection.immutable
 
-object StartTaxYear {
-  implicit val startTaxYearFormat: Format[StartTaxYear] = Json.valueFormat[StartTaxYear]
+sealed abstract class ErrorReason403(override val entryName: String) extends EnumEntry
+
+object ErrorReason403 extends Enum[ErrorReason403] with PlayJsonEnum[ErrorReason403] {
+  val values: immutable.IndexedSeq[ErrorReason403] = findValues
+  case object Forbidden        extends ErrorReason403("Forbidden")
+  case object UserUnauthorised extends ErrorReason403("User Not Authorised")
 }

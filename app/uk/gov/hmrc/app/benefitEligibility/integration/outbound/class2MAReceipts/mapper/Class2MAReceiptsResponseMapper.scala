@@ -17,14 +17,13 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.mapper
 
 import io.scalaland.chimney.dsl.into
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
-  AccessForbidden,
-  BadRequest,
-  UnprocessableEntity
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
+  DownstreamErrorReport,
+  DownstreamSuccessResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.Class2MaReceiptsResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
   Class2MAReceiptsErrorResponse400,
   Class2MAReceiptsErrorResponse403,
@@ -36,30 +35,19 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
   Class2MAReceiptsResponse,
   Class2MAReceiptsSuccess
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
-  NpsApiResponseStatus,
-  NpsApiResult,
-  NpsNormalizedError,
-  NpsResponseMapper
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, Class2MaReceiptsResult, NpsResponseMapper}
 
-class Class2MAReceiptsResponseMapper extends NpsResponseMapper[Class2MAReceiptsResponse, Class2MaReceiptsResult] {
+class Class2MAReceiptsResponseMapper extends NpsResponseMapper[Class2MAReceiptsResponse, ApiResult] {
 
-  def toResult(response: Class2MAReceiptsResponse): Class2MaReceiptsResult =
+  def toApiResult(response: Class2MAReceiptsResponse): Class2MaReceiptsResult =
     response match {
-      case resp: Class2MAReceiptsSuccessResponse => Class2MaReceiptsResult(Success, Some(resp), None)
-      case _: Class2MAReceiptsErrorResponse403   => toResult(AccessForbidden)
-      case _: Class2MAReceiptsErrorResponse400   => toResult(BadRequest)
-      case _: Class2MAReceiptsErrorResponse422   => toResult(UnprocessableEntity)
+      case Class2MAReceiptsErrorResponse400(failures) =>
+        DownstreamErrorReport(Class2MAReceipts, BadRequest)
+      case Class2MAReceiptsErrorResponse403(reason, code) =>
+        DownstreamErrorReport(Class2MAReceipts, AccessForbidden)
+      case Class2MAReceiptsErrorResponse422(failures) =>
+        DownstreamErrorReport(Class2MAReceipts, UnprocessableEntity)
+      case response: Class2MAReceiptsSuccessResponse => DownstreamSuccessResponse(Class2MAReceipts, response)
     }
-
-  def toResult(normalizedErrorStatusCode: NormalizedErrorStatusCode) =
-    Class2MaReceiptsResult(
-      Failure,
-      None,
-      Some(
-        NpsNormalizedError(normalizedErrorStatusCode, normalizedErrorStatusCode.message, normalizedErrorStatusCode.code)
-      )
-    )
 
 }

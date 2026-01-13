@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
 
-trait NpsResponseMapper[A <: NpsApiResponse, B <: NpsApiResult] {
-  def toResult(response: A): B
-
-  def toResult(code: NormalizedErrorStatusCode): B
-
+trait NpsResponseMapper[A <: NpsApiResponse, B <: NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]] {
+  def toApiResult(response: A): B
 }

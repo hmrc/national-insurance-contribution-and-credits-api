@@ -22,22 +22,29 @@ import scala.annotation.tailrec
 
 object ContributionCreditTaxWindowCalculator {
 
-  case class TaxWindow(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear)
+  private final case class NormalizedTaxYear(start: Int, end: Int)
 
-  def createWindows(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear): List[TaxWindow] = {
-    @tailrec
-    def loop(start: StartTaxYear, windows: List[TaxWindow]): List[TaxWindow] = {
+  final case class TaxWindow(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear)
 
-      val maybeNewStart = StartTaxYear(start.value + 6)
+  def createTaxWindows(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear): List[TaxWindow] = {
 
-      if (start.value >= endTaxYear.value) windows
-      else if (endTaxYear.value - start.value <= 6) {
-        (TaxWindow(start, endTaxYear) +: windows).reverse
-      } else
-        loop(maybeNewStart, TaxWindow(StartTaxYear(start.value), EndTaxYear(maybeNewStart.value)) +: windows)
-    }
+    val normalizedTaxYears = (startTaxYear.value to endTaxYear.value).map(year => NormalizedTaxYear(year, year + 1))
 
-    loop(start = startTaxYear, windows = List.empty)
+    normalizedTaxYears.zipWithIndex
+      .foldLeft(List(List.empty[NormalizedTaxYear])) { case (windows, (year, index)) =>
+        if (index > 0 && index % 6 == 0) {
+          List(year) :: windows
+        } else {
+          (year :: windows.head) :: windows.tail
+        }
+      }
+      .map(_.reverse)
+      .reverse
+      .collect {
+        case group if group.nonEmpty =>
+          TaxWindow(StartTaxYear(group.map(_.start).min), EndTaxYear(group.map(_.start).max))
+      }
+
   }
 
 }

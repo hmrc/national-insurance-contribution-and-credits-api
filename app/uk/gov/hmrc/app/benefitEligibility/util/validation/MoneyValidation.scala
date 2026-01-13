@@ -22,12 +22,23 @@ import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult
 import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult.SuccessfulResult
 
 object MoneyValidation {
-  private val min        = BigDecimal("-99999999999999.98")
-  private val max        = BigDecimal("99999999999999.98")
-  private val maxScale   = 4
-  private val multipleOf = BigDecimal("0.0001")
+
+  private object Defaults {
+
+    val max: BigDecimal = BigDecimal("99999999999999.98")
+
+    val signedMin: BigDecimal        = BigDecimal("-99999999999999.98")
+    val signedMaxScale: Int          = 4
+    val signedMultipleOf: BigDecimal = BigDecimal("0.0001")
+
+    val unsignedMin: BigDecimal        = BigDecimal("0")
+    val unsignedMaxScale: Int          = 2
+    val unsignedMultipleOf: BigDecimal = BigDecimal("0.01")
+
+  }
 
   private def validateMultipleOf[T <: Product & AnyVal](
+      multipleOf: BigDecimal,
       valueName: String,
       value: BigDecimal
   ): ValidatedNel[String, SuccessfulResult] =
@@ -38,6 +49,7 @@ object MoneyValidation {
     )
 
   private def validateScale[T <: Product & AnyVal](
+      maxScale: Int,
       valueName: String,
       value: BigDecimal
   ): ValidatedNel[String, SuccessfulResult] =
@@ -48,6 +60,7 @@ object MoneyValidation {
     )
 
   private def validateMin[T <: Product & AnyVal](
+      min: BigDecimal,
       valueName: String,
       value: BigDecimal
   ): ValidatedNel[String, SuccessfulResult] =
@@ -60,19 +73,46 @@ object MoneyValidation {
   private def validateMax[T <: Product & AnyVal](
       valueName: String,
       value: BigDecimal
-  ): ValidatedNel[String, SuccessfulResult] =
+  ): ValidatedNel[String, SuccessfulResult] = {
+    val max = Defaults.max
     Validated.condNel(
       value <= max,
       SuccessfulResult,
       s"""$valueName value exceeds the maximum allowed limit of $max"""
     )
+  }
 
-  def validate[T <: Product & AnyVal](value: T): ValidatedNel[String, SuccessfulResult] =
+  def validate[T <: Product & AnyVal](
+      value: T,
+      min: BigDecimal,
+      maxScale: Int,
+      multipleOf: BigDecimal
+  ): ValidatedNel[String, SuccessfulResult] =
     List(
-      validateMultipleOf(value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString)),
-      validateScale(value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString)),
-      validateMin(value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString)),
+      validateMultipleOf(multipleOf, value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString)),
+      validateScale(maxScale, value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString)),
+      validateMin(min, value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString)),
       validateMax(value.getClass().getSimpleName, BigDecimal(value.productElement(0).toString))
     ).sequence_.as(SuccessfulResult)
+
+  def validateUnsigned[T <: Product & AnyVal](
+      value: T
+  ): ValidatedNel[String, SuccessfulResult] =
+    validate(
+      value = value,
+      min = Defaults.unsignedMin,
+      maxScale = Defaults.unsignedMaxScale,
+      multipleOf = Defaults.unsignedMultipleOf
+    )
+
+  def validateSigned[T <: Product & AnyVal](
+      value: T
+  ): ValidatedNel[String, SuccessfulResult] =
+    validate(
+      value = value,
+      min = Defaults.signedMin,
+      maxScale = Defaults.signedMaxScale,
+      multipleOf = Defaults.signedMultipleOf
+    )
 
 }

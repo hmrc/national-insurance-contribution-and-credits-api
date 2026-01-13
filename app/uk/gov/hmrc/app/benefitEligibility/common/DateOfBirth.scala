@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.common
 
 import play.api.libs.json.{Format, Json}
 
-/** minimal representation of a tax year i.e StartTaxYear(2005) == taxYear (2005/2006)  * */
-case class StartTaxYear(value: Int) extends AnyVal
+import java.time.LocalDate
 
-object StartTaxYear {
-  implicit val startTaxYearFormat: Format[StartTaxYear] = Json.valueFormat[StartTaxYear]
+case class DateOfBirth(value: LocalDate) extends AnyVal
+
+object DateOfBirth {
+  implicit val receiptDateFormat: Format[DateOfBirth] = Json.valueFormat[DateOfBirth]
 }
