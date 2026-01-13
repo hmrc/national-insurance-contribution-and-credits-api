@@ -18,13 +18,13 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NormalizedError, NormalizedErrorStatusCode}
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   Class2MAReceipts,
   ContributionCredit,
   Liabilities,
   MarriageDetails
 }
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NormalizedErrorStatusCode}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 

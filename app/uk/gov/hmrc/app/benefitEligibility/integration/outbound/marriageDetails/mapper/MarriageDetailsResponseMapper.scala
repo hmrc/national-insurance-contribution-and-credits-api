@@ -35,54 +35,18 @@ class MarriageDetailsResponseMapper extends NpsResponseMapper[MarriageDetailsRes
 
   def toResult(response: MarriageDetailsResponse): MarriageDetailsResult =
     response match {
-
-      case response: MarriageDetailsSuccessResponse =>
-        MarriageDetailsResult(Success, Some(response), None)
-
-      case MarriageDetailsError.MarriageDetailsErrorResponse400(failures) =>
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              code = BadRequest,
-              message = failures.map(_.reason).mkString(","),
-              downstreamStatus = 400
-            )
-          )
-        )
-
-      case MarriageDetailsError.MarriageDetailsErrorResponse403(reason, code) =>
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(NpsNormalizedError(code = AccessForbidden, message = reason.entryName, downstreamStatus = 403))
-        )
-
-      case MarriageDetailsError.MarriageDetailsErrorResponse422(failures) =>
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              code = UnprocessableEntity,
-              message = failures.map(_.reason).mkString(","),
-              downstreamStatus = 422
-            )
-          )
-        )
+      case response: MarriageDetailsSuccessResponse => MarriageDetailsResult(Success, Some(response), None)
+      case _: MarriageDetailsError.MarriageDetailsErrorResponse400 => toResult(BadRequest)
+      case _: MarriageDetailsError.MarriageDetailsErrorResponse422 => toResult(UnprocessableEntity)
+      case _: MarriageDetailsError.MarriageDetailsErrorResponse403 => toResult(AccessForbidden)
     }
 
-  def toResult(textualErrorStatusCode: NormalizedErrorStatusCode) =
+  def toResult(normalizedErrorStatusCode: NormalizedErrorStatusCode) =
     MarriageDetailsResult(
       Failure,
       None,
       Some(
-        NpsNormalizedError(
-          textualErrorStatusCode,
-          textualErrorStatusCode.message,
-          textualErrorStatusCode.code
-        )
+        NpsNormalizedError(normalizedErrorStatusCode, normalizedErrorStatusCode.message, normalizedErrorStatusCode.code)
       )
     )
 

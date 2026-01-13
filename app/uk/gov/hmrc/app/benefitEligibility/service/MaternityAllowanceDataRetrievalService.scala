@@ -18,8 +18,8 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.AccessForbidden
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, EndTaxYear, StartTaxYear}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
@@ -27,6 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{Con
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.Class2MAReceiptsRequestHelper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -42,21 +43,30 @@ class MaternityAllowanceDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: MAEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] =
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] = {
+
+    val windows = ContributionCreditTaxWindowCalculator.createWindows(
+      StartTaxYear(eligibilityCheckDataRequest.startTaxYear),
+      EndTaxYear(eligibilityCheckDataRequest.endTaxYear)
+    )
+
     for {
       class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
         class2MAReceiptsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
       )
       liabilityResult = LiabilityResult(Failure, None, Some(NpsNormalizedError(AccessForbidden, "", 403)))
-      contributionCreditResult = ContributionCreditResult(
-        Failure,
-        None,
-        Some(NpsNormalizedError(AccessForbidden, "", 403))
-      )
+      contributionCreditResult = windows.map { windows =>
+        ContributionCreditResult(
+          Failure,
+          None,
+          Some(NpsNormalizedError(AccessForbidden, "", 403))
+        )
+      }
     } yield EligibilityCheckDataResultMA(
       class2MaReceiptsResult,
       liabilityResult,
       contributionCreditResult
     )
+  }
 
 }
