@@ -20,7 +20,7 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.JSAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.JSAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
 

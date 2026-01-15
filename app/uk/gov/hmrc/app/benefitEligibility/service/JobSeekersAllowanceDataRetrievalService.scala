@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.instances.future.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.JSAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.JSAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
 

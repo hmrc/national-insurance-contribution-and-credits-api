@@ -1,0 +1,904 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Individual's Marriage Details",
+    "description": "# Usage Terms\nThis interface is business-critical for HMRC and is expected to be consumed by Digital users and other HMRC systems - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).\n## Version Log\n| Version | Date | Author | Description |putMarriageDetails\n|---------|------|--------|-------------|\n| 0.0.1 | 14/07/2025 | DWIT Team | Initial Draft for RetrieveMarriageDetails|\n| 0.0.2 | 14/07/2025 | DWIT Team | Initial Draft for putMarriageDetails|\n| 0.0.3 | 24/07/2025 | DWIT Team | Removes PROTOTYPE |\n|       |            |           | Removes Contact section |\n|       |            |           | Moves change log |\n|       |            |           | Adds correlationid pattern |\n|       |            |           | Adds govukoriginatorid min/max |\n|       |            |           | Adds api-type |\n|       |            |           | Adds domain/sub-domain |\n|       |            |           | Changes status to ALPHA |\n|       |            |           | Removes License Section |\n| 0.0.4 | 05/08/2025 | DWIT Team | Individual Domain change |\n|       |            |           | Updated URI |\n| 0.0.5 | 06/08/2025 | DWIT Team | Path/Method fix |\n| 0.0.6 | 30/10/2025 | NPS Development Team | backendHostname corrected |\n| 0.0.7 | 05/12/2025 | NPS Development Team | Added Spouse name details |",
+    "version": "0.0.7",
+    "x-integration-catalogue": {
+      "reviewed-date": "2025-12-05T09:55:17Z",
+      "publisher-reference": "individual-marriage-details",
+      "short-description": "Individual's Marriage Details (This is a PROTOTYPE - documentation only)",
+      "api-type": "SIMPLE",
+      "status": "ALPHA",
+      "platform": "HIP",
+      "domain": 8,
+      "sub-domain": 8.17,
+      "backends": [
+        "PAYE"
+      ]
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/paye",
+      "description": "Corporate - Production"
+    },
+    {
+      "url": "https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/paye",
+      "description": "Corporate - Test"
+    },
+    {
+      "url": "https://hip.ws.hmrc.gov.uk/paye",
+      "description": "MDTP - Production"
+    },
+    {
+      "url": "https://hip.ws.ibt.hmrc.gov.uk/paye",
+      "description": "MDTP - QA"
+    }
+  ],
+  "paths": {
+    "/individual/{identifier}/marriage-cp": {
+      "get": {
+        "tags": [],
+        "summary": "Retrieve Individual marriage details from the individual domain.",
+        "description": "# Purpose\nThis API will retrieve the marriage details for the specified individual identifier. <br><p>\n# Summary<br>\n- The API must provide the following path parameters:<br>\n  - National Insurance Number (identifier). <br>\n  - Temporary Reference Number (identifier). <br>\n- The API may be called with the following query parameters:<br>\n  - Search start year (searchStartYear). <br>\n  - Search end year (searchEndYear). <br>\n  - Latest record only (latest). <br>\n  - Sequence number for pagination of records (sequence). <br>\n- NPS will return a payload holding the marriage details of the specified individual.<br>\n# Volumes & Registered Consumers\nThis API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection. <br><p>\n| Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |\n|----------|------------------------|---------------------|----------|\n| ??? | xxx | xxx | xxx |\n*TPS = Transactions per second",
+        "operationId": "RetrieveMarriageDetails",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/correlationId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkOriginatorId"
+          },
+          {
+            "$ref": "#/components/parameters/Identifier"
+          },
+          {
+            "$ref": "#/components/parameters/SearchStartYear"
+          },
+          {
+            "$ref": "#/components/parameters/SearchEndYear"
+          },
+          {
+            "$ref": "#/components/parameters/Latest"
+          },
+          {
+            "$ref": "#/components/parameters/Sequence"
+          }
+        ],
+        "security": [
+          {
+            "oAuth2": [
+              "read:individual-marriage-details"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/optimisticLock"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveMarriageDetailsResponse"
+                },
+                "examples": {
+                  "examplePopulatedResponse": {
+                    "summary": "With all response properties senarios that could return.",
+                    "value": {
+                      "marriageDetails": {
+                        "activeMarriage": true,
+                        "marriageDetailsList": [
+                          {
+                            "sequenceNumber": 1,
+                            "status": "CIVIL PARTNER",
+                            "startDate": "2020-04-06",
+                            "startDateStatus": "VERIFIED",
+                            "endDate": "2025-04-06",
+                            "endDateStatus": "VERIFIED",
+                            "spouseIdentifier": "AA000002",
+                            "separationDate": "2025-04-05",
+                            "reconciliationDate": "2020-04-07"
+                          }
+                        ],
+                        "_links": {
+                          "self": {
+                            "href": "/individual/{identifier}/marriage-cp?searchStartYear={searchStartYear}&searchEndYear={searchEndYear}&latest={latest}&sequence={next-marriage-sequence}",
+                            "methods": "get"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_400"
+                },
+                "examples": {
+                  "exampleResponse": {
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "Constraint Violation - Invalid/Missing input parameter",
+                          "code": "400.1"
+                        },
+                        {
+                          "reason": "HTTP message not readable",
+                          "code": "400.2"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "code": "404",
+                      "reason": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_422"
+                },
+                "examples": {
+                  "exampleResponse": {
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "Unprocessable Entity",
+                          "code": "422.0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [],
+        "summary": "Update Individual marriage details on the individual domain",
+        "description": "# Purpose\nThis API will retrieve the marriage details for the specified individual identifier. <br><p>\n# Summary<br>\n- The API must provide the following path parameters:<br>\n  - National Insurance Number (identifier). <br>\n  - Temporary Reference Number (identifier). <br>\n- NPS will return a payload holding the updated optimistic Lock for marriage details of the specified individual.<br>\n# Volumes & Registered Consumers\nThis API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection. <br><p>\n| Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |\n|----------|------------------------|---------------------|----------|\n| ??? | xxx | xxx | xxx |\n*TPS = Transactions per second",
+        "operationId": "putMarriageDetails",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/correlationId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkOriginatorId"
+          },
+          {
+            "$ref": "#/components/parameters/Identifier"
+          }
+        ],
+        "security": [
+          {
+            "oAuth2": [
+              "write:individual-marriage-details"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutMarriageDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutMarriageDetailsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_400"
+                },
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "HTTP message not readable",
+                          "code": "400.2"
+                        },
+                        {
+                          "reason": "Constraint violation: Invalid/Missing input parameter: <parameter>",
+                          "code": "400.1"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden ",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "code": "404",
+                      "reason": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Optlock Conflict",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_409"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_422"
+                },
+                "examples": {
+                  "422_TRNNotAllowed": {
+                    "description": "This error is only returned for certain consumers.",
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "Invalid NINo entered",
+                          "code": "48003"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "correlationId": {
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/correlationId"
+        }
+      },
+      "optimisticLock": {
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/optimisticLock"
+        }
+      }
+    },
+    "parameters": {
+      "correlationId": {
+        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
+        "in": "header",
+        "name": "correlationId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/correlationId"
+        }
+      },
+      "govUkOriginatorId": {
+        "description": "Identity of the Originating System that made the API call.",
+        "in": "header",
+        "name": "gov-uk-originator-id",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/govUkOriginatorId"
+        }
+      },
+      "Identifier": {
+        "description": "The identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO).",
+        "in": "path",
+        "name": "identifier",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/identifierParameter"
+        }
+      },
+      "SearchStartYear": {
+        "description": "If present, start the search from this year, or from the beginning if not present.",
+        "in": "query",
+        "name": "searchStartYear",
+        "required": false,
+        "example": 2002,
+        "schema": {
+          "$ref": "#/components/schemas/taxYear"
+        }
+      },
+      "SearchEndYear": {
+        "description": "If present end the search at this year (include this year) - or to the end if not present.",
+        "in": "query",
+        "name": "searchEndYear",
+        "required": false,
+        "example": 2025,
+        "schema": {
+          "$ref": "#/components/schemas/taxYear"
+        }
+      },
+      "Latest": {
+        "description": "If this is set to true, then only return the latest marriage record - if not present will default to false",
+        "in": "query",
+        "name": "latest",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/latestParameter"
+        }
+      },
+      "Sequence": {
+        "description": "If present start search from this marriage-sequence-number - used for paging",
+        "in": "query",
+        "name": "sequence",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/sequenceParameter"
+        }
+      }
+    },
+    "schemas": {
+      "correlationId": {
+        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "example": "e470d658-99f7-4292-a4a1-ed12c72f1337",
+        "format": "uuid",
+        "type": "string"
+      },
+      "optimisticLock": {
+        "description": "Denotes the version of the data being viewed/processed - if this value is different to what is held in the database, any update requests would be rejected to avoid the risk of overwriting valid data with out of date data. The consumer must first refresh their data before re-attempting to perform any subsequent update requests.",
+        "example": 123,
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 254
+      },
+      "govUkOriginatorId": {
+        "description": "Identity of the Originating System that made the API call",
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 40
+      },
+      "identifierParameter": {
+        "description": "The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.",
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 9,
+        "pattern": "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$",
+        "example": "AA000001A"
+      },
+      "taxYear": {
+        "description": "Denotes the tax year (i.e. the year the tax period started, 2023 for a 2023/2024 tax period).",
+        "example": 2023,
+        "maximum": 2099,
+        "minimum": 1900,
+        "type": "integer"
+      },
+      "latestParameter": {
+        "description": "If this is set to true, then only return the latest marriage record - if not present will default to false.",
+        "type": "boolean",
+        "example": true
+      },
+      "sequenceParameter": {
+        "description": "If present start search from this marriage-sequence-number - used for paging",
+        "type": "integer",
+        "example": 5
+      },
+      "errorResourceObj_400": {
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "maxLength": 120
+          },
+          "code": {
+            "description": "The error code representing the error that has occurred. Valid values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'\n400.2 - HTTP message not readable;",
+            "type": "string",
+            "enum": [
+              "400.1",
+              "400.2"
+            ]
+          }
+        }
+      },
+      "errorResponse_400": {
+        "description": "Error Response Payload for this API",
+        "title": "Error Response",
+        "type": "object",
+        "properties": {
+          "failures": {
+            "$ref": "#/components/schemas/errorResponseFailure_400"
+          }
+        }
+      },
+      "errorResponseFailure_400": {
+        "description": "Array of Error Response Failure Object in Error Response.",
+        "title": "Failure Object in Error Response",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/errorResourceObj_400"
+        }
+      },
+      "errorResourceObj_403_Forbidden": {
+        "title": "403_Forbidden",
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "enum": [
+              "Forbidden"
+            ]
+          },
+          "code": {
+            "description": "The error code representing the Forbidden Error.",
+            "type": "string",
+            "enum": [
+              "403.2"
+            ]
+          }
+        }
+      },
+      "errorResponse_403": {
+        "description": "Error Response Payload for this API",
+        "title": "Forbidden Error Response",
+        "type": "object",
+        "properties": {
+          "failures": {
+            "$ref": "#/components/schemas/errorResponseFailure_403"
+          }
+        }
+      },
+      "errorResponseFailure_403": {
+        "description": "Array of Error Response Failure Object in Error Response.",
+        "title": "Failure Object in Error Response",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/errorResourceObj_403_Forbidden"
+        }
+      },
+      "errorResponse_409": {
+        "description": "Error Response Payload for this API",
+        "title": "Optlock Error Response",
+        "properties": {
+          "failures": {
+            "$ref": "#/components/schemas/errorResourceObj_409"
+          }
+        }
+      },
+      "errorResourceObj_409": {
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "maxLength": 120
+          },
+          "code": {
+            "description": "The error code representing the error that has occurred."
+          }
+        }
+      },
+      "errorResourceObj_422_UnprocessableEntity": {
+        "title": "422_UnprocessableEntity",
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "code": {
+            "description": "The error code representing the error that has occured.",
+            "type": "string"
+          }
+        }
+      },
+      "errorResponse_422": {
+        "description": "Error Response Payload for this API",
+        "title": "Unprocessable Entity Error Response",
+        "type": "object",
+        "properties": {
+          "failures": {
+            "$ref": "#/components/schemas/errorResponseFailure_422"
+          }
+        }
+      },
+      "errorResponseFailure_422": {
+        "description": "Array of Error Response Failure Object in Error Response.",
+        "title": "Failure Object in Error Response",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/errorResourceObj_422_UnprocessableEntity"
+        }
+      },
+      "RetrieveMarriageDetailsResponse": {
+        "type": "object",
+        "required": [
+          "marriageDetails"
+        ],
+        "properties": {
+          "marriageDetails": {
+            "$ref": "#/components/schemas/MarriageDetails"
+          }
+        }
+      },
+      "MarriageDetails": {
+        "type": "object",
+        "required": [
+          "activeMarriage"
+        ],
+        "properties": {
+          "activeMarriage": {
+            "$ref": "#/components/schemas/ActiveMarriage"
+          },
+          "marriageDetailsList": {
+            "$ref": "#/components/schemas/MarriageDetailsList"
+          },
+          "_links": {
+            "description": "Contains link for the marriage details.",
+            "properties": {
+              "self": {
+                "$ref": "#/components/schemas/SelfLink"
+              }
+            }
+          }
+        }
+      },
+      "ActiveMarriage": {
+        "type": "boolean",
+        "description": "Denotes whether or not a marriage/civil partnership is active for the individual."
+      },
+      "MarriageDetailsList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/MarriageDetailsListElement"
+        }
+      },
+      "MarriageDetailsListElement": {
+        "type": "object",
+        "required": [
+          "sequenceNumber",
+          "status"
+        ],
+        "properties": {
+          "sequenceNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 126,
+            "example": 15,
+            "description": "Unique sequence number representing the position in the marriage history (i.e. row) of the marriage details entry for this individual"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EnumMgstattp"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which the marriage started."
+          },
+          "startDateStatus": {
+            "$ref": "#/components/schemas/EnumDateStat"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which the marriage ceased."
+          },
+          "endDateStatus": {
+            "$ref": "#/components/schemas/EnumVfddttrm"
+          },
+          "spouseIdentifier": {
+            "type": "string",
+            "description": "The spouse's identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO)."
+          },
+          "spouseForename": {
+            "description": "The spouse's forename.",
+            "example": "Jean-Pierre",
+            "maxLength": 99,
+            "minLength": 1,
+            "pattern": "^([A-Za-z '-])+$",
+            "type": "string"
+          },
+          "spouseSurname": {
+            "description": "The spouse's surname.",
+            "example": "van Cholmondley-warner",
+            "maxLength": 99,
+            "minLength": 2,
+            "pattern": "^([A-Za-z '-])+$",
+            "type": "string"
+          },
+          "separationDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which this married couple separated but were still legally married."
+          },
+          "reconciliationDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which the marriage was reconciled."
+          }
+        }
+      },
+      "PutMarriageDetailsRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/EnumMgstattp"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which the marriage started."
+          },
+          "startDateStatus": {
+            "$ref": "#/components/schemas/EnumDateStat"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which the marriage ceased."
+          },
+          "endDateStatus": {
+            "$ref": "#/components/schemas/EnumVfddttrm"
+          },
+          "spouseIdentifier": {
+            "type": "string",
+            "description": "The spouse's identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO)."
+          },
+          "separationDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which this married couple separated but were still legally married."
+          },
+          "reconciliationDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date on which the marriage was reconciled."
+          }
+        }
+      },
+      "PutMarriageDetailsResponse": {
+        "required": [
+          "updatedOptimisticLock"
+        ],
+        "description": "response payload for this API.",
+        "properties": {
+          "updatedOptimisticLock": {
+            "$ref": "#/components/schemas/optimisticLock"
+          }
+        }
+      },
+      "EnumMgstattp": {
+        "type": "string",
+        "description": "Current status of individual's marriage",
+        "enum": [
+          "(NONE)",
+          "CIVIL PARTNER",
+          "CIVIL PARTNERSHIP ANNULLED",
+          "CIVIL PARTNERSHIP DISSOLVED",
+          "CIVIL PARTNERSHIP TERMINATED - REASON N/K",
+          "DIVORCED",
+          "MARRIAGE ANNULLED",
+          "MARRIAGE TERMINATED - REASON NOT KNOWN",
+          "MARRIED",
+          "SINGLE",
+          "SURVIVING CIVIL PARTNER",
+          "VOID",
+          "WIDOWED"
+        ]
+      },
+      "EnumDateStat": {
+        "type": "string",
+        "description": "The status of the marriage start date.",
+        "enum": [
+          "COEG Confirmed",
+          "NOT KNOWN",
+          "NOT VERIFIED",
+          "VERIFIED"
+        ]
+      },
+      "EnumVfddttrm": {
+        "type": "string",
+        "description": "The status of the marriage end date.",
+        "enum": [
+          "IN EFFECT",
+          "NOT KNOWN",
+          "UNVERIFIED",
+          "VERIFIED"
+        ]
+      },
+      "SelfLink": {
+        "properties": {
+          "href": {
+            "type": "string",
+            "description": "Link for the marriage details."
+          },
+          "methods": {
+            "type": "string",
+            "description": "Methods available.",
+            "enum": [
+              "get"
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "oAuth2": {
+        "type": "oauth2",
+        "description": "OAuth2 Client Credentials Flow",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "/tokenUrl/not-required",
+            "scopes": {
+              "read:individual-marriage-details": "Individual's Marriage Details",
+              "write:individual-marriage-details": "Individual's Marriage Details"
+            }
+          }
+        }
+      }
+    }
+  }
+}

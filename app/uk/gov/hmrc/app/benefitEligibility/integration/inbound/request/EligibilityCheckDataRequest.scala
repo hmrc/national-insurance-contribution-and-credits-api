@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.inbound
+package uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
 
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{
-  BenefitType,
-  DateOfBirth,
-  EndTaxYear,
-  Identifier,
-  MaternityAllowanceSortType,
-  ReceiptDate,
-  StartTaxYear
-}
+import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 
 import java.time.LocalDate
 

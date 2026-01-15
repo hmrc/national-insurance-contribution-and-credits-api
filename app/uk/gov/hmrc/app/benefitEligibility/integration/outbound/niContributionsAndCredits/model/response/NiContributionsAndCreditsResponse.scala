@@ -17,7 +17,9 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response
 
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode400, ErrorCode422, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -156,12 +158,12 @@ object NiContributionsAndCreditsSuccess {
     implicit val weeksPaidReads: Format[TaxYear] = Json.valueFormat[TaxYear]
   }
 
-  case class NumberOfCreditsAndConts(value: Int) extends AnyVal
+  case class NumberOfCreditsAndContributions(value: Int) extends AnyVal
 
-  object NumberOfCreditsAndConts {
+  object NumberOfCreditsAndContributions {
 
-    implicit val numberOfCreditsAndContsFormat: Format[NumberOfCreditsAndConts] =
-      Json.valueFormat[NumberOfCreditsAndConts]
+    implicit val numberOfCreditsAndContsFormat: Format[NumberOfCreditsAndContributions] =
+      Json.valueFormat[NumberOfCreditsAndContributions]
 
   }
 
@@ -169,7 +171,7 @@ object NiContributionsAndCreditsSuccess {
 
   object Class2NIContributionAmount {
 
-    implicit val numberOfCreditsAndContsFormat: Format[Class2NIContributionAmount] =
+    implicit val class2NIContributionAmountFormat: Format[Class2NIContributionAmount] =
       Json.valueFormat[Class2NIContributionAmount]
 
   }
@@ -202,7 +204,7 @@ object NiContributionsAndCreditsSuccess {
 
   case class NicClass2(
       taxYear: Option[TaxYear],
-      noOfCreditsAndConts: Option[NumberOfCreditsAndConts],
+      noOfCreditsAndConts: Option[NumberOfCreditsAndContributions],
       contributionCreditType: Option[ContributionCreditType],
       class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
       class2NIContributionAmount: Option[Class2NIContributionAmount],

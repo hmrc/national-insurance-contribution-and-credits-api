@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request
 
 import cats.implicits.catsSyntaxSemigroup
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.{
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   BSPEligibilityCheckDataRequest,
   GYSPEligibilityCheckDataRequest
 }

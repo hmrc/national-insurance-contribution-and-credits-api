@@ -18,11 +18,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, OverallResultStatus, OverallResultSummary}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators.{
-  AggregationServiceBSP,
-  AggregationServiceGYSP,
-  AggregationServiceMA
+  AggregationServiceBsp,
+  AggregationServiceGysp,
+  AggregationServiceMa
 }
 
 sealed trait EligibilityCheckDataResult {
@@ -44,12 +45,12 @@ sealed trait EligibilityCheckDataResult {
 
 object EligibilityCheckDataResult {
 
-  implicit val aggregator: ResultAggregator[EligibilityCheckDataResult] = {
-    case result: EligibilityCheckDataResultMA   => AggregationServiceMA.aggregator.aggregate(result)
+  implicit val aggregator: ResultAggregator[EligibilityCheckDataResult, AggregatedData] = {
+    case result: EligibilityCheckDataResultMA   => AggregationServiceMa.aggregator.aggregate(result)
     case result: EligibilityCheckDataResultESA  => ???
     case result: EligibilityCheckDataResultJSA  => ???
-    case result: EligibilityCheckDataResultGYSP => AggregationServiceGYSP.aggregator.aggregate(result)
-    case result: EligibilityCheckDataResultBSP  => AggregationServiceBSP.aggregator.aggregate(result)
+    case result: EligibilityCheckDataResultGYSP => AggregationServiceGysp.aggregator.aggregate(result)
+    case result: EligibilityCheckDataResultBSP  => AggregationServiceBsp.aggregator.aggregate(result)
   }
 
   case class EligibilityCheckDataResultMA(

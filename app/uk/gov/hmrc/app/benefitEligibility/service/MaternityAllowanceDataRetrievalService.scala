@@ -23,6 +23,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Liabilities, NiContrib
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport

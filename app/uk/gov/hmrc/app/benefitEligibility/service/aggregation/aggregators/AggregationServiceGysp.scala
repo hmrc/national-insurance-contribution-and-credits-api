@@ -18,24 +18,27 @@ package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData.AggregatedDataMA
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedDataGysp
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
 
-object AggregationServiceMA {
+object AggregationServiceGysp {
 
-  val aggregator: ResultAggregator[EligibilityCheckDataResultMA] = {
-    (eligibilityCheckDataSuccessResultMA: EligibilityCheckDataResultMA) =>
-      if (eligibilityCheckDataSuccessResultMA.allResults.forall(_.isSuccess)) {
+  val aggregator: ResultAggregator[EligibilityCheckDataResultGYSP, AggregatedDataGysp] =
+    (eligibilityCheckDataResultGYSP: EligibilityCheckDataResultGYSP) =>
+      if (eligibilityCheckDataResultGYSP.allResults.forall(_.isSuccess)) {
+        val marriageDetailsResult = eligibilityCheckDataResultGYSP.marriageDetailsResult.getSuccess.get
 
-        val class2MaReceiptsResult = eligibilityCheckDataSuccessResultMA.class2MaReceiptsResult.getSuccess.get
         Right(
-          AggregatedDataMA(
-            class2MaReceiptsResult.class2MAReceiptDetails.flatMap(_.receiptDate)
+          AggregatedDataGysp(
+            List(),
+            List(),
+            List(),
+            List(),
+            List(),
+            List()
           )
         )
-      } else Left(BenefitEligibilityDataFetchError.from(eligibilityCheckDataSuccessResultMA))
-
-  }
+      } else Left(BenefitEligibilityDataFetchError.from(eligibilityCheckDataResultGYSP))
 
 }

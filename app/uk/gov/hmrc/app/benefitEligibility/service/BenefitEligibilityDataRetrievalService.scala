@@ -20,6 +20,14 @@ import cats.data.EitherT
 import cats.syntax.all.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
+  BSPEligibilityCheckDataRequest,
+  ESAEligibilityCheckDataRequest,
+  EligibilityCheckDataRequest,
+  GYSPEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest,
+  MAEligibilityCheckDataRequest
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.http.HeaderCarrier
 

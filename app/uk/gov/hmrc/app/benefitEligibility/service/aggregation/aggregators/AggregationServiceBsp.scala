@@ -19,27 +19,18 @@ package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData.AggregatedDataBSP
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedDataBsp
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
 
-object AggregationServiceBSP {
+object AggregationServiceBsp {
 
-  val aggregator: ResultAggregator[EligibilityCheckDataResultBSP] =
+  val aggregator: ResultAggregator[EligibilityCheckDataResultBSP, AggregatedDataBsp] =
     (eligibilityCheckDataResultBSP: EligibilityCheckDataResultBSP) =>
       if (eligibilityCheckDataResultBSP.allResults.forall(_.isSuccess)) {
-
-        val marriageDetailsResult = eligibilityCheckDataResultBSP.marriageDetailsResult.getSuccess.get
-
         Right(
-          AggregatedDataBSP(
-            marriageDetailsResult.marriageDetailsList.flatMap(_.status).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.startDate).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.startDateStatus).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.endDate).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.endDateStatus).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.spouseIdentifier).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.spouseForename).get,
-            marriageDetailsResult.marriageDetailsList.flatMap(_.spouseSurname).get
+          AggregatedDataBsp(
+            List(),
+            List()
           )
         )
       } else Left(BenefitEligibilityDataFetchError.from(eligibilityCheckDataResultBSP))

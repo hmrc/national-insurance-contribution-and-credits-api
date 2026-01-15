@@ -23,7 +23,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Identifier, NpsNormalizedError}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.GYSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector

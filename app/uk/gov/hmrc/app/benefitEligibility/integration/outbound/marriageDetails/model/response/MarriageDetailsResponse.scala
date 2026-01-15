@@ -100,16 +100,16 @@ object MarriageDetailsSuccess {
     implicit val sequenceNumberFormat: Format[SequenceNumber] = Json.valueFormat[SequenceNumber]
   }
 
-  case class StartDate(value: LocalDate) extends AnyVal
+  case class MarriageStartDate(value: LocalDate) extends AnyVal
 
-  object StartDate {
-    implicit val startDateReads: Format[StartDate] = Json.valueFormat[StartDate]
+  object MarriageStartDate {
+    implicit val startDateReads: Format[MarriageStartDate] = Json.valueFormat[MarriageStartDate]
   }
 
-  case class EndDate(value: LocalDate) extends AnyVal
+  case class MarriageEndDate(value: LocalDate) extends AnyVal
 
-  object EndDate {
-    implicit val endDateReads: Format[EndDate] = Json.valueFormat[EndDate]
+  object MarriageEndDate {
+    implicit val endDateReads: Format[MarriageEndDate] = Json.valueFormat[MarriageEndDate]
   }
 
   final case class SpouseForename private (value: String) extends AnyVal
@@ -139,9 +139,9 @@ object MarriageDetailsSuccess {
   case class MarriageDetailsList(
       sequenceNumber: Option[SequenceNumber], // TODO make required filed
       status: Option[MarriageStatus],         // TODO make required filed
-      startDate: Option[StartDate],
+      startDate: Option[MarriageStartDate],
       startDateStatus: Option[MarriageStartDateStatus],
-      endDate: Option[EndDate],
+      endDate: Option[MarriageEndDate],
       endDateStatus: Option[MarriageEndDateStatus],
       spouseIdentifier: Option[Identifier],
       spouseForename: Option[SpouseForename],
