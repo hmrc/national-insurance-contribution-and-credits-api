@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound
+package uk.gov.hmrc.app.benefitEligibility.integration.inbound.response
 
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
-import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, DateOfBirth, EndTaxYear, Identifier, StartTaxYear}
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData
 
-trait NpsResponseMapper[A <: NpsApiResponse, B <: NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]] {
-  def toApiResult(response: A): B
+trait BenefitEligibilityResponse {
+  def benefitType: BenefitType
+  def nationalInsuranceNumber: Identifier
+  def startTaxYear: StartTaxYear
+  def endTaxYear: EndTaxYear
+  def dateOfBirth: DateOfBirth
+  def data: AggregatedData
 }

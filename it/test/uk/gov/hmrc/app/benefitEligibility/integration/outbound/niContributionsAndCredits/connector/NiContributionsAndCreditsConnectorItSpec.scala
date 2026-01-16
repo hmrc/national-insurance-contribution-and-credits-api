@@ -118,7 +118,7 @@ class NiContributionsAndCreditsConnectorItSpec
             List(
               NicClass2(
                 taxYear = Some(TaxYear(2022)),
-                noOfCreditsAndConts = Some(NumberOfCreditsAndConts(53)),
+                noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
                 contributionCreditType = Some(ContributionCreditType.C1),
                 class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
                 class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),

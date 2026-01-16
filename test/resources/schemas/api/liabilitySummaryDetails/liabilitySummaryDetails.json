@@ -1,0 +1,1553 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Liability Summary Details",
+    "version": "2.0.4",
+    "description": "# Usage Terms\nThese interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).\n\n## Version Log\n| Version | Date       | Author               | Description   |\n|---------|------------|----------------------|---------------|\n| 0.0.1   | 03/03/2024 | NPS Development Team | Initial Draft |\n| 0.0.2   | 17/03/2025 | NPS Development Team | Updated specs for HMRC Comments and consistency across all APIs  |\n| 1.0.0   | 21/03/2025 | NPS Development Team | Spec baselined|\n| 2.0.0   | 01/05/2025 | NPS Development Team | Specs aligned across HIP and Application, removed 403.1 remnants   |\n| 2.0.1   | 02/06/2025 | NPS Development Team | Hyphenated Search Category Parameter for HIP |\n| 2.0.2   | 06/06/2025 | NPS Development Team | Replaced Additional special characters search Category Parameter for HIP | \n| 2.0.3   | 01/10/2025 | NPS Development Team | Updated 422 error, updated office details, updated regex patter for homeResponsibilitiesProtectionBenefitReference and changed liabilityType from EnumLiabtp to EnumHyphenatedLiabtp  |\n| 2.0.4   | 02/06/2025 | NPS Development Team | Added  Replacement Credits for Parents and Carers to EnumLiabtp, govUkJobRole removed maxLength: 20, govUkOriginatorId minLength: 3,  errorResourceObj_400, maxLength: 128|",
+    "x-integration-catalogue": {
+      "reviewed-date": "2025-01-20T11:00:01Z",
+      "publisher-reference": "nps-ni-liability-summary",
+      "short-description": "Liability Summary details associated with a person",
+      "status": "BETA",
+      "api-type": "SIMPLE",
+      "platform": "HIP",
+      "backends": [
+        "NI"
+      ],
+      "domain": 6,
+      "sub-domain": 6.4
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni",
+      "description": "Corporate - Production"
+    },
+    {
+      "url": "https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni",
+      "description": "Corporate - Test"
+    },
+    {
+      "url": "https://hip.ws.hmrc.gov.uk/ni",
+      "description": "MDTP - Production"
+    },
+    {
+      "url": "https://hip.ws.ibt.hmrc.gov.uk/ni",
+      "description": "MDTP - QA"
+    }
+  ],
+  "security": [
+    {
+      "oAuth2": [
+        "read:nps-ni-liability-summary"
+      ]
+    }
+  ],
+  "paths": {
+    "/person/{identifier}/liability-summary/{searchCategory}": {
+      "get": {
+        "summary": "Retrieve a Person's Liability Summary.",
+        "description": "# Purpose\nThis API is used to retrieve an individual's liability summary for a given tax year from NPS (National Insurance & PAYE Service). This forms part of the NI Contributions Processing. Data may be filtered using liabilityStartDate and/or liabilityEndDate. More processing only required for NI processing, callbackURL will not be returned down PAYE Processing.\n\n# Volumes & Registered Consumers\nThis API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection.\n\n| Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |\n|----------|----------------------------|-------------------------|----------|\n| XXXX XXX | xxx                        | xxx                     | xxx      |\n\n*TPS = Transactions per second\n\n## Request Data Structure & Payload Details",
+        "operationId": "getLiabilitySummaryHIP",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/correlationId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkOriginatorId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkOrganisationId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkUserId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkUserName"
+          },
+          {
+            "$ref": "#/components/parameters/govUkJobRole"
+          },
+          {
+            "$ref": "#/components/parameters/resourceGroupId"
+          },
+          {
+            "$ref": "#/components/parameters/Identifier"
+          },
+          {
+            "$ref": "#/components/parameters/LiabilitySearchCategoryHyphenated"
+          },
+          {
+            "$ref": "#/components/parameters/LiabilityOccurrenceNumberQuery"
+          },
+          {
+            "$ref": "#/components/parameters/LiabilityTypeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/EarliestLiabilityStartDate"
+          },
+          {
+            "$ref": "#/components/parameters/LiabilityStart"
+          },
+          {
+            "$ref": "#/components/parameters/LiabilityEnd"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLiabilitySummaryResponseHIP"
+                },
+                "examples": {
+                  "maximallyPopulatedNIProcessingResponse": {
+                    "summary": "Maximally populated response for NI",
+                    "value": {
+                      "liabilityDetailsList": [
+                        {
+                          "identifier": "RN000001A",
+                          "type": "ABROAD",
+                          "occurrenceNumber": 1,
+                          "startDateStatus": "PSEUDO START DATE",
+                          "endDateStatus": "END DATE HELD",
+                          "startDate": "2022-06-27",
+                          "endDate": "2022-06-27",
+                          "country": "ABROAD - NOT KNOWN",
+                          "trainingCreditApprovalStatus": "CREDIT FOR APPROVED TRAINING APPLIES",
+                          "casepaperReferenceNumber": "SCH/123/4",
+                          "homeResponsibilitiesProtectionBenefitReference": "12345678AB",
+                          "homeResponsibilitiesProtectionRate": 10.56,
+                          "lostCardNotificationReason": "LOST IN DEPARTMENT'S CUSTODY",
+                          "lostCardRulingReason": "ACCEPTED",
+                          "homeResponsibilityProtectionCalculationYear": 2022,
+                          "awardAmount": 10.56,
+                          "resourceGroupIdentifier": 789,
+                          "officeDetails": {
+                            "officeLocationDecode": 1,
+                            "officeLocationValue": "HQ STATIONARY STORE",
+                            "officeIdentifier": "(NONE)"
+                          }
+                        }
+                      ],
+                      "callback": {
+                        "callbackURL": "/person/RN000001/liability-summary/ABROAD?occurrenceNumber=1&type=ABROAD"
+                      }
+                    }
+                  },
+                  "minimallyPopulatedNIProcessingResponse": {
+                    "summary": "Minimally populated response for NI",
+                    "value": {
+                      "liabilityDetailsList": [
+                        {
+                          "identifier": "RN000001A",
+                          "type": "ABROAD",
+                          "occurrenceNumber": 1,
+                          "startDate": "2022-06-27"
+                        }
+                      ]
+                    }
+                  },
+                  "maximallyPopulatedPAYEProcessingResponse": {
+                    "summary": "Maximally populated response for PAYE",
+                    "value": {
+                      "liabilityEmploymentDetailsList": [
+                        {
+                          "employmentStatusForLiability": "EMP",
+                          "liabilityDetails": {
+                            "identifier": "RN000001A",
+                            "type": "ABROAD",
+                            "occurrenceNumber": 1,
+                            "startDateStatus": "PSEUDO START DATE",
+                            "endDateStatus": "END DATE HELD",
+                            "startDate": "2022-06-27",
+                            "endDate": "2022-06-27",
+                            "country": "ABROAD - NOT KNOWN",
+                            "trainingCreditApprovalStatus": "CREDIT FOR APPROVED TRAINING APPLIES",
+                            "casepaperReferenceNumber": "SCH/123/4",
+                            "homeResponsibilitiesProtectionBenefitReference": "12345678AB",
+                            "homeResponsibilitiesProtectionRate": 10.56,
+                            "lostCardNotificationReason": "LOST IN DEPARTMENT'S CUSTODY",
+                            "lostCardRulingReason": "ACCEPTED",
+                            "homeResponsibilityProtectionCalculationYear": 2022,
+                            "awardAmount": 10.56,
+                            "resourceGroupIdentifier": 789,
+                            "officeDetails": {
+                              "officeLocationDecode": 1,
+                              "officeLocationValue": "HQ STATIONARY STORE",
+                              "officeIdentifier": "(NONE)"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "minimallyPopulatedPAYEProcessingResponse": {
+                    "summary": "Minimally populated response for PAYE",
+                    "value": {
+                      "liabilityEmploymentDetailsList": [
+                        {
+                          "employmentStatusForLiability": "EMP",
+                          "liabilityDetails": {
+                            "identifier": "RN000001A",
+                            "type": "ABROAD",
+                            "occurrenceNumber": 1,
+                            "startDate": "2022-06-27"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_400"
+                },
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "HTTP message not readable",
+                          "code": "400.2"
+                        },
+                        {
+                          "reason": "Constraint violation: Invalid/Missing input parameter: <parameter>",
+                          "code": "400.1"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_403_ForbiddenOnly"
+                },
+                "examples": {
+                  "Forbidden_Response": {
+                    "value": {
+                      "reason": "Forbidden",
+                      "code": "403.2"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponseOverrideable"
+                },
+                "examples": {
+                  "422_TRNNotAllowed": {
+                    "description": "This error is only returned for certain consumers.",
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "Invalid NINo entered",
+                          "code": "48003"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "correlationId": {
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/correlationId"
+        }
+      }
+    },
+    "parameters": {
+      "correlationId": {
+        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
+        "in": "header",
+        "name": "correlationId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/correlationId"
+        }
+      },
+      "govUkOriginatorId": {
+        "description": "Identity of the Originating System that made the API call.",
+        "in": "header",
+        "name": "gov-uk-originator-id",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/govUkOriginatorId"
+        }
+      },
+      "govUkOrganisationId": {
+        "description": "A unique organisation ID for the user.",
+        "in": "header",
+        "name": "gov-uk-organisation-id",
+        "schema": {
+          "$ref": "#/components/schemas/govUkOrganisationId"
+        }
+      },
+      "govUkUserId": {
+        "description": "A unique user ID for the user.",
+        "in": "header",
+        "name": "gov-uk-user-id",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/govUkUserId"
+        }
+      },
+      "govUkUserName": {
+        "description": "A unique username for the user.",
+        "in": "header",
+        "name": "gov-uk-user-name",
+        "schema": {
+          "$ref": "#/components/schemas/govUkUserName"
+        }
+      },
+      "govUkJobRole": {
+        "description": "A unique job role for the user.",
+        "in": "header",
+        "name": "gov-uk-job-role",
+        "schema": {
+          "$ref": "#/components/schemas/govUkJobRole"
+        }
+      },
+      "resourceGroupId": {
+        "description": "A unique identifier for a HMRC Resource Group.",
+        "in": "header",
+        "name": "resource-group-id",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/resourceGroupIdentifier"
+        }
+      },
+      "Identifier": {
+        "name": "identifier",
+        "in": "path",
+        "required": true,
+        "description": "The identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO).",
+        "schema": {
+          "$ref": "#/components/schemas/identifierParameter"
+        }
+      },
+      "LiabilitySearchCategoryHyphenated": {
+        "description": "The type of liability associated with the individual's tax affairs.",
+        "in": "path",
+        "required": true,
+        "name": "searchCategory",
+        "schema": {
+          "$ref": "#/components/schemas/liabilitySearchCategoryHyphenated"
+        }
+      },
+      "LiabilityStart": {
+        "description": "The date on which this liability started.",
+        "name": "liabilityStartDate",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/liabilityStart"
+        }
+      },
+      "LiabilityEnd": {
+        "description": "The date on which this liability ended.",
+        "name": "liabilityEndDate",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/liabilityEnd"
+        }
+      },
+      "LiabilityTypeQuery": {
+        "description": "The type of liability associated with the individual's tax affairs.",
+        "name": "type",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/liabilityType"
+        }
+      },
+      "LiabilityOccurrenceNumberQuery": {
+        "description": "Denotes the number of times a particular liability has occurred on an individual's account.",
+        "in": "query",
+        "name": "occurrenceNumber",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/liabilityOccurrenceNumber"
+        }
+      },
+      "EarliestLiabilityStartDate": {
+        "description": "Denotes the earliest liability start date to retrieve data for.",
+        "name": "earliestStartDate",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/earliestLiabilityStartDate"
+        }
+      }
+    },
+    "schemas": {
+      "EnumAtcredfg": {
+        "enum": [
+          "CREDIT FOR APPROVED TRAINING APPLIES",
+          "NO CREDIT FOR APPROVED TRAINING"
+        ],
+        "type": "string"
+      },
+      "EnumCountry": {
+        "enum": [
+          "ABROAD - NOT KNOWN",
+          "AFGHANISTAN",
+          "ALBANIA",
+          "ALDERNEY",
+          "ALGERIA",
+          "AMERICAN SAMOA",
+          "ANDORRA",
+          "ANGOLA",
+          "ANGUILLA",
+          "ANTARCTIC TERRITORIES (BRITISH)",
+          "ANTARCTICA",
+          "ANTIGUA",
+          "ANTIGUA AND BARBUDA",
+          "ANTILLES (NETHERLANDS)",
+          "ARAB EMIRATES (UNITED)",
+          "ARGENTINA",
+          "ARUBA",
+          "ASCENCION ISLAND",
+          "AUSTRALIA",
+          "AUSTRIA",
+          "BAHAMAS",
+          "BAHRAIN",
+          "BANGLADESH",
+          "BARBADOS",
+          "BARBUDA",
+          "BELGIUM",
+          "BELIZE",
+          "BENIN",
+          "BERMUDA",
+          "BHUTAN",
+          "BISSAU (GUINEA)",
+          "BOLIVIA",
+          "BOTSWANA",
+          "BOUVET ISLAND",
+          "BRAZIL",
+          "BRITISH INDIAN OCEAN TERRITORIES",
+          "BRUNEI",
+          "BULGARIA",
+          "BURKINA FASO",
+          "BURMA",
+          "BURUNDI",
+          "CAMBODIA",
+          "CAMEROON",
+          "CANADA",
+          "CAPE VERDE ISLANDS",
+          "CARIBBEAN NETHERLANDS",
+          "CAYMAN ISLANDS",
+          "CENTRAL AFRICAN REPUBLIC",
+          "CHAD",
+          "CHANNEL ISLANDS",
+          "CHILE",
+          "CHINA PEOPLES REPUBLIC",
+          "CHRISTMAS ISLAND",
+          "COCOS (KEELING) ISLANDS",
+          "COLOMBIA",
+          "COMMONWEALTH OF DOMINICA",
+          "COMORO ISLANDS",
+          "CONGO",
+          "COOK ISLANDS",
+          "COSTA RICA",
+          "COTE D'IVOIRE",
+          "CUBA",
+          "CURACAO",
+          "CYPRUS",
+          "CZECH REPUBLIC",
+          "CZECHOSLOVAKIA",
+          "DEMOCRATIC REPUBLIC OF CONGO",
+          "DEMOCRATIC YEMEN",
+          "DENMARK",
+          "DJIBOUTI",
+          "DOMINICAN REPUBLIC",
+          "EAST GERMANY",
+          "EAST TIMOR",
+          "ECUADOR",
+          "EGYPT",
+          "EL SALVADOR",
+          "ENGLAND",
+          "EQUATORIAL GUINEA",
+          "ERITREA",
+          "ETHIOPIA",
+          "FALKLAND ISLANDS",
+          "FAROE ISLANDS",
+          "FEDERAL REP OF YUGOSLAVIA",
+          "FIJI",
+          "FINLAND",
+          "FORMER YUG REP OF MACEDONIA",
+          "FRANCE",
+          "FRENCH GUIANA",
+          "FRENCH OVERSEAS DEPARTMENT",
+          "FRENCH POLYNESIA",
+          "FRENCH SOUTHERN TERRITORIES",
+          "GABON",
+          "GAMBIA",
+          "GERMANY",
+          "GHANA",
+          "GIBRALTAR",
+          "GREAT BRITAIN",
+          "GREECE",
+          "GREENLAND",
+          "GRENADA",
+          "GUADELOUPE",
+          "GUAM",
+          "GUATEMALA",
+          "GUERNSEY",
+          "GUINEA",
+          "GUYANA",
+          "HAITI",
+          "HEARD ISLAND AND MCDONALD ISLANDS",
+          "HONDURAS",
+          "HONG KONG",
+          "HUNGARY",
+          "ICELAND",
+          "INDIA",
+          "INDONESIA",
+          "IRAN",
+          "IRAQ",
+          "ISLE OF MAN",
+          "ISRAEL",
+          "ITALY",
+          "JAMAICA",
+          "JAPAN",
+          "JERSEY",
+          "JORDAN",
+          "KAMPUCHEA",
+          "KENYA",
+          "KIRIBATI",
+          "KUWAIT",
+          "LAOS",
+          "LEBANON",
+          "LESOTHO",
+          "LIBERIA",
+          "LIBYA",
+          "LIECHTENSTEIN",
+          "LUXEMBOURG",
+          "MACAU",
+          "MADAGASCAR",
+          "MALAWI",
+          "MALAYSIA",
+          "MALDIVE ISLANDS",
+          "MALI",
+          "MALTA",
+          "MARSHALL ISLANDS",
+          "MARTINIQUE",
+          "MAURITANIA",
+          "MAURITIUS",
+          "MAYOTTE",
+          "MEXICO",
+          "MICRONESIA FEDERATION OF",
+          "MONACO",
+          "MONGOLIA",
+          "MONTSERRAT",
+          "MOROCCO",
+          "MOZAMBIQUE",
+          "MYANMAR",
+          "NAMIBIA",
+          "NAURU",
+          "NEPAL",
+          "NETHERLANDS",
+          "NEVIS,ST KITTS-NEVIS",
+          "NEW CALEDONIA",
+          "NEW ZEALAND",
+          "NICARAGUA",
+          "NIGER",
+          "NIGERIA",
+          "NIUE",
+          "NORFOLK ISLAND",
+          "NORTH KOREA",
+          "NORTH MACEDONIA",
+          "NORTHERN IRELAND",
+          "NORTHERN MARIANA ISLANDS",
+          "NORWAY",
+          "NOT SPECIFIED OR NOT USED",
+          "NOT YET RECORDED",
+          "OMAN",
+          "PAKISTAN",
+          "PALAU",
+          "PANAMA",
+          "PAPUA NEW GUINEA",
+          "PARAGUAY",
+          "PERU",
+          "PHILIPPINES",
+          "PITCAIRN",
+          "POLAND",
+          "PORTUGAL",
+          "PRINCIPE AND SAO TOME",
+          "PUERTO RICO",
+          "QATAR",
+          "REP OF BOSNIA-HERZEGOVINA",
+          "REPUBLIC OF ARMENIA",
+          "REPUBLIC OF AZERBAIJAN",
+          "REPUBLIC OF BELARUS",
+          "REPUBLIC OF CROATIA",
+          "REPUBLIC OF ESTONIA",
+          "REPUBLIC OF GEORGIA",
+          "REPUBLIC OF IRELAND",
+          "REPUBLIC OF KAZAKHSTAN",
+          "REPUBLIC OF KOSOVO",
+          "REPUBLIC OF KYRGYZSTAN",
+          "REPUBLIC OF LATVIA",
+          "REPUBLIC OF LITHUANIA",
+          "REPUBLIC OF MOLDOVA",
+          "REPUBLIC OF MONTENEGRO",
+          "REPUBLIC OF SERBIA",
+          "REPUBLIC OF SLOVENIA",
+          "REPUBLIC OF TAJIKISTAN",
+          "REPUBLIC OF TURKMENISTAN",
+          "REPUBLIC OF UZBEKISTAN",
+          "REPUBLIC OF YEMEN",
+          "REUNION",
+          "ROMANIA",
+          "RUSSIA",
+          "RUSSIAN FEDERATION",
+          "RWANDA",
+          "SABAH",
+          "SAINT PIERRE AND MIQUELON",
+          "SAMOA",
+          "SAN MARINO",
+          "SARAWAK",
+          "SARK",
+          "SAUDI ARABIA",
+          "SCOTLAND",
+          "SENEGAL",
+          "SEYCHELLES",
+          "SHARJAH",
+          "SIERRA LEONE",
+          "SINGAPORE",
+          "SLOVAK REPUBLIC",
+          "SOLOMON ISLANDS",
+          "SOMALIA",
+          "SOUTH AFRICA",
+          "SOUTH GEORGIA AND SOUTH SANDWICH ISLAND",
+          "SOUTH KOREA",
+          "SPAIN",
+          "SRI LANKA",
+          "ST HELENA & DEPNDS",
+          "ST LUCIA",
+          "ST MARTINS",
+          "ST VINCENT & GRENADINES",
+          "STATELESS",
+          "SUDAN",
+          "SURINAM",
+          "SVALBARD AND JAN MAYEN",
+          "SWAZILAND",
+          "SWEDEN",
+          "SWITZERLAND",
+          "SYRIA",
+          "TAHITI",
+          "TAIWAN",
+          "TANZANIA",
+          "THAILAND",
+          "TOGO",
+          "TOKELAU",
+          "TONGA",
+          "TOURS",
+          "TRINIDAD & TOBAGO",
+          "TRISTAN DA CUHNA",
+          "TUNISIA",
+          "TURKEY",
+          "TURKS & CAICOS ISLANDS",
+          "TUVALU",
+          "UGANDA",
+          "UKRAINE",
+          "UNITED STATES MINOR OUTLYING ISLANDS",
+          "URUGUAY",
+          "USA",
+          "USSR",
+          "VANUATU",
+          "VATICAN CITY STATE",
+          "VENEZUELA",
+          "VIETNAM",
+          "VIRGIN ISLANDS (BRITISH)",
+          "VIRGIN ISLANDS (USA)",
+          "WALES",
+          "WALLIS AND FUTUNA",
+          "WESTERN SAHARA",
+          "WESTERN SAMOA",
+          "YUGOSLAVIA",
+          "ZAIRE",
+          "ZAMBIA",
+          "ZIMBABWE",
+          "NORTHERN PART OF CYPRUS"
+        ],
+        "type": "string"
+      },
+      "EnumLcheadtp": {
+        "enum": [
+          "LOST IN DEPARTMENT'S CUSTODY",
+          "NOT APPLICABLE",
+          "OTHER"
+        ],
+        "type": "string"
+      },
+      "EnumLcruletp": {
+        "enum": [
+          "ACCEPTED",
+          "ACCEPTED AFTER REFUSAL",
+          "CANCELLED",
+          "NOT APPLICABLE",
+          "REFUSED"
+        ],
+        "type": "string"
+      },
+      "EnumLiabtp": {
+        "enum": [
+          "ABROAD",
+          "ABSOLUTE WAIVER",
+          "ALL LIABILITIES",
+          "APPROVED TRAINING",
+          "CA (S2P)",
+          "CL2 EC/BILATERAL REGS",
+          "CLASS 2 CONVERTED FROM NIRS1",
+          "CLASS 2 IN SA",
+          "CLASS 2 LIABILITY (UK)",
+          "CLASS 2 MATERNITY ALLOWANCE",
+          "CLASS 2 VOLUNTARY UK",
+          "CLASS 3 (UK)",
+          "CLASS 3 BILLING OVERRIDE",
+          "CLASS 3 CONVERTED FROM NIRS1",
+          "CODED OUT",
+          "CONTINUING CLASS 1 LIABILITY",
+          "CONTINUING CLASS 2 LIABILITY",
+          "CONTRIBUTOR INITIATED NON-LIABILITY OVERRIDE",
+          "CRIMINAL PROCEEDINGS",
+          "CRS/RO",
+          "Carer of AA/CAA/DLA recipient",
+          "Carer Support Payment",
+          "Carer's Allowance",
+          "Carer's Credit",
+          "Child Benefit",
+          "Class 2 Billing Override",
+          "DEFERMENT TYPE 1",
+          "DEFERMENT TYPE 2",
+          "DEFERMENT TYPE 3",
+          "DEFERMENT TYPE 4",
+          "DPTC (GB - EMPLOYED)",
+          "DPTC (GB - SELF EMPLOYED)",
+          "DPTC (NI - EMPLOYED)",
+          "DPTC (NI - SELF EMPLOYED)",
+          "DUMMY 101",
+          "DUMMY 102",
+          "DWA (GB EMPLOYED)",
+          "DWA (GB SELF - EMPLOYED)",
+          "DWA (NI EMPLOYED)",
+          "DWA (NI SELF -EMPLOYED)",
+          "Disabled Tax Credit (Employed)",
+          "Disabled Tax Credit (Self-Employed)",
+          "ESA (S2P)",
+          "FULL TIME EDUCATION",
+          "FamC (GB)",
+          "FamC (NI)",
+          "Foreign Earnings Qualification (S2P)",
+          "Foster Carer",
+          "HIGHER RATE PROVISION OVERRIDE",
+          "HMF",
+          "HOME RESPONSIBILITY PROTECTION (AA/CAA)",
+          "HOME RESPONSIBILITY PROTECTION (CBC AUTO)",
+          "HOME RESPONSIBILITY PROTECTION (CBC CLERICAL)",
+          "HOME RESPONSIBILITY PROTECTION (DLA)",
+          "HOME RESPONSIBILITY PROTECTION (FOSTER CARERS)",
+          "HOME RESPONSIBILITY PROTECTION (I/S)",
+          "IB (S2P)",
+          "INSOLVENCY (CLASS 1)",
+          "INSOLVENCY (CLASS 2)",
+          "IRRECOVERABLE ARREARS",
+          "ISLE OF MAN",
+          "LCW/LCWRA",
+          "LCW/LCWRA Override",
+          "LONG TERM NON EMPLOYMENT",
+          "LONG TERM SCALE RATE (LTSR)",
+          "LOST CARD",
+          "MARINER'S VOLUNTARY CLASS 2",
+          "MARRIED WOMAN'S REDUCED RATE",
+          "NEGLIGENT EMPLOYEE",
+          "NOT APPLICABLE",
+          "PAYMENT OF ARREARS BY ADMINISTRATIVE ORDER",
+          "PAYMENT OF ARREARS BY INSTALMENTS",
+          "PERIODS OF ESA (AUTO)",
+          "PERIODS OF ESA (CLERICAL)",
+          "PERIODS OF INCAPACITY (AUTO)",
+          "PERIODS OF INCAPACITY (CLERICAL)",
+          "PROVISIONAL WAIVER",
+          "PSEUDO CIVIL RECOVERY SECTION",
+          "PSEUDO DEBT MANAGEMENT SECTION",
+          "PSEUDO INSOLVENCY SECTION",
+          "PSEUDO SUBJECT TO NORMAL COLLECTION ACTION",
+          "REDUCED BENEFIT DIRECTIVE (RBD)",
+          "SENT TO IDMS",
+          "SHAREFISHERMAN",
+          "SHAREFISHERMAN IN SA",
+          "SHAREFISHERMAN UNEMPLOYMENT BENEFIT",
+          "SICKNESS",
+          "SMALL EARNINGS EXCEPTION",
+          "SPT-LPT",
+          "SPT-LPT EC",
+          "SYSTEM INITIATED NON-LIABILITY OVERRIDE",
+          "Specified Adult Carer",
+          "Transferred ChB Liability",
+          "UNDER SMALL PROFIT THRESHOLD",
+          "UNEMPLOYABILITY SUPPLEMENT",
+          "Universal Credit",
+          "Universal Credit (S2P)",
+          "VOLUNTARY CLASS 2 ABROAD",
+          "VOLUNTARY CLASS 2 ABROAD BY EMPLOYERS SCHEDULE",
+          "VOLUNTARY CLASS 3 ABROAD",
+          "VOLUNTARY CLASS 3 ABROAD BY EMPLOYERS SCHEDULE",
+          "VOLUNTEER DEVELOPMENT WORKER",
+          "WFTC (GB)",
+          "WFTC (NI)",
+          "Working Tax Credit (Employed)",
+          "Working Tax Credit (Self-Employed)",
+          "Replacement Credits for Parents and Carers"
+        ],
+        "type": "string"
+      },
+      "EnumHyphenatedLiabtp": {
+        "enum": [
+          "ABROAD",
+          "ABSOLUTE-WAIVER",
+          "ALL-LIABILITIES",
+          "APPROVED-TRAINING",
+          "CA-S2P",
+          "CL2-EC_BILATERAL-REGS",
+          "CLASS-2-CONVERTED-FROM-NIRS1",
+          "CLASS-2-IN-SA",
+          "CLASS-2-LIABILITY-UK",
+          "CLASS-2-MATERNITY-ALLOWANCE",
+          "CLASS-2-VOLUNTARY-UK",
+          "CLASS-3-UK",
+          "CLASS-3-BILLING-OVERRIDE",
+          "CLASS-3-CONVERTED-FROM-NIRS1",
+          "CODED-OUT",
+          "CONTINUING-CLASS-1-LIABILITY",
+          "CONTINUING-CLASS-2-LIABILITY",
+          "CONTRIBUTOR-INITIATED-NON-LIABILITY-OVERRIDE",
+          "CRIMINAL-PROCEEDINGS",
+          "CRS_RO",
+          "Carer-of-AA_CAA_DLA-recipient",
+          "Carer-Support-Payment",
+          "Carers-Allowance",
+          "Carers-Credit",
+          "Child-Benefit",
+          "Class-2-Billing-Override",
+          "DEFERMENT-TYPE-1",
+          "DEFERMENT-TYPE-2",
+          "DEFERMENT-TYPE-3",
+          "DEFERMENT-TYPE-4",
+          "DPTC-GB-EMPLOYED",
+          "DPTC-GB-SELF-EMPLOYED",
+          "DPTC-NI-EMPLOYED",
+          "DPTC-NI-SELF-EMPLOYED",
+          "DUMMY-101",
+          "DUMMY-102",
+          "DWA-GB-EMPLOYED",
+          "DWA-GB-SELF-EMPLOYED",
+          "DWA-NI-EMPLOYED",
+          "DWA-NI-SELF-EMPLOYED",
+          "Disabled-Tax-Credit-Employed",
+          "Disabled-Tax-Credit-Self-Employed",
+          "ESA-S2P",
+          "FULL-TIME-EDUCATION",
+          "FamC-GB",
+          "FamC-NI",
+          "Foreign-Earnings-Qualification-S2P",
+          "Foster-Carer",
+          "HIGHER-RATE-PROVISION-OVERRIDE",
+          "HMF",
+          "HOME-RESPONSIBILITY-PROTECTION-AA_CAA",
+          "HOME-RESPONSIBILITY-PROTECTION-CBC-AUTO",
+          "HOME-RESPONSIBILITY-PROTECTION-CBC-CLERICAL",
+          "HOME-RESPONSIBILITY-PROTECTION-DLA",
+          "HOME-RESPONSIBILITY-PROTECTION-FOSTER-CARERS",
+          "HOME-RESPONSIBILITY-PROTECTION-I_S",
+          "IB-S2P",
+          "INSOLVENCY-CLASS-1",
+          "INSOLVENCY-CLASS-2",
+          "IRRECOVERABLE-ARREARS",
+          "ISLE-OF-MAN",
+          "LCW_LCWRA",
+          "LCW_LCWRA-Override",
+          "LONG-TERM-NON-EMPLOYMENT",
+          "LONG-TERM-SCALE-RATE-LTSR",
+          "LOST-CARD",
+          "MARINERS-VOLUNTARY-CLASS-2",
+          "MARRIED-WOMANS-REDUCED-RATE",
+          "NEGLIGENT-EMPLOYEE",
+          "NOT-APPLICABLE",
+          "PAYMENT-OF-ARREARS-BY-ADMINISTRATIVE-ORDER",
+          "PAYMENT-OF-ARREARS-BY-INSTALMENTS",
+          "PERIODS-OF-ESA-AUTO",
+          "PERIODS-OF-ESA-CLERICAL",
+          "PERIODS-OF-INCAPACITY-AUTO",
+          "PERIODS-OF-INCAPACITY-CLERICAL",
+          "PROVISIONAL-WAIVER",
+          "PSEUDO-CIVIL-RECOVERY-SECTION",
+          "PSEUDO-DEBT-MANAGEMENT-SECTION",
+          "PSEUDO-INSOLVENCY-SECTION",
+          "PSEUDO-SUBJECT-TO-NORMAL-COLLECTION-ACTION",
+          "REDUCED-BENEFIT-DIRECTIVE-RBD",
+          "SENT-TO-IDMS",
+          "SHAREFISHERMAN",
+          "SHAREFISHERMAN-IN-SA",
+          "SHAREFISHERMAN-UNEMPLOYMENT-BENEFIT",
+          "SICKNESS",
+          "SMALL-EARNINGS-EXCEPTION",
+          "SPT-LPT",
+          "SPT-LPT-EC",
+          "SYSTEM-INITIATED-NON-LIABILITY-OVERRIDE",
+          "Specified-Adult-Carer",
+          "Transferred-ChB-Liability",
+          "UNDER-SMALL-PROFIT-THRESHOLD",
+          "UNEMPLOYABILITY-SUPPLEMENT",
+          "Universal-Credit",
+          "Universal-Credit-S2P",
+          "VOLUNTARY-CLASS-2-ABROAD",
+          "VOLUNTARY-CLASS-2-ABROAD-BY-EMPLOYERS-SCHEDULE",
+          "VOLUNTARY-CLASS-3-ABROAD",
+          "VOLUNTARY-CLASS-3-ABROAD-BY-EMPLOYERS-SCHEDULE",
+          "VOLUNTEER-DEVELOPMENT-WORKER",
+          "WFTC-GB",
+          "WFTC-NI",
+          "Working-Tax-Credit-Employed",
+          "Working-Tax-Credit-Self-Employed"
+        ],
+        "type": "string"
+      },
+      "EnumLtpedttp": {
+        "enum": [
+          "END DATE HELD",
+          "END DATE NOT HELD",
+          "END DATE PRE RNI",
+          "INPUT/REMOVAL OF CONTRIBUTION/CREDIT OF RRE LAPSED BY LO",
+          "PERIOD CLOSED DUE TO CLAIM FOR BENEFIT",
+          "PSEUDO END DATE",
+          "PSUEDO RETURN FROM ABROAD",
+          "RRE ENDED FOR MPA",
+          "RRE LAPSED BY CHANGE IN MARITAL STATUS",
+          "RRE LAPSED BY CREDITS",
+          "RRE LAPSED BY REVOCATION",
+          "RRE LAPSED BY RPFA",
+          "RRE LAPSED BY VPA APPLICATION",
+          "RRE LAPSED DUE TO FAILURE OF 2 YEAR CHECK"
+        ],
+        "type": "string"
+      },
+      "EnumLtpsdttp": {
+        "enum": [
+          "PSEUDO START DATE",
+          "START DATE HELD",
+          "START DATE NOT HELD",
+          "START DATE PRE 1982",
+          "START DATE PRE RNI"
+        ],
+        "type": "string"
+      },
+      "EnumOffidtp": {
+        "enum": [
+          "(NONE)",
+          "DE",
+          "DSS",
+          "Inland Revenue",
+          "NOT APPLICABLE",
+          "NOT KNOWN"
+        ],
+        "type": "string"
+      },
+      "EnumHrpIndicator": {
+        "enum": [
+          "(NONE)",
+          "HRP already recorded",
+          "Missing HRP letter not sent - awarded",
+          "Missing HRP letter not sent - refused",
+          "Missing HRP letter sent",
+          "Missing HRP letter sent - awarded",
+          "Missing HRP letter sent - refused"
+        ],
+        "type": "string"
+      },
+      "correlationId": {
+        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
+        "example": "e470d658-99f7-4292-a4a1-ed12c72f1337",
+        "format": "uuid",
+        "type": "string"
+      },
+      "govUkOriginatorId": {
+        "description": "Identity of the Originating System that made the API call",
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 40
+      },
+      "govUkOrganisationId": {
+        "description": "A unique organisation ID for the user.",
+        "type": "string",
+        "example": "Department",
+        "minLength": 4,
+        "maxLength": 40
+      },
+      "govUkUserId": {
+        "description": "A unique user ID for the user.",
+        "minLength": 7,
+        "maxLength": 7,
+        "type": "string"
+      },
+      "govUkUserName": {
+        "description": "A unique username for the user.",
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 20,
+        "example": "Worker"
+      },
+      "govUkJobRole": {
+        "description": "A unique job role for the user.",
+        "type": "string",
+        "minLength": 4,
+        "example": "Social"
+      },
+      "resourceGroupIdentifier": {
+        "description": "A unique identifier for a HMRC Resource Group.",
+        "example": 11111111,
+        "maximum": 99999999,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "identifierParameter": {
+        "description": "The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.",
+        "type": "string",
+        "pattern": "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$",
+        "example": "AA000001A",
+        "minLength": 8,
+        "maxLength": 9
+      },
+      "errorResponse_400": {
+        "description": "Array of Error Response Failure Object in Error Response.",
+        "title": "Error Response",
+        "properties": {
+          "failures": {
+            "items": {
+              "$ref": "#/components/schemas/errorResourceObj_400"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "errorResourceObj_400": {
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "maxLength": 128
+          },
+          "code": {
+            "description": "The error code representing the error that has occurred. Valid values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'\n400.2 - HTTP message not readable;",
+            "type": "string",
+            "enum": [
+              "400.1",
+              "400.2"
+            ]
+          }
+        }
+      },
+      "errorResponse_403_ForbiddenOnly": {
+        "$ref": "#/components/schemas/errorResourceObj_403_Forbidden",
+        "description": "Error Response Payload for this API",
+        "title": "Forbidden Error Response"
+      },
+      "errorResourceObj_403_Forbidden": {
+        "title": "403_Forbidden",
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "enum": [
+              "Forbidden"
+            ]
+          },
+          "code": {
+            "description": "The error code representing the Forbidden Error.",
+            "type": "string",
+            "enum": [
+              "403.2"
+            ]
+          }
+        }
+      },
+      "errorResponseOverrideable": {
+        "description": "Error Response Payload for this API",
+        "title": "Error Response",
+        "properties": {
+          "failures": {
+            "items": {
+              "$ref": "#/components/schemas/errorResourceObj"
+            },
+            "type": "array"
+          },
+          "askUser": {
+            "description": "Indicator of whether the user can choose to override a failure.",
+            "type": "boolean"
+          },
+          "fixRequired": {
+            "description": "Indicator of whether the error requires user intervention to remediate errors.",
+            "type": "boolean"
+          },
+          "workItemRaised": {
+            "description": "Indicator of whether an NI work item has been raised for the errors provided.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "errorResourceObj": {
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "description": "Displays the reason of the failure passed from NPS.",
+            "type": "string",
+            "maxLength": 128
+          },
+          "code": {
+            "minLength": 1,
+            "description": "The error code representing the error that has occurred passed from NPS.",
+            "type": "string",
+            "maxLength": 10
+          }
+        }
+      },
+      "liabilitySearchCategoryHyphenated": {
+        "$ref": "#/components/schemas/EnumHyphenatedLiabtp",
+        "description": "The type of liability associated with the individual's tax affairs."
+      },
+      "liabilityStart": {
+        "description": "The date on which this liability started.",
+        "example": "2022-06-27",
+        "format": "date",
+        "type": "string"
+      },
+      "liabilityEnd": {
+        "description": "The date on which this liability ended.",
+        "example": "2022-06-27",
+        "format": "date",
+        "type": "string"
+      },
+      "liabilityType": {
+        "$ref": "#/components/schemas/EnumHyphenatedLiabtp",
+        "description": "The type of liability associated with the individual's tax affairs."
+      },
+      "liabilityOccurrenceNumber": {
+        "description": "Denotes the number of times a particular liability has occurred on an individual's account.",
+        "example": 1,
+        "maximum": 32766,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "earliestLiabilityStartDate": {
+        "description": "Denotes the earliest liability start date to retrieve data for.",
+        "example": "2022-06-27",
+        "format": "date",
+        "type": "string"
+      },
+      "callback": {
+        "properties": {
+          "callbackURL": {
+            "type": "string",
+            "description": "A URL in the response body that redirects the user to call the next set of data based on the prepared URL. This will only be populated if the call has not returned all the relevant data and another call is required."
+          }
+        }
+      },
+      "GetLiabilitySummaryResponseHIP": {
+        "description": "Success response payload for this API.",
+        "properties": {
+          "liabilityDetailsList": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseLiabilityDetailsHIP"
+            },
+            "type": "array"
+          },
+          "liabilityEmploymentDetailsList": {
+            "items": {
+              "$ref": "#/components/schemas/MPPCLiabilityAndEmploymentDetailsHIP"
+            },
+            "type": "array"
+          },
+          "callback": {
+            "$ref": "#/components/schemas/callback"
+          }
+        },
+        "type": "object"
+      },
+      "MPPCLiabilityAndEmploymentDetailsHIP": {
+        "description": "Contains employment status and liability details associated with an individual.",
+        "required": [
+          "employmentStatusForLiability",
+          "liabilityDetails"
+        ],
+        "properties": {
+          "employmentStatusForLiability": {
+            "description": "Denotes the individual's employment status for a given liability.",
+            "example": "EMP",
+            "maxLength": 5,
+            "minLength": 1,
+            "pattern": "^(EMP|UNEMP| )$",
+            "type": "string"
+          },
+          "liabilityDetails": {
+            "$ref": "#/components/schemas/MPPCResponseLiabilityDetailsHIP"
+          }
+        },
+        "type": "object"
+      },
+      "MPPCResponseLiabilityDetailsHIP": {
+        "description": "Contains liability details associated with an individual.",
+        "required": [
+          "identifier",
+          "type",
+          "occurrenceNumber",
+          "startDate"
+        ],
+        "properties": {
+          "identifier": {
+            "description": "The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. RN000001A.",
+            "type": "string",
+            "pattern": "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$",
+            "example": "RN000001A"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EnumLiabtp",
+            "description": "The type of liability associated with the individual's tax affairs."
+          },
+          "occurrenceNumber": {
+            "description": "Denotes the number of times a particular liability has occurred on an individual's account.",
+            "example": 1,
+            "maximum": 32766,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "startDateStatus": {
+            "$ref": "#/components/schemas/EnumLtpsdttp",
+            "description": "Denotes the status associated with a liability start date."
+          },
+          "endDateStatus": {
+            "$ref": "#/components/schemas/EnumLtpedttp",
+            "description": "Denotes the status associated with a liability end date."
+          },
+          "startDate": {
+            "description": "The date on which this liability started.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "endDate": {
+            "description": "The date on which this liability ended.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/EnumCountry",
+            "description": "The country that the address resides in."
+          },
+          "trainingCreditApprovalStatus": {
+            "$ref": "#/components/schemas/EnumAtcredfg",
+            "description": "Denotes whether or not credits apply to a period of approved training."
+          },
+          "casepaperReferenceNumber": {
+            "description": "Denotes the reference number of the casepaper associated with a liability.",
+            "example": "SCH/123/4",
+            "maxLength": 9,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9/ -]+$",
+            "type": "string"
+          },
+          "homeResponsibilitiesProtectionBenefitReference": {
+            "description": "Denotes the Home Responsibilities Protection (HRP) benefit reference.",
+            "example": "12345678AB",
+            "maxLength": 10,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9- ]+$",
+            "type": "string"
+          },
+          "homeResponsibilitiesProtectionRate": {
+            "description": "The rate associated with the home responsibility protection benefit.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "lostCardNotificationReason": {
+            "$ref": "#/components/schemas/EnumLcheadtp",
+            "description": "Denotes the reason for the lost card notification."
+          },
+          "lostCardRulingReason": {
+            "$ref": "#/components/schemas/EnumLcruletp",
+            "description": "Denotes the decision for the lost card ruling."
+          },
+          "homeResponsibilityProtectionCalculationYear": {
+            "description": "Denotes the calculation year of the Home Responsibility Protection (HRP).",
+            "example": 2022,
+            "maximum": 2099,
+            "minimum": 1975,
+            "type": "integer"
+          },
+          "awardAmount": {
+            "description": "Denotes the amount of the award.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "resourceGroupIdentifier": {
+            "description": "A unique identifier for a HMRC Resource Group.",
+            "example": 789,
+            "maximum": 99999999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "officeDetails": {
+            "$ref": "#/components/schemas/DecodedOfficeDetailsResponse"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseLiabilityDetailsHIP": {
+        "description": "Contains liability details associated with an individual.",
+        "required": [
+          "identifier",
+          "type",
+          "occurrenceNumber",
+          "startDate"
+        ],
+        "properties": {
+          "identifier": {
+            "description": "The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. RN000001A.",
+            "type": "string",
+            "pattern": "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$",
+            "example": "RN000001A"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EnumLiabtp",
+            "description": "The type of liability associated with the individual's tax affairs."
+          },
+          "occurrenceNumber": {
+            "description": "Denotes the number of times a particular liability has occurred on an individual's account.",
+            "example": 1,
+            "maximum": 32766,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "startDateStatus": {
+            "$ref": "#/components/schemas/EnumLtpsdttp",
+            "description": "Denotes the status associated with a liability start date."
+          },
+          "endDateStatus": {
+            "$ref": "#/components/schemas/EnumLtpedttp",
+            "description": "Denotes the status associated with a liability end date."
+          },
+          "startDate": {
+            "description": "The date on which this liability started.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "endDate": {
+            "description": "The date on which this liability ended.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/EnumCountry",
+            "description": "The country that the address resides in."
+          },
+          "trainingCreditApprovalStatus": {
+            "$ref": "#/components/schemas/EnumAtcredfg",
+            "description": "Denotes whether or not credits apply to a period of approved training."
+          },
+          "casepaperReferenceNumber": {
+            "description": "Denotes the reference number of the casepaper associated with a liability.",
+            "example": "SCH/123/4",
+            "maxLength": 9,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9/ -]+$",
+            "type": "string"
+          },
+          "homeResponsibilitiesProtectionBenefitReference": {
+            "description": "Denotes the Home Responsibilities Protection (HRP) benefit reference.",
+            "example": "12345678AB",
+            "maxLength": 10,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9- ]+$",
+            "type": "string"
+          },
+          "homeResponsibilitiesProtectionRate": {
+            "description": "The rate associated with the home responsibility protection benefit.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "lostCardNotificationReason": {
+            "$ref": "#/components/schemas/EnumLcheadtp",
+            "description": "Denotes the reason for the lost card notification."
+          },
+          "lostCardRulingReason": {
+            "$ref": "#/components/schemas/EnumLcruletp",
+            "description": "Denotes the decision for the lost card ruling."
+          },
+          "homeResponsibilityProtectionCalculationYear": {
+            "description": "Denotes the calculation year of the Home Responsibility Protection (HRP).",
+            "example": 2022,
+            "maximum": 2099,
+            "minimum": 1975,
+            "type": "integer"
+          },
+          "awardAmount": {
+            "description": "Denotes the amount of the award.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "resourceGroupIdentifier": {
+            "description": "A unique identifier for a HMRC Resource Group.",
+            "example": 789,
+            "maximum": 99999999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "homeResponsibilitiesProtectionIndicator": {
+            "description": "Denotes the indicator used to determine the Home Responsibilities Protection scheme.",
+            "$ref": "#/components/schemas/EnumHrpIndicator"
+          },
+          "officeDetails": {
+            "$ref": "#/components/schemas/DecodedOfficeDetailsResponse"
+          }
+        },
+        "type": "object"
+      },
+      "DecodedOfficeDetailsResponse": {
+        "description": "Contains office related details.",
+        "properties": {
+          "officeLocationDecode": {
+            "description": "A unique identifier for an office location.",
+            "example": 1,
+            "maximum": 99999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "officeLocationValue": {
+            "description": "The description of the office location.",
+            "example": "HQ STATIONARY STORE",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "officeIdentifier": {
+            "$ref": "#/components/schemas/EnumOffidtp",
+            "description": "Denotes the type of office."
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "oAuth2": {
+        "type": "oauth2",
+        "description": "OAuth2 Client Credentials Flow",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "/tokenUrl/not-required",
+            "scopes": {
+              "read:nps-ni-liability-summary": "Retrieve Liability Summary"
+            }
+          }
+        }
+      }
+    }
+  }
+}

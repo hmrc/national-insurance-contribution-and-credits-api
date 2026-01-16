@@ -1,0 +1,1308 @@
+openapi: 3.0.3
+info:
+  title: Benefit Eligibility Info API
+  description: |-
+    API for retrieving data for a given benefit type that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  version: 1.0.0
+  contact: {}
+servers:
+  - url: https://test-api.service.hmrc.gov.uk
+    description: Sandbox
+  - url: https://api.service.hmrc.gov.uk
+    description: Production
+
+paths:
+  /misc/national-insurance-contributions-and-credits/benefit-eligibility-info:
+    post:
+      summary: Request information that can be used to determine benefit eligibility
+      description: Submit a request for benefit information based on benefit type
+      operationId: getBenefitEligibilityInformation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/BSPRequest'
+                - $ref: '#/components/schemas/GYSPRequest'
+                - $ref: '#/components/schemas/ESARequest'
+                - $ref: '#/components/schemas/JSARequest'
+                - $ref: '#/components/schemas/MARequest'
+              discriminator:
+                propertyName: type
+                mapping:
+                  BSP: '#/components/schemas/BSPRequest'
+                  GYSP: '#/components/schemas/GYSPRequest'
+                  ESA: '#/components/schemas/ESARequest'
+                  JSA: '#/components/schemas/JSARequest'
+                  MA: '#/components/schemas/MARequest'
+            examples:
+              BSP_minimal_request:
+                summary: BSP request - Minimal required fields
+                value:
+                  type: "BSP"
+                  nationalInsuranceNumber: "AB123456C"
+                  dateOfBirth: "1960-01-15"
+                  startTaxYear: 2020
+                  endTaxYear: 2023
+              BSP_full_request:
+                summary: BSP request - All fields including optional
+                value:
+                  type: "BSP"
+                  nationalInsuranceNumber: "CD789012E"
+                  dateOfBirth: "1958-03-22"
+                  startTaxYear: 2018
+                  endTaxYear: 2024
+                  searchStartYear: "2018-04-06"
+                  searchEndYear: "2024-04-05"
+                  latest: true
+                  sequence: 1
+              GYSP_minimal_request:
+                summary: GYSP request - Minimal required fields
+                value:
+                  type: "GYSP"
+                  nationalInsuranceNumber: "GH567890J"
+                  dateOfBirth: "1955-06-20"
+                  startTaxYear: 2018
+                  endTaxYear: 2023
+                  benefitType: "GRADUATED"
+                  associatedCalculationSequenceNumber: 1
+                  schemeContractedOutNumber: 12345
+              GYSP_full_request:
+                summary: GYSP request - All fields including optional
+                value:
+                  type: "GYSP"
+                  nationalInsuranceNumber: "JK901234L"
+                  dateOfBirth: "1952-11-08"
+                  startTaxYear: 2015
+                  endTaxYear: 2023
+                  benefitType: "STATE_PENSION"
+                  associatedCalculationSequenceNumber: 2
+                  schemeContractedOutNumber: 67890
+                  searchStartYear: 2015
+                  searchEndYear: 2023
+                  latest: false
+                  sequence: 3
+                  pensionProcessingArea: "NORTH"
+                  schemeMembershipSequenceNumber: 101
+                  schemeMembershipTransferSequenceNumber: 201
+                  schemeMembershipOccurrenceNumber: 301
+              ESA_request:
+                summary: ESA request
+                value:
+                  type: "ESA"
+                  nationalInsuranceNumber: "QR456789S"
+                  dateOfBirth: "1975-09-14"
+                  startTaxYear: 2020
+                  endTaxYear: 2023
+              JSA_request:
+                summary: JSA request
+                value:
+                  type: "JSA"
+                  nationalInsuranceNumber: "AB234567C"
+                  dateOfBirth: "1982-12-03"
+                  startTaxYear: 2021
+                  endTaxYear: 2023
+              MA_minimal_request:
+                summary: MA request - Minimal required fields
+                value:
+                  type: "MA"
+                  nationalInsuranceNumber: "KL890123M"
+                  dateOfBirth: "1985-04-18"
+                  startTaxYear: 2022
+                  endTaxYear: 2023
+                  liabilitySearchCategoryHyphenated: true
+              MA_full_request:
+                summary: MA request - All fields including optional
+                value:
+                  type: "MA"
+                  nationalInsuranceNumber: "NP012345Q"
+                  dateOfBirth: "1988-07-25"
+                  startTaxYear: 2021
+                  endTaxYear: 2023
+                  liabilitySearchCategoryHyphenated: false
+                  liabilityOccurrenceNumber: 1
+                  liabilityType: "STANDARD"
+                  earliestLiabilityStartDate: "2021-01-01"
+                  liabilityStart: "2021-06-15"
+                  liabilityEnd: "2022-06-14"
+                  archived: false
+                  receiptDate: "2021-05-20"
+                  sortBy: "DATE_DESC"
+
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BSPSuccessResponse'
+                  - $ref: '#/components/schemas/GYSPSuccessResponse'
+                  - $ref: '#/components/schemas/ESASuccessResponse'
+                  - $ref: '#/components/schemas/JSASuccessResponse'
+                  - $ref: '#/components/schemas/MASuccessResponse'
+                discriminator:
+                  propertyName: benefitType
+                  mapping:
+                    BSP: '#/components/schemas/BSPSuccessResponse'
+                    GYSP: '#/components/schemas/GYSPSuccessResponse'
+                    ESA: '#/components/schemas/ESASuccessResponse'
+                    JSA: '#/components/schemas/JSASuccessResponse'
+                    MA: '#/components/schemas/MASuccessResponse'
+              examples:
+                BSP_success:
+                  summary: BSP
+                  value:
+                    correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    benefitType: "BSP"
+                    nationalInsuranceNumber: "AB123456C"
+                    dateOfBirth: "1960-01-15"
+                    startTaxYear: 2020
+                    endTaxYear: 2023
+                    data:
+                      niContributionsAndCreditData:
+                        - taxYear: 2020
+                          primaryPaidEarnings: 25000.00
+                          class2Or3EarningsFactor: 1.5
+                          contributionCategory: "STANDARD RATE"
+                          contributionCategoryLetter: "A"
+                          primaryContribution: 3000.00
+                          class2NIContributionAmount: 150.00
+                          class1ContributionStatus: "VALID"
+                          class2Or3CreditStatus: "VALID"
+                          contributionCreditType: "C1"
+                          numberOfCreditsAndContributions: 52
+                      marriageDetails:
+                        - status: "MARRIED"
+                          startDate: "1985-06-15"
+                          startDateStatus: "VERIFIED"
+                          endDate: "2010-03-20"
+                          endDateStatus: "VERIFIED"
+                          spouseIdentifier: "CD789012E"
+                          spouseForename: "Jane"
+                          spouseSurname: "Smith"
+                GYSP_success:
+                  summary: GYSP
+                  value:
+                    correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
+                    benefitType: "GYSP"
+                    nationalInsuranceNumber: "GH567890J"
+                    dateOfBirth: "1955-06-20"
+                    startTaxYear: 2018
+                    endTaxYear: 2023
+                    data:
+                      niContributionsAndCreditData:
+                        - taxYear: 2019
+                          contributionCategory: "STANDARD RATE"
+                          contributionCategoryLetter: "A"
+                          contributionCreditType: "C1"
+                          numberOfCreditsAndContributions: 52
+                          employerName: "ACME"
+                        - taxYear: 2020
+                          contributionCategory: "STANDARD RATE"
+                          contributionCategoryLetter: "A"
+                          contributionCreditType: "C1"
+                          numberOfCreditsAndContributions: 52
+                          employerName: "Global"
+                      benefitCalculationDetails:
+                        - guaranteedMinimumPensionContractedOutDeductionsPre1988: 1500.00
+                          guaranteedMinimumPensionContractedOutDeductionsPost1988: 2000.00
+                          contractedOutDeductionsPre1988: 800.00
+                          contractedOutDeductionsPost1988: 1200.00
+                      marriageDetails:
+                        - startDate: "1980-08-12"
+                          startDateStatus: "VERIFIED"
+                          endDate: "2005-11-30"
+                          endDateStatus: "VERIFIED"
+                          spouseIdentifier: "EF345678G"
+                          spouseForename: "Robert"
+                          spouseSurname: "Johnson"
+                      longTermBenefitNotes:
+                        - "Pension credit awarded for caring responsibilities"
+                        - "Additional credit for unemployment period"
+                      schemeMembershipDetails:
+                        - schemeMembershipStartDate: "1990-04-06"
+                          schemeMembershipEndDate: "2010-04-05"
+                          employersContractedOutNumberDetails: "CON123456"
+                      statePensionDetails:
+                        - numberOfQualifyingYears: 35
+                          qualifyingTaxYear: true
+                ESA_success:
+                  summary: ESA
+                  value:
+                    correlationId: "22222222-3333-4444-5555-666666666666"
+                    benefitType: "ESA"
+                    nationalInsuranceNumber: "QR456789S"
+                    dateOfBirth: "1975-09-14"
+                    startTaxYear: 2020
+                    endTaxYear: 2023
+                    data:
+                      niContributionsAndCreditData:
+                        - taxYear: 2021
+                          primaryPaidEarnings: 15000.00
+                          class2Or3EarningsFactor: 1.0
+                          contributionCreditType: "2A"
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          numberOfCreditsAndContributions: 39
+                        - taxYear: 2022
+                          primaryPaidEarnings: 18000.00
+                          class2Or3EarningsFactor: 1.2
+                          contributionCreditType: "2A"
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          numberOfCreditsAndContributions: 26
+                        - taxYear: 2023
+                          primaryPaidEarnings: 20000.00
+                          class2Or3EarningsFactor: 1.3
+                          contributionCreditType: "2A"
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          numberOfCreditsAndContributions: 20
+                JSA_success:
+                  summary: JSA
+                  value:
+                    correlationId: "44444444-5555-6666-7777-888888888888"
+                    benefitType: "JSA"
+                    nationalInsuranceNumber: "AB234567C"
+                    dateOfBirth: "1982-12-03"
+                    startTaxYear: 2021
+                    endTaxYear: 2023
+                    data:
+                      niContributionsAndCreditData:
+                        - taxYear: 2019
+                          primaryPaidEarnings: 10000.00
+                          class2Or3EarningsFactor: 0.7
+                          contributionCreditType: "2B"
+                          creditSource: "JSA TAPE INPUT"
+                          numberOfCreditsAndContributions: 15
+                        - taxYear: 2021
+                          primaryPaidEarnings: 12000.00
+                          class2Or3EarningsFactor: 0.8
+                          contributionCreditType: "2B"
+                          creditSource: "JSA TAPE INPUT"
+                          numberOfCreditsAndContributions: 20
+                        - taxYear: 2022
+                          primaryPaidEarnings: 16000.00
+                          class2Or3EarningsFactor: 1.1
+                          contributionCreditType: "2B"
+                          creditSource: "JSA TAPE INPUT"
+                          numberOfCreditsAndContributions: 30
+                MA_success:
+                  summary: MA
+                  value:
+                    correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "KL890123M"
+                    dateOfBirth: "1985-04-18"
+                    startTaxYear: 2022
+                    endTaxYear: 2023
+                    data:
+                      niContributionsAndCreditData:
+                        - taxYear: 2021
+                          contributionCreditType: "MAR"
+                          numberOfCreditsAndContributions: 39
+                          primaryPaidEarnings: 20000.00
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2022
+                          contributionCreditType: "MAR"
+                          numberOfCreditsAndContributions: 39
+                          primaryPaidEarnings: 22000.00
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2023
+                          contributionCreditType: "MAR"
+                          numberOfCreditsAndContributions: 26
+                          primaryPaidEarnings: 24000.00
+                          latePaymentPeriod: "ZZ"
+                      class2MaReceiptDetails:
+                        - receiptDate: "2021-03-10"
+                        - receiptDate: "2022-04-15"
+                        - receiptDate: "2023-01-20"
+                      liabilitiesDetails:
+                        - startDate: "2021-01-01"
+                          endDate: "2021-12-31"
+                        - startDate: "2022-01-01"
+                          endDate: "2022-12-31"
+                        - startDate: "2023-01-01"
+                          endDate: "2023-06-30"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/PartialFailure'
+
+components:
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_type:
+              summary: Missing benefit type
+              value:
+                code: "BAD_REQUEST"
+                reason: "type field is required"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_auth_token:
+              summary: Missing authentication token
+              value:
+                code: "FORBIDDEN"
+                reason: "authentication token is required"
+            invalid_auth_token:
+              summary: Invalid authentication token
+              value:
+                code: "FORBIDDEN"
+                reason: "invalid or expired authentication token"
+
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_ni_number_format:
+              summary: Invalid National Insurance number format
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "invalid national insurance number format"
+            invalid_date_format:
+              summary: Invalid date format
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "dateOfBirth must be in YYYY-MM-DD format"
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unexpected_error:
+              summary: Unexpected error
+              value:
+                code: "INTERNAL_SERVER_ERROR"
+                reason: "an unexpected error occurred while processing the request"
+
+    PartialFailure:
+      description: Partial or complete failure from downstream services
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PartialFailureResponse'
+          examples:
+            partial_failure:
+              summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
+              value:
+                status: "PARTIAL_FAILURE"
+                correlationId: "55555555-6666-7777-8888-999999999999"
+                benefitType: "MA"
+                nationalInsuranceNumber: "KL890123M"
+                dateOfBirth: "1985-04-18"
+                startTaxYear: 2022
+                endTaxYear: 2023
+                summary:
+                  totalCalls: 3
+                  successful: 2
+                  failed: 1
+                downStreams:
+                  - apiName: "NiContributionsAndCredits"
+                    status: "SUCCESS"
+                  - apiName: "Class2MAReceipts"
+                    status: "SUCCESS"
+                  - apiName: "Liabilities"
+                    status: "FAILURE"
+                    error:
+                      code: "TIMEOUT"
+                      message: "liability calculation service timeout"
+                      downstreamStatus: 408
+            complete_failure:
+              summary: Complete failure - every downstream called for a given benefit responds with a failure
+              value:
+                status: "FAILURE"
+                correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
+                benefitType: "MA"
+                nationalInsuranceNumber: "NP012345Q"
+                dateOfBirth: "1988-07-25"
+                startTaxYear: 2021
+                endTaxYear: 2023
+                summary:
+                  totalCalls: 3
+                  successful: 0
+                  failed: 3
+                downStreams:
+                  - apiName: "NiContributionsAndCredits"
+                    status: "FAILURE"
+                    error:
+                      code: "FORBIDDEN"
+                      message: "access denied to maternity allowance service"
+                      downstreamStatus: 403
+                  - apiName: "Class2MAReceipts"
+                    status: "FAILURE"
+                    error:
+                      code: "INTERNAL_SERVER_ERROR"
+                      message: "class 2 MA receipts service internal error"
+                      downstreamStatus: 500
+                  - apiName: "Liabilities"
+                    status: "FAILURE"
+                    error:
+                      code: "BAD_REQUEST"
+                      message: "invalid liability calculation parameters"
+                      downstreamStatus: 400
+
+  schemas:
+    # Base Request Schema
+    BaseRequest:
+      type: object
+      required:
+        - type
+        - nationalInsuranceNumber
+        - dateOfBirth
+        - startTaxYear
+        - endTaxYear
+      properties:
+        type:
+          type: string
+          enum: [BSP, GYSP, ESA, JSA, MA]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        dateOfBirth:
+          $ref: '#/components/schemas/dateString'
+        startTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        endTaxYear:
+          $ref: '#/components/schemas/taxYear'
+
+    # Request Schemas
+    BSPRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [BSP]
+            searchStartYear:
+              $ref: '#/components/schemas/dateString'
+            searchEndYear:
+              $ref: '#/components/schemas/dateString'
+            latest:
+              type: boolean
+            sequence:
+              type: integer
+
+    GYSPRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - benefitType
+            - associatedCalculationSequenceNumber
+            - schemeContractedOutNumber
+          properties:
+            type:
+              type: string
+              enum: [GYSP]
+            benefitType:
+              type: string
+            associatedCalculationSequenceNumber:
+              type: integer
+            schemeContractedOutNumber:
+              type: integer
+            searchStartYear:
+              $ref: '#/components/schemas/taxYear'
+            searchEndYear:
+              $ref: '#/components/schemas/taxYear'
+            latest:
+              type: boolean
+            sequence:
+              type: integer
+            pensionProcessingArea:
+              type: string
+            schemeMembershipSequenceNumber:
+              type: integer
+            schemeMembershipTransferSequenceNumber:
+              type: integer
+            schemeMembershipOccurrenceNumber:
+              type: integer
+
+    ESARequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [ESA]
+
+    JSARequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [JSA]
+
+    MARequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - liabilitySearchCategoryHyphenated
+          properties:
+            type:
+              type: string
+              enum: [MA]
+            liabilitySearchCategoryHyphenated:
+              type: boolean
+            liabilityOccurrenceNumber:
+              type: integer
+            liabilityType:
+              type: string
+            earliestLiabilityStartDate:
+              $ref: '#/components/schemas/dateString'
+            liabilityStart:
+              $ref: '#/components/schemas/dateString'
+            liabilityEnd:
+              $ref: '#/components/schemas/dateString'
+            archived:
+              type: boolean
+            receiptDate:
+              $ref: '#/components/schemas/dateString'
+            sortBy:
+              type: string
+
+    # Base Success Response Schema
+    BaseSuccessResponse:
+      type: object
+      required:
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - dateOfBirth
+        - startTaxYear
+        - endTaxYear
+        - data
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [BSP, GYSP, ESA, JSA, MA]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        dateOfBirth:
+          $ref: '#/components/schemas/dateString'
+        startTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        endTaxYear:
+          $ref: '#/components/schemas/taxYear'
+
+    # Success Response Schemas
+    BSPSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseSuccessResponse'
+        - type: object
+          properties:
+            benefitType:
+              type: string
+              enum: [BSP]
+            data:
+              $ref: '#/components/schemas/BSPResponseData'
+
+    GYSPSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseSuccessResponse'
+        - type: object
+          properties:
+            benefitType:
+              type: string
+              enum: [GYSP]
+            data:
+              $ref: '#/components/schemas/GYSPResponseData'
+
+    ESASuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseSuccessResponse'
+        - type: object
+          properties:
+            benefitType:
+              type: string
+              enum: [ESA]
+            data:
+              $ref: '#/components/schemas/ESAResponseData'
+
+    JSASuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseSuccessResponse'
+        - type: object
+          properties:
+            benefitType:
+              type: string
+              enum: [JSA]
+            data:
+              $ref: '#/components/schemas/JSAResponseData'
+
+    MASuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseSuccessResponse'
+        - type: object
+          properties:
+            benefitType:
+              type: string
+              enum: [MA]
+            data:
+              $ref: '#/components/schemas/MAResponseData'
+
+    # Response Data Schemas
+    BSPResponseData:
+      type: object
+      required:
+        - niContributionsAndCreditData
+        - marriageDetails
+      properties:
+        niContributionsAndCreditData:
+          type: array
+          items:
+            $ref: '#/components/schemas/NiContributionDataBSP'
+        marriageDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarriageDetailsBSP'
+
+    GYSPResponseData:
+      type: object
+      required:
+        - niContributionsAndCreditData
+        - benefitCalculationDetails
+        - marriageDetails
+        - longTermBenefitNotes
+        - schemeMembershipDetails
+        - statePensionDetails
+      properties:
+        niContributionsAndCreditData:
+          type: array
+          items:
+            $ref: '#/components/schemas/NiContributionDataGysp'
+        benefitCalculationDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitCalculationDetailsGysp'
+        marriageDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarriageDetailsGYSP'
+        longTermBenefitNotes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LongTermBenefitNote'
+        schemeMembershipDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeDataGysp'
+        statePensionDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/statePensionDetailsGysp'
+
+    ESAResponseData:
+      type: object
+      required:
+        - niContributionsAndCreditData
+      properties:
+        niContributionsAndCreditData:
+          type: array
+          items:
+            $ref: '#/components/schemas/NiContributionDataEsaAndJsa'
+
+    JSAResponseData:
+      type: object
+      required:
+        - niContributionsAndCreditData
+      properties:
+        niContributionsAndCreditData:
+          type: array
+          items:
+            $ref: '#/components/schemas/NiContributionDataEsaAndJsa'
+
+    MAResponseData:
+      type: object
+      required:
+        - niContributionsAndCreditData
+        - class2MaReceiptDetails
+        - liabilitiesDetails
+      properties:
+        niContributionsAndCreditData:
+          type: array
+          items:
+            $ref: '#/components/schemas/NiContributionDataMa'
+        class2MaReceiptDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2MaReceiptData'
+        liabilitiesDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiabilitiesMa'
+
+    # NI Contribution Data Schemas
+    NiContributionDataBSP:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        contributionCategory:
+          $ref: '#/components/schemas/EnumContCat'
+        contributionCategoryLetter:
+          $ref: '#/components/schemas/contributionCategoryLetter'
+        primaryContribution:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2NIContributionAmount:
+          $ref: '#/components/schemas/unsignedMoney'
+        class1ContributionStatus:
+          $ref: '#/components/schemas/EnumCl1stat'
+        class2Or3CreditStatus:
+          $ref: '#/components/schemas/EnumCl2Stat'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+
+    NiContributionDataEsaAndJsa:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+
+    NiContributionDataMa:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+        latePaymentPeriod:
+          $ref: '#/components/schemas/EnumLpind'
+
+    NiContributionDataGysp:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        contributionCategory:
+          $ref: '#/components/schemas/EnumContCat'
+        contributionCategoryLetter:
+          $ref: '#/components/schemas/contributionCategoryLetter'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+        employerName:
+          $ref: '#/components/schemas/employerName'
+
+    # Base marriage details with common fields
+    BaseMarriageDetails:
+      type: object
+      properties:
+        startDate:
+          $ref: '#/components/schemas/dateString'
+        startDateStatus:
+          $ref: '#/components/schemas/EnumMarriageStartDateStatus'
+        endDate:
+          $ref: '#/components/schemas/dateString'
+        endDateStatus:
+          $ref: '#/components/schemas/EnumMarriageEndDateStatus'
+        spouseIdentifier:
+          type: string
+        spouseForename:
+          $ref: '#/components/schemas/spouseForename'
+        spouseSurname:
+          $ref: '#/components/schemas/spouseSurname'
+
+    # BSP-specific marriage details (includes status)
+    MarriageDetailsBSP:
+      allOf:
+        - $ref: '#/components/schemas/BaseMarriageDetails'
+        - type: object
+          properties:
+            status:
+              $ref: '#/components/schemas/EnumMarriageStatus'
+
+    # GYSP-specific marriage details (no status field)
+    MarriageDetailsGYSP:
+      $ref: '#/components/schemas/BaseMarriageDetails'
+
+
+    # Other Data Schemas
+    Class2MaReceiptData:
+      type: object
+      properties:
+        receiptDate:
+          $ref: '#/components/schemas/dateString'
+
+    LiabilitiesMa:
+      type: object
+      properties:
+        startDate:
+          $ref: '#/components/schemas/dateString'
+        endDate:
+          $ref: '#/components/schemas/dateString'
+
+    BenefitCalculationDetailsGysp:
+      type: object
+      properties:
+        guaranteedMinimumPensionContractedOutDeductionsPre1988:
+          $ref: '#/components/schemas/signedMoney'
+        guaranteedMinimumPensionContractedOutDeductionsPost1988:
+          $ref: '#/components/schemas/signedMoney'
+        contractedOutDeductionsPre1988:
+          $ref: '#/components/schemas/signedMoney'
+        contractedOutDeductionsPost1988:
+          $ref: '#/components/schemas/signedMoney'
+
+    SchemeDataGysp:
+      type: object
+      properties:
+        schemeMembershipStartDate:
+          $ref: '#/components/schemas/dateString'
+        schemeMembershipEndDate:
+          $ref: '#/components/schemas/dateString'
+        employersContractedOutNumberDetails:
+          $ref: '#/components/schemas/employersContractedOutNumberDetails'
+
+    statePensionDetailsGysp:
+      type: object
+      properties:
+        numberOfQualifyingYears:
+          $ref: '#/components/schemas/numberOfQualifyingYears'
+        qualifyingTaxYear:
+          $ref: '#/components/schemas/qualifyingTaxYear'
+
+    LongTermBenefitNote:
+      type: string
+
+    # Shared Type Definitions
+    taxYear:
+      description: "Denotes the tax year (e.g. 2023 for a 2023/2024 tax period)."
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+      type: integer
+
+    nationalInsuranceNumber:
+      description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+      maxLength: 9
+      minLength: 8
+      pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+      example: "AA000001A"
+      type: string
+
+    dateString:
+      description: "Date in YYYY-MM-DD format."
+      format: date
+      pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      type: string
+
+    spouseForename:
+      description: "The spouse's forename."
+      example: "Jean-Pierre"
+      maxLength: 99
+      minLength: 1
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+
+    spouseSurname:
+      description: "The spouse's surname."
+      example: "van Cholmondley-warner"
+      maxLength: 99
+      minLength: 2
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+
+    employersContractedOutNumberDetails:
+      description: "Denotes the Employer's Contracting-Out Number with prefix and suffix - used where an employer has an occupational pension scheme that is contracted-out of the State Second Pension."
+      example: "S3123456B"
+      maxLength: 9
+      minLength: 7
+      pattern: "^([A-Z]{0,1}\\d{6}[A-Z^GIO SUVZ]{0,1})$"
+      type: string
+
+    qualifyingTaxYear:
+      description: "Indicates whether the tax year is a qualifying one for an individual's basic pension."
+      example: true
+      type: boolean
+
+    numberOfQualifyingYears:
+      description: "Denotes the number of qualifying years an individual has for receiving their basic pension."
+      example: 5
+      maximum: 100
+      minimum: 0
+      type: integer
+
+    unsignedMoney:
+      description: "Positive or zero monetary value."
+      maximum: 99999999999999.98
+      minimum: 0
+      multipleOf: 0.01
+      type: number
+
+    signedMoney:
+      description: "Signed monetary value."
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      multipleOf: 0.01
+      type: number
+
+    contributionCategoryLetter:
+      description: "Letter associated with the contribution category."
+      maxLength: 1
+      minLength: 1
+      pattern: "^[A-Z]$"
+      type: string
+
+    numberOfCreditsAndContributions:
+      description: "Number of weekly credits that apply to the credit record."
+      minimum: 0
+      maximum: 53
+      type: integer
+
+    employerName:
+      description: "Employer name, held as a checkbrick in NPS for employment details linked to a contribution."
+      minLength: 1
+      maxLength: 6
+      pattern: "^([A-Za-z ])+$"
+      type: string
+
+    # Enum Definitions
+    EnumMarriageStatus:
+      type: string
+      enum:
+        - "CIVIL PARTNER"
+        - "CIVIL PARTNERSHIP ANNULLED"
+        - "CIVIL PARTNERSHIP DISSOLVED"
+        - "CIVIL PARTNERSHIP TERMINATED - REASON N/K"
+        - "DIVORCED"
+        - "MARRIAGE ANNULLED"
+        - "MARRIAGE TERMINATED - REASON NOT KNOWN"
+        - "MARRIED"
+        - "SINGLE"
+        - "SURVIVING CIVIL PARTNER"
+        - "VOID"
+        - "WIDOWED"
+
+    EnumMarriageStartDateStatus:
+      type: string
+      enum:
+        - "COEG CONFIRMED"
+        - "NOT KNOWN"
+        - "NOT VERIFIED"
+        - "VERIFIED"
+
+    EnumMarriageEndDateStatus:
+      type: string
+      enum:
+        - "IN EFFECT"
+        - "NOT KNOWN"
+        - "UNVERIFIED"
+        - "VERIFIED"
+
+    EnumLpind:
+      enum:
+        - "L"
+        - "LX"
+        - "ZY"
+        - "ZZ"
+      type: string
+
+    EnumCreditSource:
+      description: "Denotes the credit source type."
+      enum:
+        - "NOT KNOWN"
+        - "ADP CENTRE LIVINGSTON"
+        - "DSS LOCAL OFFICES"
+        - "EMPLOYMENT SERVICES"
+        - "DIRECT DEBIT"
+        - "CARER'S ALLOWANCE (CA)"
+        - "HNCIP OR SDA"
+        - "NORTHERN IRELAND SICKNESS CREDITS"
+        - "JURY SERVICE"
+        - "NUBS 2"
+        - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+        - "DWA UNIT (BLACKPOOL) EMPLOYED EARNERS"
+        - "DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS"
+        - "DWA UNIT (BELFAST) EMPLOYED EARNERS"
+        - "DWA UNIT (BELFAST) SELF EMPLOYED EARNERS"
+        - "ISLE OF MAN"
+        - "AUTOCREDITS - INTERNALLY CALCULATED"
+        - "AUTOCREDITS - EXTERNALLY INPUT"
+        - "JUVENILE CREDITS (INTERNAL)"
+        - "WIDOWS CREDITS   (INTERNAL)"
+        - "APPROVED TRAINING CREDITS (INTERNAL)"
+        - "UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)"
+        - "PSCS INCAP"
+        - "LONG TERM SCALE RATE"
+        - "ADP READING"
+        - "NOT APPLICABLE"
+        - "QUARTERLY BILLING"
+        - "JSA TAPE INPUT"
+        - "JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)"
+        - "JSA PAPER INPUT"
+        - "FAMC-NI"
+        - "FAMC-GB"
+        - "CENTRAL AWARD"
+        - "ADP NORTHERN IRELAND"
+        - "FAMILY CREDIT (GB)"
+        - "FAMILY CREDIT (NI)"
+        - "INCAPACITY"
+        - "DPTC (GB) EMP"
+        - "DPTC (GB) S/EMP"
+        - "DPTC (NI) EMP"
+        - "DPTC (NI) S/EMP"
+        - "WFTC (GB)"
+        - "WFTC (NI)"
+        - "STATUTORY MATERNITY PAY CREDIT"
+        - "STATUTORY ADOPTION PAY CREDIT"
+        - "Disabled Tax Credit (Employed)"
+        - "Disabled Tax Credit (Self-employed)"
+        - "Working Tax Credit (Employed)"
+        - "Working Tax Credit (Self-employed)"
+        - "EMPLOYMENT AND SUPPORT"
+        - "HRP CONVERSION"
+        - "CHILD BENEFIT"
+        - "CARER'S CREDIT"
+        - "FOSTER CARER"
+        - "MoD Spouse/Civil Partner's Credits"
+        - "ADDITIONAL STATUTORY PATERNITY PAY"
+        - "SPECIFIED ADULT CARER"
+        - "UNIVERSAL CREDIT"
+        - "SHARED PARENTAL PAY"
+        - "Post 75 Service Spouses Credit"
+        - "Statutory Parental Bereavement Pay"
+        - "CARER SUPPORT PAYMENT (CSP)"
+        - "Statutory Neonatal Care Pay"
+        - "REPLACEMENT CREDITS FOR PARENTS AND CARERS"
+
+    EnumContCat:
+      description: "Denotes the contribution category."
+      enum:
+        - "(NONE)"
+        - "CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS"
+        - "CONVERTED ACCOUNT - CONTRACTED OUT"
+        - "MARINER FOREIGN GOING REBATE ( REDUCED CONTRACTED-OUT )"
+        - "MARINER FOREIGN GOING REBATE ( STANDARD CONTRACTED-OUT )"
+        - "MARINER FOREIGN GOING REBATE EQUIVALENT (REDUCED)"
+        - "MARINER FOREIGN GOING REBATE EQUIVALENT (SECONDARY ONLY)"
+        - "MARINER FOREIGN GOING REBATE EQUIVALENT (STANDARD)"
+        - "MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( REDUCED C-OUT)"
+        - "MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( STANDARD C-OUT)"
+        - "MARINER REDUNDANCY FUND & FOREIGN GOING REBATE EQUIV.(SECONDARY ONLY)"
+        - "MARINER REDUNDANCY FUND & FRGN GNG REBATE EQUIV.(STD)"
+        - "MARINER REDUNDANCY FUND & FRGN GOING REBATE EQUIV.(RDCD)"
+        - "MARINER REDUNDANCY FUND REBATE ( REDUCED CONTRACTED-OUT )"
+        - "MARINER REDUNDANCY FUND REBATE ( STANDARD CONTRACTED-OUT )"
+        - "MARINER REDUNDANCY FUND REBATE EQUIV. (RDCD)"
+        - "MARINER REDUNDANCY FUND REBATE EQUIVALENT (SECONDARY ONLY)"
+        - "MARINER REDUNDANCY FUND REBATE EQUIVALENT (STANDARD)"
+        - "MARRIED WOMAN'S REDUCED RATE ELECTION"
+        - "NO LIABILITY"
+        - "OFFICE HOLDERS"
+        - "REDUCED RATE"
+        - "REDUCED RATE CONTRACTED-OUT"
+        - "STANDARD RATE"
+        - "STANDARD RATE CONTRACTED-OUT"
+        - "UNALLOCATED"
+        - "ZERO RATE"
+      type: string
+
+    EnumCl1stat:
+      description: "Denotes the status for the contribution."
+      enum:
+        - "COMPLIANCE & YIELD INCOMPLETE"
+        - "CURRENT"
+        - "HISTORIC AMENDED"
+        - "HISTORIC CANCELLED"
+        - "INVALID - NO RCF"
+        - "INVALID - RCF"
+        - "INVALID COMPATIBILITY CHECK"
+        - "NOT KNOWN / NOT APPLICABLE"
+        - "POTENTIAL"
+        - "VALID"
+        - "VALID RCF"
+      type: string
+
+    EnumCl2Stat:
+      description: "Denotes the status for the credit."
+      enum:
+        - "NOT KNOWN/NOT APPLICABLE"
+        - "VALID"
+        - "INVALID"
+        - "POTENTIAL"
+        - "INVALID COMPATIBILITY CHECK"
+      type: string
+
+    EnumCCType:
+      description: "Short code relating to the type of contribution or credit."
+      enum:
+        - "C1"
+        - "HMF"
+        - "MAR"
+        - "CS"
+        - "EON"
+        - "CR1"
+        - "C2"
+        - "C2W"
+        - "SF"
+        - "2A"
+        - "2B"
+        - "2C"
+        - "2D"
+        - "SFA"
+        - "SFB"
+        - "SFC"
+        - "SFD"
+        - "VDA"
+        - "VDB"
+        - "VDC"
+        - "VDD"
+        - "2N"
+      type: string
+
+    # Error and Failure Response Schemas
+    PartialFailureResponse:
+      type: object
+      required:
+        - status
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - dateOfBirth
+        - startTaxYear
+        - endTaxYear
+        - summary
+        - downStreams
+      properties:
+        status:
+          type: string
+          enum: [PARTIAL_FAILURE, FAILURE]
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [BSP, GYSP, ESA, JSA, MA]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        dateOfBirth:
+          $ref: '#/components/schemas/dateString'
+        startTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        endTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        summary:
+          $ref: '#/components/schemas/Summary'
+        downStreams:
+          type: array
+          items:
+            $ref: '#/components/schemas/DownstreamResult'
+
+    Summary:
+      type: object
+      required:
+        - totalCalls
+        - successful
+        - failed
+      properties:
+        totalCalls:
+          type: integer
+          minimum: 0
+        successful:
+          type: integer
+          minimum: 0
+        failed:
+          type: integer
+          minimum: 0
+
+    DownstreamResult:
+      type: object
+      required:
+        - apiName
+        - status
+      properties:
+        apiName:
+          type: string
+        status:
+          type: string
+          enum: [SUCCESS, FAILURE]
+        error:
+          $ref: '#/components/schemas/DownstreamError'
+
+    DownstreamError:
+      type: object
+      required:
+        - code
+        - message
+        - downstreamStatus
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        downstreamStatus:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        code:
+          type: string
+          enum: [BAD_REQUEST, FORBIDDEN, UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR]
+        reason:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

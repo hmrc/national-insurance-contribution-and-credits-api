@@ -42,6 +42,13 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   MarriageDetails,
   NiContributionAndCredits
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
+  BSPEligibilityCheckDataRequest,
+  ESAEligibilityCheckDataRequest,
+  GYSPEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest,
+  MAEligibilityCheckDataRequest
+}
 
 import java.time.LocalDate
 import java.util.concurrent.Executors

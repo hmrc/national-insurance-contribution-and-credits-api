@@ -32,7 +32,7 @@ import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.ContributionCredi
 class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
 
   val niContributionsAndCreditsOpenApiSpec =
-    "test/resources/schemas/api/niContributionsAndCredits/NI_Contributions_and_Credits.json"
+    "test/resources/schemas/api/niContributionsAndCredits/niContributionsAndCredits.json"
 
   "NiContributionsAndCreditsResponse" - {
 
@@ -66,7 +66,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
         List(
           NicClass2(
             taxYear = Some(TaxYear(2022)),
-            noOfCreditsAndConts = Some(NumberOfCreditsAndConts(53)),
+            noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
             contributionCreditType = Some(ContributionCreditType.C1),
             class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
             class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
@@ -127,7 +127,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           List(
             NicClass2(
               taxYear = Some(TaxYear(3000)),
-              noOfCreditsAndConts = Some(NumberOfCreditsAndConts(100)),
+              noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(100)),
               contributionCreditType = Some(ContributionCreditType.C1),
               class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("-99999999999999.98"))),
               class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("-99999999999999.98"))),
@@ -150,7 +150,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
             """PrimaryContribution value is below the minimum allowed limit of 0""",
             """PrimaryPaidEarnings value is below the minimum allowed limit of 0""",
             """TaxYear value exceeds the maximum allowed limit of 2099""",
-            """NumberOfCreditsAndConts value exceeds the maximum allowed limit of 53""",
+            """NumberOfCreditsAndContributions value exceeds the maximum allowed limit of 53""",
             """Class2Or3EarningsFactor value is below the minimum allowed limit of 0""",
             """Class2NIContributionAmount value is below the minimum allowed limit of 0"""
           )

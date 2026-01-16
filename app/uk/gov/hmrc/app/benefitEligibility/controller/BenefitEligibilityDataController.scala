@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.EligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.AggregatorSyntax.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}

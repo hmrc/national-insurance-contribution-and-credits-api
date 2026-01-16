@@ -1,0 +1,1497 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Long Term Benefit Calculation",
+    "description": "# Usage Terms\nThese interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).",
+    "version": "0.0.1 Draft",
+    "x-integration-catalogue": {
+      "reviewed-date": "2025-12-10T16:47:25Z",
+      "publisher-reference": "ni-ltb-calculation",
+      "short-description": "Long Term Benefit Calculation",
+      "status": "ALPHA",
+      "api-type": "SIMPLE",
+      "platform": "HIP",
+      "backends": [
+        "NI"
+      ],
+      "domain": 3,
+      "sub-domain": 3.1
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni",
+      "description": "Corporate - Production"
+    },
+    {
+      "url": "https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni",
+      "description": "Corporate - Test"
+    },
+    {
+      "url": "https://hip.ws.hmrc.gov.uk/ni",
+      "description": "MDTP - Production"
+    },
+    {
+      "url": "https://hip.ws.ibt.hmrc.gov.uk/ni",
+      "description": "MDTP - QA"
+    }
+  ],
+  "security": [
+    {
+      "oAuth2": [
+        "read:ni-ltb-calculation"
+      ]
+    }
+  ],
+  "paths": {
+    "/individual/long-term-benefit/{identifier}/calculation": {
+      "get": {
+        "tags": [
+          "Long Term Benefit"
+        ],
+        "summary": "Retrieve Long Term Benefit Calculation Details.",
+        "description": "# Purpose\nThis API is used to retrieve Long Term Benefit calculation details from NPS (National Insurance & PAYE Service). It forms part of the NI Long Term Benefits Processing.\n\n## Version Log\n| Version | Date | Author | Description |\n|---------|------|--------|-------------|\n| 0.0.1 | 10/12/2025 | NPS Development Team  | Initial Draft  |",
+        "operationId": "GetLongTermBenefitCalculationDetails",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/correlationId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkOriginatorId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkOrganisationId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkUserId"
+          },
+          {
+            "$ref": "#/components/parameters/govUkUserName"
+          },
+          {
+            "$ref": "#/components/parameters/govUkJobRole"
+          },
+          {
+            "$ref": "#/components/parameters/Identifier"
+          },
+          {
+            "$ref": "#/components/parameters/AssociatedCalculationSequenceNumber"
+          },
+          {
+            "$ref": "#/components/parameters/BenefitType"
+          },
+          {
+            "$ref": "#/components/parameters/PensionProcessingArea"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLongTermBenefitCalculationDetailsResponse"
+                },
+                "examples": {
+                  "maximallyPopulatedResponseBereavementBenefitAndJobCentrePlusEEPP": {
+                    "summary": "Maximally populated response when benefit type is BEREAVEMENT BENEFIT and PensionProcessingArea is Job Centre+ Electronic Enabled Pension Processing",
+                    "value": {
+                      "statePensionAgeBefore2010TaxYear": true,
+                      "statePensionAgeAfter2016TaxYear": true,
+                      "benefitCalculationDetailsList": [
+                        {
+                          "additionalPensionAmountPre1997": 10.56,
+                          "additionalPensionAmountPost1997": 10.56,
+                          "pre97AgeRelatedAdditionalPension": 10.56,
+                          "post97AgeRelatedAdditionalPension": 10.56,
+                          "basicPensionIncrementsCashValue": 10.56,
+                          "graduatedRetirementBenefitCashValue": 10.56,
+                          "totalGuaranteedMinimumPension": 10.56,
+                          "totalNonGuaranteedMinimumPension": 10.56,
+                          "greatBritainPaymentAmount": 10.56,
+                          "dateOfBirth": "2022-06-27",
+                          "notionalPost1997AdditionalPension": 10.56,
+                          "notionalPre1997AdditionalPension": 10.56,
+                          "inheritableNotionalAdditionalPensionIncrements": 10.56,
+                          "conditionOneSatisfied": "H",
+                          "reasonForFormIssue": "REQUESTED BENEFIT CALCULATION",
+                          "additionalNotionalPensionAmountPost2002": 10.56,
+                          "additionalPensionAmountPost2002": 10.56,
+                          "additionalNotionalPensionIncrementsInheritedPost2002": 10.56,
+                          "additionalPensionIncrementsInheritedPost2002": 10.56,
+                          "post02AgeRelatedAdditionalPension": 10.56,
+                          "pre1975ShortTermBenefits": 2,
+                          "survivingSpouseAge": 45,
+                          "operativeBenefitStartDate": "2022-06-27",
+                          "sicknessBenefitStatusForReports": "Y",
+                          "benefitCalculationDetail": {
+                            "nationalInsuranceNumber": "AA123456",
+                            "benefitType": "ALL",
+                            "associatedCalculationSequenceNumber": 86,
+                            "calculationStatus": "DEFINITIVE",
+                            "substitutionMethod1": 235,
+                            "substitutionMethod2": 235,
+                            "calculationDate": "2022-06-27",
+                            "guaranteedMinimumPensionContractedOutDeductionsPre1988": 10.56,
+                            "guaranteedMinimumPensionContractedOutDeductionsPost1988": 10.56,
+                            "contractedOutDeductionsPre1988": 10.56,
+                            "contractedOutDeductionsPost1988": 10.56,
+                            "additionalPensionPercentage": 10.56,
+                            "basicPensionPercentage": 86,
+                            "survivorsBenefitAgeRelatedPensionPercentage": 10.56,
+                            "additionalAgeRelatedPensionPercentage": 10.56,
+                            "inheritedBasicPensionPercentage": 10.56,
+                            "inheritedAdditionalPensionPercentage": 10.56,
+                            "inheritedGraduatedPensionPercentage": 10.56,
+                            "inheritedGraduatedBenefit": 10.56,
+                            "calculationSource": "AP COMPONENT SUSPECT (APRIL - MAY CALC)",
+                            "payday": "FRIDAY",
+                            "dateOfBirth": "2022-06-27",
+                            "husbandDateOfDeath": "2022-06-27",
+                            "additionalPost1997PensionPercentage": 10.56,
+                            "additionalPost1997AgeRelatedPensionPercentage": 10.56,
+                            "additionalPensionNotionalPercentage": 10.56,
+                            "additionalPost1997PensionNotionalPercentage": 10.56,
+                            "inheritedAdditionalPensionNotionalPercentage": 10.56,
+                            "inheritableAdditionalPensionPercentage": 90,
+                            "additionalPost2002PensionNotionalPercentage": 10.56,
+                            "additionalPost2002PensionPercentage": 10.56,
+                            "inheritedAdditionalPost2002PensionNotionalPercentage": 10.56,
+                            "inheritedAdditionalPost2002PensionPercentage": 10.56,
+                            "additionalPost2002AgeRelatedPensionPercentage": 10.56,
+                            "singleContributionConditionRulesApply": true,
+                            "officeDetails": {
+                              "officeLocationDecode": 1,
+                              "officeLocationValue": "HQ STATIONARY STORE",
+                              "officeIdentifier": "(NONE)"
+                            },
+                            "newStatePensionCalculationDetails": {
+                              "newStatePensionRequisiteYears": 35,
+                              "calculationDate": "2022-06-27"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "maximallyPopulatedResponseStandardEEPP": {
+                    "summary": "Maximally populated response when PensionProcessingArea is Standard Electronic Enabled Pension Processing",
+                    "value": {
+                      "statePensionAgeBefore2010TaxYear": true,
+                      "statePensionAgeAfter2016TaxYear": true,
+                      "benefitCalculationDetailsList": [
+                        {
+                          "additionalPensionAmountPre1997": 10.56,
+                          "additionalPensionAmountPost1997": 10.56,
+                          "basicPensionIncrementsCashValue": 10.56,
+                          "additionalPensionIncrementsCashValue": 10.56,
+                          "graduatedRetirementBenefitCashValue": 10.56,
+                          "totalGuaranteedMinimumPension": 10.56,
+                          "totalNonGuaranteedMinimumPension": 10.56,
+                          "longTermBenefitsIncrementalCashValue": 10.56,
+                          "notionalPost1997AdditionalPension": 10.56,
+                          "notionalPre1997AdditionalPension": 10.56,
+                          "inheritableNotionalAdditionalPensionIncrements": 10.56,
+                          "conditionOneSatisfied": "H",
+                          "reasonForFormIssue": "REQUESTED BENEFIT CALCULATION",
+                          "longTermBenefitsCategoryACashValue": 10.56,
+                          "longTermBenefitsCategoryBLCashValue": 10.56,
+                          "longTermBenefitsUnitValue": 10.56,
+                          "additionalNotionalPensionAmountPost2002": 10.56,
+                          "additionalPensionAmountPost2002": 10.56,
+                          "additionalNotionalPensionIncrementsInheritedPost2002": 10.56,
+                          "additionalPensionIncrementsInheritedPost2002": 10.56,
+                          "post02AgeRelatedAdditionalPension": 10.56,
+                          "benefitCalculationDetail": {
+                            "nationalInsuranceNumber": "AA123456",
+                            "benefitType": "ALL",
+                            "associatedCalculationSequenceNumber": 86,
+                            "calculationStatus": "DEFINITIVE",
+                            "substitutionMethod1": 235,
+                            "substitutionMethod2": 235,
+                            "calculationDate": "2022-06-27",
+                            "guaranteedMinimumPensionContractedOutDeductionsPre1988": 10.56,
+                            "guaranteedMinimumPensionContractedOutDeductionsPost1988": 10.56,
+                            "contractedOutDeductionsPre1988": 10.56,
+                            "contractedOutDeductionsPost1988": 10.56,
+                            "additionalPensionPercentage": 10.56,
+                            "basicPensionPercentage": 86,
+                            "survivorsBenefitAgeRelatedPensionPercentage": 10.56,
+                            "additionalAgeRelatedPensionPercentage": 10.56,
+                            "inheritedBasicPensionPercentage": 10.56,
+                            "inheritedAdditionalPensionPercentage": 10.56,
+                            "inheritedGraduatedPensionPercentage": 10.56,
+                            "inheritedGraduatedBenefit": 10.56,
+                            "calculationSource": "AP COMPONENT SUSPECT (APRIL - MAY CALC)",
+                            "payday": "FRIDAY",
+                            "dateOfBirth": "2022-06-27",
+                            "husbandDateOfDeath": "2022-06-27",
+                            "additionalPost1997PensionPercentage": 10.56,
+                            "additionalPost1997AgeRelatedPensionPercentage": 10.56,
+                            "additionalPensionNotionalPercentage": 10.56,
+                            "additionalPost1997PensionNotionalPercentage": 10.56,
+                            "inheritedAdditionalPensionNotionalPercentage": 10.56,
+                            "inheritableAdditionalPensionPercentage": 90,
+                            "additionalPost2002PensionNotionalPercentage": 10.56,
+                            "additionalPost2002PensionPercentage": 10.56,
+                            "inheritedAdditionalPost2002PensionNotionalPercentage": 10.56,
+                            "inheritedAdditionalPost2002PensionPercentage": 10.56,
+                            "additionalPost2002AgeRelatedPensionPercentage": 10.56,
+                            "singleContributionConditionRulesApply": true,
+                            "officeDetails": {
+                              "officeLocationDecode": 1,
+                              "officeLocationValue": "HQ STATIONARY STORE",
+                              "officeIdentifier": "(NONE)"
+                            },
+                            "newStatePensionCalculationDetails": {
+                              "netAdditionalPensionPre1997": 10.56,
+                              "oldRulesStatePensionEntitlement": 10.56,
+                              "netRulesAmount": 10.56,
+                              "derivedRebateAmount": 10.56,
+                              "initialStatePensionAmount": 10.56,
+                              "protectedPayment2016": 10.56,
+                              "minimumQualifyingPeriodMet": true,
+                              "qualifyingYearsAfter2016": 3,
+                              "newStatePensionQualifyingYears": 20,
+                              "newStatePensionRequisiteYears": 35,
+                              "newStatePensionEntitlement": 10.56,
+                              "protectedPayment": 10.56,
+                              "pensionSharingOrderContractedOutEmploymentsGroup": true,
+                              "pensionSharingOrderStateEarningsRelatedPensionScheme": true,
+                              "considerReducedRateElection": true,
+                              "weeklyBudgetingLoanAmount": 10.56,
+                              "calculationDate": "2022-06-27"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "minimallyPopulatedResponse": {
+                    "summary": "Minimally populated response",
+                    "value": {
+                      "benefitCalculationDetailsList": [
+                        {
+                          "post97AgeRelatedAdditionalPension": 10.56,
+                          "graduatedRetirementBenefitCashValue": 10.56,
+                          "greatBritainPaymentAmount": 10.56,
+                          "benefitCalculationDetail": {
+                            "nationalInsuranceNumber": "AA123456",
+                            "benefitType": "ALL",
+                            "associatedCalculationSequenceNumber": 86,
+                            "additionalPensionPercentage": 10.56,
+                            "survivorsBenefitAgeRelatedPensionPercentage": 10.56,
+                            "additionalAgeRelatedPensionPercentage": 10.56,
+                            "inheritedBasicPensionPercentage": 10.56,
+                            "inheritedAdditionalPensionPercentage": 10.56,
+                            "inheritedGraduatedPensionPercentage": 10.56,
+                            "additionalPost1997PensionPercentage": 10.56,
+                            "additionalPost1997AgeRelatedPensionPercentage": 10.56,
+                            "additionalPensionNotionalPercentage": 10.56,
+                            "additionalPost1997PensionNotionalPercentage": 10.56,
+                            "inheritedAdditionalPensionNotionalPercentage": 10.56,
+                            "additionalPost2002PensionNotionalPercentage": 10.56,
+                            "additionalPost2002PensionPercentage": 10.56,
+                            "inheritedAdditionalPost2002PensionNotionalPercentage": 10.56,
+                            "inheritedAdditionalPost2002PensionPercentage": 10.56,
+                            "additionalPost2002AgeRelatedPensionPercentage": 10.56
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_400"
+                },
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "failures": [
+                        {
+                          "reason": "HTTP message not readable",
+                          "code": "400.2"
+                        },
+                        {
+                          "reason": "Constraint violation: Invalid/Missing input parameter: <parameter>",
+                          "code": "400.1"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden ",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_403"
+                },
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "reason": "Forbidden",
+                      "code": "403.2"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "examples": {
+                  "Actual_Response": {
+                    "value": {
+                      "code": "404",
+                      "reason": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            },
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorResponse_422"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error Response",
+            "headers": {
+              "correlationId": {
+                "$ref": "#/components/headers/correlationId"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "correlationId": {
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/correlationId"
+        }
+      }
+    },
+    "parameters": {
+      "correlationId": {
+        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
+        "in": "header",
+        "name": "correlationId",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/correlationId"
+        }
+      },
+      "govUkOriginatorId": {
+        "description": "Identity of the Originating System that made the API call.",
+        "in": "header",
+        "name": "gov-uk-originator-id",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/govUkOriginatorId"
+        }
+      },
+      "govUkOrganisationId": {
+        "description": "A unique organisation ID for the user.",
+        "in": "header",
+        "name": "gov-uk-organisation-id",
+        "schema": {
+          "$ref": "#/components/schemas/govUkOrganisationId"
+        }
+      },
+      "govUkUserId": {
+        "description": "A unique user ID for the user.",
+        "in": "header",
+        "name": "gov-uk-user-id",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/govUkUserId"
+        }
+      },
+      "govUkUserName": {
+        "description": "A unique username for the user.",
+        "in": "header",
+        "name": "gov-uk-user-name",
+        "schema": {
+          "$ref": "#/components/schemas/govUkUserName"
+        }
+      },
+      "govUkJobRole": {
+        "description": "A unique job role for the user.",
+        "in": "header",
+        "name": "gov-uk-job-role",
+        "schema": {
+          "$ref": "#/components/schemas/govUkJobRole"
+        }
+      },
+      "Identifier": {
+        "name": "identifier",
+        "in": "path",
+        "required": true,
+        "description": "The identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO).",
+        "schema": {
+          "$ref": "#/components/schemas/identifier"
+        }
+      },
+      "AssociatedCalculationSequenceNumber": {
+        "description": "Unique sequence number representing the position in the associated calculation history (i.e. row) of the associated calculation details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.",
+        "in": "query",
+        "name": "seqNo",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/associatedCalculationSequenceNumber"
+        }
+      },
+      "BenefitType": {
+        "description": "Denotes the area responsible for the electronic enabling of the pensions processing.",
+        "in": "query",
+        "name": "type",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/benefitType"
+        }
+      },
+      "PensionProcessingArea": {
+        "description": "Denotes the area responsible for the electronic enabling of the pensions processing.",
+        "in": "query",
+        "name": "pensionProcessingArea",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/pensionProcessingArea"
+        }
+      }
+    },
+    "schemas": {
+      "EnumBenType": {
+        "enum": [
+          "ALL",
+          "AUTOPIE / AUTOJSP",
+          "BEREAVED NSP",
+          "BEREAVEMENT BENEFIT",
+          "CAA/US",
+          "CARER'S ALLOWANCE",
+          "CATEGORY B",
+          "CLAIMS PAPER",
+          "DEPENDANT'S WAR PENSION",
+          "EMPLOYMENT AND SUPPORT",
+          "EQUIVALENT PENSION BENEFIT",
+          "GBU",
+          "GUARDIAN'S ALLOWANCE",
+          "HOUSING BENEFIT",
+          "INCAPACITY BENEFIT",
+          "INDUSTRIAL DEATH BENEFIT",
+          "JOB RELEASE ALLOWANCE",
+          "JOB SEEKER'S ALLOWANCE",
+          "LTB",
+          "MATERNITY ALLOWANCE",
+          "NOT KNOWN",
+          "PENSION SHARING ON DIVORCE",
+          "PRE-2001 WIDOWER",
+          "RETIREMENT PENSION",
+          "RPFA",
+          "SICKNESS BENEFIT/IVB",
+          "STB (NOT UB/JSA)",
+          "UNEMPLOYMENT BENEFIT",
+          "WIDOWS BENEFIT"
+        ],
+        "type": "string"
+      },
+      "EnumCalcsrce": {
+        "enum": [
+          "AP COMPONENT SUSPECT (APRIL - MAY CALC)",
+          "AWARD RECONCILED",
+          "AWARD RECONCILIATION - REVISED UPWARDS",
+          "INTERIM WB CALCULATION",
+          "IVB UPRATING",
+          "NOT KNOWN",
+          "RECONCILIATION FAILED - AWARD REVISED DOWNWARDS",
+          "REQUESTED BENEFIT CALCULATION",
+          "RP CALCULATION - CLAIMANT REACHED DPA",
+          "RP CALCULATION - CLAIMANT REACHED MPA",
+          "RP/WB/BB CALCULATION - FEDBACK DETAILS RECEIVED",
+          "SCHEME RECONCILIATION SERVICE ACCOUNT",
+          "SRB ISSUED - CHANGE TO FLAT RATE RECORD (<1948)",
+          "SRB ISSUED - CHANGE TO GRB RECORD",
+          "SRB ISSUED - CONTRIBUTION/CREDIT CHANGE IN FRY TAX YEAR",
+          "SRB ISSUED - CONTRIBUTION/CREDIT CHANGE IN PRE-FRY TAX YEAR",
+          "SRB ISSUED - DATE OF BIRTH CHANGE (WIDOW)",
+          "SRB ISSUED - HRP INVOLVEMENT",
+          "SRB ISSUED - PERSONAL DETAILS CHANGE (ACCOUNT HOLDER)",
+          "SRB ISSUED - RETROSPECTIVE PP OPTION RECEIVED",
+          "SRB ISSUED - S2P ENTITLEMENT CHANGE",
+          "SRB ISSUED - SSP RECEIVED",
+          "SRB ISSUED - SUBSTITUTION/INHERITANCE DETAILS REVISED",
+          "SRB ISSUED - TERMINATION DEBIT RECEIVED"
+        ],
+        "type": "string"
+      },
+      "EnumCalsttp": {
+        "enum": [
+          "DEFINITIVE",
+          "DELETED",
+          "FINAL",
+          "INITIAL",
+          "NOT APPLICABLE"
+        ],
+        "type": "string"
+      },
+      "EnumEeppflg": {
+        "enum": [
+          "Job Centre+ Electronic Enabled Pension Processing",
+          "Standard Electronic Enabled Pension Processing"
+        ],
+        "type": "string"
+      },
+      "EnumOffidtp": {
+        "enum": [
+          "(NONE)",
+          "DE",
+          "DSS",
+          "Inland Revenue",
+          "NOT APPLICABLE",
+          "NOT KNOWN"
+        ],
+        "type": "string"
+      },
+      "EnumPayday": {
+        "enum": [
+          "FRIDAY",
+          "MONDAY",
+          "NULL",
+          "THURSDAY",
+          "TUESDAY",
+          "WEDNESDAY"
+        ],
+        "type": "string"
+      },
+      "correlationId": {
+        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
+        "example": "e470d658-99f7-4292-a4a1-ed12c72f1337",
+        "format": "uuid",
+        "type": "string"
+      },
+      "govUkOriginatorId": {
+        "description": "Identity of the Originating System that made the API call",
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 40
+      },
+      "govUkOrganisationId": {
+        "description": "A unique organisation ID for the user.",
+        "type": "string",
+        "example": "Department",
+        "minLength": 4,
+        "maxLength": 40
+      },
+      "govUkUserId": {
+        "description": "A unique user ID for the user.",
+        "minLength": 7,
+        "maxLength": 7,
+        "type": "string"
+      },
+      "govUkUserName": {
+        "description": "A unique username for the user.",
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 20,
+        "example": "Worker"
+      },
+      "govUkJobRole": {
+        "description": "A unique job role for the user.",
+        "type": "string",
+        "minLength": 4,
+        "example": "Social"
+      },
+      "identifier": {
+        "description": "The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.",
+        "type": "string",
+        "pattern": "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$",
+        "example": "AA000001A"
+      },
+      "associatedCalculationSequenceNumber": {
+        "description": "Unique sequence number representing the position in the associated calculation history (i.e. row) of the associated calculation details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.",
+        "example": 86,
+        "maximum": 126,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "benefitType": {
+        "$ref": "#/components/schemas/EnumBenType",
+        "description": "Denotes the type of benefit that is being claimed by the individual."
+      },
+      "pensionProcessingArea": {
+        "$ref": "#/components/schemas/EnumEeppflg",
+        "description": "Denotes the area responsible for the electronic enabling of the pensions processing."
+      },
+      "errorResponse_400": {
+        "description": "Array of Error Response Failure Object in Error Response.",
+        "title": "Error Response",
+        "properties": {
+          "failures": {
+            "items": {
+              "$ref": "#/components/schemas/errorResourceObj_400"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "errorResourceObj_400": {
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "maxLength": 128
+          },
+          "code": {
+            "description": "The error code representing the error that has occurred. Valid values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'\n400.2 - HTTP message not readable;",
+            "type": "string",
+            "enum": [
+              "400.1",
+              "400.2"
+            ]
+          }
+        }
+      },
+      "errorResponse_403": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/errorResourceObj_403_Forbidden"
+          },
+          {
+            "$ref": "#/components/schemas/errorResourceObj_403_UserNotAuthorised"
+          }
+        ],
+        "description": "Error Response Payload for this API",
+        "title": "Forbidden Error Response"
+      },
+      "errorResourceObj_403_Forbidden": {
+        "title": "403_Forbidden",
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "enum": [
+              "Forbidden"
+            ]
+          },
+          "code": {
+            "description": "The error code representing the Forbidden Error.",
+            "type": "string",
+            "enum": [
+              "403.2"
+            ]
+          }
+        }
+      },
+      "errorResourceObj_403_UserNotAuthorised": {
+        "title": "403_UserNotAuthorised",
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "enum": [
+              "User Not Authorised"
+            ]
+          },
+          "code": {
+            "description": "User Not Authorised.",
+            "type": "string",
+            "enum": [
+              "403.1"
+            ]
+          }
+        }
+      },
+      "errorResponse_422": {
+        "description": "Error Response Payload for this API",
+        "title": "Error Response",
+        "type": "object",
+        "properties": {
+          "failures": {
+            "$ref": "#/components/schemas/errorResponseFailure_422"
+          }
+        }
+      },
+      "errorResponseFailure_422": {
+        "description": "Array of Error Response Failure Object in Error Response.",
+        "title": "Failure Object in Error Response",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/errorResourceObj_422"
+        }
+      },
+      "errorResourceObj_422": {
+        "type": "object",
+        "required": [
+          "code",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "description": "Displays the reason of the failure.",
+            "type": "string",
+            "maxLength": 128
+          },
+          "code": {
+            "minLength": 1,
+            "description": "The error code representing the error that has occurred.",
+            "type": "string",
+            "maxLength": 10
+          }
+        }
+      },
+      "BenefitCalculationDetail": {
+        "description": "Contains benefit calculation details for an individual.",
+        "required": [
+          "nationalInsuranceNumber",
+          "benefitType",
+          "associatedCalculationSequenceNumber"
+        ],
+        "properties": {
+          "nationalInsuranceNumber": {
+            "description": "National Insurance Number - unique for an individual - note not all individuals qualify to be issued with one.",
+            "example": "AA123456",
+            "maxLength": 8,
+            "minLength": 8,
+            "pattern": "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$",
+            "type": "string"
+          },
+          "benefitType": {
+            "$ref": "#/components/schemas/EnumBenType",
+            "description": "Denotes the type of benefit that is being claimed by the individual."
+          },
+          "associatedCalculationSequenceNumber": {
+            "description": "Unique sequence number representing the position in the associated calculation history (i.e. row) of the associated calculation details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.",
+            "example": 86,
+            "maximum": 126,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "calculationStatus": {
+            "$ref": "#/components/schemas/EnumCalsttp",
+            "description": "Denotes the status or type of calculation performed."
+          },
+          "substitutionMethod1": {
+            "description": "Denotes the first substitution method applicable for the Long Term Benefit (LTB) calculation.",
+            "example": 235,
+            "maximum": 254,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "substitutionMethod2": {
+            "description": "Denotes the second substitution method applicable for the Long Term Benefit (LTB) calculation.",
+            "example": 235,
+            "maximum": 254,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "calculationDate": {
+            "description": "The date on which the benefit calculation was performed as part of the benefit calculation details.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "guaranteedMinimumPensionContractedOutDeductionsPre1988": {
+            "description": "Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) pre 1988",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "guaranteedMinimumPensionContractedOutDeductionsPost1988": {
+            "description": "Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) post 1988",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "contractedOutDeductionsPre1988": {
+            "description": "Denotes the value of the Contracted-Out Deductions (COD) pre 1988",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "contractedOutDeductionsPost1988": {
+            "description": "Denotes the value of the Contracted-Out Deductions (COD) post 1988",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalPensionPercentage": {
+            "description": "Denotes the additional pension percentage. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "basicPensionPercentage": {
+            "description": "Denotes the percentage of a basic pension that the individual is currently eligible for.",
+            "example": 86,
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "survivorsBenefitAgeRelatedPensionPercentage": {
+            "description": "Denotes the age related pension percentage for a widow/widower or surviving civil partner. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "additionalAgeRelatedPensionPercentage": {
+            "description": "Denotes the age related additional pension percentage. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedBasicPensionPercentage": {
+            "description": "Denotes the basic pension percentage that a widow/widower or surviving civil partner may inherit from their partner's additional state pension. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedAdditionalPensionPercentage": {
+            "description": "Denotes the additional pension percentage that a widow/widower or surviving civil partner may inherit from their partner's additional state pension. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedGraduatedPensionPercentage": {
+            "description": "Denotes the graduated pension percentage that a widow/widower or surviving civil partner may inherit from their partner's additional state pension. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedGraduatedBenefit": {
+            "description": "The value of the inherited graduated benefit by a surviving spouse or civil partner of a person with entitlement to that benefit.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "calculationSource": {
+            "$ref": "#/components/schemas/EnumCalcsrce",
+            "description": "Denotes the source that triggered the calculation."
+          },
+          "payday": {
+            "$ref": "#/components/schemas/EnumPayday",
+            "description": "Denotes the day of the week that the benefit is paid to the customer."
+          },
+          "dateOfBirth": {
+            "description": "The date of birth of the individual.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "husbandDateOfDeath": {
+            "description": "The date on which the individual's husband deceased.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "additionalPost1997PensionPercentage": {
+            "description": "Denotes the additional pension percentage from 1997. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "additionalPost1997AgeRelatedPensionPercentage": {
+            "description": "Denotes the age related additional pension percentage from 1997. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "additionalPensionNotionalPercentage": {
+            "description": "Denotes the notional additional pension percentage. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "additionalPost1997PensionNotionalPercentage": {
+            "description": "Denotes the notional additional pension percentage from 1997. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedAdditionalPensionNotionalPercentage": {
+            "description": "Denotes the notional additional pension percentage that a widow/widower or surviving civil partner may inherit from their partner's additional state pension. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritableAdditionalPensionPercentage": {
+            "description": "Denotes the percentage of an additional pension that can be inherited.",
+            "example": 90,
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "additionalPost2002PensionNotionalPercentage": {
+            "description": "Denotes the notional additional pension percentage from 2002. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "additionalPost2002PensionPercentage": {
+            "description": "Denotes the additional pension percentage from 2002. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedAdditionalPost2002PensionNotionalPercentage": {
+            "description": "Denotes the post-2002 notional additional pension percentage that a widow/widower or surviving civil partner may inherit from their partner's additional state pension. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "inheritedAdditionalPost2002PensionPercentage": {
+            "description": "Denotes the post-2002 additional pension percentage that a widow/widower or surviving civil partner may inherit from their partner's additional state pension. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "additionalPost2002AgeRelatedPensionPercentage": {
+            "description": "Denotes the age related additional pension percentage from 2002. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
+            "example": 10.56,
+            "maximum": 100,
+            "minimum": 0,
+            "format": "float",
+            "type": "number"
+          },
+          "singleContributionConditionRulesApply": {
+            "description": "Denotes whether or not single contribution condition rules apply.",
+            "example": true,
+            "type": "boolean"
+          },
+          "officeDetails": {
+            "$ref": "#/components/schemas/DecodedOfficeDetailsResponse"
+          },
+          "newStatePensionCalculationDetails": {
+            "$ref": "#/components/schemas/NewStatePensionCalculationDetails"
+          }
+        },
+        "type": "object"
+      },
+      "BenefitCalculationDetails": {
+        "description": "Contains benefit calculation details for an individual.",
+        "properties": {
+          "additionalPensionAmountPre1997": {
+            "description": "Denotes the cash value of the individual's additional pension from tax years prior to 1997.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalPensionAmountPost1997": {
+            "description": "Denotes the cash value of the individual's additional pension from tax years after 1997.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "pre97AgeRelatedAdditionalPension": {
+            "description": "Denotes the Widow(er)'s Benefit Pre-Year 1997 Age Related Additional Pension Amount.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "post97AgeRelatedAdditionalPension": {
+            "description": "Denotes the Widow(er)'s Benefit Post Year 1997 Age Related Additional Pension Amount.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "basicPensionIncrementsCashValue": {
+            "description": "Denotes the incremental basic pension cash value amount inherited from a former spouse.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalPensionIncrementsCashValue": {
+            "description": "Denotes the incremental additional pension cash value amount inherited from a former spouse.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "graduatedRetirementBenefitCashValue": {
+            "description": "Denotes the entitlement amount for a national state pension when payments from earnings related pensions are added on top as part of the Graduated Retirement Benefit Scheme.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "totalGuaranteedMinimumPension": {
+            "description": "Denotes the total Guaranteed Minimum Pension (GMP) amount that an individual can receive.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "totalNonGuaranteedMinimumPension": {
+            "description": "Denotes the total Non-Guaranteed Minimum Pension (GMP) amount that an individual can receive.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "longTermBenefitsIncrementalCashValue": {
+            "description": "Denotes the incremental cash value amount for Graduated Retirement Benefits.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "greatBritainPaymentAmount": {
+            "description": "Denotes the Widow(er)'s Benefit Great Britain Payment Amount.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "dateOfBirth": {
+            "description": "The date of birth of the individual.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "notionalPost1997AdditionalPension": {
+            "description": "Denotes the cash value of the notional post 1997 additional pension.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "notionalPre1997AdditionalPension": {
+            "description": "Denotes the cash value of the notional pre 1997 additional pension.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "inheritableNotionalAdditionalPensionIncrements": {
+            "description": "Denotes the cash value of the notional additional pension increments inherited from a former spouse.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "conditionOneSatisfied": {
+            "description": "Denotes the status around whether or not condition one for Basic Pensions has been satisfied.",
+            "example": "H",
+            "maxLength": 10,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9\\/ -]+$",
+            "type": "string"
+          },
+          "reasonForFormIssue": {
+            "description": "Denotes the reason that the form was issued.",
+            "example": "REQUESTED BENEFIT CALCULATION",
+            "maxLength": 30,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9 -]+$",
+            "type": "string"
+          },
+          "longTermBenefitsCategoryACashValue": {
+            "description": "Denotes the total cash value for Category A Long Term Benefits.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "longTermBenefitsCategoryBLCashValue": {
+            "description": "Denotes the total cash value for Category BL Long Term Benefits.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "longTermBenefitsUnitValue": {
+            "description": "Denotes the unit value amount for Graduated Retirement Benefits.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalNotionalPensionAmountPost2002": {
+            "description": "Denotes the notional cash value of the individual's additional pension from tax years after 2002.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalPensionAmountPost2002": {
+            "description": "Denotes the cash value of the individual's additional pension from tax years after 2002.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalNotionalPensionIncrementsInheritedPost2002": {
+            "description": "Denotes the notional cash value of additional pension increments inherited from a former spouse after April 2002 under the State Second Pension.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "additionalPensionIncrementsInheritedPost2002": {
+            "description": "Denotes the cash value of additional pension increments inherited from a former spouse after April 2002 under the State Second Pension.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "post02AgeRelatedAdditionalPension": {
+            "description": "Denotes the Widow(er)'s Benefit Post Year 2002 Age Related Additional Pension Amount.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "pre1975ShortTermBenefits": {
+            "description": "Denotes the number of pre-1975 short term benefits held.",
+            "example": 2,
+            "maximum": 26,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "survivingSpouseAge": {
+            "description": "Denotes the Surviving Spouse's Age.",
+            "example": 45,
+            "maximum": 125,
+            "minimum": 18,
+            "type": "integer"
+          },
+          "operativeBenefitStartDate": {
+            "description": "Denotes the start date reported for the operative benefit.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          },
+          "sicknessBenefitStatusForReports": {
+            "description": "Denotes the sickness benefit status for reporting.",
+            "example": "Y",
+            "maxLength": 1,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9]$",
+            "type": "string"
+          },
+          "benefitCalculationDetail": {
+            "$ref": "#/components/schemas/BenefitCalculationDetail"
+          }
+        },
+        "type": "object"
+      },
+      "GetLongTermBenefitCalculationDetailsResponse": {
+        "description": "Success response payload for this API.",
+        "properties": {
+          "statePensionAgeBefore2010TaxYear": {
+            "description": "Denotes whether or not the State Pension Age (SPA) for the individual falls before the date 06/04/2010.",
+            "example": true,
+            "type": "boolean"
+          },
+          "statePensionAgeAfter2016TaxYear": {
+            "description": "Denotes whether or not the State Pension Age (SPA) for the individual falls after the date 05/04/2016.",
+            "example": true,
+            "type": "boolean"
+          },
+          "benefitCalculationDetailsList": {
+            "items": {
+              "$ref": "#/components/schemas/BenefitCalculationDetails"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NewStatePensionCalculationDetails": {
+        "description": "Contains details related to a new state pension calculation.",
+        "properties": {
+          "netAdditionalPensionPre1997": {
+            "description": "Denotes the net amount of additional pension after subtracting an individual's Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) for tax years post 1997.",
+            "example": 10.56,
+            "maximum": 1000,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "oldRulesStatePensionEntitlement": {
+            "description": "Denotes the State Pension entitlement accrued up to 2016 under the old rules.",
+            "example": 10.56,
+            "maximum": 1000,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "netRulesAmount": {
+            "description": "Denotes the net rules amount for New State Pension (NSP) calculations from 06/04/2016.",
+            "example": 10.56,
+            "maximum": 300,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "derivedRebateAmount": {
+            "description": "Denotes the derived rebate amount to use when adjusting the gross new rules amount to take account of the periods of contracting-out.",
+            "example": 10.56,
+            "maximum": 1000,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "initialStatePensionAmount": {
+            "description": "The initial value of the person's state pension.",
+            "example": 10.56,
+            "maximum": 99999999999999.98,
+            "minimum": -99999999999999.98,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "protectedPayment2016": {
+            "description": "Denotes the protected payment amount for the insured person at or before 2016.",
+            "example": 10.56,
+            "maximum": 1000,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "minimumQualifyingPeriodMet": {
+            "description": "Denotes whether or not the minimum qualifying period for a New State Pension has been met.",
+            "example": true,
+            "type": "boolean"
+          },
+          "qualifyingYearsAfter2016": {
+            "description": "Denotes the number of qualifying years from 2016/2017 onwards.",
+            "example": 3,
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "newStatePensionQualifyingYears": {
+            "description": "Denotes the number of qualifying years that the individual has towards their New State Pension (NSP).",
+            "example": 20,
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "newStatePensionRequisiteYears": {
+            "description": "Denotes the number of requisite years that the individual has towards their New State Pension (NSP).",
+            "example": 35,
+            "maximum": 35,
+            "minimum": 35,
+            "type": "integer"
+          },
+          "newStatePensionEntitlement": {
+            "description": "Denotes the New State Pension entitlement for an individual.",
+            "example": 10.56,
+            "maximum": 1000,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "protectedPayment": {
+            "description": "Denotes the protected payment amount for the insured person.",
+            "example": 10.56,
+            "maximum": 1000,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "pensionSharingOrderContractedOutEmploymentsGroup": {
+            "description": "Denotes whether or not a pension sharing order applies to a Contracted-Out Employments Group (COEG).",
+            "example": true,
+            "type": "boolean"
+          },
+          "pensionSharingOrderStateEarningsRelatedPensionScheme": {
+            "description": "Denotes whether or not a pension sharing order applies to a State Earnings Related Pension Scheme (SERPS).",
+            "example": true,
+            "type": "boolean"
+          },
+          "considerReducedRateElection": {
+            "description": "Denotes whether or not a reduced rate of election should be considered.",
+            "example": true,
+            "type": "boolean"
+          },
+          "weeklyBudgetingLoanAmount": {
+            "description": "Denotes the weekly budgeting loan amount for a given tax year, based on the number of qualifying years - weekly amounts come from Reference Data Classes CATBLRT1 for qualifying years 0-15 and CATBLRT2 for qualifying years 16+.",
+            "example": 10.56,
+            "maximum": 85,
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "calculationDate": {
+            "description": "The date on which the benefit calculation was performed as part of the benefit calculation details.",
+            "example": "2022-06-27",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DecodedOfficeDetailsResponse": {
+        "description": "Contains office related details.",
+        "properties": {
+          "officeLocationDecode": {
+            "description": "A unique identifier for an office location.",
+            "example": 1,
+            "maximum": 99999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "officeLocationValue": {
+            "description": "The description of the office location.",
+            "example": "HQ STATIONARY STORE",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "officeIdentifier": {
+            "$ref": "#/components/schemas/EnumOffidtp",
+            "description": "Denotes the type of office."
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "oAuth2": {
+        "type": "oauth2",
+        "description": "OAuth2 Client Credentials Flow",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "/tokenUrl/not-required",
+            "scopes": {
+              "read:ni-ltb-calculation": "Long Term Benefit Calculation"
+            }
+          }
+        }
+      }
+    }
+  }
+}
