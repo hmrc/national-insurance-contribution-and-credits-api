@@ -18,14 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 
 import cats.data.EitherT
 import play.api.http.Status.*
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
-  InternalServerError,
-  NotFound,
-  UnexpectedStatus
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsClient
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper.MarriageDetailsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.{
   MarriageDetailsErrorResponse400,
@@ -34,6 +30,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{MarriageDetailsResult, NpsClient}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptStrictParse
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
@@ -57,27 +54,30 @@ class MarriageDetailsConnector @Inject() (
         val marriageDetailsResult =
           response.status match {
             case OK =>
-              attemptStrictParse[MarriageDetailsSuccessResponse](response).map(marriageDetailsResponseMapper.toResult)
+              attemptStrictParse[MarriageDetailsSuccessResponse](response).map(
+                marriageDetailsResponseMapper.toApiResult
+              )
             case BAD_REQUEST =>
               attemptStrictParse[MarriageDetailsErrorResponse400](response).map { resp =>
                 logger.warn(s"MarriageDetails returned a 400: ${resp.failures.mkString(",")}")
-                marriageDetailsResponseMapper.toResult(resp)
+                marriageDetailsResponseMapper.toApiResult(resp)
               }
             case FORBIDDEN =>
               attemptStrictParse[MarriageDetailsErrorResponse403](response).map { resp =>
                 logger.warn(
                   s"MarriageDetails returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
                 )
-                marriageDetailsResponseMapper.toResult(resp)
+                marriageDetailsResponseMapper.toApiResult(resp)
               }
             case UNPROCESSABLE_ENTITY =>
               attemptStrictParse[MarriageDetailsErrorResponse422](response).map { resp =>
                 logger.warn(s"MarriageDetails returned a 422: ${resp.failures.mkString(",")}")
-                marriageDetailsResponseMapper.toResult(resp)
+                marriageDetailsResponseMapper.toApiResult(resp)
               }
-            case NOT_FOUND             => Right(marriageDetailsResponseMapper.toResult(NotFound))
-            case INTERNAL_SERVER_ERROR => Right(marriageDetailsResponseMapper.toResult(InternalServerError))
-            case code                  => Right(marriageDetailsResponseMapper.toResult(UnexpectedStatus(code)))
+            case NOT_FOUND => Right(DownstreamErrorReport(MarriageDetails, NotFound))
+            case INTERNAL_SERVER_ERROR =>
+              Right(DownstreamErrorReport(MarriageDetails, InternalServerError))
+            case code => Right(DownstreamErrorReport(MarriageDetails, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](marriageDetailsResult).leftMap { error =>

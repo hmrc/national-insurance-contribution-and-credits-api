@@ -19,16 +19,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common.NormalizedErrorStatusCode.{
-  AccessForbidden,
-  BadRequest,
-  InternalServerError,
-  NotFound,
-  UnprocessableEntity
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
+  DownstreamErrorReport,
+  DownstreamSuccessResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.MarriageDetailsResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.{
   MarriageDetailsErrorResponse400,
@@ -36,13 +32,24 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
   MarriageDetailsErrorResponse422
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.enums.{
+  ErrorCode403,
+  ErrorReason403
+}
 
 class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
 
-  val mockMarriageDetailsSuccessResponse: MarriageDetailsSuccessResponse   = mock[MarriageDetailsSuccessResponse]
-  val mockMarriageDetailsErrorResponse400: MarriageDetailsErrorResponse400 = mock[MarriageDetailsErrorResponse400]
-  val mockMarriageDetailsErrorResponse403: MarriageDetailsErrorResponse403 = mock[MarriageDetailsErrorResponse403]
-  val mockMarriageDetailsErrorResponse422: MarriageDetailsErrorResponse422 = mock[MarriageDetailsErrorResponse422]
+  MarriageDetailsSuccessResponse(None, None, None)
+
+  val mockMarriageDetailsSuccessResponse: MarriageDetailsSuccessResponse =
+    MarriageDetailsSuccessResponse(None, None, None)
+
+  val mockMarriageDetailsErrorResponse400: MarriageDetailsErrorResponse400 = MarriageDetailsErrorResponse400(List())
+
+  val mockMarriageDetailsErrorResponse403: MarriageDetailsErrorResponse403 =
+    MarriageDetailsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_2)
+
+  val mockMarriageDetailsErrorResponse422: MarriageDetailsErrorResponse422 = MarriageDetailsErrorResponse422(List())
 
   val underTest = new MarriageDetailsResponseMapper
 
@@ -50,137 +57,27 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
     ".toResult" - {
       "should successfully return a Success result when given a SuccessResponse" in {
 
-        underTest.toResult(mockMarriageDetailsSuccessResponse) shouldBe
-          MarriageDetailsResult(Success, Some(mockMarriageDetailsSuccessResponse), None)
+        underTest.toApiResult(mockMarriageDetailsSuccessResponse) shouldBe
+          DownstreamSuccessResponse(ApiName.MarriageDetails, mockMarriageDetailsSuccessResponse)
       }
 
       "should successfully return a Failure result when given an ErrorResponse400" in {
 
-        underTest.toResult(mockMarriageDetailsErrorResponse400) shouldBe
-          MarriageDetailsResult(
-            Failure,
-            None,
-            Some(
-              NpsNormalizedError(
-                code = BadRequest,
-                message = "downstream received a malformed request",
-                downstreamStatus = 400
-              )
-            )
-          )
+        underTest.toApiResult(mockMarriageDetailsErrorResponse400) shouldBe
+          DownstreamErrorReport(MarriageDetails, NpsNormalizedError.BadRequest)
       }
 
       "should successfully return a Failure result when given a ErrorResponse403" in {
 
-        underTest.toResult(mockMarriageDetailsErrorResponse403) shouldBe
-          MarriageDetailsResult(
-            Failure,
-            None,
-            Some(
-              NpsNormalizedError(
-                code = AccessForbidden,
-                message = "downstream resource cannot be accessed by the calling client",
-                downstreamStatus = 403
-              )
-            )
-          )
+        underTest.toApiResult(mockMarriageDetailsErrorResponse403) shouldBe
+          DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
       }
 
       "should successfully return a Failure result when given a ErrorResponse422" in {
 
-        underTest.toResult(mockMarriageDetailsErrorResponse422) shouldBe
-          MarriageDetailsResult(
-            Failure,
-            None,
-            Some(
-              NpsNormalizedError(
-                code = UnprocessableEntity,
-                message = "downstream could not process data in request",
-                downstreamStatus = 422
-              )
-            )
-          )
+        underTest.toApiResult(mockMarriageDetailsErrorResponse422) shouldBe
+          DownstreamErrorReport(MarriageDetails, NpsNormalizedError.UnprocessableEntity)
       }
-    }
-
-    "should successfully return a Failure result when given an UnprocessableEntity TextualErrorStatusCode" in {
-
-      underTest.toResult(UnprocessableEntity) shouldBe
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              UnprocessableEntity,
-              UnprocessableEntity.message,
-              UnprocessableEntity.code
-            )
-          )
-        )
-    }
-
-    "should successfully return a Failure result when given a BadRequest TextualErrorStatusCode" in {
-
-      underTest.toResult(BadRequest) shouldBe
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              BadRequest,
-              BadRequest.message,
-              BadRequest.code
-            )
-          )
-        )
-    }
-
-    "should successfully return a Failure result when given an AccessForbidden TextualErrorStatusCode" in {
-
-      underTest.toResult(AccessForbidden) shouldBe
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              AccessForbidden,
-              AccessForbidden.message,
-              AccessForbidden.code
-            )
-          )
-        )
-    }
-
-    "should successfully return a Failure result when given a NotFound TextualErrorStatusCode" in {
-
-      underTest.toResult(NotFound) shouldBe
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              NotFound,
-              NotFound.message,
-              NotFound.code
-            )
-          )
-        )
-    }
-
-    "should successfully return a Failure result when given an InternalServerError TextualErrorStatusCode" in {
-
-      underTest.toResult(InternalServerError) shouldBe
-        MarriageDetailsResult(
-          Failure,
-          None,
-          Some(
-            NpsNormalizedError(
-              InternalServerError,
-              InternalServerError.message,
-              InternalServerError.code
-            )
-          )
-        )
     }
   }
 

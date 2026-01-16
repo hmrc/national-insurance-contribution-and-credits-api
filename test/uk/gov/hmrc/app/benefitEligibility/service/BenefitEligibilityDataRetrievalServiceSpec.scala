@@ -32,15 +32,16 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckD
   EligibilityCheckDataResultMA
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  Class2MaReceiptsResult,
-  ContributionCreditResult,
-  LiabilityResult,
-  MarriageDetailsResult
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.reqeust.MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsNormalizedError}
+import MaternityAllowanceSortType.NinoDescending
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
+  Class2MAReceipts,
+  Liabilities,
+  MarriageDetails,
+  NiContributionAndCredits
+}
 
 import java.time.LocalDate
 import java.util.concurrent.Executors
@@ -76,28 +77,23 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   private val marriageDetailsResult =
-    MarriageDetailsResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
+    DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
 
   private val class2MaReceiptsResult =
-    Class2MaReceiptsResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
+    DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
 
   private val liabilityResult =
-    LiabilityResult(Failure, None, Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403)))
+    DownstreamErrorReport(Liabilities, NpsNormalizedError.AccessForbidden)
 
-  private val contributionCreditResult =
-    List(
-      ContributionCreditResult(
-        Failure,
-        None,
-        Some(NpsNormalizedError(NormalizedErrorStatusCode.AccessForbidden, "", 403))
-      )
-    )
+  private val contributionCreditResult = List(
+    DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
+  )
 
   private val eligibilityCheckDataRequestMA = MAEligibilityCheckDataRequest(
     nationalInsuranceNumber = "GD379251T",
-    dateOfBirth = LocalDate.parse("1992-08-23"),
-    startTaxYear = 2025,
-    endTaxYear = 2025,
+    dateOfBirth = DateOfBirth(LocalDate.parse("1992-08-23")),
+    startTaxYear = StartTaxYear(2025),
+    endTaxYear = EndTaxYear(2025),
     identifier = Identifier("GD379251T"),
     liabilitySearchCategoryHyphenated = true,
     liabilityOccurrenceNumber = Some(233232323),

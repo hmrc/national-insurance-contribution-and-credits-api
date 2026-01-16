@@ -43,8 +43,8 @@ object Class2MAReceiptsResponseValidation {
           el.surname.map(s => StringLengthValidation.validate(s, 2, 99)),
           el.initials.map(i => StringPatternValidation.validate(i, "^([A-Za-z '-])+$".r)),
           el.initials.map(i => StringLengthValidation.validate(i, 1, 2)),
-          el.billAmount.map(MoneyValidation.validate),
-          el.receivablePayment.map(MoneyValidation.validate)
+          el.billAmount.map(MoneyValidation.validateSigned),
+          el.receivablePayment.map(MoneyValidation.validateSigned)
         ).flatten
       } ++
         List(

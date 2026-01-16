@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.common
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-
 import scala.collection.immutable
 
-sealed abstract class ApiName(override val entryName: String) extends EnumEntry
+sealed abstract class LatePaymentPeriod(override val entryName: String) extends EnumEntry
 
-object ApiName extends Enum[ApiName] with PlayJsonEnum[ApiName] {
-  val values: immutable.IndexedSeq[ApiName] = findValues
+object LatePaymentPeriod extends Enum[LatePaymentPeriod] with PlayJsonEnum[LatePaymentPeriod] {
+  val values: immutable.IndexedSeq[LatePaymentPeriod] = findValues
 
-  case object Class2MAReceipts         extends ApiName("Class2 MA Receipts")
-  case object Liabilities              extends ApiName("Liabilities")
-  case object NiContributionAndCredits extends ApiName("NI Contributions and credits")
-  case object MarriageDetails          extends ApiName("Marriage Details")
+  case object L extends LatePaymentPeriod("L")
+
+  case object Lx extends LatePaymentPeriod("LX")
+
+  case object Zy extends LatePaymentPeriod("ZY")
+
+  case object Zz extends LatePaymentPeriod("ZZ")
+
 }

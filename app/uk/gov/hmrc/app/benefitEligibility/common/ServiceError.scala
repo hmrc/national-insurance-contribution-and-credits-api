@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.app.benefitEligibility.common
 
-import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.{Failure, Success}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, EligibilityCheckDataResult}
 import io.scalaland.chimney.dsl.into
+import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, EligibilityCheckDataResult}
+
+import scala.collection.immutable
 
 trait WithLoggableDebugString {
   def toStringSafeToLogInProd: String
@@ -68,15 +69,15 @@ object BenefitEligibilityDataFetchError {
         overallResultStatus = OverallResultStatus.Failure,
         benefitType = eligibilityCheckDataResult.benefitType,
         overallResultSummary = eligibilityCheckDataResult.resultSummary,
-        downStreams = eligibilityCheckDataResult.allResults.filter(_.status == Failure)
+        downStreams = eligibilityCheckDataResult.allResults.filter(_.isFailure)
       )
     } else {
       BenefitEligibilityDataFetchError(
         overallResultStatus = OverallResultStatus.Partial,
         benefitType = eligibilityCheckDataResult.benefitType,
         overallResultSummary = eligibilityCheckDataResult.resultSummary,
-        downStreams = eligibilityCheckDataResult.allResults.filter(_.status == Success) ++
-          eligibilityCheckDataResult.allResults.filter(_.status == Failure)
+        downStreams = eligibilityCheckDataResult.allResults.filter(_.isSuccess) ++
+          eligibilityCheckDataResult.allResults.filter(_.isFailure)
       )
     }
 
