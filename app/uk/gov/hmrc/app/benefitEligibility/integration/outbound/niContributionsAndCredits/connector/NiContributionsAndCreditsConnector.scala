@@ -20,12 +20,10 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
-import play.api.libs.json.Json
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{MarriageDetails, NiContributionAndCredits}
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.mapper.NiContributionsAndCreditsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
@@ -37,7 +35,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptStrictParse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
@@ -55,6 +54,7 @@ class NiContributionsAndCreditsConnector @Inject() (
   def path = s"${appConfig.hipBaseUrl}/national-insurance/contributions-and-credits"
 
   def fetchContributionsAndCredits(
+      benefitType: BenefitType,
       request: NiContributionsAndCreditsRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, ContributionCreditResult] =
     npsClient
@@ -63,24 +63,23 @@ class NiContributionsAndCreditsConnector @Inject() (
         val contributionsAndCreditsResult =
           response.status match {
             case OK =>
-              attemptStrictParse[NiContributionsAndCreditsSuccessResponse](response).map(
+              attemptStrictParse[NiContributionsAndCreditsSuccessResponse](benefitType, response).map(
                 niContributionsAndCreditsResponseMapper.toApiResult
               )
             case BAD_REQUEST =>
-              attemptStrictParse[NiContributionsAndCreditsResponse400](response).map { resp =>
+              attemptParse[NiContributionsAndCreditsResponse400](response).map { resp =>
                 logger.warn(s"ContributionsAndCredits returned a 400: ${resp.failures.mkString(",")}")
                 niContributionsAndCreditsResponseMapper.toApiResult(resp)
               }
             case FORBIDDEN =>
-              attemptStrictParse[NiContributionsAndCreditsResponse403](response).map { resp =>
+              attemptParse[NiContributionsAndCreditsResponse403](response).map { resp =>
                 logger.warn(
                   s"ContributionsAndCredits returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
                 )
                 niContributionsAndCreditsResponseMapper.toApiResult(resp)
               }
             case UNPROCESSABLE_ENTITY =>
-
-              attemptStrictParse[NiContributionsAndCreditsResponse422](response).map { resp =>
+              attemptParse[NiContributionsAndCreditsResponse422](response).map { resp =>
                 logger.warn(s"ContributionsAndCredits returned a 422: ${resp.failures.mkString(",")}")
                 niContributionsAndCreditsResponseMapper.toApiResult(resp)
               }

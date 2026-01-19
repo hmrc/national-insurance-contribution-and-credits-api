@@ -18,59 +18,34 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsA
 
 import cats.data.Validated
 import cats.implicits.{catsSyntaxNestedFoldable, toFunctorOps}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.{
-  NiContributionsAndCreditsResponse400,
-  NiContributionsAndCreditsResponse403,
-  NiContributionsAndCreditsResponse422
-}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.util.validation.{
-  MoneyValidation,
-  NumberValidation,
-  StringLengthValidation,
-  StringPatternValidation
-}
+import uk.gov.hmrc.app.benefitEligibility.util.validation.{MoneyValidation, NumberValidation}
 import uk.gov.hmrc.app.benefitEligibility.util.{NpsResponseValidator, SuccessfulResult}
 
 object NiContributionsAndCreditsResponseValidation {
 
   implicit val niContributionsAndCreditsSuccessResponseValidator
       : NpsResponseValidator[NiContributionsAndCreditsSuccessResponse] =
-    (response: NiContributionsAndCreditsSuccessResponse) =>
-      (response.niClass1.flatMap { el =>
-        List(
-          el.taxYear.map(NumberValidation.validate(_, 1900, 2099)),
-          el.contributionCategoryLetter.map(StringLengthValidation.validate(_, 1, 1)),
-          el.contributionCategoryLetter.map(StringPatternValidation.validate(_, "^[A-Z]$".r)),
-          el.employerName.map(StringLengthValidation.validate(_, 1, 6)),
-          el.employerName.map(StringPatternValidation.validate(_, "^([A-Za-z ])+$".r)),
-          el.primaryContribution.map(MoneyValidation.validateUnsigned),
-          el.primaryPaidEarnings.map(MoneyValidation.validateUnsigned)
-        ).flatten
-      } ++
-        response.niClass2.flatMap { el =>
-          List(
-            el.taxYear.map(NumberValidation.validate(_, 1900, 2099)),
-            el.noOfCreditsAndConts.map(NumberValidation.validate(_, 0, 53)),
-            el.class2Or3EarningsFactor.map(MoneyValidation.validateUnsigned),
-            el.class2NIContributionAmount.map(MoneyValidation.validateUnsigned)
-          ).flatten
-        }).sequence_.as(SuccessfulResult)
-
-  implicit val niContributionsAndCreditsResponse400Validator
-      : NpsResponseValidator[NiContributionsAndCreditsResponse400] =
-    (t: NiContributionsAndCreditsResponse400) =>
-      t.failures.map(data => StringLengthValidation.validate(data.reason, 1, 120)).sequence_.as(SuccessfulResult)
-
-  implicit val niContributionsAndCreditsResponse403Validator
-      : NpsResponseValidator[NiContributionsAndCreditsResponse403] =
-    (t: NiContributionsAndCreditsResponse403) => Validated.validNel(SuccessfulResult)
-
-  implicit val niContributionsAndCreditsResponse422Validator
-      : NpsResponseValidator[NiContributionsAndCreditsResponse422] =
-    (t: NiContributionsAndCreditsResponse422) =>
-      (t.failures.map(data => StringLengthValidation.validate(data.reason, 1, 120)) ++ t.failures.map(data =>
-        StringLengthValidation.validate(data.code, 1, 10)
-      )).sequence_.as(SuccessfulResult)
+    (benefitType, response: NiContributionsAndCreditsSuccessResponse) =>
+      benefitType match {
+        case BenefitType.MA =>
+          (if (response.niClass1.isDefined) {
+             response.niClass1.get.flatMap { el =>
+               List(
+                 el.taxYear.map(NumberValidation.validate(_, 1900, 2099)),
+                 el.primaryPaidEarnings.map(MoneyValidation.validateUnsigned)
+               ).flatten
+             }
+           } else {
+             response.niClass2.get.flatMap { el =>
+               List(
+                 el.taxYear.map(NumberValidation.validate(_, 1900, 2099)),
+                 el.noOfCreditsAndConts.map(NumberValidation.validate(_, 0, 53))
+               ).flatten
+             }
+           }).sequence_.as(SuccessfulResult)
+        case _ => Validated.validNel(SuccessfulResult)
+      }
 
 }

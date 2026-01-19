@@ -32,31 +32,40 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 
 class NiContributionsAndCreditsResponseMapperSpec extends AnyFreeSpec with MockFactory {
 
-  val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-    List(
-      NicClass1(
-        taxYear = Some(TaxYear(2022)),
-        contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-        contributionCategory = Some(ContributionCategory.None),
-        contributionCreditType = Some(ContributionCreditType.C1),
-        primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-        class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-        primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-        creditSource = Some(CreditSource.NotKnown),
-        employerName = Some(EmployerName("ipOpMs")),
-        latePaymentPeriod = Some(LatePaymentPeriod.L)
+  val niContributionsAndCreditsSuccessResponse1 = NiContributionsAndCreditsSuccessResponse(
+    niClass1 = Some(
+      List(
+        NiClass1(
+          taxYear = Some(TaxYear(2022)),
+          contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+          contributionCategory = Some(ContributionCategory.None),
+          contributionCreditType = Some(ContributionCreditType.C1),
+          primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+          class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+          primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+          creditSource = Some(CreditSource.NotKnown),
+          employerName = Some(EmployerName("ipOpMs")),
+          latePaymentPeriod = Some(LatePaymentPeriod.L)
+        )
       )
     ),
-    List(
-      NicClass2(
-        taxYear = Some(TaxYear(2022)),
-        noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
-        contributionCreditType = Some(ContributionCreditType.C1),
-        class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-        class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-        class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-        creditSource = Some(CreditSource.NotKnown),
-        latePaymentPeriod = Some(LatePaymentPeriod.L)
+    niClass2 = None
+  )
+
+  val niContributionsAndCreditsSuccessResponse2 = NiContributionsAndCreditsSuccessResponse(
+    niClass1 = None,
+    niClass2 = Some(
+      List(
+        NiClass2(
+          taxYear = Some(TaxYear(2022)),
+          noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
+          contributionCreditType = Some(ContributionCreditType.C1),
+          class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+          class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+          class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+          creditSource = Some(CreditSource.NotKnown),
+          latePaymentPeriod = Some(LatePaymentPeriod.L)
+        )
       )
     )
   )
@@ -65,17 +74,17 @@ class NiContributionsAndCreditsResponseMapperSpec extends AnyFreeSpec with MockF
     List(
       NiContributionsAndCredits400(
         Reason("HTTP message not readable"),
-        ErrorCode400.ErrorCode400_2
+        NpsErrorCode400.NpsErrorCode400_2
       ),
       NiContributionsAndCredits400(
         Reason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-        ErrorCode400.ErrorCode400_1
+        NpsErrorCode400.NpsErrorCode400_1
       )
     )
   )
 
   val niContributionsAndCreditsResponse403 =
-    NiContributionsAndCreditsResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_2)
+    NiContributionsAndCreditsResponse403(NpsErrorReason403.Forbidden, NpsErrorCode403.NpsErrorCode403_2)
 
   val niContributionsAndCreditsResponse422 = NiContributionsAndCreditsResponse422(
     failures = List(
@@ -92,8 +101,8 @@ class NiContributionsAndCreditsResponseMapperSpec extends AnyFreeSpec with MockF
     ".toApiResult" - {
       "should successfully return a Success result when given a SuccessResponse" in {
 
-        underTest.toApiResult(niContributionsAndCreditsSuccessResponse) shouldBe
-          DownstreamSuccessResponse(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
+        underTest.toApiResult(niContributionsAndCreditsSuccessResponse1) shouldBe
+          DownstreamSuccessResponse(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse1)
       }
 
       "should successfully return a Failure result when given an ErrorResponse400" in {

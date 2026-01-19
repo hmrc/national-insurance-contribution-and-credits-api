@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedDataMa
+import uk.gov.hmrc.app.benefitEligibility.service.aggregation.{AggregatedDataMa, NiContributionDataMa}
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
 
 object AggregationServiceMa {
@@ -27,9 +27,22 @@ object AggregationServiceMa {
   val aggregator: ResultAggregator[EligibilityCheckDataResultMA, AggregatedDataMa] = {
     (eligibilityCheckDataSuccessResultMA: EligibilityCheckDataResultMA) =>
       if (eligibilityCheckDataSuccessResultMA.allResults.forall(_.isSuccess)) {
+        val isNiClass1 =
+          eligibilityCheckDataSuccessResultMA.contributionCreditResult.flatMap(_.getSuccess).nonEmpty
+        val niData: List[NiContributionDataMa] = if (isNiClass1) {
+          eligibilityCheckDataSuccessResultMA.contributionCreditResult
+            .flatMap(_.getSuccess)
+            .flatMap(_.niClass1.get)
+            .map(NiContributionDataMa(_))
+        } else {
+          eligibilityCheckDataSuccessResultMA.contributionCreditResult
+            .flatMap(_.getSuccess)
+            .flatMap(_.niClass2.get)
+            .map(NiContributionDataMa(_))
+        }
         Right(
           AggregatedDataMa(
-            List(),
+            niData,
             List(),
             List()
           )

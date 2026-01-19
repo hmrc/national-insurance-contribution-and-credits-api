@@ -28,13 +28,16 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MaternityAllowanceDataRetrievalService @Inject() (
-    class2MAReceiptsConnector: Class2MAReceiptsConnector
+    class2MAReceiptsConnector: Class2MAReceiptsConnector,
+    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector
 )(
     implicit ec: ExecutionContext
 ) {
@@ -50,13 +53,24 @@ class MaternityAllowanceDataRetrievalService @Inject() (
 
     for {
       class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
+        eligibilityCheckDataRequest.`type`,
         eligibilityCheckDataRequest.identifier,
         eligibilityCheckDataRequest.archived,
         eligibilityCheckDataRequest.receiptDate,
         eligibilityCheckDataRequest.sortBy
       )
 
-      contributionsAndCreditResult = List(DownstreamErrorReport(NiContributionAndCredits, UnexpectedStatus(207)))
+      contributionsAndCreditResult <- taxWindows.map { window =>
+        niContributionsAndCreditsConnector.fetchContributionsAndCredits(
+          eligibilityCheckDataRequest.`type`,
+          NiContributionsAndCreditsRequest(
+            eligibilityCheckDataRequest.identifier,
+            eligibilityCheckDataRequest.dateOfBirth,
+            window.startTaxYear,
+            window.endTaxYear
+          )
+        )
+      }.sequence
 
       liabilityResult = DownstreamErrorReport(Liabilities, UnexpectedStatus(207))
 

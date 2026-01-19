@@ -25,6 +25,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
 import uk.gov.hmrc.app.benefitEligibility.common.{
   BenefitEligibilityError,
+  BenefitType,
   Identifier,
   MaternityAllowanceSortType,
   ReceiptDate
@@ -38,14 +39,9 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
   Class2MAReceiptsErrorResponse422
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponseValidation.{
-  class2MAReceiptsError422ResponseValidator,
-  class2MAReceiptsErrorResponse400Validator,
-  class2MAReceiptsErrorResponse403Validator,
-  class2MAReceiptsSuccessResponseValidator
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptStrictParse
+import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
@@ -61,6 +57,7 @@ class Class2MAReceiptsConnector @Inject() (
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchClass2MAReceipts(
+      benefitType: BenefitType,
       identifier: Identifier,
       archived: Option[Boolean],
       receiptDate: Option[ReceiptDate],
@@ -83,23 +80,23 @@ class Class2MAReceiptsConnector @Inject() (
         val class2MAReceiptsResult =
           response.status match {
             case OK =>
-              attemptStrictParse[Class2MAReceiptsSuccessResponse](response).map(
+              attemptStrictParse[Class2MAReceiptsSuccessResponse](benefitType, response).map(
                 class2MAReceiptsResponseMapper.toApiResult
               )
             case BAD_REQUEST =>
-              attemptStrictParse[Class2MAReceiptsErrorResponse400](response).map { resp =>
+              attemptParse[Class2MAReceiptsErrorResponse400](response).map { resp =>
                 logger.warn(s"Class2MAReceipts returned a 400: ${resp.failures.mkString(",")}")
                 class2MAReceiptsResponseMapper.toApiResult(resp)
               }
             case FORBIDDEN =>
-              attemptStrictParse[Class2MAReceiptsErrorResponse403](response).map { resp =>
+              attemptParse[Class2MAReceiptsErrorResponse403](response).map { resp =>
                 logger.warn(
                   s"Class2MAReceipts returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
                 )
                 class2MAReceiptsResponseMapper.toApiResult(resp)
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptStrictParse[Class2MAReceiptsErrorResponse422](response).map { resp =>
+              attemptParse[Class2MAReceiptsErrorResponse422](response).map { resp =>
                 logger.warn(s"Class2MAReceipts returned a 422: ${resp.failures.mkString(",")}")
                 class2MAReceiptsResponseMapper.toApiResult(resp)
               }

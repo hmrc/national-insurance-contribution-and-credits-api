@@ -23,20 +23,19 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, Liabilities, NiContributionAndCredits}
+import uk.gov.hmrc.app.benefitEligibility.common.MaternityAllowanceSortType.NinoDescending
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, UnexpectedStatus}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import MaternityAllowanceSortType.NinoDescending
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated.AllLiabilities
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -54,6 +53,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   val mockClass2MAReceiptsConnector: Class2MAReceiptsConnector = mock[Class2MAReceiptsConnector]
 
+  val mocNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
+    mock[NiContributionsAndCreditsConnector]
+
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
 
   (mockServicesConfig.baseUrl(_: String)).expects("hip").returning("hip")
@@ -64,7 +66,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   val appConfig: AppConfig = new AppConfig(config = mockServicesConfig)
 
   lazy val underTest = new MaternityAllowanceDataRetrievalService(
-    mockClass2MAReceiptsConnector
+    mockClass2MAReceiptsConnector,
+    mocNiContributionsAndCreditsConnector
   )
 
   private val eligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
@@ -99,12 +102,14 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       "should retrieve data successfully" in {
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
+            _: BenefitType,
             _: Identifier,
             _: Option[Boolean],
             _: Option[ReceiptDate],
             _: Option[MaternityAllowanceSortType]
           )(_: HeaderCarrier))
           .expects(
+            BenefitType.MA,
             Identifier("GD379251T"),
             Some(true),
             Some(ReceiptDate(LocalDate.parse("1992-08-23"))),
@@ -114,6 +119,27 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+            )
+          )
+
+        (mocNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(
+            _: BenefitType,
+            _: NiContributionsAndCreditsRequest
+          )(_: HeaderCarrier))
+          .expects(
+            BenefitType.MA,
+            NiContributionsAndCreditsRequest(
+              Identifier(eligibilityCheckDataRequest.nationalInsuranceNumber),
+              eligibilityCheckDataRequest.dateOfBirth,
+              eligibilityCheckDataRequest.startTaxYear,
+              eligibilityCheckDataRequest.endTaxYear
+            ),
+            *
+          )
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](
+              DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(207))
             )
           )
 

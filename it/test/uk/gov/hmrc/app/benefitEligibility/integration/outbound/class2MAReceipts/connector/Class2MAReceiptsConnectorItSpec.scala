@@ -32,8 +32,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.*
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamErrorReport,
   DownstreamSuccessResponse
@@ -105,7 +106,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(DownstreamSuccessResponse(Class2MAReceipts, successResponse))
           server.verify(
@@ -140,7 +142,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.BadRequest)
@@ -173,7 +176,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
@@ -197,7 +201,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.NotFound)
@@ -234,7 +239,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnprocessableEntity)
@@ -256,7 +262,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.InternalServerError)
@@ -279,7 +286,8 @@ class Class2MAReceiptsConnectorItSpec
                 )
             )
 
-            val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+            val result =
+              connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
             result shouldBe Right(
               DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnexpectedStatus(statusCode))
@@ -301,7 +309,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ParsingError]
@@ -323,7 +332,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ValidationError]
@@ -341,7 +351,8 @@ class Class2MAReceiptsConnectorItSpec
               )
           )
 
-          val result = connector.fetchClass2MAReceipts(identifier, archived, receiptDate, sortType).value.futureValue
+          val result =
+            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[DownstreamError]

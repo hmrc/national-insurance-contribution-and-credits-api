@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.instances.future.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
@@ -41,6 +41,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultGYSP] =
     for {
       marriageDetailsResult <- marriageDetailsConnector.fetchMarriageDetails(
+        BenefitType.GYSP,
         marriageDetailsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
       )
     } yield EligibilityCheckDataResultGYSP(

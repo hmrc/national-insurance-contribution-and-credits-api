@@ -23,10 +23,15 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode400, ErrorCode422, Identifier, Reason, ReceiptDate}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.enums.{
-  ErrorCode403,
-  ErrorReason403
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
+import uk.gov.hmrc.app.benefitEligibility.common.{
+  ErrorCode422,
+  Identifier,
+  NpsErrorCode400,
+  NpsErrorCode403,
+  NpsErrorReason403,
+  Reason,
+  ReceiptDate
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
   Class2MAReceiptsErrorResponse400,
@@ -121,6 +126,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
         )
 
         Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator.validate(
+          MA,
           invalidResponse
         ) shouldBe Validated.Invalid(
           NonEmptyList.of(
@@ -176,11 +182,11 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
         List(
           Class2MAReceiptsError.Class2MAReceiptsError400(
             Reason("HTTP message not readable"),
-            ErrorCode400.ErrorCode400_2
+            NpsErrorCode400.NpsErrorCode400_2
           ),
           Class2MAReceiptsError.Class2MAReceiptsError400(
             Reason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-            ErrorCode400.ErrorCode400_1
+            NpsErrorCode400.NpsErrorCode400_1
           )
         )
       )
@@ -199,43 +205,6 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      "should match the openapi schema" in {
-
-        val invalidResponse = Class2MAReceiptsErrorResponse400(
-          List(
-            Class2MAReceiptsError.Class2MAReceiptsError400(
-              Reason(
-                "some reason with way to many letters letters letters letters  letters letters  letters letters  letters letters  letters letters  letters letters  letters letters"
-              ),
-              ErrorCode400.ErrorCode400_2
-            ),
-            Class2MAReceiptsError.Class2MAReceiptsError400(
-              Reason(
-                ""
-              ),
-              ErrorCode400.ErrorCode400_1
-            )
-          )
-        )
-
-        Class2MAReceiptsResponseValidation.class2MAReceiptsErrorResponse400Validator.validate(
-          invalidResponse
-        ) shouldBe Validated.Invalid(
-          NonEmptyList.of(
-            "Reason value exceeds the max character limit of 128",
-            "Reason value is below the minimum character limit of 1"
-          )
-        )
-
-        class2MaReceipts400JsonSchema.validateAndGetErrors(
-          Json.toJson(invalidResponse)
-        ) shouldBe
-          List(
-            """$.failures[0].reason: must be at most 128 characters long""",
-            """$.failures[1].reason: must be at least 1 characters long"""
-          )
-
-      }
       "deserialises and serialises successfully" in {
         Json.toJson(class2MAReceiptsErrorResponse400) shouldBe Json.parse(class2MAReceiptsErrorResponse400JsonString)
       }
@@ -258,10 +227,10 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       val jsonFormat = implicitly[Format[Class2MAReceiptsErrorResponse403]]
 
       val class2MAReceiptsErrorResponse403_1 =
-        Class2MAReceiptsErrorResponse403(ErrorReason403.UserUnauthorised, ErrorCode403.ErrorCode403_1)
+        Class2MAReceiptsErrorResponse403(NpsErrorReason403.UserUnauthorised, NpsErrorCode403.NpsErrorCode403_1)
 
       val class2MAReceiptsErrorResponse403_2 =
-        Class2MAReceiptsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_2)
+        Class2MAReceiptsErrorResponse403(NpsErrorReason403.Forbidden, NpsErrorCode403.NpsErrorCode403_2)
 
       val class2MAReceiptsErrorResponse403_1JsonString =
         """{
@@ -336,37 +305,6 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      "should match the openapi schema" in {
-
-        val invalidResponse = Class2MAReceiptsErrorResponse422(
-          List(
-            Class2MAReceiptsError.Class2MAReceiptsError422(
-              Reason(
-                "some reason with way too many letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters"
-              ),
-              ErrorCode422("")
-            )
-          )
-        )
-
-        Class2MAReceiptsResponseValidation.class2MAReceiptsError422ResponseValidator.validate(
-          invalidResponse
-        ) shouldBe Validated.Invalid(
-          NonEmptyList.of(
-            "Reason value exceeds the max character limit of 128",
-            "ErrorCode422 value is below the minimum character limit of 1"
-          )
-        )
-
-        class2MaReceipts422JsonSchema.validateAndGetErrors(
-          Json.toJson(invalidResponse)
-        ) shouldBe
-          List(
-            """$.failures[0].code: must be at least 1 characters long""",
-            """$.failures[0].reason: must be at most 128 characters long"""
-          )
-
-      }
       "deserialises and serialises successfully" in {
         Json.toJson(class2MAReceiptsErrorResponse422) shouldBe Json.parse(class2MAReceiptsErrorResponse422JsonString)
       }

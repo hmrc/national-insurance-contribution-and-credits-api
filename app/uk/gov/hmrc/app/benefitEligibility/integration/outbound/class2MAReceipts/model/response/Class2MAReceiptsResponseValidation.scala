@@ -19,11 +19,6 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts
 import cats.data.{Validated, ValidatedNel}
 import cats.implicits.{catsSyntaxNestedFoldable, toFunctorOps}
 import uk.gov.hmrc.app.benefitEligibility.common.Identifier
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
-  Class2MAReceiptsErrorResponse400,
-  Class2MAReceiptsErrorResponse403,
-  Class2MAReceiptsErrorResponse422
-}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult.SuccessfulResult
 import uk.gov.hmrc.app.benefitEligibility.util.validation.{
@@ -36,7 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.util.{NpsResponseValidator, Successful
 object Class2MAReceiptsResponseValidation {
 
   implicit val class2MAReceiptsSuccessResponseValidator: NpsResponseValidator[Class2MAReceiptsSuccessResponse] =
-    (response: Class2MAReceiptsSuccessResponse) =>
+    (_, response: Class2MAReceiptsSuccessResponse) =>
       (response.class2MAReceiptDetails.flatMap { el =>
         List(
           el.surname.map(s => StringPatternValidation.validate(s, "^([A-Za-z '-])+$".r)),
@@ -50,27 +45,5 @@ object Class2MAReceiptsResponseValidation {
         List(
           StringPatternValidation.validate(response.identifier, Identifier.pattern)
         )).sequence_.as(SuccessfulResult)
-
-  implicit val class2MAReceiptsError422ResponseValidator: NpsResponseValidator[Class2MAReceiptsErrorResponse422] =
-    (t: Class2MAReceiptsErrorResponse422) =>
-      t.failures
-        .flatMap { f =>
-          List(
-            StringLengthValidation.validate(f.reason, minLength = 1, maxLength = 128),
-            StringLengthValidation.validate(f.code, minLength = 1, maxLength = 10)
-          )
-        }
-        .sequence_
-        .as(SuccessfulResult)
-
-  implicit val class2MAReceiptsErrorResponse400Validator: NpsResponseValidator[Class2MAReceiptsErrorResponse400] =
-    (t: Class2MAReceiptsErrorResponse400) =>
-      t.failures
-        .map(f => StringLengthValidation.validate(f.reason, minLength = 1, maxLength = 128))
-        .sequence_
-        .as(SuccessfulResult)
-
-  implicit val class2MAReceiptsErrorResponse403Validator: NpsResponseValidator[Class2MAReceiptsErrorResponse403] =
-    (t: Class2MAReceiptsErrorResponse403) => Validated.validNel(SuccessfulResult)
 
 }

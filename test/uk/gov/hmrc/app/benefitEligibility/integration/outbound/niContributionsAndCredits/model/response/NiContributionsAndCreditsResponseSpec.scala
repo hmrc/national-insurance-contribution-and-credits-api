@@ -22,12 +22,19 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode400, ErrorCode422, Reason}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
+import uk.gov.hmrc.app.benefitEligibility.common.{
+  BenefitType,
+  ErrorCode422,
+  NpsErrorCode400,
+  NpsErrorCode403,
+  NpsErrorReason403,
+  Reason
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums._
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.ContributionCreditFormats.*
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.ContributionCreditFormats._
 
 class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
 
@@ -48,36 +55,45 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
 
       val jsonFormat = implicitly[Format[NiContributionsAndCreditsSuccessResponse]]
 
-      val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-        List(
-          NicClass1(
-            taxYear = Some(TaxYear(2022)),
-            contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-            contributionCategory = Some(ContributionCategory.None),
-            contributionCreditType = Some(ContributionCreditType.C1),
-            primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-            class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-            primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-            creditSource = Some(CreditSource.NotKnown),
-            employerName = Some(EmployerName("ipOpMs")),
-            latePaymentPeriod = Some(LatePaymentPeriod.L)
+      val niContributionsAndCreditsSuccessResponse1 = NiContributionsAndCreditsSuccessResponse(
+        Some(
+          List(
+            NiClass1(
+              taxYear = Some(TaxYear(2022)),
+              contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+              contributionCategory = Some(ContributionCategory.None),
+              contributionCreditType = Some(ContributionCreditType.C1),
+              primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+              class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+              primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+              creditSource = Some(CreditSource.NotKnown),
+              employerName = Some(EmployerName("ipOpMs")),
+              latePaymentPeriod = Some(LatePaymentPeriod.L)
+            )
           )
         ),
-        List(
-          NicClass2(
-            taxYear = Some(TaxYear(2022)),
-            noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
-            contributionCreditType = Some(ContributionCreditType.C1),
-            class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-            class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-            class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-            creditSource = Some(CreditSource.NotKnown),
-            latePaymentPeriod = Some(LatePaymentPeriod.L)
+        None
+      )
+
+      val niContributionsAndCreditsSuccessResponse2 = NiContributionsAndCreditsSuccessResponse(
+        niClass1 = None,
+        niClass2 = Some(
+          List(
+            NiClass2(
+              taxYear = Some(TaxYear(2022)),
+              noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
+              contributionCreditType = Some(ContributionCreditType.C1),
+              class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+              class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+              class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+              creditSource = Some(CreditSource.NotKnown),
+              latePaymentPeriod = Some(LatePaymentPeriod.L)
+            )
           )
         )
       )
 
-      val jsonString =
+      val jsonStringNiClass1 =
         """{
           |  "niClass1": [
           |    {
@@ -92,7 +108,11 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |      "employerName": "ipOpMs",
           |      "latePaymentPeriod": "L"
           |    }
-          |  ],
+          |  ]
+          |}""".stripMargin
+
+      val jsonStringNiClass2 =
+        """{
           |  "niClass2": [
           |    {
           |      "taxYear": 2022,
@@ -107,52 +127,79 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      "should match the openapi schema" in {
+      val jsonStringFullResponse = """{
+                                     |  "niClass1": [
+                                     |    {
+                                     |      "taxYear": 2022,
+                                     |      "contributionCategoryLetter": "U",
+                                     |      "contributionCategory": "(NONE)",
+                                     |      "contributionCreditType": "C1",
+                                     |      "primaryContribution": 99999999999999.98,
+                                     |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+                                     |      "primaryPaidEarnings": 99999999999999.98,
+                                     |      "creditSource": "NOT KNOWN",
+                                     |      "employerName": "ipOpMs",
+                                     |      "latePaymentPeriod": "L"
+                                     |    }
+                                     |  ],
+                                     |  "niClass2": [
+                                     |    {
+                                     |      "taxYear": 2022,
+                                     |      "noOfCreditsAndConts": 53,
+                                     |      "contributionCreditType": "C1",
+                                     |      "class2Or3EarningsFactor": 99999999999999.98,
+                                     |      "class2NIContributionAmount": 99999999999999.98,
+                                     |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+                                     |      "creditSource": "NOT KNOWN",
+                                     |      "latePaymentPeriod": "L"
+                                     |    }
+                                     |  ]
+                                     |}""".stripMargin
+
+      "should validate the fields required for a given benefit type in line with the openapi schema (niClass1)" in {
 
         val invalidResponse = NiContributionsAndCreditsSuccessResponse(
-          List(
-            NicClass1(
-              taxYear = Some(TaxYear(3000)),
-              contributionCategoryLetter = Some(ContributionCategoryLetter("22")),
-              contributionCategory = Some(ContributionCategory.None),
-              contributionCreditType = Some(ContributionCreditType.C1),
-              primaryContribution = Some(PrimaryContribution(BigDecimal("-99999999999999.98"))),
-              class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-              primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("-99999999999999.98"))),
-              creditSource = Some(CreditSource.NotKnown),
-              employerName = Some(EmployerName("12345678")),
-              latePaymentPeriod = Some(LatePaymentPeriod.Lx)
+          Some(
+            List(
+              NiClass1(
+                taxYear = Some(TaxYear(3000)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("A")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(ContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("100"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("-99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("Surf")),
+                latePaymentPeriod = Some(LatePaymentPeriod.Lx)
+              )
             )
           ),
-          List(
-            NicClass2(
-              taxYear = Some(TaxYear(3000)),
-              noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(100)),
-              contributionCreditType = Some(ContributionCreditType.C1),
-              class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("-99999999999999.98"))),
-              class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("-99999999999999.98"))),
-              class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-              creditSource = Some(CreditSource.NotKnown),
-              latePaymentPeriod = Some(LatePaymentPeriod.L)
-            )
-          )
+          None
+//          Some(
+//            List(
+//              NiClass2(
+//                taxYear = Some(TaxYear(3000)),
+//                noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(100)),
+//                contributionCreditType = Some(ContributionCreditType.C1),
+//                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("100"))),
+//                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("100"))),
+//                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+//                creditSource = Some(CreditSource.NotKnown),
+//                latePaymentPeriod = Some(LatePaymentPeriod.L)
+//              )
+//            )
+//          )
+          //          )
         )
 
         NiContributionsAndCreditsResponseValidation.niContributionsAndCreditsSuccessResponseValidator.validate(
+          BenefitType.MA,
           invalidResponse
         ) shouldBe Validated.Invalid(
           NonEmptyList.of(
             """TaxYear value exceeds the maximum allowed limit of 2099""",
-            """ContributionCategoryLetter value exceeds the max character limit of 1""",
-            """ContributionCategoryLetter value does not match regex pattern: ^[A-Z]$""",
-            """EmployerName value exceeds the max character limit of 6""",
-            """EmployerName value does not match regex pattern: ^([A-Za-z ])+$""",
-            """PrimaryContribution value is below the minimum allowed limit of 0""",
-            """PrimaryPaidEarnings value is below the minimum allowed limit of 0""",
-            """TaxYear value exceeds the maximum allowed limit of 2099""",
-            """NumberOfCreditsAndContributions value exceeds the maximum allowed limit of 53""",
-            """Class2Or3EarningsFactor value is below the minimum allowed limit of 0""",
-            """Class2NIContributionAmount value is below the minimum allowed limit of 0"""
+            """PrimaryPaidEarnings value is below the minimum allowed limit of 0"""
           )
         )
 
@@ -160,15 +207,45 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           Json.toJson(invalidResponse)
         ) shouldBe
           List(
-            """$.niClass1[0].contributionCategoryLetter: does not match the regex pattern ^[A-Z]$""",
-            """$.niClass1[0].contributionCategoryLetter: must be at most 1 characters long""",
-            """$.niClass1[0].employerName: does not match the regex pattern ^([A-Za-z ])+$""",
-            """$.niClass1[0].employerName: must be at most 6 characters long""",
-            """$.niClass1[0].primaryContribution: must have a minimum value of 0""",
             """$.niClass1[0].primaryPaidEarnings: must have a minimum value of 0""",
-            """$.niClass1[0].taxYear: must have a maximum value of 2099""",
-            """$.niClass2[0].class2NIContributionAmount: must have a minimum value of 0""",
-            """$.niClass2[0].class2Or3EarningsFactor: must have a minimum value of 0""",
+            """$.niClass1[0].taxYear: must have a maximum value of 2099"""
+          )
+
+      }
+      "should validate the fields required for a given benefit type in line with the openapi schema (niClass2)" in {
+
+        val invalidResponse = NiContributionsAndCreditsSuccessResponse(
+          niClass1 = None,
+          niClass2 = Some(
+            List(
+              NiClass2(
+                taxYear = Some(TaxYear(3000)),
+                noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(100)),
+                contributionCreditType = Some(ContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("100"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("100"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        NiContributionsAndCreditsResponseValidation.niContributionsAndCreditsSuccessResponseValidator.validate(
+          BenefitType.MA,
+          invalidResponse
+        ) shouldBe Validated.Invalid(
+          NonEmptyList.of(
+            """TaxYear value exceeds the maximum allowed limit of 2099""",
+            """NumberOfCreditsAndContributions value exceeds the maximum allowed limit of 53"""
+          )
+        )
+
+        niContributionsAndCreditsResponseSuccessResponseJsonSchema.validateAndGetErrors(
+          Json.toJson(invalidResponse)
+        ) shouldBe
+          List(
             """$.niClass2[0].noOfCreditsAndConts: must have a maximum value of 53""",
             """$.niClass2[0].taxYear: must have a maximum value of 2099"""
           )
@@ -176,15 +253,35 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
       }
 
       "deserialises and serialises successfully" in {
-        Json.toJson(niContributionsAndCreditsSuccessResponse) shouldBe Json.parse(jsonString)
+        Json.toJson(niContributionsAndCreditsSuccessResponse1) shouldBe Json.parse(jsonStringNiClass1)
+        Json.toJson(niContributionsAndCreditsSuccessResponse2) shouldBe Json.parse(jsonStringNiClass2)
       }
 
       "deserialises to the model class" in {
-        val _: NiContributionsAndCreditsSuccessResponse = jsonFormat.reads(Json.parse(jsonString)).get
+        val _: NiContributionsAndCreditsSuccessResponse = jsonFormat.reads(Json.parse(jsonStringNiClass1)).get
+        val _: NiContributionsAndCreditsSuccessResponse = jsonFormat.reads(Json.parse(jsonStringNiClass2)).get
+      }
+
+      "deserialises and reserialises to the same thing (NiClass1)" in {
+        val jValue: JsValue = Json.parse(jsonStringNiClass1)
+        val niContributionsAndCreditsSuccessResponse: NiContributionsAndCreditsSuccessResponse =
+          jsonFormat.reads(jValue).get
+        val writtenJson: JsValue = jsonFormat.writes(niContributionsAndCreditsSuccessResponse)
+
+        writtenJson shouldBe jValue
+      }
+
+      "deserialises and reserialises to the same thing (NiClass2)" in {
+        val jValue: JsValue = Json.parse(jsonStringNiClass2)
+        val niContributionsAndCreditsSuccessResponse: NiContributionsAndCreditsSuccessResponse =
+          jsonFormat.reads(jValue).get
+        val writtenJson: JsValue = jsonFormat.writes(niContributionsAndCreditsSuccessResponse)
+
+        writtenJson shouldBe jValue
       }
 
       "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-        val jValue: JsValue = Json.parse(jsonString)
+        val jValue: JsValue = Json.parse(jsonStringFullResponse)
         val niContributionsAndCreditsSuccessResponse: NiContributionsAndCreditsSuccessResponse =
           jsonFormat.reads(jValue).get
         val writtenJson: JsValue = jsonFormat.writes(niContributionsAndCreditsSuccessResponse)
@@ -210,11 +307,11 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
         List(
           NiContributionsAndCredits400(
             Reason("HTTP message not readable"),
-            ErrorCode400.ErrorCode400_2
+            NpsErrorCode400.NpsErrorCode400_2
           ),
           NiContributionsAndCredits400(
             Reason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-            ErrorCode400.ErrorCode400_1
+            NpsErrorCode400.NpsErrorCode400_1
           )
         )
       )
@@ -233,43 +330,6 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      "should match the openapi schema" in {
-
-        val invalidResponse = NiContributionsAndCreditsResponse400(
-          List(
-            NiContributionsAndCredits400(
-              Reason(
-                "some reason with way to many letters letters letters letters  letters letters  letters letters  letters letters  letters letters  letters letters  letters letters"
-              ),
-              ErrorCode400.ErrorCode400_2
-            ),
-            NiContributionsAndCredits400(
-              Reason(
-                ""
-              ),
-              ErrorCode400.ErrorCode400_1
-            )
-          )
-        )
-
-        NiContributionsAndCreditsResponseValidation.niContributionsAndCreditsResponse400Validator.validate(
-          invalidResponse
-        ) shouldBe Validated.Invalid(
-          NonEmptyList.of(
-            "Reason value exceeds the max character limit of 120",
-            "Reason value is below the minimum character limit of 1"
-          )
-        )
-
-        niContributionsAndCredits400JsonSchema.validateAndGetErrors(
-          Json.toJson(invalidResponse)
-        ) shouldBe
-          List(
-            """$.failures[0].reason: must be at most 120 characters long""",
-            """$.failures[1].reason: must be at least 1 characters long"""
-          )
-
-      }
       "deserialises and serialises successfully" in {
         Json.toJson(niContributionsAndCreditsResponse400) shouldBe Json.parse(
           niContributionsAndCreditsResponse400JsonString
@@ -294,7 +354,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
       val jsonFormat = implicitly[Format[NiContributionsAndCreditsResponse403]]
 
       val niContributionsAndCreditsResponse403 =
-        NiContributionsAndCreditsResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_2)
+        NiContributionsAndCreditsResponse403(NpsErrorReason403.Forbidden, NpsErrorCode403.NpsErrorCode403_2)
 
       val niContributionsAndCreditsResponse403JsonString =
         """{
@@ -353,37 +413,6 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      "should match the openapi schema" in {
-
-        val invalidResponse = NiContributionsAndCreditsResponse422(
-          List(
-            NiContributionsAndCredits422(
-              Reason(
-                "some reason with way too many letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters"
-              ),
-              ErrorCode422("")
-            )
-          )
-        )
-
-        NiContributionsAndCreditsResponseValidation.niContributionsAndCreditsResponse422Validator.validate(
-          invalidResponse
-        ) shouldBe Validated.Invalid(
-          NonEmptyList.of(
-            "Reason value exceeds the max character limit of 120",
-            "ErrorCode422 value is below the minimum character limit of 1"
-          )
-        )
-
-        niContributionsAndCreditsResponse422JsonSchema.validateAndGetErrors(
-          Json.toJson(invalidResponse)
-        ) shouldBe
-          List(
-            """$.failures[0].code: must be at least 1 characters long""",
-            """$.failures[0].reason: must be at most 120 characters long"""
-          )
-
-      }
       "deserialises and serialises successfully" in {
         Json.toJson(niContributionsAndCreditsResponse422) shouldBe Json.parse(
           niContributionsAndCreditsResponse422JsonString

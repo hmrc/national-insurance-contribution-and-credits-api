@@ -17,19 +17,22 @@
 package uk.gov.hmrc.app.benefitEligibility.util
 
 import cats.data.ValidatedNel
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponse
 import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult.SuccessfulResult
 
 trait NpsResponseValidator[T <: NpsApiResponse] {
-  def validate(t: T): ValidatedNel[String, SuccessfulResult]
+  def validate(benefitType: BenefitType, t: T): ValidatedNel[String, SuccessfulResult]
 }
 
 object ValidatorSyntax {
 
   implicit class ValidatorOps[T <: NpsApiResponse](t: T) {
 
-    def validate(implicit validator: NpsResponseValidator[T]): ValidatedNel[String, SuccessfulResult] =
-      validator.validate(t)
+    def validate[B <: BenefitType](benefitType: B)(
+        implicit validator: NpsResponseValidator[T]
+    ): ValidatedNel[String, SuccessfulResult] =
+      validator.validate(benefitType, t)
 
   }
 
