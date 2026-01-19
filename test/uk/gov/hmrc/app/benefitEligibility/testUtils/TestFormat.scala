@@ -25,6 +25,13 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
   Class2MAReceiptsErrorResponse403,
   Class2MAReceiptsErrorResponse422
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
+  LiabilitySummaryDetailsError400,
+  LiabilitySummaryDetailsError422,
+  LiabilitySummaryDetailsErrorResponse400,
+  LiabilitySummaryDetailsErrorResponse403,
+  LiabilitySummaryDetailsErrorResponse422
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.{
   NiContributionsAndCredits400,
   NiContributionsAndCredits422,
@@ -108,6 +115,27 @@ object TestFormat {
 
     implicit val niContributionsAndCreditsErrorResponse422Writes: Writes[NiContributionsAndCreditsResponse422] =
       Json.writes[NiContributionsAndCreditsResponse422]
+
+  }
+
+  object LiabilitySummaryDetailsFormats {
+
+    import CommonFormats.errorCode422
+
+    implicit val liabilitySummaryDetailsError400Writes: Writes[LiabilitySummaryDetailsError400] =
+      Json.writes[LiabilitySummaryDetailsError400]
+
+    implicit val liabilitySummaryDetailsErrorResponse400Writes: Writes[LiabilitySummaryDetailsErrorResponse400] =
+      Json.writes[LiabilitySummaryDetailsErrorResponse400]
+
+    implicit val liabilitySummaryDetailsErrorResponse403Writes: Writes[LiabilitySummaryDetailsErrorResponse403] =
+      Json.writes[LiabilitySummaryDetailsErrorResponse403]
+
+    implicit val liabilitySummaryDetailsError422Writes: Writes[LiabilitySummaryDetailsError422] =
+      Json.writes[LiabilitySummaryDetailsError422]
+
+    implicit val liabilitySummaryDetailsErrorResponse422Writes: Writes[LiabilitySummaryDetailsErrorResponse422] =
+      Json.writes[LiabilitySummaryDetailsErrorResponse422]
 
   }
 

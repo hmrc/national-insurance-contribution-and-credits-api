@@ -19,6 +19,8 @@ package uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated
 
 import java.time.LocalDate
 
@@ -39,20 +41,20 @@ object EligibilityCheckDataRequest {
 sealed trait EligibilityCheckDataRequest
 
 case class MAEligibilityCheckDataRequest(
-    nationalInsuranceNumber: String,            // contribution credit api
-    dateOfBirth: DateOfBirth,                   // contribution credit api
-    startTaxYear: StartTaxYear,                 // contribution credit api
-    endTaxYear: EndTaxYear,                     // contribution credit api
-    identifier: Identifier,                     // maybe trn or nino (required by both the liability and ma receipt api)
-    liabilitySearchCategoryHyphenated: Boolean, // liability api
-    liabilityOccurrenceNumber: Option[Int],     // liability api
-    liabilityType: Option[String],              // liability api
-    earliestLiabilityStartDate: Option[LocalDate], // liability api
-    liabilityStart: Option[LocalDate],             // liability api
-    liabilityEnd: Option[LocalDate],               // liability api
-    archived: Option[Boolean],                     // ma receipts api
-    receiptDate: Option[ReceiptDate],              // ma receipts api
-    sortBy: Option[MaternityAllowanceSortType]     // ma receipts api
+    nationalInsuranceNumber: String, // contribution credit api
+    dateOfBirth: DateOfBirth,        // contribution credit api
+    startTaxYear: StartTaxYear,      // contribution credit api
+    endTaxYear: EndTaxYear,          // contribution credit api
+    identifier: Identifier,          // maybe trn or nino (required by both the liability and ma receipt api)
+    liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated, // liability api
+    liabilityOccurrenceNumber: Option[OccurrenceNumber],                  // liability api
+    liabilityType: Option[LiabilitySearchCategoryHyphenated],             // liability api
+    earliestLiabilityStartDate: Option[LocalDate],                        // liability api
+    liabilityStart: Option[LocalDate],                                    // liability api
+    liabilityEnd: Option[LocalDate],                                      // liability api
+    archived: Option[Boolean],                                            // ma receipts api
+    receiptDate: Option[ReceiptDate],                                     // ma receipts api
+    sortBy: Option[MaternityAllowanceSortType]                            // ma receipts api
 ) extends EligibilityCheckDataRequest
 
 object MAEligibilityCheckDataRequest {

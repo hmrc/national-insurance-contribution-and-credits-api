@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import play.api.libs.json.Writes
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 
 trait NpsSuccessfulApiResponse extends NpsApiResponse
@@ -29,6 +30,8 @@ object NpsSuccessfulApiResponse {
       Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse.getClass2MAReceiptsResponseWrites.writes(r)
     case m: MarriageDetailsSuccessResponse =>
       MarriageDetailsSuccessResponse.marriageDetailsSuccessResponseFormat.writes(m)
+    case l: LiabilitySummaryDetailsSuccessResponse =>
+      LiabilitySummaryDetailsSuccessResponse.liabilitySummaryDetailsSuccessResponseWrites.writes(l)
   }
 
 }
