@@ -33,6 +33,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import MaternityAllowanceSortType.NinoDescending
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated.AllLiabilities
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.config.AppConfig
@@ -71,9 +73,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     startTaxYear = StartTaxYear(2025),
     endTaxYear = EndTaxYear(2026),
     identifier = Identifier("GD379251T"),
-    liabilitySearchCategoryHyphenated = true,
-    liabilityOccurrenceNumber = Some(233232323),
-    liabilityType = Some("FOOD"),
+    liabilitySearchCategoryHyphenated = AllLiabilities,
+    liabilityOccurrenceNumber = Some(OccurrenceNumber(233232323)),
+    liabilityType = Some(AllLiabilities),
     earliestLiabilityStartDate = Some(LocalDate.parse("1992-08-23")),
     liabilityStart = Some(LocalDate.parse("1992-08-23")),
     liabilityEnd = Some(LocalDate.parse("1992-08-23")),
