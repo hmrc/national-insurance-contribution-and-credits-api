@@ -22,6 +22,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 
 import scala.collection.immutable
 
@@ -35,11 +36,12 @@ object NpsApiResponseStatus extends Enum[NpsApiResponseStatus] with PlayJsonEnum
   case object Failure extends NpsApiResponseStatus("FAILURE")
 }
 
-type ApiResult                = NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]
-type Class2MaReceiptsResult   = NpsApiResult[NpsNormalizedError, Class2MAReceiptsSuccessResponse]
-type ContributionCreditResult = NpsApiResult[NpsNormalizedError, NiContributionsAndCreditsSuccessResponse]
-type MarriageDetailsResult    = NpsApiResult[NpsNormalizedError, MarriageDetailsSuccessResponse]
-type LiabilityResult          = NpsApiResult[NpsNormalizedError, LiabilitySummaryDetailsSuccessResponse]
+type ApiResult                     = NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]
+type Class2MaReceiptsResult        = NpsApiResult[NpsNormalizedError, Class2MAReceiptsSuccessResponse]
+type ContributionCreditResult      = NpsApiResult[NpsNormalizedError, NiContributionsAndCreditsSuccessResponse]
+type SchemeMembershipDetailsResult = NpsApiResult[NpsNormalizedError, SchemeMembershipDetailsSuccessResponse]
+type MarriageDetailsResult         = NpsApiResult[NpsNormalizedError, MarriageDetailsSuccessResponse]
+type LiabilityResult               = NpsApiResult[NpsNormalizedError, LiabilitySummaryDetailsSuccessResponse]
 
 sealed trait NpsApiResult[+A, +B] {
   def apiName: ApiName

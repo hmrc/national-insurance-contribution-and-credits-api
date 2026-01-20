@@ -29,4 +29,5 @@ object ApiName extends Enum[ApiName] with PlayJsonEnum[ApiName] {
   case object Liabilities              extends ApiName("Liabilities")
   case object NiContributionAndCredits extends ApiName("NI Contributions and credits")
   case object MarriageDetails          extends ApiName("Marriage Details")
+  case object SchemeMembershipDetails  extends ApiName("Scheme Membership Details")
 }
