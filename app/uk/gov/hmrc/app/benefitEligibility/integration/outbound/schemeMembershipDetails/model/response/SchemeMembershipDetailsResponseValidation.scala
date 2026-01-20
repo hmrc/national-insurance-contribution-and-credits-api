@@ -34,7 +34,7 @@ object SchemeMembershipDetailsResponseValidation {
             el.schemeMembershipDetails.employersContractedOutNumberDetails.map(
               StringPatternValidation.validate(_, "^([A-Z]{0,1}[3]\\d{6}[A-Z ^GIO SUVZ]{0,1})$".r)
             ),
-            el.schemeMembershipDetails.employersContractedOutNumberDetails.map(StringLengthValidation.validate(_, 9, 7))
+            el.schemeMembershipDetails.employersContractedOutNumberDetails.map(StringLengthValidation.validate(_, 7, 9))
           ).flatten
         }
         .sequence_
