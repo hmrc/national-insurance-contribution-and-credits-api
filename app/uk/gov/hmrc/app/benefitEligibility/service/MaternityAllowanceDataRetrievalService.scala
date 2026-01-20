@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
+import cats.Semigroup
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Liabilities, NiContributionAndCredits}
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
@@ -30,6 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.Down
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -51,16 +53,15 @@ class MaternityAllowanceDataRetrievalService @Inject() (
       eligibilityCheckDataRequest.endTaxYear
     )
 
-    for {
-      class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
+    (
+      class2MAReceiptsConnector.fetchClass2MAReceipts(
         eligibilityCheckDataRequest.`type`,
         eligibilityCheckDataRequest.identifier,
         eligibilityCheckDataRequest.archived,
         eligibilityCheckDataRequest.receiptDate,
         eligibilityCheckDataRequest.sortBy
-      )
-
-      contributionsAndCreditResult <- taxWindows.map { window =>
+      ),
+      taxWindows.map { window =>
         niContributionsAndCreditsConnector.fetchContributionsAndCredits(
           eligibilityCheckDataRequest.`type`,
           NiContributionsAndCreditsRequest(
@@ -70,15 +71,53 @@ class MaternityAllowanceDataRetrievalService @Inject() (
             window.endTaxYear
           )
         )
-      }.sequence
+      }.sequence,
+      EitherT.pure[Future, BenefitEligibilityError](DownstreamErrorReport(Liabilities, UnexpectedStatus(207)))
+    ).parTupled.map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
+      EligibilityCheckDataResultMA(
+        class2MaReceiptsResult,
+        liabilityResult,
+        contributionsAndCreditResult
+      )
+    }
 
-      liabilityResult = DownstreamErrorReport(Liabilities, UnexpectedStatus(207))
-
-    } yield EligibilityCheckDataResultMA(
-      class2MaReceiptsResult,
-      liabilityResult,
-      contributionsAndCreditResult
-    )
+//    for {
+//      class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
+//        eligibilityCheckDataRequest.`type`,
+//        eligibilityCheckDataRequest.identifier,
+//        eligibilityCheckDataRequest.archived,
+//        eligibilityCheckDataRequest.receiptDate,
+//        eligibilityCheckDataRequest.sortBy
+//      )
+//
+//      contributionsAndCreditResult <- taxWindows.map { window =>
+//        niContributionsAndCreditsConnector.fetchContributionsAndCredits(
+//          eligibilityCheckDataRequest.`type`,
+//          NiContributionsAndCreditsRequest(
+//            eligibilityCheckDataRequest.identifier,
+//            eligibilityCheckDataRequest.dateOfBirth,
+//            window.startTaxYear,
+//            window.endTaxYear
+//          )
+//        )
+//      }.sequence
+//
+//      liabilityResult = DownstreamErrorReport(Liabilities, UnexpectedStatus(207))
+//
+//    } yield EligibilityCheckDataResultMA(
+//      class2MaReceiptsResult,
+//      liabilityResult,
+//      contributionsAndCreditResult
+//    )
   }
+
+}
+
+object Test {
+
+  implicit val benefitEligibilityErrorSemiGroup: Semigroup[BenefitEligibilityError] =
+    new Semigroup[BenefitEligibilityError] {
+      override def combine(x: BenefitEligibilityError, y: BenefitEligibilityError): BenefitEligibilityError = x
+    }
 
 }

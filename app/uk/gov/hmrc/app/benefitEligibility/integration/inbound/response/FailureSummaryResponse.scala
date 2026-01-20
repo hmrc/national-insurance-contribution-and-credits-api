@@ -43,7 +43,7 @@ object FailureSummaryResponse {
   implicit val writes: Writes[FailureSummaryResponse] = Json.writes[FailureSummaryResponse]
 
   def from(
-      benefitEligibilityDataFetchError: BenefitEligibilityDataFetchError,
+      benefitEligibilityDataFetchError: BenefitEligibilityDataFetchErrorReport,
       correlationId: CorrelationId
   ): FailureSummaryResponse =
 

@@ -19,20 +19,6 @@ package uk.gov.hmrc.app.benefitEligibility.testUtils
 import play.api.libs.json.{Format, Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.ErrorCode422
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.{
-  SchemeMembershipDetailsError400,
-  SchemeMembershipDetailsError422,
-  SchemeMembershipDetailsErrorResponse400,
-  SchemeMembershipDetailsErrorResponse403,
-  SchemeMembershipDetailsErrorResponse422
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.{
-  Callback,
-  SchemeMembershipDetails,
-  SchemeMembershipDetailsSuccessResponse,
-  SchemeMembershipDetailsSummary
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsError400,
   LiabilitySummaryDetailsError422,
@@ -40,22 +26,10 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
   LiabilitySummaryDetailsErrorResponse403,
   LiabilitySummaryDetailsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.{
-  NiContributionsAndCredits400,
-  NiContributionsAndCredits422,
-  NiContributionsAndCreditsResponse400,
-  NiContributionsAndCreditsResponse403,
-  NiContributionsAndCreditsResponse422
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.{
-  ContributionCategoryLetter,
-  EmployerName,
-  NiContributionsAndCreditsSuccessResponse,
-  NicClass1,
-  NicClass2,
-  PrimaryContribution,
-  PrimaryPaidEarnings
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
 
 object TestFormat {
 

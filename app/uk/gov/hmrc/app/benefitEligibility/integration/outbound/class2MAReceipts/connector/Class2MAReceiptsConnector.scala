@@ -23,15 +23,8 @@ import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.common.{
-  BenefitEligibilityError,
-  BenefitType,
-  Identifier,
-  MaternityAllowanceSortType,
-  ReceiptDate
-}
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{Class2MaReceiptsResult, NpsClient}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.mapper.Class2MAReceiptsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
   Class2MAReceiptsErrorResponse400,
@@ -41,6 +34,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{Class2MaReceiptsResult, NpsClient}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig

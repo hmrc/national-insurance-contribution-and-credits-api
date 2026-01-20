@@ -27,7 +27,7 @@ trait WithLoggableDebugString {
 }
 
 sealed trait ServiceError extends Exception with WithLoggableDebugString {
-  this: Product & Serializable & (BenefitEligibilityError | DownstreamError) =>
+  this: Product & Serializable & (BenefitEligibilityError | NpsClientError) =>
   def toStringSafeToLogInProd: String = this.toString
 
   override final def toString: String = {
@@ -39,46 +39,8 @@ sealed trait ServiceError extends Exception with WithLoggableDebugString {
 
 sealed trait BenefitEligibilityError extends ServiceError { this: Product with Serializable => }
 
-case class ValidationError(errors: List[String]) extends BenefitEligibilityError
+case class ValidationError(errors: List[String]) extends BenefitEligibilityError //TODO - should return as a 500 to DWP
 
-case class ParsingError(throwable: Throwable) extends BenefitEligibilityError
+case class ParsingError(throwable: Throwable) extends BenefitEligibilityError //TODO - should return as a 500 to DWP
 
-case class DownstreamError(throwable: Throwable) extends BenefitEligibilityError
-
-case class OverallResultSummary(totalCalls: Int, successful: Int, failed: Int)
-
-object OverallResultSummary {
-  implicit val writes: Writes[OverallResultSummary] = Json.writes[OverallResultSummary]
-}
-
-case class BenefitEligibilityDataFetchError(
-    overallResultStatus: OverallResultStatus,
-    benefitType: BenefitType,
-    overallResultSummary: OverallResultSummary,
-    downStreams: List[ApiResult]
-) extends BenefitEligibilityError
-
-object BenefitEligibilityDataFetchError {
-
-  def from(
-      eligibilityCheckDataResult: EligibilityCheckDataResult
-  ): BenefitEligibilityDataFetchError =
-
-    if (eligibilityCheckDataResult.overallResultStatus == OverallResultStatus.Failure) {
-      BenefitEligibilityDataFetchError(
-        overallResultStatus = OverallResultStatus.Failure,
-        benefitType = eligibilityCheckDataResult.benefitType,
-        overallResultSummary = eligibilityCheckDataResult.resultSummary,
-        downStreams = eligibilityCheckDataResult.allResults.filter(_.isFailure)
-      )
-    } else {
-      BenefitEligibilityDataFetchError(
-        overallResultStatus = OverallResultStatus.Partial,
-        benefitType = eligibilityCheckDataResult.benefitType,
-        overallResultSummary = eligibilityCheckDataResult.resultSummary,
-        downStreams = eligibilityCheckDataResult.allResults.filter(_.isSuccess) ++
-          eligibilityCheckDataResult.allResults.filter(_.isFailure)
-      )
-    }
-
-}
+case class NpsClientError(throwable: Throwable) extends BenefitEligibilityError //TODO - should return as a 500 to DWP

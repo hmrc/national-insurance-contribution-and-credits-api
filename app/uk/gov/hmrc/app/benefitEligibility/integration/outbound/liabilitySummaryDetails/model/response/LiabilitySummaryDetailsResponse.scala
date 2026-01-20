@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response
 
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode400, ErrorCode422, Identifier, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, NpsErrorCode400, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -29,7 +29,7 @@ object LiabilitySummaryDetailsError {
 
   // region Error400
 
-  case class LiabilitySummaryDetailsError400(reason: Reason, code: ErrorCode400)
+  case class LiabilitySummaryDetailsError400(reason: Reason, code: NpsErrorCode400)
 
   object LiabilitySummaryDetailsError400 {
 

@@ -22,7 +22,8 @@ import izumi.reflect.Tag
 import play.api.http.HeaderNames.{AUTHORIZATION, CONTENT_TYPE}
 import play.api.http.MimeTypes.JSON
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, DownstreamError}
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
+import uk.gov.hmrc.app.benefitEligibility.common.NpsClientError
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.ORIGINATING_SYSTEM
 import uk.gov.hmrc.http.HttpReads.Implicits.*
@@ -31,7 +32,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) {
 
@@ -44,7 +44,7 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
   def post[A: Tag](path: String, body: A)(
       implicit hc: HeaderCarrier,
       writes: Writes[A]
-  ): EitherT[Future, BenefitEligibilityError, HttpResponse] =
+  ): EitherT[Future, NpsClientError, HttpResponse] =
 
     EitherT(
       httpClientV2
@@ -53,17 +53,17 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
         .withBody(Json.toJson(body))
         .execute[HttpResponse]
         .attempt
-    ).leftMap(DownstreamError(_))
+    ).leftMap(NpsClientError(_))
 
   def get(path: String)(
       implicit hc: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, HttpResponse] =
+  ): EitherT[Future, NpsClientError, HttpResponse] =
     EitherT(
       httpClientV2
         .get(url"$path")
         .setHeader(commonHeaders *)
         .execute[HttpResponse]
         .attempt
-    ).leftMap(DownstreamError(_))
+    ).leftMap(NpsClientError(_))
 
 }

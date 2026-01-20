@@ -355,7 +355,7 @@ class Class2MAReceiptsConnectorItSpec
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[DownstreamError]
+          result.left.value shouldBe a[NpsClientError]
         }
       }
 

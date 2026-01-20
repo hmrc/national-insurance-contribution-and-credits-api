@@ -393,7 +393,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[DownstreamError]
+          result.left.value shouldBe a[NpsClientError]
         }
       }
 
