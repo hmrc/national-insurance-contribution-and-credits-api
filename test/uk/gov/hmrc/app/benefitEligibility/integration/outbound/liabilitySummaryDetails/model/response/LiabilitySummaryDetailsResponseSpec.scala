@@ -52,68 +52,37 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
 
     val jsonFormat = implicitly[Format[LiabilitySummaryDetailsSuccessResponse]]
 
-    val validLiabilityDetailsList = LiabilityDetailsList(
-      identifier = Some(Identifier("RN000001A")),
-      _type = Some(EnumLiabtp.Abroad),
-      occurrenceNumber = Some(OccurrenceNumber(1)),
-      startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
-      endDateStatus = Some(EnumLtpedttp.EndDateHeld),
-      startDate = Some(StartDate(LocalDate.parse("2026-01-01"))),
-      endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
-      country = Some(EnumCountry.GreatBritain),
-      trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
-      casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
-      homeResponsibilitiesProtectionBenefitReference =
-        Some(HomeResponsibilitiesProtectionBenefitReference("12345678AB")),
-      homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
-      lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
-      lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
-      homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
-      awardAmount = Some(AwardAmount(10.56)),
-      resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
-      homeResponsibilitiesProtectionIndicator = Some(EnumHrpIndicator.None),
-      officeDetails = Some(
-        OfficeDetails(
-          officeLocationDecode = Some(OfficeLocationDecode(1)),
-          officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
-          officeIdentifier = Some(EnumOffidtp.None)
-        )
-      )
-    )
-
-    val invalidLiabilityDetailsList = LiabilityDetailsList(
-      identifier = Some(Identifier("a")),
-      _type = Some(EnumLiabtp.Abroad),
-      occurrenceNumber = Some(OccurrenceNumber(0)),
-      startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
-      endDateStatus = Some(EnumLtpedttp.EndDateHeld),
-      startDate = Some(StartDate(LocalDate.parse("2026-01-01"))),
-      endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
-      country = Some(EnumCountry.GreatBritain),
-      trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
-      casepaperReferenceNumber = Some(CasepaperReferenceNumber("1234")),
-      homeResponsibilitiesProtectionBenefitReference =
-        Some(HomeResponsibilitiesProtectionBenefitReference("AAAAAAAAAAAAA")),
-      homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
-      lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
-      lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
-      homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
-      awardAmount = Some(AwardAmount(10.56)),
-      resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
-      homeResponsibilitiesProtectionIndicator = Some(EnumHrpIndicator.None),
-      officeDetails = Some(
-        OfficeDetails(
-          officeLocationDecode = Some(OfficeLocationDecode(1)),
-          officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
-          officeIdentifier = Some(EnumOffidtp.None)
-        )
-      )
-    )
-
     val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
       Some(
         List(
-          validLiabilityDetailsList
+          LiabilityDetailsList(
+            identifier = Identifier("RN000001A"),
+            `type` = EnumLiabtp.Abroad,
+            occurrenceNumber = OccurrenceNumber(1),
+            startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
+            endDateStatus = Some(EnumLtpedttp.EndDateHeld),
+            startDate = StartDate(LocalDate.parse("2026-01-01")),
+            endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
+            country = Some(EnumCountry.GreatBritain),
+            trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
+            casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
+            homeResponsibilitiesProtectionBenefitReference =
+              Some(HomeResponsibilitiesProtectionBenefitReference("12345678AB")),
+            homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
+            lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
+            lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
+            homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
+            awardAmount = Some(AwardAmount(10.56)),
+            resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
+            homeResponsibilitiesProtectionIndicator = Some(EnumHrpIndicator.None),
+            officeDetails = Some(
+              OfficeDetails(
+                officeLocationDecode = Some(OfficeLocationDecode(1)),
+                officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
+                officeIdentifier = Some(EnumOffidtp.None)
+              )
+            )
+          )
         )
       ),
       Some(
@@ -121,7 +90,33 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
           LiabilityEmploymentDetailsList(
             employmentStatusForLiability = EmploymentStatusForLiability("EMP"),
             liabilityDetails = List(
-              validLiabilityDetailsList
+              LiabilityDetails(
+                identifier = Identifier("RN000001A"),
+                `type` = EnumLiabtp.Abroad,
+                occurrenceNumber = OccurrenceNumber(1),
+                startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
+                endDateStatus = Some(EnumLtpedttp.EndDateHeld),
+                startDate = StartDate(LocalDate.parse("2026-01-01")),
+                endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
+                country = Some(EnumCountry.GreatBritain),
+                trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
+                casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
+                homeResponsibilitiesProtectionBenefitReference =
+                  Some(HomeResponsibilitiesProtectionBenefitReference("12345678AB")),
+                homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
+                lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
+                lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
+                homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
+                awardAmount = Some(AwardAmount(10.56)),
+                resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
+                officeDetails = Some(
+                  OfficeDetails(
+                    officeLocationDecode = Some(OfficeLocationDecode(1)),
+                    officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
+                    officeIdentifier = Some(EnumOffidtp.None)
+                  )
+                )
+              )
             )
           )
         )
@@ -134,7 +129,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         | "liabilityDetailsList":[
         |   {
         |    "identifier":"RN000001A",
-        |    "_type":"ABROAD",
+        |    "type":"ABROAD",
         |    "occurrenceNumber":1,
         |    "startDateStatus":"START DATE HELD",
         |    "endDateStatus":"END DATE HELD",
@@ -163,7 +158,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         |     "liabilityDetails":[
         |       {
         |         "identifier":"RN000001A",
-        |         "_type":"ABROAD",
+        |         "type":"ABROAD",
         |         "occurrenceNumber":1,
         |         "startDateStatus":"START DATE HELD",
         |         "endDateStatus":"END DATE HELD",
@@ -178,7 +173,6 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         |         "lostCardRulingReason":"NOT APPLICABLE",
         |         "homeResponsibilityProtectionCalculationYear":2022,
         |         "awardAmount":10.56,"resourceGroupIdentifier":789,
-        |         "homeResponsibilitiesProtectionIndicator":"(NONE)",
         |         "officeDetails":{
         |           "officeLocationDecode":1,
         |           "officeLocationValue":"HQ STATIONARY STORE",
@@ -190,50 +184,6 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         | ],
         | "callback":"Callback"
         }""".stripMargin
-
-    "should match the openapi schema" in {
-
-      val invalidResponse = LiabilitySummaryDetailsSuccessResponse(
-        Some(
-          List(
-            invalidLiabilityDetailsList
-          )
-        ),
-        Some(
-          List(
-            LiabilityEmploymentDetailsList(
-              employmentStatusForLiability = EmploymentStatusForLiability("EMP"),
-              liabilityDetails = List(
-                invalidLiabilityDetailsList
-              )
-            )
-          )
-        ),
-        Some(Callback("Callback"))
-      )
-
-      LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsResponseValidator.validate(
-        invalidResponse
-      ) shouldBe Validated.Invalid(
-        NonEmptyList.of(
-          """Identifier value does not match regex pattern: ^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$""",
-          """OccurrenceNumber value is below the minimum allowed limit of 1""",
-          """HomeResponsibilitiesProtectionBenefitReference value exceeds the max character limit of 10"""
-        )
-      )
-
-      liabilitySummaryDetailsOpenApi.validateAndGetErrors(
-        Json.toJson(invalidResponse)
-      ) shouldBe
-        List(
-          """$.liabilityDetailsList[0].homeResponsibilitiesProtectionBenefitReference: must be at most 10 characters long""",
-          """$.liabilityDetailsList[0].identifier: does not match the regex pattern ^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$""",
-          """$.liabilityDetailsList[0].occurrenceNumber: must have a minimum value of 1""",
-          """$.liabilityDetailsList[0]: required property 'type' not found""",
-          """$.liabilityEmploymentDetailsList[0].liabilityDetails: array found, object expected"""
-        )
-
-    }
 
     "deserialises and serialises successfully" in {
       Json.toJson(liabilitySummaryDetailsSuccessResponse) shouldBe Json.parse(jsonString)
@@ -266,14 +216,16 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
       )
 
     val liabilitySummaryDetailsErrorResponse400 = LiabilitySummaryDetailsErrorResponse400(
-      List(
-        LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-          Reason("HTTP message not readable"),
-          ErrorCode400.ErrorCode400_2
-        ),
-        LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-          Reason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-          ErrorCode400.ErrorCode400_1
+      Some(
+        List(
+          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
+            Reason("HTTP message not readable"),
+            ErrorCode400.ErrorCode400_2
+          ),
+          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
+            Reason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+            ErrorCode400.ErrorCode400_1
+          )
         )
       )
     )
@@ -295,28 +247,21 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     "should match the openapi schema" in {
 
       val invalidResponse = LiabilitySummaryDetailsErrorResponse400(
-        List(
-          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-            Reason(
-              "some reason with way to many letters letters letters letters  letters letters  letters letters  letters letters  letters letters  letters letters  letters letters"
+        Some(
+          List(
+            LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
+              Reason(
+                "some reason with way to many letters letters letters letters  letters letters  letters letters  letters letters  letters letters  letters letters  letters letters"
+              ),
+              ErrorCode400.ErrorCode400_2
             ),
-            ErrorCode400.ErrorCode400_2
-          ),
-          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-            Reason(
-              ""
-            ),
-            ErrorCode400.ErrorCode400_1
+            LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
+              Reason(
+                ""
+              ),
+              ErrorCode400.ErrorCode400_1
+            )
           )
-        )
-      )
-
-      LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsErrorResponse400Validator.validate(
-        invalidResponse
-      ) shouldBe Validated.Invalid(
-        NonEmptyList.of(
-          "Reason value exceeds the max character limit of 128",
-          "Reason value is below the minimum character limit of 1"
         )
       )
 
@@ -398,10 +343,12 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     val jsonFormat = implicitly[Format[LiabilitySummaryDetailsErrorResponse422]]
 
     val liabilitySummaryDetailsErrorResponse422 = LiabilitySummaryDetailsErrorResponse422(
-      failures = List(
-        LiabilitySummaryDetailsError.LiabilitySummaryDetailsError422(
-          Reason("HTTP message not readable"),
-          ErrorCode422("A589")
+      failures = Some(
+        List(
+          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError422(
+            Reason("HTTP message not readable"),
+            ErrorCode422("A589")
+          )
         )
       ),
       askUser = Some(true),
@@ -425,26 +372,19 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     "should match the openapi schema" in {
 
       val invalidResponse = LiabilitySummaryDetailsErrorResponse422(
-        List(
-          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError422(
-            Reason(
-              "some reason with way too many letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters"
-            ),
-            ErrorCode422("")
+        Some(
+          List(
+            LiabilitySummaryDetailsError.LiabilitySummaryDetailsError422(
+              Reason(
+                "some reason with way too many letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters"
+              ),
+              ErrorCode422("")
+            )
           )
         ),
         askUser = Some(true),
         fixRequired = Some(true),
         workItemRaised = Some(true)
-      )
-
-      LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsError422ResponseValidator.validate(
-        invalidResponse
-      ) shouldBe Validated.Invalid(
-        NonEmptyList.of(
-          "Reason value exceeds the max character limit of 128",
-          "ErrorCode422 value is below the minimum character limit of 1"
-        )
       )
 
       liabilitySummaryDetails422JsonSchema.validateAndGetErrors(

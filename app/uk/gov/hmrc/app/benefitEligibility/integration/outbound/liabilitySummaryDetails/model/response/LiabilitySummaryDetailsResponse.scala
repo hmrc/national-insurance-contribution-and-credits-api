@@ -38,7 +38,7 @@ object LiabilitySummaryDetailsError {
 
   }
 
-  case class LiabilitySummaryDetailsErrorResponse400(failures: List[LiabilitySummaryDetailsError400])
+  case class LiabilitySummaryDetailsErrorResponse400(failures: Option[List[LiabilitySummaryDetailsError400]])
       extends LiabilitySummaryDetailsResponse
 
   object LiabilitySummaryDetailsErrorResponse400 {
@@ -77,7 +77,7 @@ object LiabilitySummaryDetailsError {
   }
 
   case class LiabilitySummaryDetailsErrorResponse422(
-      failures: List[LiabilitySummaryDetailsError422],
+      failures: Option[List[LiabilitySummaryDetailsError422]],
       askUser: Option[Boolean],
       fixRequired: Option[Boolean],
       workItemRaised: Option[Boolean]
@@ -193,12 +193,12 @@ object LiabilitySummaryDetailsSuccess {
   }
 
   case class LiabilityDetailsList(
-      identifier: Option[Identifier],
-      _type: Option[EnumLiabtp],
-      occurrenceNumber: Option[OccurrenceNumber],
+      identifier: Identifier,
+      `type`: EnumLiabtp,
+      occurrenceNumber: OccurrenceNumber,
       startDateStatus: Option[EnumLtpsdttp],
       endDateStatus: Option[EnumLtpedttp],
-      startDate: Option[StartDate],
+      startDate: StartDate,
       endDate: Option[EndDate],
       country: Option[EnumCountry],
       trainingCreditApprovalStatus: Option[EnumAtcredfg],
@@ -231,9 +231,34 @@ object LiabilitySummaryDetailsSuccess {
 
   }
 
+  case class LiabilityDetails(
+      identifier: Identifier,
+      `type`: EnumLiabtp,
+      occurrenceNumber: OccurrenceNumber,
+      startDateStatus: Option[EnumLtpsdttp],
+      endDateStatus: Option[EnumLtpedttp],
+      startDate: StartDate,
+      endDate: Option[EndDate],
+      country: Option[EnumCountry],
+      trainingCreditApprovalStatus: Option[EnumAtcredfg],
+      casepaperReferenceNumber: Option[CasepaperReferenceNumber],
+      homeResponsibilitiesProtectionBenefitReference: Option[HomeResponsibilitiesProtectionBenefitReference],
+      homeResponsibilitiesProtectionRate: Option[HomeResponsibilitiesProtectionRate],
+      lostCardNotificationReason: Option[EnumLcheadtp],
+      lostCardRulingReason: Option[EnumLcruletp],
+      homeResponsibilityProtectionCalculationYear: Option[HomeResponsibilityProtectionCalculationYear],
+      awardAmount: Option[AwardAmount],
+      resourceGroupIdentifier: Option[ResourceGroupIdentifier],
+      officeDetails: Option[OfficeDetails]
+  )
+
+  object LiabilityDetails {
+    implicit val liabilityDetailsFormats: Format[LiabilityDetails] = Json.format[LiabilityDetails]
+  }
+
   case class LiabilityEmploymentDetailsList(
       employmentStatusForLiability: EmploymentStatusForLiability,
-      liabilityDetails: List[LiabilityDetailsList]
+      liabilityDetails: List[LiabilityDetails]
   )
 
   object LiabilityEmploymentDetailsList {
