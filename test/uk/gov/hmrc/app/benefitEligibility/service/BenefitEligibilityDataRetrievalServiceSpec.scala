@@ -49,6 +49,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   JSAEligibilityCheckDataRequest,
   MAEligibilityCheckDataRequest
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated.AllLiabilities
 
 import java.time.LocalDate
 import java.util.concurrent.Executors
@@ -102,9 +104,9 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     startTaxYear = StartTaxYear(2025),
     endTaxYear = EndTaxYear(2025),
     identifier = Identifier("GD379251T"),
-    liabilitySearchCategoryHyphenated = true,
-    liabilityOccurrenceNumber = Some(233232323),
-    liabilityType = Some("FOOD"),
+    liabilitySearchCategoryHyphenated = AllLiabilities,
+    liabilityOccurrenceNumber = Some(OccurrenceNumber(233232323)),
+    liabilityType = Some(AllLiabilities),
     earliestLiabilityStartDate = Some(LocalDate.parse("1992-08-23")),
     liabilityStart = Some(LocalDate.parse("1992-08-23")),
     liabilityEnd = Some(LocalDate.parse("1992-08-23")),
