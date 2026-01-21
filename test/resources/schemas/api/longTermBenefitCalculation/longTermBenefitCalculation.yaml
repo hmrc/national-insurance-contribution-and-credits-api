@@ -1,0 +1,1423 @@
+openapi: 3.0.3
+info:
+  title: Long Term Benefit Calculation
+  description: |-
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  version: 0.0.2 Draft
+  x-integration-catalogue:
+    reviewed-date: 2026-01-13T16:47:25Z
+    short-description: Long Term Benefit Calculation
+    status: ALPHA
+    api-type: SIMPLE
+    platform: HIP
+    backends:
+      - NI
+    domain: 3
+    sub-domain: 3.1
+servers:
+  - url: https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate - Production
+  - url: https://api.ipaas.preprod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate – Pre-Production
+  - url: https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni
+    description: Corporate - Test
+  - url: https://hip.ws.hmrc.gov.uk/ni
+    description: MDTP - Production
+  - url: https://hip.ws.ibt.hmrc.gov.uk/ni
+    description: MDTP - QA
+security:
+  - oAuth2:
+      - read:ni-ltb-calculation
+paths:
+  /long-term-benefits/{identifier}/calculation:
+    get:
+      tags:
+        - Long Term Benefit
+      summary: Retrieve Long Term Benefit Calculation Details.
+      description: |-
+        # Purpose
+        This API is used to retrieve Long Term Benefit calculation details from NPS (National Insurance & PAYE Service). It forms part of the NI Long Term Benefits Processing.
+
+        ## Version Log
+        | Version | Date | Author | Description |
+        |---------|------|--------|-------------|
+        | 0.0.1 | 10/12/2025 | NPS Development Team  | Initial Draft  |
+        | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples |
+      operationId: GetLongTermBenefitCalculationDetails
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/govUkOrganisationId'
+        - $ref: '#/components/parameters/govUkUserId'
+        - $ref: '#/components/parameters/govUkUserName'
+        - $ref: '#/components/parameters/govUkJobRole'
+        - $ref: '#/components/parameters/Identifier'
+        - $ref: '#/components/parameters/AssociatedCalculationSequenceNumber'
+        - $ref: '#/components/parameters/BenefitType'
+        - $ref: '#/components/parameters/PensionProcessingArea'
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/GetLongTermBenefitCalculationDetailsResponse'
+              examples:
+                exampleStandardCalcResponse:
+                  summary: Standard Long Term Benefit calculation
+                  value:
+                    statePensionAgeBefore2010TaxYear: false
+                    statePensionAgeAfter2016TaxYear: true
+                    benefitCalculationDetailsList:
+                      - additionalPensionAmountPre1997: 50.0
+                        additionalPensionAmountPost1997: 75.0
+                        basicPensionIncrementsCashValue: 5.0
+                        graduatedRetirementBenefitCashValue: 2.5
+                        totalGuaranteedMinimumPension: 10.0
+                        totalNonGuaranteedMinimumPension: 0.0
+                        greatBritainPaymentAmount: 120.0
+                        dateOfBirth: 1955-07-15
+                        benefitCalculationDetail:
+                          nationalInsuranceNumber: AA123456
+                          benefitType: RETIREMENT PENSION
+                          associatedCalculationSequenceNumber: 1
+                          calculationStatus: DEFINITIVE
+                          calculationDate: 2025-11-01
+                          additionalPensionPercentage: 12.5
+                          basicPensionPercentage: 86
+                          survivorsBenefitAgeRelatedPensionPercentage: 0.0
+                          additionalAgeRelatedPensionPercentage: 4.75
+                          payday: FRIDAY
+                          newStatePensionCalculationDetails:
+                            netAdditionalPensionPre1997: 5.0
+                            oldRulesStatePensionEntitlement: 130.0
+                            netRulesAmount: 160.0
+                            derivedRebateAmount: 2.0
+                            initialStatePensionAmount: 170.0
+                            protectedPayment2016: 0.0
+                            minimumQualifyingPeriodMet: true
+                            qualifyingYearsAfter2016: 6
+                            newStatePensionQualifyingYears: 28
+                            newStatePensionRequisiteYears: 35
+                            newStatePensionEntitlement: 185.15
+                            protectedPayment: 0.0
+                            pensionSharingOrderContractedOutEmploymentsGroup: false
+                            pensionSharingOrderStateEarningsRelatedPensionScheme: false
+                            considerReducedRateElection: false
+                            weeklyBudgetingLoanAmount: 10.56
+                            calculationDate: 2025-11-01
+                maximallyPopulatedResponseBereavementBenefitAndJobCentrePlusEEPP:
+                  summary: Maximally populated response when benefit type is BEREAVEMENT
+                    BENEFIT and PensionProcessingArea is Job Centre+ Electronic Enabled
+                    Pension Processing
+                  value:
+                    statePensionAgeBefore2010TaxYear: true
+                    statePensionAgeAfter2016TaxYear: true
+                    benefitCalculationDetailsList:
+                      - additionalPensionAmountPre1997: 10.56
+                        additionalPensionAmountPost1997: 10.56
+                        pre97AgeRelatedAdditionalPension: 10.56
+                        post97AgeRelatedAdditionalPension: 10.56
+                        basicPensionIncrementsCashValue: 10.56
+                        graduatedRetirementBenefitCashValue: 10.56
+                        totalGuaranteedMinimumPension: 10.56
+                        totalNonGuaranteedMinimumPension: 10.56
+                        greatBritainPaymentAmount: 10.56
+                        dateOfBirth: 2022-06-27
+                        notionalPost1997AdditionalPension: 10.56
+                        notionalPre1997AdditionalPension: 10.56
+                        inheritableNotionalAdditionalPensionIncrements: 10.56
+                        conditionOneSatisfied: H
+                        reasonForFormIssue: REQUESTED BENEFIT CALCULATION
+                        additionalNotionalPensionAmountPost2002: 10.56
+                        additionalPensionAmountPost2002: 10.56
+                        additionalNotionalPensionIncrementsInheritedPost2002: 10.56
+                        additionalPensionIncrementsInheritedPost2002: 10.56
+                        post02AgeRelatedAdditionalPension: 10.56
+                        pre1975ShortTermBenefits: 2
+                        survivingSpouseAge: 45
+                        operativeBenefitStartDate: 2022-06-27
+                        sicknessBenefitStatusForReports: "Y"
+                        benefitCalculationDetail:
+                          nationalInsuranceNumber: AA123456
+                          benefitType: ALL
+                          associatedCalculationSequenceNumber: 86
+                          calculationStatus: DEFINITIVE
+                          substitutionMethod1: 235
+                          substitutionMethod2: 235
+                          calculationDate: 2022-06-27
+                          guaranteedMinimumPensionContractedOutDeductionsPre1988: 10.56
+                          guaranteedMinimumPensionContractedOutDeductionsPost1988: 10.56
+                          contractedOutDeductionsPre1988: 10.56
+                          contractedOutDeductionsPost1988: 10.56
+                          additionalPensionPercentage: 10.56
+                          basicPensionPercentage: 86
+                          survivorsBenefitAgeRelatedPensionPercentage: 10.56
+                          additionalAgeRelatedPensionPercentage: 10.56
+                          inheritedBasicPensionPercentage: 10.56
+                          inheritedAdditionalPensionPercentage: 10.56
+                          inheritedGraduatedPensionPercentage: 10.56
+                          inheritedGraduatedBenefit: 10.56
+                          calculationSource: AP COMPONENT SUSPECT (APRIL - MAY CALC)
+                          payday: FRIDAY
+                          dateOfBirth: 2022-06-27
+                          husbandDateOfDeath: 2022-06-27
+                          additionalPost1997PensionPercentage: 10.56
+                          additionalPost1997AgeRelatedPensionPercentage: 10.56
+                          additionalPensionNotionalPercentage: 10.56
+                          additionalPost1997PensionNotionalPercentage: 10.56
+                          inheritedAdditionalPensionNotionalPercentage: 10.56
+                          inheritableAdditionalPensionPercentage: 90
+                          additionalPost2002PensionNotionalPercentage: 10.56
+                          additionalPost2002PensionPercentage: 10.56
+                          inheritedAdditionalPost2002PensionNotionalPercentage: 10.56
+                          inheritedAdditionalPost2002PensionPercentage: 10.56
+                          additionalPost2002AgeRelatedPensionPercentage: 10.56
+                          singleContributionConditionRulesApply: true
+                          officeDetails:
+                            officeLocationDecode: 1
+                            officeLocationValue: HQ STATIONARY STORE
+                            officeIdentifier: (NONE)
+                          newStatePensionCalculationDetails:
+                            newStatePensionRequisiteYears: 35
+                            calculationDate: 2022-06-27
+                maximallyPopulatedResponseStandardEEPP:
+                  summary: Maximally populated response when PensionProcessingArea
+                    is Standard Electronic Enabled Pension Processing
+                  value:
+                    statePensionAgeBefore2010TaxYear: true
+                    statePensionAgeAfter2016TaxYear: true
+                    benefitCalculationDetailsList:
+                      - additionalPensionAmountPre1997: 10.56
+                        additionalPensionAmountPost1997: 10.56
+                        basicPensionIncrementsCashValue: 10.56
+                        additionalPensionIncrementsCashValue: 10.56
+                        graduatedRetirementBenefitCashValue: 10.56
+                        totalGuaranteedMinimumPension: 10.56
+                        totalNonGuaranteedMinimumPension: 10.56
+                        longTermBenefitsIncrementalCashValue: 10.56
+                        notionalPost1997AdditionalPension: 10.56
+                        notionalPre1997AdditionalPension: 10.56
+                        inheritableNotionalAdditionalPensionIncrements: 10.56
+                        conditionOneSatisfied: H
+                        reasonForFormIssue: REQUESTED BENEFIT CALCULATION
+                        longTermBenefitsCategoryACashValue: 10.56
+                        longTermBenefitsCategoryBLCashValue: 10.56
+                        longTermBenefitsUnitValue: 10.56
+                        additionalNotionalPensionAmountPost2002: 10.56
+                        additionalPensionAmountPost2002: 10.56
+                        additionalNotionalPensionIncrementsInheritedPost2002: 10.56
+                        additionalPensionIncrementsInheritedPost2002: 10.56
+                        post02AgeRelatedAdditionalPension: 10.56
+                        benefitCalculationDetail:
+                          nationalInsuranceNumber: AA123456
+                          benefitType: ALL
+                          associatedCalculationSequenceNumber: 86
+                          calculationStatus: DEFINITIVE
+                          substitutionMethod1: 235
+                          substitutionMethod2: 235
+                          calculationDate: 2022-06-27
+                          guaranteedMinimumPensionContractedOutDeductionsPre1988: 10.56
+                          guaranteedMinimumPensionContractedOutDeductionsPost1988: 10.56
+                          contractedOutDeductionsPre1988: 10.56
+                          contractedOutDeductionsPost1988: 10.56
+                          additionalPensionPercentage: 10.56
+                          basicPensionPercentage: 86
+                          survivorsBenefitAgeRelatedPensionPercentage: 10.56
+                          additionalAgeRelatedPensionPercentage: 10.56
+                          inheritedBasicPensionPercentage: 10.56
+                          inheritedAdditionalPensionPercentage: 10.56
+                          inheritedGraduatedPensionPercentage: 10.56
+                          inheritedGraduatedBenefit: 10.56
+                          calculationSource: AP COMPONENT SUSPECT (APRIL - MAY CALC)
+                          payday: FRIDAY
+                          dateOfBirth: 2022-06-27
+                          husbandDateOfDeath: 2022-06-27
+                          additionalPost1997PensionPercentage: 10.56
+                          additionalPost1997AgeRelatedPensionPercentage: 10.56
+                          additionalPensionNotionalPercentage: 10.56
+                          additionalPost1997PensionNotionalPercentage: 10.56
+                          inheritedAdditionalPensionNotionalPercentage: 10.56
+                          inheritableAdditionalPensionPercentage: 90
+                          additionalPost2002PensionNotionalPercentage: 10.56
+                          additionalPost2002PensionPercentage: 10.56
+                          inheritedAdditionalPost2002PensionNotionalPercentage: 10.56
+                          inheritedAdditionalPost2002PensionPercentage: 10.56
+                          additionalPost2002AgeRelatedPensionPercentage: 10.56
+                          singleContributionConditionRulesApply: true
+                          officeDetails:
+                            officeLocationDecode: 1
+                            officeLocationValue: HQ STATIONARY STORE
+                            officeIdentifier: (NONE)
+                          newStatePensionCalculationDetails:
+                            netAdditionalPensionPre1997: 10.56
+                            oldRulesStatePensionEntitlement: 10.56
+                            netRulesAmount: 10.56
+                            derivedRebateAmount: 10.56
+                            initialStatePensionAmount: 10.56
+                            protectedPayment2016: 10.56
+                            minimumQualifyingPeriodMet: true
+                            qualifyingYearsAfter2016: 3
+                            newStatePensionQualifyingYears: 20
+                            newStatePensionRequisiteYears: 35
+                            newStatePensionEntitlement: 10.56
+                            protectedPayment: 10.56
+                            pensionSharingOrderContractedOutEmploymentsGroup: true
+                            pensionSharingOrderStateEarningsRelatedPensionScheme: true
+                            considerReducedRateElection: true
+                            weeklyBudgetingLoanAmount: 10.56
+                            calculationDate: 2022-06-27
+                minimallyPopulatedResponse:
+                  summary: Minimally populated response
+                  value:
+                    benefitCalculationDetailsList:
+                      - post97AgeRelatedAdditionalPension: 10.56
+                        graduatedRetirementBenefitCashValue: 10.56
+                        greatBritainPaymentAmount: 10.56
+                        benefitCalculationDetail:
+                          nationalInsuranceNumber: AA123456
+                          benefitType: ALL
+                          associatedCalculationSequenceNumber: 86
+                          additionalPensionPercentage: 10.56
+                          survivorsBenefitAgeRelatedPensionPercentage: 10.56
+                          additionalAgeRelatedPensionPercentage: 10.56
+                          inheritedBasicPensionPercentage: 10.56
+                          inheritedAdditionalPensionPercentage: 10.56
+                          inheritedGraduatedPensionPercentage: 10.56
+                          additionalPost1997PensionPercentage: 10.56
+                          additionalPost1997AgeRelatedPensionPercentage: 10.56
+                          additionalPensionNotionalPercentage: 10.56
+                          additionalPost1997PensionNotionalPercentage: 10.56
+                          inheritedAdditionalPensionNotionalPercentage: 10.56
+                          additionalPost2002PensionNotionalPercentage: 10.56
+                          additionalPost2002PensionPercentage: 10.56
+                          inheritedAdditionalPost2002PensionNotionalPercentage: 10.56
+                          inheritedAdditionalPost2002PensionPercentage: 10.56
+                          additionalPost2002AgeRelatedPensionPercentage: 10.56
+        "400":
+          description: Bad Request Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                Actual_Response:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                        - reason: "Constraint violation: Invalid/Missing input parameter:\
+                          \ <parameter>"
+                          code: "400.1"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "403":
+          description: 'Forbidden '
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_403'
+              examples:
+                Actual_Response:
+                  value:
+                    reason: Forbidden
+                    code: "403.2"
+        "404":
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+        "500":
+          description: Internal Server Error Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+components:
+  schemas:
+    EnumBenType:
+      enum:
+        - ALL
+        - AUTOPIE / AUTOJSP
+        - BEREAVED NSP
+        - BEREAVEMENT BENEFIT
+        - CAA/US
+        - CARER'S ALLOWANCE
+        - CATEGORY B
+        - CLAIMS PAPER
+        - DEPENDANT'S WAR PENSION
+        - EMPLOYMENT AND SUPPORT
+        - EQUIVALENT PENSION BENEFIT
+        - GBU
+        - GUARDIAN'S ALLOWANCE
+        - HOUSING BENEFIT
+        - INCAPACITY BENEFIT
+        - INDUSTRIAL DEATH BENEFIT
+        - JOB RELEASE ALLOWANCE
+        - JOB SEEKER'S ALLOWANCE
+        - LTB
+        - MATERNITY ALLOWANCE
+        - NOT KNOWN
+        - PENSION SHARING ON DIVORCE
+        - PRE-2001 WIDOWER
+        - RETIREMENT PENSION
+        - RPFA
+        - SICKNESS BENEFIT/IVB
+        - STB (NOT UB/JSA)
+        - UNEMPLOYMENT BENEFIT
+        - WIDOWS BENEFIT
+      type: string
+    EnumCalcsrce:
+      enum:
+        - AP COMPONENT SUSPECT (APRIL - MAY CALC)
+        - AWARD RECONCILED
+        - AWARD RECONCILIATION - REVISED UPWARDS
+        - INTERIM WB CALCULATION
+        - IVB UPRATING
+        - NOT KNOWN
+        - RECONCILIATION FAILED - AWARD REVISED DOWNWARDS
+        - REQUESTED BENEFIT CALCULATION
+        - RP CALCULATION - CLAIMANT REACHED DPA
+        - RP CALCULATION - CLAIMANT REACHED MPA
+        - RP/WB/BB CALCULATION - FEDBACK DETAILS RECEIVED
+        - SCHEME RECONCILIATION SERVICE ACCOUNT
+        - SRB ISSUED - CHANGE TO FLAT RATE RECORD (<1948)
+        - SRB ISSUED - CHANGE TO GRB RECORD
+        - SRB ISSUED - CONTRIBUTION/CREDIT CHANGE IN FRY TAX YEAR
+        - SRB ISSUED - CONTRIBUTION/CREDIT CHANGE IN PRE-FRY TAX YEAR
+        - SRB ISSUED - DATE OF BIRTH CHANGE (WIDOW)
+        - SRB ISSUED - HRP INVOLVEMENT
+        - SRB ISSUED - PERSONAL DETAILS CHANGE (ACCOUNT HOLDER)
+        - SRB ISSUED - RETROSPECTIVE PP OPTION RECEIVED
+        - SRB ISSUED - S2P ENTITLEMENT CHANGE
+        - SRB ISSUED - SSP RECEIVED
+        - SRB ISSUED - SUBSTITUTION/INHERITANCE DETAILS REVISED
+        - SRB ISSUED - TERMINATION DEBIT RECEIVED
+      type: string
+    EnumCalsttp:
+      enum:
+        - DEFINITIVE
+        - DELETED
+        - FINAL
+        - INITIAL
+        - NOT APPLICABLE
+      type: string
+    EnumEeppflg:
+      enum:
+        - Job Centre+ Electronic Enabled Pension Processing
+        - Standard Electronic Enabled Pension Processing
+      type: string
+    EnumOffidtp:
+      enum:
+        - (NONE)
+        - DE
+        - DSS
+        - Inland Revenue
+        - NOT APPLICABLE
+        - NOT KNOWN
+      type: string
+    EnumPayday:
+      enum:
+        - FRIDAY
+        - MONDAY
+        - "NULL"
+        - THURSDAY
+        - TUESDAY
+        - WEDNESDAY
+      type: string
+    correlationId:
+      format: uuid
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      maxLength: 40
+      minLength: 3
+      type: string
+    govUkOrganisationId:
+      description: A unique organisation ID for the user.
+      maxLength: 40
+      minLength: 4
+      type: string
+      example: Department
+    govUkUserId:
+      description: A unique user ID for the user.
+      maxLength: 7
+      minLength: 7
+      type: string
+    govUkUserName:
+      description: A unique username for the user.
+      maxLength: 20
+      minLength: 4
+      type: string
+      example: Worker
+    govUkJobRole:
+      description: A unique job role for the user.
+      minLength: 4
+      type: string
+      example: Social
+    identifier:
+      description: The identifier of which could be either a Temporary Reference Number
+        (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
+      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+      type: string
+      example: AA000001A
+    associatedCalculationSequenceNumber:
+      description: Unique sequence number representing the position in the associated
+        calculation history (i.e. row) of the associated calculation details entry
+        for this individual - this would only be populated if the previous call did
+        not transfer all of the data i.e. there are more rows marked to be collected
+        still.
+      maximum: 126
+      minimum: 1
+      type: integer
+      example: 86
+    benefitType:
+      $ref: '#/components/schemas/EnumBenType'
+    pensionProcessingArea:
+      $ref: '#/components/schemas/EnumEeppflg'
+    errorResponse_400:
+      title: Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: object
+      properties:
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_400:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: |-
+            The error code representing the error that has occurred. Valid values are
+            400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'
+            400.2 - HTTP message not readable;
+          enum:
+            - "400.1"
+            - "400.2"
+          type: string
+    errorResponse_403:
+      title: Forbidden Error Response
+      description: Error Response Payload for this API
+      oneOf:
+        - $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+        - $ref: '#/components/schemas/errorResourceObj_403_UserNotAuthorised'
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Forbidden
+          type: string
+        code:
+          description: The error code representing the Forbidden Error.
+          enum:
+            - "403.2"
+          type: string
+    errorResourceObj_403_UserNotAuthorised:
+      title: 403_UserNotAuthorised
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - User Not Authorised
+          type: string
+        code:
+          description: User Not Authorised.
+          enum:
+            - "403.1"
+          type: string
+    errorResponse_422:
+      title: Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_422'
+    errorResponseFailure_422:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_422'
+    errorResourceObj_422:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: The error code representing the error that has occurred.
+          maxLength: 10
+          minLength: 1
+          type: string
+    BenefitCalculationDetail:
+      description: Contains benefit calculation details for an individual.
+      required:
+        - nationalInsuranceNumber
+        - benefitType
+        - associatedCalculationSequenceNumber
+      type: object
+      properties:
+        nationalInsuranceNumber:
+          description: National Insurance Number - unique for an individual - note
+            not all individuals qualify to be issued with one.
+          maxLength: 8
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$"
+          type: string
+          example: AA123456
+        benefitType:
+          $ref: '#/components/schemas/EnumBenType'
+        associatedCalculationSequenceNumber:
+          description: Unique sequence number representing the position in the associated
+            calculation history (i.e. row) of the associated calculation details entry
+            for this individual - this would only be populated if the previous call
+            did not transfer all of the data i.e. there are more rows marked to be
+            collected still.
+          maximum: 126
+          minimum: 1
+          type: integer
+          example: 86
+        calculationStatus:
+          $ref: '#/components/schemas/EnumCalsttp'
+        substitutionMethod1:
+          description: Denotes the first substitution method applicable for the Long
+            Term Benefit (LTB) calculation.
+          maximum: 254
+          minimum: 0
+          type: integer
+          example: 235
+        substitutionMethod2:
+          description: Denotes the second substitution method applicable for the Long
+            Term Benefit (LTB) calculation.
+          maximum: 254
+          minimum: 0
+          type: integer
+          example: 235
+        calculationDate:
+          format: date
+          description: The date on which the benefit calculation was performed as
+            part of the benefit calculation details.
+          type: string
+          example: 2022-06-27
+        guaranteedMinimumPensionContractedOutDeductionsPre1988:
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) pre 1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        guaranteedMinimumPensionContractedOutDeductionsPost1988:
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) post 1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        contractedOutDeductionsPre1988:
+          description: Denotes the value of the Contracted-Out Deductions (COD) pre
+            1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        contractedOutDeductionsPost1988:
+          description: Denotes the value of the Contracted-Out Deductions (COD) post
+            1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage. Value precision\
+            \ allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678,\
+            \ 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        basicPensionPercentage:
+          description: Denotes the percentage of a basic pension that the individual
+            is currently eligible for.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 86
+        survivorsBenefitAgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related pension percentage for a widow/widower\
+            \ or surviving civil partner. Value precision allows for up to 6 decimal\
+            \ places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890\
+            \ are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalAgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related additional pension percentage. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedBasicPensionPercentage:
+          format: float
+          description: "Denotes the basic pension percentage that a widow/widower\
+            \ or surviving civil partner may inherit from their partner's additional\
+            \ state pension. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage that a widow/widower\
+            \ or surviving civil partner may inherit from their partner's additional\
+            \ state pension. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedGraduatedPensionPercentage:
+          format: float
+          description: "Denotes the graduated pension percentage that a widow/widower\
+            \ or surviving civil partner may inherit from their partner's additional\
+            \ state pension. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedGraduatedBenefit:
+          description: The value of the inherited graduated benefit by a surviving
+            spouse or civil partner of a person with entitlement to that benefit.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        calculationSource:
+          $ref: '#/components/schemas/EnumCalcsrce'
+        payday:
+          $ref: '#/components/schemas/EnumPayday'
+        dateOfBirth:
+          format: date
+          description: The date of birth of the individual.
+          type: string
+          example: 2022-06-27
+        husbandDateOfDeath:
+          format: date
+          description: The date on which the individual's husband deceased.
+          type: string
+          example: 2022-06-27
+        additionalPost1997PensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage from 1997. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost1997AgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related additional pension percentage from\
+            \ 1997. Value precision allows for up to 6 decimal places - i.e. 10, 10.5,\
+            \ 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost1997PensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage from 1997.\
+            \ Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage that a\
+            \ widow/widower or surviving civil partner may inherit from their partner's\
+            \ additional state pension. Value precision allows for up to 6 decimal\
+            \ places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890\
+            \ are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritableAdditionalPensionPercentage:
+          description: Denotes the percentage of an additional pension that can be
+            inherited.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 90
+        additionalPost2002PensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage from 2002.\
+            \ Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost2002PensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage from 2002. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPost2002PensionNotionalPercentage:
+          format: float
+          description: "Denotes the post-2002 notional additional pension percentage\
+            \ that a widow/widower or surviving civil partner may inherit from their\
+            \ partner's additional state pension. Value precision allows for up to\
+            \ 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789,\
+            \ 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPost2002PensionPercentage:
+          format: float
+          description: "Denotes the post-2002 additional pension percentage that a\
+            \ widow/widower or surviving civil partner may inherit from their partner's\
+            \ additional state pension. Value precision allows for up to 6 decimal\
+            \ places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890\
+            \ are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost2002AgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related additional pension percentage from\
+            \ 2002. Value precision allows for up to 6 decimal places - i.e. 10, 10.5,\
+            \ 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        singleContributionConditionRulesApply:
+          description: Denotes whether or not single contribution condition rules
+            apply.
+          type: boolean
+          example: true
+        officeDetails:
+          $ref: '#/components/schemas/DecodedOfficeDetailsResponse'
+        newStatePensionCalculationDetails:
+          $ref: '#/components/schemas/NewStatePensionCalculationDetails'
+    BenefitCalculationDetails:
+      description: Contains benefit calculation details for an individual.
+      type: object
+      properties:
+        additionalPensionAmountPre1997:
+          description: Denotes the cash value of the individual's additional pension
+            from tax years prior to 1997.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionAmountPost1997:
+          description: Denotes the cash value of the individual's additional pension
+            from tax years after 1997.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        pre97AgeRelatedAdditionalPension:
+          description: Denotes the Widow(er)'s Benefit Pre-Year 1997 Age Related Additional
+            Pension Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        post97AgeRelatedAdditionalPension:
+          description: Denotes the Widow(er)'s Benefit Post Year 1997 Age Related
+            Additional Pension Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        basicPensionIncrementsCashValue:
+          description: Denotes the incremental basic pension cash value amount inherited
+            from a former spouse.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionIncrementsCashValue:
+          description: Denotes the incremental additional pension cash value amount
+            inherited from a former spouse.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        graduatedRetirementBenefitCashValue:
+          description: Denotes the entitlement amount for a national state pension
+            when payments from earnings related pensions are added on top as part
+            of the Graduated Retirement Benefit Scheme.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        totalGuaranteedMinimumPension:
+          description: Denotes the total Guaranteed Minimum Pension (GMP) amount that
+            an individual can receive.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        totalNonGuaranteedMinimumPension:
+          description: Denotes the total Non-Guaranteed Minimum Pension (GMP) amount
+            that an individual can receive.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        longTermBenefitsIncrementalCashValue:
+          description: Denotes the incremental cash value amount for Graduated Retirement
+            Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        greatBritainPaymentAmount:
+          description: Denotes the Widow(er)'s Benefit Great Britain Payment Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        dateOfBirth:
+          format: date
+          description: The date of birth of the individual.
+          type: string
+          example: 2022-06-27
+        notionalPost1997AdditionalPension:
+          description: Denotes the cash value of the notional post 1997 additional
+            pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        notionalPre1997AdditionalPension:
+          description: Denotes the cash value of the notional pre 1997 additional
+            pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        inheritableNotionalAdditionalPensionIncrements:
+          description: Denotes the cash value of the notional additional pension increments
+            inherited from a former spouse.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        conditionOneSatisfied:
+          description: Denotes the status around whether or not condition one for
+            Basic Pensions has been satisfied.
+          maxLength: 10
+          minLength: 1
+          pattern: "^[A-Za-z0-9\\/ -]+$"
+          type: string
+          example: H
+        reasonForFormIssue:
+          description: Denotes the reason that the form was issued.
+          maxLength: 30
+          minLength: 1
+          pattern: "^[A-Za-z0-9 -]+$"
+          type: string
+          example: REQUESTED BENEFIT CALCULATION
+        longTermBenefitsCategoryACashValue:
+          description: Denotes the total cash value for Category A Long Term Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        longTermBenefitsCategoryBLCashValue:
+          description: Denotes the total cash value for Category BL Long Term Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        longTermBenefitsUnitValue:
+          description: Denotes the unit value amount for Graduated Retirement Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalNotionalPensionAmountPost2002:
+          description: Denotes the notional cash value of the individual's additional
+            pension from tax years after 2002.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionAmountPost2002:
+          description: Denotes the cash value of the individual's additional pension
+            from tax years after 2002.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalNotionalPensionIncrementsInheritedPost2002:
+          description: Denotes the notional cash value of additional pension increments
+            inherited from a former spouse after April 2002 under the State Second
+            Pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionIncrementsInheritedPost2002:
+          description: Denotes the cash value of additional pension increments inherited
+            from a former spouse after April 2002 under the State Second Pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        post02AgeRelatedAdditionalPension:
+          description: Denotes the Widow(er)'s Benefit Post Year 2002 Age Related
+            Additional Pension Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        pre1975ShortTermBenefits:
+          description: Denotes the number of pre-1975 short term benefits held.
+          maximum: 26
+          minimum: 0
+          type: integer
+          example: 2
+        survivingSpouseAge:
+          description: Denotes the Surviving Spouse's Age.
+          maximum: 125
+          minimum: 18
+          type: integer
+          example: 45
+        operativeBenefitStartDate:
+          format: date
+          description: Denotes the start date reported for the operative benefit.
+          type: string
+          example: 2022-06-27
+        sicknessBenefitStatusForReports:
+          description: Denotes the sickness benefit status for reporting.
+          maxLength: 1
+          minLength: 1
+          pattern: "^[A-Z0-9]$"
+          type: string
+          example: "Y"
+        benefitCalculationDetail:
+          $ref: '#/components/schemas/BenefitCalculationDetail'
+    GetLongTermBenefitCalculationDetailsResponse:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        statePensionAgeBefore2010TaxYear:
+          description: Denotes whether or not the State Pension Age (SPA) for the
+            individual falls before the date 06/04/2010.
+          type: boolean
+          example: true
+        statePensionAgeAfter2016TaxYear:
+          description: Denotes whether or not the State Pension Age (SPA) for the
+            individual falls after the date 05/04/2016.
+          type: boolean
+          example: true
+        benefitCalculationDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitCalculationDetails'
+    NewStatePensionCalculationDetails:
+      description: Contains details related to a new state pension calculation.
+      type: object
+      properties:
+        netAdditionalPensionPre1997:
+          description: Denotes the net amount of additional pension after subtracting
+            an individual's Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions
+            (COD) for tax years post 1997.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        oldRulesStatePensionEntitlement:
+          description: Denotes the State Pension entitlement accrued up to 2016 under
+            the old rules.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        netRulesAmount:
+          description: Denotes the net rules amount for New State Pension (NSP) calculations
+            from 06/04/2016.
+          multipleOf: 0.01
+          maximum: 300
+          minimum: 0
+          type: number
+          example: 10.56
+        derivedRebateAmount:
+          description: Denotes the derived rebate amount to use when adjusting the
+            gross new rules amount to take account of the periods of contracting-out.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        initialStatePensionAmount:
+          description: The initial value of the person's state pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        protectedPayment2016:
+          description: Denotes the protected payment amount for the insured person
+            at or before 2016.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        minimumQualifyingPeriodMet:
+          description: Denotes whether or not the minimum qualifying period for a
+            New State Pension has been met.
+          type: boolean
+          example: true
+        qualifyingYearsAfter2016:
+          description: Denotes the number of qualifying years from 2016/2017 onwards.
+          maximum: 50
+          minimum: 0
+          type: integer
+          example: 3
+        newStatePensionQualifyingYears:
+          description: Denotes the number of qualifying years that the individual
+            has towards their New State Pension (NSP).
+          maximum: 50
+          minimum: 0
+          type: integer
+          example: 20
+        newStatePensionRequisiteYears:
+          description: Denotes the number of requisite years that the individual has
+            towards their New State Pension (NSP).
+          maximum: 35
+          minimum: 35
+          type: integer
+          example: 35
+        newStatePensionEntitlement:
+          description: Denotes the New State Pension entitlement for an individual.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        protectedPayment:
+          description: Denotes the protected payment amount for the insured person.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        pensionSharingOrderContractedOutEmploymentsGroup:
+          description: Denotes whether or not a pension sharing order applies to a
+            Contracted-Out Employments Group (COEG).
+          type: boolean
+          example: true
+        pensionSharingOrderStateEarningsRelatedPensionScheme:
+          description: Denotes whether or not a pension sharing order applies to a
+            State Earnings Related Pension Scheme (SERPS).
+          type: boolean
+          example: true
+        considerReducedRateElection:
+          description: Denotes whether or not a reduced rate of election should be
+            considered.
+          type: boolean
+          example: true
+        weeklyBudgetingLoanAmount:
+          description: "Denotes the weekly budgeting loan amount for a given tax year,\
+            \ based on the number of qualifying years - weekly amounts come from Reference\
+            \ Data Classes CATBLRT1 for qualifying years 0-15 and CATBLRT2 for qualifying\
+            \ years 16+."
+          multipleOf: 0.01
+          maximum: 85
+          minimum: 0
+          type: number
+          example: 10.56
+        calculationDate:
+          format: date
+          description: The date on which the benefit calculation was performed as
+            part of the benefit calculation details.
+          type: string
+          example: 2022-06-27
+    DecodedOfficeDetailsResponse:
+      description: Contains office related details.
+      type: object
+      properties:
+        officeLocationDecode:
+          description: A unique identifier for an office location.
+          maximum: 99999
+          minimum: 0
+          type: integer
+          example: 1
+        officeLocationValue:
+          description: The description of the office location.
+          maxLength: 128
+          minLength: 1
+          type: string
+          example: HQ STATIONARY STORE
+        officeIdentifier:
+          $ref: '#/components/schemas/EnumOffidtp'
+    HIP-originEnum:
+      enum:
+        - HIP
+        - HoD
+      type: string
+    HIP-failureResponse:
+      required:
+        - failures
+      type: object
+      properties:
+        failures:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            required:
+              - type
+              - reason
+            type: object
+            properties:
+              type:
+                type: string
+              reason:
+                type: string
+            additionalProperties: false
+    HIP-originResponse:
+      required:
+        - origin
+        - response
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/HIP-originEnum'
+        response:
+          $ref: '#/components/schemas/HIP-failureResponse'
+      additionalProperties: false
+  parameters:
+    correlationId:
+      name: correlationId
+      in: header
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    govUkOriginatorId:
+      name: gov-uk-originator-id
+      in: header
+      description: Identity of the Originating System that made the API call.
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    govUkOrganisationId:
+      name: gov-uk-organisation-id
+      in: header
+      description: A unique organisation ID for the user.
+      schema:
+        $ref: '#/components/schemas/govUkOrganisationId'
+    govUkUserId:
+      name: gov-uk-user-id
+      in: header
+      description: A unique user ID for the user.
+      required: false
+      schema:
+        $ref: '#/components/schemas/govUkUserId'
+    govUkUserName:
+      name: gov-uk-user-name
+      in: header
+      description: A unique username for the user.
+      schema:
+        $ref: '#/components/schemas/govUkUserName'
+    govUkJobRole:
+      name: gov-uk-job-role
+      in: header
+      description: A unique job role for the user.
+      schema:
+        $ref: '#/components/schemas/govUkJobRole'
+    Identifier:
+      name: identifier
+      in: path
+      description: The identifier of which could be either a Temporary Reference Number
+        (TRN) or a National Insurance Number (NINO).
+      required: true
+      schema:
+        $ref: '#/components/schemas/identifier'
+    AssociatedCalculationSequenceNumber:
+      name: seqNo
+      in: query
+      description: Unique sequence number representing the position in the associated
+        calculation history (i.e. row) of the associated calculation details entry
+        for this individual - this would only be populated if the previous call did
+        not transfer all of the data i.e. there are more rows marked to be collected
+        still.
+      required: false
+      schema:
+        $ref: '#/components/schemas/associatedCalculationSequenceNumber'
+    BenefitType:
+      name: type
+      in: query
+      description: Denotes the area responsible for the electronic enabling of the
+        pensions processing.
+      required: false
+      schema:
+        $ref: '#/components/schemas/benefitType'
+    PensionProcessingArea:
+      name: pensionProcessingArea
+      in: query
+      description: Denotes the area responsible for the electronic enabling of the
+        pensions processing.
+      required: false
+      schema:
+        $ref: '#/components/schemas/pensionProcessingArea'
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: OAuth2 Client Credentials Flow
+      flows:
+        clientCredentials:
+          tokenUrl: /tokenUrl/not-required
+          scopes:
+            read:ni-ltb-calculation: Long Term Benefit Calculation

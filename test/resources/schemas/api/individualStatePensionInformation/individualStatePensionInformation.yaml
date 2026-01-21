@@ -1,0 +1,942 @@
+openapi: 3.0.3
+info:
+  title: Individual's State Pension Information
+  description: |-
+    # Usage Terms
+    This interface is business-critical for HMRC and is expected to be consumed by Digital users and other HMRC systems - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  version: 0.0.2
+  x-integration-catalogue:
+    reviewed-date: 2026-01-13T08:59:30Z
+    short-description: Individual's State Pension Information
+    status: BETA
+    api-type: SIMPLE
+    platform: HIP
+    backends:
+      - NI
+    domain: 1
+    sub-domain: 1.1
+servers:
+  - url: https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate - Production
+  - url: https://api.ipaas.preprod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate – Pre-Production
+  - url: https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni
+    description: Corporate - Test
+  - url: https://hip.ws.hmrc.gov.uk/ni
+    description: MDTP - Production
+  - url: https://hip.ws.ibt.hmrc.gov.uk/ni
+    description: MDTP - QA
+security:
+  - oAuth2:
+      - read:ltb-qualifying-years-and-contributions
+paths:
+  /long-term-benefits/{identifier}/contributions:
+    get:
+      summary: "Retrieve Individual's State Pension Information, Number of Qualifying\
+        \ Years, and Contributions by Tax Year"
+      description: |-
+        # Purpose
+        This API is used to retrieve State Pension information for an indvidual (i.e., their NI record). It forms part of the NI Long Term Benefits Processing.
+        # Volumes & Registered Consumers
+        This API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection.<br>
+         | Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |
+         |----------|------------------------|---------------------|----------|
+         | xxx | xxx | xxx | xxx |
+         *TPS = Transactions per second
+         ## Version Log
+         |Version|Date        | Author               | Description         |
+         |-------|------------|----------------------|---------------------|
+         | 0.0.1 Draft | 12/12/2024 | NPS Development Team | Initial Draft |
+         | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples     |
+      operationId: getNIRecordForIPF
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/Identifier'
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/GetNIRecordResponse'
+              examples:
+                exampleResponse:
+                  summary: Example Response
+                  value:
+                    identifier: AA000001A
+                    numberOfQualifyingYears: 50
+                    nonQualifyingYears: 0
+                    yearsToFinalRelevantYear: 0
+                    nonQualifyingYearsPayable: 0
+                    pre1975CCCount: 0
+                    dateOfEntry: 1975-07-18
+                    contributionsByTaxYear:
+                      - taxYear: 1975
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 19.26
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 350.91
+                        otherCredits:
+                          - contributionCreditType: CLASS 3 CREDIT
+                            creditSourceType: NOT KNOWN
+                            contributionCreditCount: 50
+                      - taxYear: 1976
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 79.16
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 1377.39
+                        otherCredits:
+                          - contributionCreditType: CLASS 3 CREDIT
+                            creditSourceType: NOT KNOWN
+                            contributionCreditCount: 50
+                      - taxYear: 1977
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 153.21
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 2666.09
+                      - taxYear: 1978
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 299.4
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 4606.15
+                      - taxYear: 1979
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 249.92
+                        coClassOnePaid: 186.46
+                        totalPrimaryEarnings: 4665.0
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 5641.93
+                      - taxYear: 1980
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 246.18
+                        coClassOnePaid: 165.42
+                        totalPrimaryEarnings: 3894.12
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 5091.15
+                      - taxYear: 1981
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 85.57
+                        coClassOnePaid: 56.27
+                        totalPrimaryEarnings: 1072.38
+                        niEarningsSelfEmployed: 40
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 1450.44
+                      - taxYear: 1982
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 536.4
+                        coClassOnePaid: 415.14
+                        totalPrimaryEarnings: 6643.2
+                        niEarningsSelfEmployed: 4
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 8029.49
+                      - taxYear: 1983
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 685.3
+                        coClassOnePaid: 539.66
+                        totalPrimaryEarnings: 7880.29
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 9499.18
+                      - taxYear: 1984
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 836.68
+                        coClassOnePaid: 677.56
+                        totalPrimaryEarnings: 9891.97
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 11660.86
+                      - taxYear: 1985
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 701.43
+                        coClassOnePaid: 535.35
+                        totalPrimaryEarnings: 7815.33
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 9979.85
+                      - taxYear: 1986
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 872.97
+                        coClassOnePaid: 335.92
+                        totalPrimaryEarnings: 4903.94
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 12426.81
+                      - taxYear: 1987
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1301.4
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 14459.0
+                      - taxYear: 1988
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1213.15
+                        coClassOnePaid: 377.94
+                        totalPrimaryEarnings: 5399.0
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 14678.0
+                      - taxYear: 1989
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1106.22
+                        coClassOnePaid: 981.09
+                        totalPrimaryEarnings: 14015.0
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 16208.0
+                      - taxYear: 1990
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1128.91
+                        coClassOnePaid: 994.87
+                        totalPrimaryEarnings: 14212.0
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 17603.0
+                      - taxYear: 1991
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1460.16
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 18304.0
+                      - taxYear: 1992
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1452.88
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 18304.0
+                      - taxYear: 1993
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1445.6
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 18304.0
+                      - taxYear: 1994
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1595.88
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 18304.0
+                      - taxYear: 1995
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1800.83
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 20441.0
+                      - taxYear: 1996
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1821.99
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 20757.0
+                      - taxYear: 1997
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2160.08
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 24180.0
+                      - taxYear: 1998
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2255.76
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 25220.0
+                      - taxYear: 1999
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2256.8
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 26000.0
+                      - taxYear: 2000
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1798.0
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 21000.0
+                      - taxYear: 2001
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1097.35
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 15385.0
+                      - taxYear: 2002
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1237.05
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 16973.0
+                      - taxYear: 2003
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1226.6
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 14700.0
+                      - taxYear: 2004
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1504.36
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 18392.0
+                      - taxYear: 2005
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 937.55
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 12758.0
+                        otherCredits:
+                          - contributionCreditType: CLASS 1 CREDIT
+                            creditSourceType: JSA TAPE INPUT
+                            contributionCreditCount: 3
+                      - taxYear: 2006
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 655.26
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 9619.0
+                        otherCredits:
+                          - contributionCreditType: CLASS 1 CREDIT
+                            creditSourceType: JSA TAPE INPUT
+                            contributionCreditCount: 11
+                      - taxYear: 2007
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 830.72
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 12315.0
+                      - taxYear: 2008
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1229.8
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 16592.0
+                      - taxYear: 2009
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1078.88
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 15496.0
+                      - taxYear: 2010
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1478.4
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 19128.0
+                      - taxYear: 2011
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 369.98
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 6754.0
+                      - taxYear: 2012
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1488.88
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 19994.0
+                      - taxYear: 2013
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1927.74
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 23825.57
+                      - taxYear: 2014
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2056.97
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 25097.58
+                      - taxYear: 2015
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 3581.9
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 37668.89
+                      - taxYear: 2016
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 3366.29
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 36065.92
+                      - taxYear: 2017
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 4082.54
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 41810.62
+                      - taxYear: 2018
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2568.29
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 29826.46
+                      - taxYear: 2019
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1322.33
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 19442.84
+                      - taxYear: 2020
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2631.95
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 31592.0
+                      - taxYear: 2021
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2710.82
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 32042.0
+                      - taxYear: 2022
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2812.48
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 34249.0
+                      - taxYear: 2023
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 2688.36
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 35787.0
+                      - taxYear: 2024
+                        qualifyingTaxYear: true
+                        payableAccepted: false
+                        totalPrimaryContributions: 1947.32
+                        underInvestigationFlag: false
+                        primaryPaidEarnings: 36888.0
+        "400":
+          description: Bad Request
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                Actual_Response:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                        - reason: Constraint Violation - Invalid/Missing input parameter
+                          code: "400.1"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "403":
+          description: Forbidden
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+              examples:
+                Forbidden_Response:
+                  value:
+                    reason: Forbidden
+                    code: "403.2"
+        "404":
+          $ref: '#/components/responses/notFoundErrorResponse'
+        "500":
+          $ref: '#/components/responses/internalServerErrorResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+components:
+  schemas:
+    correlationId:
+      format: uuid
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      maxLength: 40
+      minLength: 4
+      type: string
+    identifier:
+      description: The identifier of which could be either a Temporary Reference Number
+        (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
+      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+      type: string
+      example: AA000001A
+    EnumContributionCreditType:
+      enum:
+        - NOT KNOWN
+        - CLASS 1 - NORMAL DEDUCTION CARD
+        - CLASS 1- HMF
+        - CLASS 1- MARINER
+        - CLASS 1- CIVIL SERVANT/FRINGE BODY
+        - CLASS 1- EMPLOYEE ONLY
+        - CLASS 2 - NORMAL RATE
+        - CLASS 2 - WOMAN'S RATE
+        - CLASS 2 - SHAREFISHERMAN'S RATE
+        - CLASS 2 - NORMAL RATE A
+        - CLASS 2 - NORMAL RATE B
+        - CLASS 2 - NORMAL RATE C
+        - CLASS 2 - NORMAL RATE D
+        - CLASS 2 - SHAREFISHERMAN'S RATE A
+        - CLASS 2 - SHAREFISHERMAN'S RATE B
+        - CLASS 2 - SHAREFISHERMAN'S RATE C
+        - CLASS 2 - SHAREFISHERMAN'S RATE D
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE A
+        - CLASS 3 - PRE 85 RATE
+        - CLASS 3 - RATE A
+        - CLASS 3 - RATE B
+        - CLASS 3 - RATE C
+        - CLASS 3 - RATE D
+        - CLASS 1 CREDIT
+        - CLASS 3 CREDIT
+        - NOT APPLICABLE
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE B
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE C
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE D
+        - CLASS 2 - CONTRIBUTION CONVERTED FROM NIRS1
+        - CLASS 3 - CONTRIBUTION CONVERTED FROM NIRS1
+        - CREDIT CONVERTED FROM NIRS1
+      type: string
+    EnumCreditSourceType:
+      enum:
+        - NOT KNOWN
+        - ADP CENTRE LIVINGSTON
+        - DSS LOCAL OFFICES
+        - EMPLOYMENT SERVICES
+        - DIRECT DEBIT
+        - CARER'S ALLOWANCE (CA)
+        - HNCIP OR SDA
+        - NORTHERN IRELAND SICKNESS CREDITS
+        - JURY SERVICE
+        - NUBS 2
+        - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+        - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
+        - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
+        - DWA UNIT (BELFAST) EMPLOYED EARNERS
+        - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
+        - ISLE OF MAN
+        - AUTOCREDITS - INTERNALLY CALCULATED
+        - AUTOCREDITS - EXTERNALLY INPUT
+        - JUVENILE CREDITS (INTERNAL)
+        - WIDOWS CREDITS (INTERNAL)
+        - APPROVED TRAINING CREDITS (INTERNAL)
+        - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
+        - PSCS INCAP
+        - LONG TERM SCALE RATE
+        - ADP READING
+        - NOT APPLICABLE
+        - QUARTERLY BILLING
+        - JSA TAPE INPUT
+        - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
+        - JSA PAPER INPUT
+        - FAMC-NI
+        - FAMC-GB
+        - CENTRAL AWARD
+        - ADP NORTHERN IRELAND
+        - FAMILY CREDIT (GB)
+        - FAMILY CREDIT (NI)
+        - INCAPACITY
+        - DPTC (GB) EMP
+        - DPTC (GB) S/EMP
+        - DPTC (NI) EMP
+        - DPTC (NI) S/EMP
+        - WFTC (GB)
+        - WFTC (NI)
+        - STATUTORY MATERNITY PAY CREDIT
+        - STATUTORY ADOPTION PAY CREDIT
+        - DISABLED TAX CREDIT (EMPLOYED)
+        - DISABLED TAX CREDIT (SELF-EMPLOYED)
+        - WORKING TAX CREDIT (EMPLOYED)
+        - WORKING TAX CREDIT (SELF-EMPLOYED)
+        - EMPLOYMENT AND SUPPORT
+        - HRP CONVERSION
+        - CHILD BENEFIT
+        - CARER'S CREDIT
+        - FOSTER CARER
+        - MOD SPOUSE/CIVIL PARTNER'S CREDITS
+        - ADDITTIONAL STATUTORY PATERNITY PAY
+        - SPECIFIED ADULT CARER
+        - UNIVERSAL CREDIT
+        - SHARED PARENTAL PAY
+        - POST 75 SERVICE SPOUSES CREDIT
+        - STATUTORY PARENTAL BEREAVEMENT PAY
+      type: string
+    errorResponse_400:
+      title: Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: object
+      properties:
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_400:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 120
+          minLength: 1
+          type: string
+        code:
+          description: |-
+            The error code representing the error that has occurred. Valid values are
+            400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'
+            400.2 - HTTP message not readable;
+          enum:
+            - "400.1"
+            - "400.2"
+          type: string
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Forbidden
+          type: string
+        code:
+          description: The error code representing the Forbidden Error.
+          enum:
+            - "403.2"
+          type: string
+    GetNIRecordResponse:
+      description: Success response payload for this API.
+      required:
+        - identifier
+      type: object
+      properties:
+        identifier:
+          description: The identifier of which could be either a Temporary Reference
+            Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g.
+            AA000001A.
+          pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+          type: string
+          example: AA000001A
+        numberOfQualifyingYears:
+          description: Denotes the number of qualifying years an individual has for
+            receiving their basic pension.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        nonQualifyingYears:
+          description: The number of years during the individual's working life for
+            which they have not paid the required number of National Insurance Contributions
+            or received other relevant benefits.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        yearsToFinalRelevantYear:
+          description: The number of tax years remaining for the insured person up
+            to and including the Final Relevant Year. The Final Relevant Year is the
+            last complete tax year before death or pension age.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        nonQualifyingYearsPayable:
+          description: The number of non-qualifying years that are still payable.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        pre1975CCCount:
+          description: The total number of contribution credits for an individual
+            for years prior to 1975.
+          maximum: 9999
+          minimum: 0
+          type: integer
+          example: 789
+        dateOfEntry:
+          format: date
+          description: The date of entry onto the NPS system for the individual.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        contributionsByTaxYear:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionsByTaxYear'
+    ContributionsByTaxYear:
+      description: Contains details of the NI Contribution History for all relevant
+        Tax Years.
+      type: object
+      properties:
+        taxYear:
+          description: Denotes the current tax year.
+          maximum: 2099
+          minimum: 1900
+          type: integer
+          example: 2022
+        qualifyingTaxYear:
+          description: Indicates whether the tax year is a qualifying one for an individual's
+            basic pension.
+          type: boolean
+          example: true
+        payableAccepted:
+          description: Indicates whether contributions can still be paid for the tax
+            year towards an individual's basic pension.
+          type: boolean
+          example: true
+        amountNeeded:
+          description: "The total amount of retrospective monetary earnings that a\
+            \ taxpayer may be required to pay tax on, for a given tax period."
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        classThreePayable:
+          description: The amount of Class 3 contributions the taxpayer could pay
+            to make the year qualifying for a given tax year.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        classThreePayableBy:
+          format: date
+          description: The deadline for payment of Class 3 Contributions for a given
+            tax year.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classThreePayableByPenalty:
+          format: date
+          description: The deadline for payment of Class 3 Contributions with a penalty.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classTwoPayable:
+          description: The amount of voluntary class two payable for the tax year.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        classTwoPayableBy:
+          format: date
+          description: The deadline for payment of Class 2 Contributions for a given
+            tax year.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classTwoPayableByPenalty:
+          format: date
+          description: "The deadline for payment of Class 2 Contributions for a given\
+            \ tax year, with a penalty."
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classTwoOutstandingWeeks:
+          description: The number of Class 2 credits that have not been paid with
+            a liability present.
+          maximum: 99
+          minimum: 0
+          type: integer
+          example: 3
+        totalPrimaryContributions:
+          description: The total amount of class 1 earnings paid.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        niEarnings:
+          description: The total amount of NI earnings for non-qualifying years.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        coClassOnePaid:
+          description: Total contracted out class 1 contributions paid that count
+            towards qualifying status.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        totalPrimaryEarnings:
+          description: Total contracted out class 1 earnings that count towards qualifying
+            status.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        niEarningsSelfEmployed:
+          description: Total number of self-employed credits that count towards qualifying
+            status.
+          maximum: 99
+          minimum: 0
+          type: integer
+          example: 3
+        niEarningsVoluntary:
+          description: Total number of voluntary credits that count towards qualifying
+            status.
+          maximum: 99
+          minimum: 0
+          type: integer
+          example: 3
+        underInvestigationFlag:
+          description: Indicates whether an account is currently under investigation.
+          type: boolean
+          example: true
+        primaryPaidEarnings:
+          description: Total earnings including contracted out earnings that count
+            towards qualifying status.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        otherCredits:
+          type: array
+          items:
+            $ref: '#/components/schemas/OtherCredits'
+    OtherCredits:
+      description: Contains a list of other credits for an individual for the tax
+        year.
+      type: object
+      properties:
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumContributionCreditType'
+        creditSourceType:
+          $ref: '#/components/schemas/EnumCreditSourceType'
+        contributionCreditCount:
+          description: "Denotes the number of credits made to an individual's account\
+            \ for a given period - this number can be positive or negative, the latter\
+            \ of which indicates a debit."
+          maximum: 32766
+          minimum: -32768
+          type: integer
+          example: 86
+    HIP-originEnum:
+      enum:
+        - HIP
+        - HoD
+      type: string
+    HIP-failureResponse:
+      required:
+        - failures
+      type: object
+      properties:
+        failures:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            required:
+              - type
+              - reason
+            type: object
+            properties:
+              type:
+                type: string
+              reason:
+                type: string
+            additionalProperties: false
+    HIP-originResponse:
+      required:
+        - origin
+        - response
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/HIP-originEnum'
+        response:
+          $ref: '#/components/schemas/HIP-failureResponse'
+      additionalProperties: false
+  responses:
+    notFoundErrorResponse:
+      description: The requested resource could not be found
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+    internalServerErrorResponse:
+      description: Internal Server Error
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+  parameters:
+    correlationId:
+      name: correlationId
+      in: header
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    govUkOriginatorId:
+      name: gov-uk-originator-id
+      in: header
+      description: Identity of the Originating System that made the API call.
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    Identifier:
+      name: identifier
+      in: path
+      description: The identifier of which could be either a Temporary Reference Number
+        (TRN) or a National Insurance Number (NINO).
+      required: true
+      schema:
+        $ref: '#/components/schemas/identifier'
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: OAuth2 Client Credentials Flow
+      flows:
+        clientCredentials:
+          tokenUrl: /tokenUrl/not-required
+          scopes:
+            read:ltb-qualifying-years-and-contributions: Individual's State Pension
+              Information

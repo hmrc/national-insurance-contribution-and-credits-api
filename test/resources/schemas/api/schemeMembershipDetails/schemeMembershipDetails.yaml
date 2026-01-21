@@ -1,0 +1,1206 @@
+openapi: 3.0.3
+info:
+  title: Scheme Membership Details
+  description: |-
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  version: 0.0.2 Draft
+  x-integration-catalogue:
+    reviewed-date: 2026-01-13T16:47:25Z
+    short-description: Scheme Membership Details
+    status: ALPHA
+    api-type: SIMPLE
+    platform: HIP
+    backends:
+      - NI
+    domain: 3
+    sub-domain: 3.1
+servers:
+  - url: https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate - Production
+  - url: https://api.ipaas.preprod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate – Pre-Production
+  - url: https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni
+    description: Corporate - Test
+  - url: https://hip.ws.hmrc.gov.uk/ni
+    description: MDTP - Production
+  - url: https://hip.ws.ibt.hmrc.gov.uk/ni
+    description: MDTP - QA
+security:
+  - oAuth2:
+      - read:ni-scheme-membership
+paths:
+  /benefit-scheme/{nino}/scheme-membership-details:
+    get:
+      summary: Retrieve Scheme Membership Details
+      description: |-
+        # Purpose
+        This API is used to retrieve scheme membership details from NPS (National Insurance & PAYE Service). It forms part of the Contracted-Out Pension Processing.
+        CallbackURL for more processing constructed with the schemeMembershipSequenceNumberQuery, schemeMembershipOccurrenceNumberQuery, and schemeMembershipTransferSequenceNumberQuery.
+
+        ## Version Log
+        | Version | Date | Author | Description |
+        |---------|------|--------|-------------|
+        | 0.0.1 | 10/12/2025 | NPS Development Team  | Initial Draft  |
+        | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples |
+      operationId: GetSchemeMembershipDetails
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/govUkOrganisationId'
+        - $ref: '#/components/parameters/govUkUserId'
+        - $ref: '#/components/parameters/govUkUserName'
+        - $ref: '#/components/parameters/govUkJobRole'
+        - $ref: '#/components/parameters/NationalInsuranceNumber'
+        - $ref: '#/components/parameters/SchemeMembershipSequenceNumberQuery'
+        - $ref: '#/components/parameters/SchemeMembershipTransferSequenceNumberQuery'
+        - $ref: '#/components/parameters/SchemeMembershipOccurrenceNumberQuery'
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/GetSchemeMembershipDetailsResponse'
+              examples:
+                minimallyPopulatedResponse:
+                  summary: Minimally populated response
+                  value:
+                    schemeMembershipDetailsSummaryList:
+                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
+                        schemeMembershipDetails:
+                          nationalInsuranceNumber: AA000001
+                          schemeMembershipSequenceNumber: 1
+                          schemeMembershipStartDate: 1993-11-01
+                          furtherPaymentsConfirmation: FURTHER PAYMENT ALLOWED
+                          survivorStatus: NOT APPLICABLE
+                          revaluationApplied: false
+                          stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
+                          stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
+                          apparentUnnotifiedTerminationStatus: No Apparent Unnotified
+                            Termination
+                          inhibitSchemeProcessing: false
+                          clericalCalculationInvolved: NO CLERICAL CALCULATION INVOLVED
+                          clericallyControlledTotal: 0.0
+                          clericallyControlledTotalPost1988: 0.0
+                          enforcementStatus: NOT ENFORCED
+                          stateSchemePremiumDeemed: SSP TYPE RECEIVABLES TO BE TREAT
+                            AS DEEMED
+                          schemeMembershipOccurrenceNumber: 9
+                          schemeMembershipTransferSequenceNumber: 2
+                          employersContractedOutNumberDetails: E3900000M
+                          schemeTerminatingContractedOutNumberDetails: S4200091P
+                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
+                        schemeMembershipDetails:
+                          nationalInsuranceNumber: AA000001
+                          schemeMembershipSequenceNumber: 1
+                          schemeMembershipStartDate: 1993-04-06
+                          methodOfPreservationType: TRANSFER FROM COSR TO COSR (3)
+                          totalLinkedGuaranteedMinimumPensionContractedOutDeductions: 0.14
+                          accruedPensionContractedOutDeductionsValue: 0.14
+                          totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988: 0.14
+                          accruedPensionContractedOutDeductionsValuePost1988: 0.14
+                          revaluationRate: LIMITED
+                          guaranteedMinimumPensionReconciliationStatus: RECONCILIATION
+                            ACTION NOT TAKEN
+                          finalYearEarnings: 1733.0
+                          retrospectiveEarnings: 0.0
+                          furtherPaymentsConfirmation: FURTHER PAYMENT ALLOWED
+                          survivorStatus: NOT APPLICABLE
+                          revaluationApplied: false
+                          stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
+                          stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
+                          apparentUnnotifiedTerminationStatus: No Apparent Unnotified
+                            Termination
+                          terminationMicrofilmNumber: 44012399
+                          inhibitSchemeProcessing: false
+                          clericalCalculationInvolved: NO CLERICAL CALCULATION INVOLVED
+                          clericallyControlledTotal: 0.0
+                          clericallyControlledTotalPost1988: 0.0
+                          enforcementStatus: NOT ENFORCED
+                          stateSchemePremiumDeemed: SSP TYPE RECEIVABLES TO BE TREAT
+                            AS DEEMED
+                          schemeMembershipOccurrenceNumber: 4
+                          schemeMembershipTransferSequenceNumber: 2
+                          employersContractedOutNumberDetails: E3022666E
+                          schemeTerminatingContractedOutNumberDetails: S4002629K
+                          importingAppropriateSchemeNumberDetails: S4200091P
+                maximallyPopulatedResponse:
+                  summary: Maximally populated response. Converted Scheme.
+                  value:
+                    schemeMembershipDetailsSummaryList:
+                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
+                        schemeMembershipDetails:
+                          nationalInsuranceNumber: AA000001
+                          schemeMembershipSequenceNumber: 1
+                          schemeMembershipOccurrenceNumber: 4
+                          schemeMembershipTransferSequenceNumber: 10
+                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
+                        schemeMembershipDetails:
+                          nationalInsuranceNumber: AA000001
+                          schemeMembershipSequenceNumber: 1
+                          schemeMembershipOccurrenceNumber: 4
+                          schemeMembershipTransferSequenceNumber: 9
+                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
+                        schemeMembershipDetails:
+                          nationalInsuranceNumber: AA000001
+                          schemeMembershipSequenceNumber: 1
+                          schemeMembershipOccurrenceNumber: 4
+                          schemeMembershipTransferSequenceNumber: 8
+                    callback:
+                      callbackURL: /benefit-scheme/AA000001/scheme-membership-details?seqNo=1&occurrenceNo=4&transferSeqNo=8
+        "400":
+          description: Bad Request Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                Actual_Response:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                        - reason: "Constraint violation: Invalid/Missing input parameter:\
+                          \ <parameter>"
+                          code: "400.1"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "403":
+          description: 'Forbidden '
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_403'
+              examples:
+                Actual_Response:
+                  value:
+                    reason: Forbidden
+                    code: "403.2"
+        "404":
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+        "500":
+          description: Internal Server Error Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+components:
+  schemas:
+    EnumAutStat:
+      enum:
+        - Apparent Unnotified Termination Not Applicable
+        - Apparent Unnotified Termination Raised
+        - Apparent Unnotified Termination Raised and Enquiry Issued
+        - No Apparent Unnotified Termination
+      type: string
+    EnumClercalc:
+      enum:
+        - CLERICAL CALCULATION INVOLVED
+        - NO CLERICAL CALCULATION INVOLVED
+      type: string
+    EnumContCatLetter:
+      enum:
+        - (NONE)
+        - "Y"
+        - J
+        - O
+        - "N"
+        - T
+        - W
+        - R
+        - K
+        - H
+        - V
+        - I
+        - P
+        - G
+        - F
+        - M
+        - S
+        - L
+        - Q
+        - X
+        - Z
+        - B
+        - E
+        - A
+        - D
+        - U
+        - C
+      type: string
+    EnumDschrsn:
+      enum:
+        - APP/SHP APP CANCELLED FROM OUTSET
+        - AUTO GMP INCORRECT
+        - BENEFICIARY REMOVED
+        - CANCELLATION OF CHANGE OF RPA/BUY OUT
+        - CANCELLED 63 DOCKET ENTRY
+        - CEP REPLACING GMP
+        - CEP REPLACING TRANSFER
+        - CHANGE OF CONTRIBUTIONS/EARNINGS
+        - CHANGE OF DATE OF BIRTH
+        - CHANGE OF REVALUATION RATE
+        - CHANGE RPA REPLACING TRANSFER
+        - COD REPLACING GMP
+        - COD/GMP ENFORCED IN ERROR
+        - COD/GMP REPLACING CEP
+        - CONVERTED FROM NIRS1 ENTRY DEBITED
+        - DATA INTEGRITY CONVERSION ERROR
+        - DEBIT GMP CONVERSION
+        - DEBIT OF INCORRECT CHANGE OF RPA/BUY OUT
+        - GMP REPLACING COD
+        - GMP/COD REPLACING TRANSFER
+        - INCORRECT ECON/SCON ON NOTICE OF TERMINATION
+        - NON-SEQUENTIAL TRANSFER
+        - NOT APPLICABLE
+        - NOTICE OF TERMINATION SENT IN ERROR/CANCELLED
+        - OTHER REASON
+        - PERIOD INCORRECT
+        - PP DEBIT AND RE-ENTRY
+        - PSEUDO TRANSFER REPLACING PREVIOUS NOTICE OF TERMINATION
+        - SCHEME CESSATION CASE 12% REPLACED BY S148 AND VICE VERSA
+        - SPLIT RIGHTS REPLACING PREVIOUS NOTICE OF TERMINATION
+        - TERMINATION NOTICE RECEIVED FROM SCHEME REPLACING ENFORCED COD/GMP
+        - TERMINATION NOTICE TO BE INPUT USING CONTROLLED EARNINGS
+        - TERMINATION ON WRONG ACCOUNT
+        - TRANSFER REPLACING CEP
+        - TRANSFER REPLACING CHANGE RPA
+        - TRANSFER REPLACING GMP
+        - TRANSFER/RPA/COD DEBITED TO PROCESS EARLIER TRANSFER
+        - TWO OR MORE GMPS TO ONE ASCN
+      type: string
+    EnumEnfcment:
+      enum:
+        - ENFORCED FOLLOWING AUT
+        - "ENFORCED FOLLOWING SSP: ALLOW CHANGE IN MOP"
+        - "ENFORCED FOLLOWING SSP: INHIBIT CHANGE OF MOP"
+        - ENFORCEMENT CARRIED FORWARD FROM NIRS1
+        - INHIBIT GMP SSP ENFORCEMENT
+        - NOT APPLICABLE
+        - NOT ENFORCED
+      type: string
+    EnumFuthpayt:
+      enum:
+        - FURTHER PAYMENT ALLOWED
+        - NO FURTHER PAYMENT ALLOWED
+      type: string
+    EnumGmpRec:
+      enum:
+        - GMP RECONCILED
+        - NOT APPLICABLE
+        - NOT KNOWN
+        - RECONCILIATION ACTION NOT TAKEN
+        - RECONCILIATION FAILURE
+      type: string
+    EnumMop:
+      enum:
+        - NOT APPLICABLE (0)
+        - CONTRIBUTIONS EQUIVALENT PREMIUM (1)
+        - GUARANTEED MINIMUM PENSION (2)
+        - TRANSFER FROM COSR TO COSR (3)
+        - TRANSFER FROM COSR TO COMP (4)
+        - TRANSFER FROM COSR TO PP (5)
+        - CHANGE OF RPA FROM COSR TO COSR (6)
+        - CHANGE OF RPA FROM COSR TO COMP (7)
+        - CHANGE OF RPA FROM COSR TO PP (8)
+        - BUYOUT OF GMP (9)
+        - PSEUDO TRANSFER (NEW ECON) (10)
+        - PSEUDO TRANSFER (PERIOD ABROAD) (11)
+        - ACCRUED RIGHTS PREMIUM (12)
+        - BLANK - NOT USED ON NIRS2 (13)
+        - PENSIONERS RIGHTS PREMIUM (14)
+        - PROTECTED RIGHTS PREMIUM (15)
+        - DUMMY TERMINATION (16)
+        - TRANSFER PREMIUM (17)
+        - PSEUDO TERMINATION DEATH RECORDED (18)
+        - CANCELLATION OF PP - COD (19)
+        - TRANSFER FROM PP TO COSR (20)
+        - TRANSFER FROM PP TO COMP (21)
+        - TRANSFER FROM PP TO PP (22)
+        - TREATED AS CHANGE OF RPA FROM PP TO PP (23)
+        - CHANGE OF RPA FROM PP TO COMP (24)
+        - CHANGE OF RPA FROM PP TO COSR (25)
+        - PROVISION OF A PENSION BY THE PP SCHEME (26)
+        - PURCHASE OF AN ANNUITY - PP (27)
+        - PROTECTED RIGHTS PAID IN THE FORM OF A LUMP SUM (28)
+        - PROTECTED RIGHTS RETAINED IN COMP SCHEME - COD (29)
+        - TRANSFER FROM COMP TO COMP (30)
+        - TRANSFER FROM COMP TO COSR (31)
+        - TRANSFER FROM COMP TO PP (32)
+        - CHANGE OF RPA FROM COMP TO COMP (33)
+        - CHANGE OF RPA FROM COMP TO COSR (34)
+        - CHANGE OF RPA FROM COMP TO PP (35)
+        - PROVISION OF A PENSION BY THE COMP SCHEME (36)
+        - PURCHASE OF AN ANNUITY - COMP (37)
+        - TREATED AS CHANGE OF RPA FROM COSR TO PP (38)
+        - TREATED AS CHANGE OF RPA FROM COMP TO PP (39)
+        - BLANK - NOT USED ON NIRS2 (40)
+        - CHANGE OF RPA FROM COSR TO PP (CONVERTED) (41)
+        - CHANGE OF RPA FROM COMP TO PP (CONVERTED) (42)
+        - CHANGE OF RPA FROM PP TO PP (CONVERTED) (43)
+        - GUARANTEED MINIMUM PENSION/COSR RIGHTS (44)
+        - COSR RIGHTS (45)
+        - PROTECTED RIGHTS RETAINED IN COMP SCHEME - COD/PR (46)
+        - PROTECTED RIGHTS RETAINED IN COMP SCHEME - PR (47)
+        - CANCELLATION OF PP - COD/PR (48)
+        - CANCELLATION OF PP - PR (49)
+        - COD/CR (50)
+        - COD/CR/PR (51)
+        - GMP/PR (52)
+        - GMP/CR/PR (53)
+        - CR/PR (54)
+        - REQUIRED AMOUNT PREMIUM (55)
+        - INCOME WITHDRAWAL (56)
+        - INCOME WITHDRAWAL - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (57)
+        - TRANSFER GMP/PR TO COSR (58)
+        - TRANSFER GMP/PR TO COMP (59)
+        - TRANSFER GMP/PR TO PP (60)
+        - TRANSFER COD/CR TO COSR (61)
+        - TRANSFER COD/CR TO COMP (62)
+        - TRANSFER COD/CR TO PP (63)
+        - TRANSFER GMP/CR/PR TO COSR (64)
+        - TRANSFER GMP/CR/PR TO COMP (65)
+        - TRANSFER GMP/CR/PR TO PP (66)
+        - TRANSFER COD/CR/PR TO COSR (67)
+        - TRANSFER COD/CR/PR TO COMP (68)
+        - TRANSFER COD/CR/PR TO PP (69)
+        - TRANSFER CR/PR TO COSR (70)
+        - TRANSFER CR/PR TO COMP (71)
+        - TRANSFER CR/PR TO PP (72)
+        - TREATED AS CHANGE OF RPA GMP/PR TO PP (73)
+        - TREATED AS CHANGE OF RPA COD/CR TO PP (74)
+        - TREATED AS CHANGE OF RPA GMP/CR/PR TO PP (75)
+        - TREATED AS CHANGE OF RPA COD/CR/PR TO PP (76)
+        - TREATED AS CHANGE OF RPA CR/PR TO PP (77)
+        - CHANGE OF RPA FROM PP TO PP (78)
+        - OVERSEAS TRANSFER (79)
+        - ASSURANCE/TAKING OUT OF AN APPROPRIATE INSURANCE POLICY (80)
+        - PROVISION OF A PENSION BY THE PP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER
+          (81)
+        - PROVISION OF A PENSION BY THE COMP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL
+          PARTNER (82)
+        - PURCHASE OF AN ANNUITY - PP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (83)
+        - PURCHASE OF AN ANNUITY - COMP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (84)
+        - COMMUTATION (85)
+        - COMMUTATION - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (86)
+        - INTERNAL TRANSFER COMP RIGHTS RETAINED (87)
+        - INTERNAL TRANSFER COSR RIGHTS RETAINED (88)
+        - GMP SPLIT RIGHTS (89)
+        - COD SPLIT RIGHTS (90)
+        - BLANK - NOT USED ON NIRS2 (91)
+        - BLANK - NOT USED ON NIRS2 (92)
+        - BLANK - NOT USED ON NIRS2 (93)
+        - BLANK - NOT USED ON NIRS2 (94)
+        - BLANK - NOT USED ON NIRS2 (95)
+        - COMMUTATION-ILL HEALTH (96)
+        - CANCELLATION OF APP SHP - PR (97)
+        - TRANSFER FROM PP TO APP SHP (98)
+        - TRANSFER FROM APP SHP TO PP (99)
+        - TRANSFER FROM APP SHP TO APP SHP (100)
+        - TREATED AS CHANGE OF RPA FROM PP TO APP SHP (101)
+        - TREATED AS CHANGE OF RPA FROM APP SHP TO PP (102)
+        - TREATED AS CHANGE OF RPA FROM APP SHP TO APP SHP (103)
+        - PROTECTED RIGHTS RETAINED IN COMP SHP SCHEME - COD/PR (105)
+        - CHANGE OF RPA FROM PP TO COMP SHP (106)
+        - TRANSFER FROM PP TO COMP SHP (107)
+        - CHANGE OF RPA FROM APP SHP TO COMP (108)
+        - TRANSFER FROM APP SHP TO COMP (109)
+        - CHANGE OF RPA FROM APP SHP TO COMP SHP (110)
+        - TRANSFER FROM APP SHP TO COMP SHP (111)
+        - CHANGE OF RPA FROM APP SHP TO COSR (112)
+        - TRANSFER FROM APP SHP TO COSR (113)
+        - TRANSFER FROM COMP TO COMP SHP (114)
+        - TRANSFER FROM COMP SHP TO COMP (115)
+        - TRANSFER FROM COMP SHP TO COMP SHP (116)
+        - TRANSFER FROM COMP TO APP SHP (117)
+        - TREATED AS CHANGE OF RPA FROM COMP TO APP SHP (118)
+        - TRANSFER FROM COMP SHP TO PP (119)
+        - TREATED AS CHANGE OF RPA FROM COMP SHP TO PP (120)
+        - TRANSFER FROM COMP SHP TO APP SHP (121)
+        - TREATED AS CHANGE OF RPA FROM COMP SHP TO APP SHP (122)
+        - TRANSFER FROM COMP SHP TO COSR (123)
+        - TRANSFER FROM COSR TO COMP SHP (124)
+        - TRANSFER FROM COSR TO APP SHP (125)
+        - TREATED AS CHANGE OF RPA FROM COSR TO APP SHP (126)
+        - TRANSFER COD/CR TO COMP SHP (127)
+        - TRANSFER COD/CR TO APP SHP (128)
+        - TRANSFER GMP/CR/PR TO COMP SHP (129)
+        - TRANSFER GMP/CR/PR TO APP SHP (130)
+        - TRANSFER COD/CR/PR TO COMP SHP (131)
+        - TRANSFER COD/CR/PR TO APP SHP (132)
+        - TRANSFER CR/PR TO COMP SHP (133)
+        - TRANSFER CR/PR TO APP SHP (134)
+        - TREATED AS CHANGE OF RPA COD/CR TO APP SHP (135)
+        - TREATED AS CHANGE OF RPA GMP/CR/PR TO APP SHP (136)
+        - TREATED AS CHANGE OF RPA COD/CR/PR TO APP SHP (137)
+        - TREATED AS CHANGE OF RPA CR/PR TO APP SHP (138)
+        - CHANGE OF RPA FROM COSR TO COMP SHP (140)
+        - CHANGE OF RPA FROM COSR TO APP SHP (141)
+        - CHANGE OF RPA FROM COMP SHP TO COMP (142)
+        - CHANGE OF RPA FROM COMP SHP TO PP (143)
+        - CHANGE OF RPA FROM COMP SHP TO COMP SHP (144)
+        - CHANGE OF RPA FROM COMP SHP TO COSR (145)
+        - CHANGE OF RPA FROM COMP SHP TO APP SHP (146)
+        - PROTECTED RIGHTS RETAINED IN COMP SHP SCHEME - PR (150)
+        - PROVISION OF A PENSION BY THE APP SHP SCHEME (152)
+        - PROVISION OF A PENSION BY THE APP SHP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL
+          PARTNER (153)
+        - PURCHASE OF AN ANNUITY - APP SHP (154)
+        - PURCHASE OF AN ANNUITY - APP SHP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (155)
+        - TREATED AS CHANGE OF RPA GMP/PR TO APP SHP (156)
+        - CANCELLATION OF APP SHP - COD/PR (157)
+        - PROVISION OF A PENSION BY THE COMP SHP SCHEME (158)
+        - PROVISION OF A PENSION BY THE COMP SHP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL
+          PARTNER (159)
+        - PURCHASE OF AN ANNUITY - COMP SHP (160)
+        - PURCHASE OF AN ANNUITY - COMP SHP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER
+          (161)
+        - CHANGE OF RPA FROM PP TO APP SHP (162)
+        - CHANGE OF RPA FROM APP SHP TO PP (163)
+        - CHANGE OF RPA FROM APP SHP TO APP SHP (164)
+        - CHANGE OF RPA FROM COMP TO COMP SHP (165)
+        - CHANGE OF RPA FROM COMP TO APP SHP (166)
+        - TRANSFER GMP/PR TO COMP SHP (167)
+        - TRANSFER GMP/PR TO APP SHP (168)
+        - BUYOUT OF PROTECTED RIGHTS (169)
+        - CHANGE OF RPA TO PPF (170)
+        - CHANGE OF RPA TO FAS (171)
+      type: string
+    EnumRevRate:
+      enum:
+        - (NONE)
+        - FIXED
+        - LIMITED
+        - S148
+      type: string
+    EnumSchshptp:
+      enum:
+        - Converted Stakeholder Pension
+        - Non-Stakeholder Pension
+        - Stakeholder Pension
+      type: string
+    EnumSspDeem:
+      enum:
+        - SSP TYPE RECEIVABLES NOT DEEMED
+        - SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED
+      type: string
+    EnumSuspflag:
+      enum:
+        - ALL PAYMENTS SUSPENDED
+        - INCENTIVES SUSPENDED
+        - NO SUSPENSION
+      type: string
+    EnumWidStat:
+      enum:
+        - ACTUAL LIABILITY
+        - ACTUAL LIABILITY (IVB)
+        - NOT APPLICABLE
+        - OPEN SCHEME MEMBERSHIP/CALC NOT POSSIBLE
+        - POSSIBLE WIDOW(ER) / SURVIVING CIVIL PARTNER
+        - REVISED STATEMENTS REQUIRED
+      type: string
+    correlationId:
+      format: uuid
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      maxLength: 40
+      minLength: 3
+      type: string
+    govUkOrganisationId:
+      description: A unique organisation ID for the user.
+      maxLength: 40
+      minLength: 4
+      type: string
+      example: Department
+    govUkUserId:
+      description: A unique user ID for the user.
+      maxLength: 7
+      minLength: 7
+      type: string
+    govUkUserName:
+      description: A unique username for the user.
+      maxLength: 20
+      minLength: 4
+      type: string
+      example: Worker
+    govUkJobRole:
+      description: A unique job role for the user.
+      minLength: 4
+      type: string
+      example: Social
+    errorResponse_400:
+      title: Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: object
+      properties:
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_400:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: |-
+            The error code representing the error that has occurred. Valid values are
+            400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'
+            400.2 - HTTP message not readable;
+          enum:
+            - "400.1"
+            - "400.2"
+          type: string
+    errorResponse_403:
+      title: Forbidden Error Response
+      description: Error Response Payload for this API
+      oneOf:
+        - $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+        - $ref: '#/components/schemas/errorResourceObj_403_UserNotAuthorised'
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Forbidden
+          type: string
+        code:
+          description: The error code representing the Forbidden Error.
+          enum:
+            - "403.2"
+          type: string
+    errorResourceObj_403_UserNotAuthorised:
+      title: 403_UserNotAuthorised
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - User Not Authorised
+          type: string
+        code:
+          description: User Not Authorised.
+          enum:
+            - "403.1"
+          type: string
+    errorResponse_422:
+      title: Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_422'
+    errorResponseFailure_422:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_422'
+    errorResourceObj_422:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: The error code representing the error that has occurred.
+          maxLength: 10
+          minLength: 1
+          type: string
+    nationalInsuranceNumber:
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
+      maxLength: 8
+      minLength: 8
+      pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$"
+      type: string
+      example: AA123456
+    schemeMembershipSequenceNumber:
+      description: Unique sequence number representing the position in the scheme
+        membership history (i.e. row) of the scheme membership details entry for this
+        individual - this would only be populated if the previous call did not transfer
+        all of the data i.e. there are more rows marked to be collected still.
+      maximum: 65534
+      minimum: 1
+      type: integer
+      example: 123
+    schemeMembershipTransferSequenceNumber:
+      description: Unique sequence number representing the position in the scheme
+        membership transfer history (i.e. row) of the scheme membership transfer details
+        entry for this individual - this would only be populated if the previous call
+        did not transfer all of the data i.e. there are more rows marked to be collected
+        still.
+      maximum: 65534
+      minimum: 1
+      type: integer
+      example: 123
+    schemeMembershipOccurrenceNumber:
+      description: Denotes the occurrence number for the Scheme Membership.
+      maximum: 32766
+      minimum: 0
+      type: integer
+      example: 1
+    callback:
+      properties:
+        callbackURL:
+          description: A URL in the response body that redirects the user to call
+            the next set of data based on the prepared URL. This will only be populated
+            if the call has not returned all the relevant data and another call is
+            required.
+          type: string
+          example: /benefit-scheme/AA123456/scheme-membership-details?seqNo=123&occurrenceNo=1&transferSeqNo=123
+    GetSchemeMembershipDetailsResponse:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        schemeMembershipDetailsSummaryList:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeMembershipDetailsSummary'
+        callback:
+          $ref: '#/components/schemas/callback'
+    RetrieveSchemeMembershipDetails:
+      description: Contains scheme membership and transfer details for an individual.
+      required:
+        - nationalInsuranceNumber
+        - schemeMembershipOccurrenceNumber
+        - schemeMembershipSequenceNumber
+      type: object
+      properties:
+        nationalInsuranceNumber:
+          description: National Insurance Number - unique for an individual - note
+            not all individuals qualify to be issued with one.
+          maxLength: 8
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$"
+          type: string
+          example: AA123456
+        schemeMembershipSequenceNumber:
+          description: Unique sequence number representing the position in the scheme
+            membership history (i.e. row) of the scheme membership details entry for
+            this individual - this would only be populated if the previous call did
+            not transfer all of the data i.e. there are more rows marked to be collected
+            still.
+          maximum: 65534
+          minimum: 1
+          type: integer
+          example: 123
+        schemeMembershipStartDate:
+          format: date
+          description: The start date of the benefit scheme membership.
+          type: string
+          example: 2022-06-27
+        contractedOutEmployerIdentifier:
+          description: An identifier for a contracted-out employer as part of the
+            contracted-out scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 789
+        schemeMembershipEndDate:
+          format: date
+          description: The end date of the benefit scheme membership.
+          type: string
+          example: 2022-06-27
+        methodOfPreservationType:
+          $ref: '#/components/schemas/EnumMop'
+        totalLinkedGuaranteedMinimumPensionContractedOutDeductions:
+          description: Denotes the Guaranteed Minimum Pension / Contracted-Out Deduction
+            value accrued from linked memberships of one or more schemes and transfers.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        accruedPensionContractedOutDeductionsValue:
+          description: The value of the Guaranteed Minimum Pension (GMP) / Contracted-Out
+            Deductions (COD) that has been accrued.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988:
+          description: Denotes the Guaranteed Minimum Pension / Contracted-Out Deduction
+            value accrued from linked memberships of one or more schemes and transfers.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        accruedPensionContractedOutDeductionsValuePost1988:
+          description: The value of the Guaranteed Minimum Pension (GMP) / Contracted-Out
+            Deductions (COD) that has been accrued post 1988.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        revaluationRate:
+          $ref: '#/components/schemas/EnumRevRate'
+        guaranteedMinimumPensionReconciliationStatus:
+          $ref: '#/components/schemas/EnumGmpRec'
+        employeesReference:
+          description: Denotes the reference number that is associated with the employee's
+            benefit scheme membership.
+          maxLength: 18
+          minLength: 1
+          pattern: "^[A-Za-z0-9()^*;:&.%,+=?\\\\\\/' -]+$"
+          type: string
+          example: 123/456/ABC
+        finalYearEarnings:
+          description: The final amount of earnings for the year for the guaranteed
+            minimum pension calculation.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        penultimateYearEarnings:
+          description: The penultimate year's earnings amount used for guaranteed
+            minimum pension calculations.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        retrospectiveEarnings:
+          description: "The total amount of retrospective monetary earnings that a\
+            \ taxpayer may be required to pay tax on, for a given tax period."
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        furtherPaymentsConfirmation:
+          $ref: '#/components/schemas/EnumFuthpayt'
+        survivorStatus:
+          $ref: '#/components/schemas/EnumWidStat'
+        transferPremiumElectionDate:
+          format: date
+          description: The date a Transfer Premium is elected to be paid.
+          type: string
+          example: 2022-06-27
+        revaluationApplied:
+          description: Denotes if a revaluation percentage has been applied to the
+            benefit scheme membership.
+          type: boolean
+          example: true
+        stateEarningsRelatedPensionsSchemeNonRestorationValue:
+          description: Denotes the non-restoration value of the State Earnings Related
+            Pensions Scheme (SERPS).
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        stateEarningsRelatedPensionsSchemeValuePost1988:
+          description: Denotes the value of the State Earnings Related Pensions Scheme
+            (SERPS) post 1988.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        apparentUnnotifiedTerminationStatus:
+          $ref: '#/components/schemas/EnumAutStat'
+        terminationMicrofilmNumber:
+          description: Denotes the microfilm number associated with the termination
+            of this benefit scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 789
+        debitVoucherMicrofilmNumber:
+          description: Denotes the microfilm number linked to the debit voucher of
+            the benefit scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 40599123
+        creationMicrofilmNumber:
+          description: Denotes the microfilm number linked to the creation of the
+            benefit scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 40599123
+        inhibitSchemeProcessing:
+          description: Denotes whether or not to inhibit processing associated with
+            a benefit scheme.
+          type: boolean
+          example: true
+        extensionDate:
+          format: date
+          description: The date that the original time limit period has been extended
+            to.
+          type: string
+          example: 2022-06-27
+        guaranteedMinimumPensionContractedOutDeductionsRevalued:
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) after being revalued.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        clericalCalculationInvolved:
+          $ref: '#/components/schemas/EnumClercalc'
+        clericallyControlledTotal:
+          description: Denotes the total weekly Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) payable at state pension age which has
+            been subjected to clerical revaluation.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        clericallyControlledTotalPost1988:
+          description: Denotes the total weekly Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) payable at state pension age which has
+            been subjected to clerical revaluation post 1988.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        certifiedAmount:
+          description: Denotes the amount of money an employer can reclaim from an
+            employee who is paying a contribution equivalent premium to restore rights
+            back to the state scheme.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        enforcementStatus:
+          $ref: '#/components/schemas/EnumEnfcment'
+        stateSchemePremiumDeemed:
+          $ref: '#/components/schemas/EnumSspDeem'
+        transferTakeUpDate:
+          format: date
+          description: "The date on which the customer's membership in the benefits\
+            \ scheme started, following a transfer."
+          type: string
+          example: 2022-06-27
+        schemeMembershipOccurrenceNumber:
+          description: Denotes the occurrence number for the Scheme Membership.
+          maximum: 32766
+          minimum: 0
+          type: integer
+          example: 1
+        schemeMembershipTransferSequenceNumber:
+          description: Unique sequence number representing the position in the scheme
+            membership transfer history (i.e. row) of the scheme membership transfer
+            details entry for this individual - this would only be populated if the
+            previous call did not transfer all of the data i.e. there are more rows
+            marked to be collected still.
+          maximum: 65534
+          minimum: 1
+          type: integer
+          example: 123
+        contributionCategoryFinalYear:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        contributionCategoryPenultimateYear:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        contributionCategoryRetrospectiveYear:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        protectedRightsStartDate:
+          format: date
+          description: "The date that an individual's rights are protected from, with\
+            \ regards to scheme membership."
+          type: string
+          example: 2022-06-27
+        schemeMembershipDebitReason:
+          $ref: '#/components/schemas/EnumDschrsn'
+        technicalAmount:
+          description: The amount of money required to fully buy back a scheme member's
+            additional pension rights in the event of scheme cessation.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        minimumFundTransferAmount:
+          description: Denotes the minimum funding amount required to qualify for
+            transferring to the Contracted-Out Salary Related (COSR) schemes.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        actualTransferValue:
+          description: The amount of money that was actually transferred.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        schemeSuspensionType:
+          $ref: '#/components/schemas/EnumSuspflag'
+        guaranteedMinimumPensionConversionApplied:
+          description: Denotes whether or not the Guaranteed Minimum Pension (GMP)
+            conversion has been applied.
+          type: boolean
+          example: true
+        employersContractedOutNumberDetails:
+          description: Denotes the Employer's Contracting-Out Number with prefix and
+            suffix - used where an employer has an occupational pension scheme that
+            is contracted-out of the State Second Pension.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A-Z]{0,1}[3]\\d{6}[A-Z ^GIO SUVZ]{0,1})$"
+          type: string
+          example: S3123456B
+        schemeCreatingContractedOutNumberDetails:
+          description: Denotes the Benefit Scheme's Contracted-Out Number with prefix
+            and suffix for the scheme being created.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: A7123456Q
+        schemeTerminatingContractedOutNumberDetails:
+          description: Denotes the Terminating Benefit Scheme's Contracted-Out Number
+            with prefix and suffix.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}[0124568]\\\
+            d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+        importingAppropriateSchemeNumberDetails:
+          description: Denotes the importing ASN (Appropriate Scheme Number) / SCON
+            (Scheme Contracted-Out Number) with prefix and suffix.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}[0124568]\\\
+            d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+        apparentUnnotifiedTerminationDestinationDetails:
+          description: Denotes the Scheme Contracted-Out Number (SCON) with prefix
+            and suffix that falls under Apparent Unnotified Termination (AUT).
+          maxLength: 9
+          minLength: 7
+          pattern: "^([S]{0,1}[0124568]\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+    SchemeMembershipDetailsSummary:
+      description: "Contains scheme membership details for an individual, including\
+        \ their stakeholder pension status."
+      required:
+        - stakeholderPensionSchemeType
+        - schemeMembershipDetails
+      type: object
+      properties:
+        stakeholderPensionSchemeType:
+          $ref: '#/components/schemas/EnumSchshptp'
+        schemeMembershipDetails:
+          $ref: '#/components/schemas/RetrieveSchemeMembershipDetails'
+    HIP-originEnum:
+      enum:
+        - HIP
+        - HoD
+      type: string
+    HIP-failureResponse:
+      required:
+        - failures
+      type: object
+      properties:
+        failures:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            required:
+              - type
+              - reason
+            type: object
+            properties:
+              type:
+                type: string
+              reason:
+                type: string
+            additionalProperties: false
+    HIP-originResponse:
+      required:
+        - origin
+        - response
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/HIP-originEnum'
+        response:
+          $ref: '#/components/schemas/HIP-failureResponse'
+      additionalProperties: false
+  parameters:
+    correlationId:
+      name: correlationId
+      in: header
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    govUkOriginatorId:
+      name: gov-uk-originator-id
+      in: header
+      description: Identity of the Originating System that made the API call.
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    govUkOrganisationId:
+      name: gov-uk-organisation-id
+      in: header
+      description: A unique organisation ID for the user.
+      schema:
+        $ref: '#/components/schemas/govUkOrganisationId'
+    govUkUserId:
+      name: gov-uk-user-id
+      in: header
+      description: A unique user ID for the user.
+      required: false
+      schema:
+        $ref: '#/components/schemas/govUkUserId'
+    govUkUserName:
+      name: gov-uk-user-name
+      in: header
+      description: A unique username for the user.
+      schema:
+        $ref: '#/components/schemas/govUkUserName'
+    govUkJobRole:
+      name: gov-uk-job-role
+      in: header
+      description: A unique job role for the user.
+      schema:
+        $ref: '#/components/schemas/govUkJobRole'
+    NationalInsuranceNumber:
+      name: nino
+      in: path
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
+      required: true
+      schema:
+        $ref: '#/components/schemas/nationalInsuranceNumber'
+    SchemeMembershipSequenceNumberQuery:
+      name: seqNo
+      in: query
+      description: Unique sequence number representing the position in the scheme
+        membership history (i.e. row) of the scheme membership details entry for this
+        individual - this would only be populated if the previous call did not transfer
+        all of the data i.e. there are more rows marked to be collected still.
+      required: false
+      schema:
+        $ref: '#/components/schemas/schemeMembershipSequenceNumber'
+    SchemeMembershipTransferSequenceNumberQuery:
+      name: transferSeqNo
+      in: query
+      description: Unique sequence number representing the position in the scheme
+        membership transfer history (i.e. row) of the scheme membership transfer details
+        entry for this individual - this would only be populated if the previous call
+        did not transfer all of the data i.e. there are more rows marked to be collected
+        still.
+      required: false
+      schema:
+        $ref: '#/components/schemas/schemeMembershipTransferSequenceNumber'
+    SchemeMembershipOccurrenceNumberQuery:
+      name: occurrenceNo
+      in: query
+      description: Denotes the occurrence number for the Scheme Membership.
+      required: false
+      schema:
+        $ref: '#/components/schemas/schemeMembershipOccurrenceNumber'
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: OAuth2 Client Credentials Flow
+      flows:
+        clientCredentials:
+          tokenUrl: /tokenUrl/not-required
+          scopes:
+            read:ni-scheme-membership: Scheme Membership Details

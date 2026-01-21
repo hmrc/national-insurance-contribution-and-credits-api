@@ -1,0 +1,808 @@
+openapi: 3.0.3
+info:
+  title: Individual's Marriage Details
+  description: |-
+    # Usage Terms
+    This interface is business-critical for HMRC and is expected to be consumed by Digital users and other HMRC systems - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+    ## Version Log
+    | Version | Date | Author | Description |putMarriageDetails
+    |---------|------|--------|-------------|
+    | 0.0.1 | 14/07/2025 | DWIT Team | Initial Draft for RetrieveMarriageDetails|
+    | 0.0.2 | 14/07/2025 | DWIT Team | Initial Draft for putMarriageDetails|
+    | 0.0.3 | 24/07/2025 | DWIT Team | Removes PROTOTYPE |
+    |       |            |           | Removes Contact section |
+    |       |            |           | Moves change log |
+    |       |            |           | Adds correlationid pattern |
+    |       |            |           | Adds govukoriginatorid min/max |
+    |       |            |           | Adds api-type |
+    |       |            |           | Adds domain/sub-domain |
+    |       |            |           | Changes status to ALPHA |
+    |       |            |           | Removes License Section |
+    | 0.0.4 | 05/08/2025 | DWIT Team | Individual Domain change |
+    |       |            |           | Updated URI |
+    | 0.0.5 | 06/08/2025 | DWIT Team | Path/Method fix |
+    | 0.0.6 | 30/10/2025 | NPS Development Team | backendHostname corrected |
+    | 0.0.7 | 12/12/2025 | NPS Development Team | Added Spouse forename and surname |
+    | 0.0.8 | 13/01/2026 | NPS Development Team | Added examples |
+  version: 0.0.8
+  x-integration-catalogue:
+    reviewed-date: 2026-01-13T09:55:17Z
+    short-description: Individual's Marriage Details
+    api-type: SIMPLE
+    status: ALPHA
+    platform: HIP
+    domain: 8
+    sub-domain: 8.17
+    backends:
+      - PAYE
+servers:
+  - url: https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/paye
+    description: Corporate - Production
+  - url: https://api.ipaas.preprod.eis.ns2p.corp.hmrc.gov.uk/paye
+    description: Corporate – Pre-Production
+  - url: https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/paye
+    description: Corporate - Test
+  - url: https://hip.ws.hmrc.gov.uk/paye
+    description: MDTP - Production
+  - url: https://hip.ws.ibt.hmrc.gov.uk/paye
+    description: MDTP - QA
+paths:
+  /individual/{identifier}/marriage-cp:
+    get:
+      tags: []
+      summary: Retrieve Individual marriage details from the individual domain.
+      description: |-
+        # Purpose
+        This API will retrieve the marriage details for the specified individual identifier. <br><p>
+        # Summary<br>
+        - The API must provide the following path parameters:<br>
+          - National Insurance Number (identifier). <br>
+          - Temporary Reference Number (identifier). <br>
+        - The API may be called with the following query parameters:<br>
+          - Marriage start year (startYear). <br>
+          - Latest record only (latest). <br>
+          - Sequence number for pagination of records (sequence). <br>
+          IMPORTANT NOTE: This API uses start year and sequence number as restart keys rather than strict filters. The date always takes priority, and sequence numbers only apply when paired with the exact same date.
+        - NPS will return a payload holding the marriage details of the specified individual.<br>
+        # Volumes & Registered Consumers
+        This API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection. <br><p>
+        | Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |
+        |----------|------------------------|---------------------|----------|
+        | ??? | xxx | xxx | xxx |
+        *TPS = Transactions per second
+      operationId: RetrieveMarriageDetails
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/Identifier'
+        - $ref: '#/components/parameters/MarriageStartYear'
+        - $ref: '#/components/parameters/Latest'
+        - $ref: '#/components/parameters/Sequence'
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+            ETag:
+              $ref: '#/components/headers/optimisticLock'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/RetrieveMarriageDetailsResponse'
+              examples:
+                exampleActiveMarriageResponse:
+                  summary: "Currently married, no separation"
+                  value:
+                    marriageDetails:
+                      activeMarriage: true
+                      marriageDetailsList:
+                        - sequenceNumber: 1
+                          status: MARRIED
+                          startDate: 2010-06-15
+                          startDateStatus: VERIFIED
+                          spouseIdentifier: AA654321B
+                          spouseForename: Alex
+                          spouseSurname: Smith
+                      _links:
+                        self:
+                          href: /individual/AA123456A/marriage-cp
+                          methods: get
+                maximallyPopulatedResponse:
+                  summary: Maximally populated response. Divorced with reconciliation.
+                  value:
+                    marriageDetails:
+                      activeMarriage: false
+                      marriageDetailsList:
+                        - sequenceNumber: 1
+                          status: DIVORCED
+                          startDate: 2000-05-20
+                          startDateStatus: VERIFIED
+                          endDate: 2015-08-01
+                          endDateStatus: VERIFIED
+                          spouseIdentifier: AA987654C
+                          spouseForename: Jordan
+                          spouseSurname: Kurt
+                          separationDate: 2014-01-01
+                          reconciliationDate: 2014-12-01
+                      _links:
+                        self:
+                          href: /individual/AA123456A/marriage-cp
+                          methods: get
+                exampleWidowedResponse:
+                  summary: example non-active marriage
+                  value:
+                    marriageDetails:
+                      activeMarriage: false
+                      marriageDetailsList:
+                        - sequenceNumber: 1
+                          status: WIDOWED
+                          startDate: 1985-03-10
+                          startDateStatus: VERIFIED
+                          endDate: 2005-11-30
+                          endDateStatus: VERIFIED
+                      _links:
+                        self:
+                          href: /individual/AA123456A/marriage-cp?
+                          methods: get
+        "400":
+          description: Bad Request
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                exampleResponse:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: Constraint Violation - Invalid/Missing input parameter
+                          code: "400.1"
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "403":
+          description: Forbidden
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_403'
+        "404":
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+              examples:
+                exampleResponse:
+                  value:
+                    failures:
+                      - reason: Unprocessable Entity
+                        code: "422.0"
+        "500":
+          description: Internal Server Error Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+      security:
+        - oAuth2:
+            - read:individual-marriage-details
+    put:
+      tags: []
+      summary: Update Individual marriage details on the individual domain
+      description: |-
+        # Purpose
+        This API will retrieve the marriage details for the specified individual identifier. <br><p>
+        # Summary<br>
+        - The API must provide the following path parameters:<br>
+          - National Insurance Number (identifier). <br>
+          - Temporary Reference Number (identifier). <br>
+        - NPS will return a payload holding the updated optimistic Lock for marriage details of the specified individual.<br>
+        # Volumes & Registered Consumers
+        This API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection. <br><p>
+        | Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |
+        |----------|------------------------|---------------------|----------|
+        | ??? | xxx | xxx | xxx |
+        *TPS = Transactions per second
+      operationId: putMarriageDetails
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/Identifier'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutMarriageDetailsRequest'
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/PutMarriageDetailsResponse'
+        "400":
+          description: Bad Request
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                Actual_Response:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                        - reason: "Constraint violation: Invalid/Missing input parameter:\
+                          \ <parameter>"
+                          code: "400.1"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "409":
+          description: Optlock Conflict
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_409'
+        "403":
+          description: 'Forbidden '
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_403'
+        "404":
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+              examples:
+                "422_TRNNotAllowed":
+                  description: This error is only returned for certain consumers.
+                  value:
+                    failures:
+                      - reason: Invalid NINo entered
+                        code: "48003"
+        "500":
+          description: Internal Server Error Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+      security:
+        - oAuth2:
+            - write:individual-marriage-details
+components:
+  schemas:
+    correlationId:
+      format: uuid
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    optimisticLock:
+      description: "Denotes the version of the data being viewed/processed - if this\
+        \ value is different to what is held in the database, any update requests\
+        \ would be rejected to avoid the risk of overwriting valid data with out of\
+        \ date data. The consumer must first refresh their data before re-attempting\
+        \ to perform any subsequent update requests."
+      maximum: 254
+      minimum: 0
+      type: integer
+      example: 123
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      maxLength: 40
+      minLength: 4
+      type: string
+    identifierParameter:
+      description: The identifier of which could be either a Temporary Reference Number
+        (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
+      maxLength: 9
+      minLength: 8
+      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+      type: string
+      example: AA000001A
+    taxYear:
+      description: "Denotes the tax year (i.e. the year the tax period started, 2023\
+        \ for a 2023/2024 tax period)."
+      maximum: 2099
+      minimum: 1900
+      type: integer
+      example: 2023
+    latestParameter:
+      description: "If this is set to true, then only return the latest marriage record\
+        \ - if not present will default to false."
+      type: boolean
+      example: true
+    sequenceParameter:
+      description: Marriage Sequence Number - used for paging
+      type: integer
+      example: 5
+    errorResourceObj_400:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 120
+          minLength: 1
+          type: string
+        code:
+          description: |-
+            The error code representing the error that has occurred. Valid values are
+            400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'
+            400.2 - HTTP message not readable;
+          enum:
+            - "400.1"
+            - "400.2"
+          type: string
+    errorResponse_400:
+      title: Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_400'
+    errorResponseFailure_400:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Forbidden
+          type: string
+        code:
+          description: The error code representing the Forbidden Error.
+          enum:
+            - "403.2"
+          type: string
+    errorResponse_403:
+      title: Forbidden Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_403'
+    errorResponseFailure_403:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+    errorResponse_409:
+      title: Optlock Error Response
+      description: Error Response Payload for this API
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResourceObj_409'
+    errorResourceObj_409:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 120
+          minLength: 1
+          type: string
+        code:
+          description: The error code representing the error that has occurred.
+    errorResourceObj_422_UnprocessableEntity:
+      title: 422_UnprocessableEntity
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 120
+          minLength: 1
+          type: string
+        code:
+          description: The error code representing the error that has occured.
+          type: string
+    errorResponse_422:
+      title: Unprocessable Entity Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_422'
+    errorResponseFailure_422:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_422_UnprocessableEntity'
+    RetrieveMarriageDetailsResponse:
+      required:
+        - marriageDetails
+      type: object
+      properties:
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetails'
+    MarriageDetails:
+      required:
+        - activeMarriage
+      type: object
+      properties:
+        activeMarriage:
+          $ref: '#/components/schemas/ActiveMarriage'
+        marriageDetailsList:
+          $ref: '#/components/schemas/MarriageDetailsList'
+        _links:
+          description: Contains link for the marriage details.
+          properties:
+            self:
+              $ref: '#/components/schemas/SelfLink'
+    ActiveMarriage:
+      description: Denotes whether or not a marriage/civil partnership is active for
+        the individual.
+      type: boolean
+    MarriageDetailsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/MarriageDetailsListElement'
+    MarriageDetailsListElement:
+      required:
+        - sequenceNumber
+        - status
+      type: object
+      properties:
+        sequenceNumber:
+          description: Unique sequence number representing the position in the marriage
+            history (i.e. row) of the marriage details entry for this individual
+          maximum: 126
+          minimum: 1
+          type: integer
+          example: 15
+        status:
+          $ref: '#/components/schemas/EnumMgstattp'
+        startDate:
+          format: date
+          description: The date on which the marriage started.
+          type: string
+        startDateStatus:
+          $ref: '#/components/schemas/EnumDateStat'
+        endDate:
+          format: date
+          description: The date on which the marriage ceased.
+          type: string
+        endDateStatus:
+          $ref: '#/components/schemas/EnumVfddttrm'
+        spouseIdentifier:
+          description: The spouse's identifier of which could be either a Temporary
+            Reference Number (TRN) or a National Insurance Number (NINO).
+          type: string
+        spouseForename:
+          description: The spouse's forename.
+          maxLength: 99
+          minLength: 1
+          pattern: "^([A-Za-z '-])+$"
+          type: string
+          example: Jean-Pierre
+        spouseSurname:
+          description: The spouse's surname.
+          maxLength: 99
+          minLength: 2
+          pattern: "^([A-Za-z '-])+$"
+          type: string
+          example: van Cholmondley-warner
+        separationDate:
+          format: date
+          description: The date on which this married couple separated but were still
+            legally married.
+          type: string
+        reconciliationDate:
+          format: date
+          description: The date on which the marriage was reconciled.
+          type: string
+    PutMarriageDetailsRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/EnumMgstattp'
+        startDate:
+          format: date
+          description: The date on which the marriage started.
+          type: string
+        startDateStatus:
+          $ref: '#/components/schemas/EnumDateStat'
+        endDate:
+          format: date
+          description: The date on which the marriage ceased.
+          type: string
+        endDateStatus:
+          $ref: '#/components/schemas/EnumVfddttrm'
+        spouseIdentifier:
+          description: The spouse's identifier of which could be either a Temporary
+            Reference Number (TRN) or a National Insurance Number (NINO).
+          type: string
+        separationDate:
+          format: date
+          description: The date on which this married couple separated but were still
+            legally married.
+          type: string
+        reconciliationDate:
+          format: date
+          description: The date on which the marriage was reconciled.
+          type: string
+    PutMarriageDetailsResponse:
+      description: response payload for this API.
+      required:
+        - updatedOptimisticLock
+      properties:
+        updatedOptimisticLock:
+          $ref: '#/components/schemas/optimisticLock'
+    EnumMgstattp:
+      description: Current status of individual's marriage
+      enum:
+        - (NONE)
+        - CIVIL PARTNER
+        - CIVIL PARTNERSHIP ANNULLED
+        - CIVIL PARTNERSHIP DISSOLVED
+        - CIVIL PARTNERSHIP TERMINATED - REASON N/K
+        - DIVORCED
+        - MARRIAGE ANNULLED
+        - MARRIAGE TERMINATED - REASON NOT KNOWN
+        - MARRIED
+        - SINGLE
+        - SURVIVING CIVIL PARTNER
+        - VOID
+        - WIDOWED
+      type: string
+    EnumDateStat:
+      description: The status of the marriage start date.
+      enum:
+        - COEG Confirmed
+        - NOT KNOWN
+        - NOT VERIFIED
+        - VERIFIED
+      type: string
+    EnumVfddttrm:
+      description: The status of the marriage end date.
+      enum:
+        - IN EFFECT
+        - NOT KNOWN
+        - UNVERIFIED
+        - VERIFIED
+      type: string
+    SelfLink:
+      properties:
+        href:
+          description: Link for the marriage details.
+          type: string
+        methods:
+          description: Methods available.
+          enum:
+            - get
+          type: string
+    HIP-originEnum:
+      enum:
+        - HIP
+        - HoD
+      type: string
+    HIP-failureResponse:
+      required:
+        - failures
+      type: object
+      properties:
+        failures:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            required:
+              - type
+              - reason
+            type: object
+            properties:
+              type:
+                type: string
+              reason:
+                type: string
+            additionalProperties: false
+    HIP-originResponse:
+      required:
+        - origin
+        - response
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/HIP-originEnum'
+        response:
+          $ref: '#/components/schemas/HIP-failureResponse'
+      additionalProperties: false
+  parameters:
+    correlationId:
+      name: correlationId
+      in: header
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    govUkOriginatorId:
+      name: gov-uk-originator-id
+      in: header
+      description: Identity of the Originating System that made the API call.
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    Identifier:
+      name: identifier
+      in: path
+      description: The identifier of which could be either a Temporary Reference Number
+        (TRN) or a National Insurance Number (NINO).
+      required: true
+      schema:
+        $ref: '#/components/schemas/identifierParameter'
+    MarriageStartYear:
+      name: startYear
+      in: query
+      description: "Primary Restart Key - Used for Pagination. If marriage start year\
+        \ is provided, the API will return ALL records where start date is less than\
+        \ the provided start date."
+      required: false
+      schema:
+        $ref: '#/components/schemas/taxYear'
+      example: 2002
+    Latest:
+      name: latest
+      in: query
+      description: "If this is set to true, then only return the latest marriage record\
+        \ - if not present will default to false"
+      required: false
+      schema:
+        $ref: '#/components/schemas/latestParameter'
+    Sequence:
+      name: sequence
+      in: query
+      description: "Secondary Restart Key - Used for Pagination. ONLY If exact sequence\
+        \ number is provided along side start date, the API will return ALL records\
+        \ where marriage start date is before the provided date and the sequence number\
+        \ is less than the provided sequence number."
+      required: false
+      schema:
+        $ref: '#/components/schemas/sequenceParameter'
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    optimisticLock:
+      required: true
+      schema:
+        $ref: '#/components/schemas/optimisticLock'
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: OAuth2 Client Credentials Flow
+      flows:
+        clientCredentials:
+          tokenUrl: /tokenUrl/not-required
+          scopes:
+            read:individual-marriage-details: Individual's Marriage Details
+            write:individual-marriage-details: Individual's Marriage Details
