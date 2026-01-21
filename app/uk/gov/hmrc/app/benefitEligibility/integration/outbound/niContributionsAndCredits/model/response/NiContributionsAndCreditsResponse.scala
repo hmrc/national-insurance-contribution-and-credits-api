@@ -30,7 +30,7 @@ sealed trait NiContributionsAndCreditsResponse extends NpsApiResponse
 
 object NiContributionsAndCreditsError {
 
-  case class NiContributionsAndCredits400(reason: Reason, code: ErrorCode400)
+  case class NiContributionsAndCredits400(reason: Reason, code: NpsErrorCode400)
 
   object NiContributionsAndCredits400 {
 
@@ -49,7 +49,7 @@ object NiContributionsAndCreditsError {
 
   }
 
-  case class NiContributionsAndCreditsResponse403(reason: ErrorReason403, code: ErrorCode403)
+  case class NiContributionsAndCreditsResponse403(reason: NpsErrorReason403, code: NpsErrorCode403)
       extends NiContributionsAndCreditsResponse
       with NpsApiResponse
 
@@ -185,7 +185,7 @@ object NiContributionsAndCreditsSuccess {
 
   }
 
-  case class NicClass1(
+  case class NiClass1(
       taxYear: Option[TaxYear],
       contributionCategoryLetter: Option[ContributionCategoryLetter],
       contributionCategory: Option[ContributionCategory],
@@ -198,11 +198,11 @@ object NiContributionsAndCreditsSuccess {
       latePaymentPeriod: Option[LatePaymentPeriod]
   )
 
-  object NicClass1 {
-    implicit val nicClass1Reads: Reads[NicClass1] = Json.reads[NicClass1]
+  object NiClass1 {
+    implicit val nicClass1Reads: Reads[NiClass1] = Json.reads[NiClass1]
   }
 
-  case class NicClass2(
+  case class NiClass2(
       taxYear: Option[TaxYear],
       noOfCreditsAndConts: Option[NumberOfCreditsAndContributions],
       contributionCreditType: Option[ContributionCreditType],
@@ -213,13 +213,13 @@ object NiContributionsAndCreditsSuccess {
       latePaymentPeriod: Option[LatePaymentPeriod]
   )
 
-  object NicClass2 {
-    implicit val nicClass2Reads: Reads[NicClass2] = Json.reads[NicClass2]
+  object NiClass2 {
+    implicit val nicClass2Reads: Reads[NiClass2] = Json.reads[NiClass2]
   }
 
   case class NiContributionsAndCreditsSuccessResponse(
-      niClass1: List[NicClass1],
-      niClass2: List[NicClass2]
+      niClass1: Option[List[NiClass1]],
+      niClass2: Option[List[NiClass2]]
   ) extends NiContributionsAndCreditsResponse
       with NpsSuccessfulApiResponse
 

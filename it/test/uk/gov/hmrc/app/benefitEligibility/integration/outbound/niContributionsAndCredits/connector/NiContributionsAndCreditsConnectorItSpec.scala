@@ -45,6 +45,7 @@ import play.api.test.Helpers.{
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamErrorReport,
   DownstreamSuccessResponse
@@ -101,30 +102,34 @@ class NiContributionsAndCreditsConnectorItSpec
       "when the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
           val successResponse = NiContributionsAndCreditsSuccessResponse(
-            List(
-              NicClass1(
-                taxYear = Some(TaxYear(2022)),
-                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-                contributionCategory = Some(ContributionCategory.None),
-                contributionCreditType = Some(ContributionCreditType.C1),
-                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                creditSource = Some(CreditSource.NotKnown),
-                employerName = Some(EmployerName("ipOpMs")),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
+            Some(
+              List(
+                NiClass1(
+                  taxYear = Some(TaxYear(2022)),
+                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                  contributionCategory = Some(ContributionCategory.None),
+                  contributionCreditType = Some(ContributionCreditType.C1),
+                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                  creditSource = Some(CreditSource.NotKnown),
+                  employerName = Some(EmployerName("ipOpMs")),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
               )
             ),
-            List(
-              NicClass2(
-                taxYear = Some(TaxYear(2022)),
-                noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
-                contributionCreditType = Some(ContributionCreditType.C1),
-                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                creditSource = Some(CreditSource.NotKnown),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
+            Some(
+              List(
+                NiClass2(
+                  taxYear = Some(TaxYear(2022)),
+                  noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCreditType = Some(ContributionCreditType.C1),
+                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                  class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                  creditSource = Some(CreditSource.NotKnown),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
               )
             )
           )
@@ -171,7 +176,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(DownstreamSuccessResponse(NiContributionAndCredits, successResponse))
           server.verify(
@@ -206,7 +211,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.BadRequest)
@@ -239,7 +244,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
@@ -263,7 +268,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.NotFound)
@@ -300,7 +305,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
@@ -322,7 +327,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.InternalServerError)
@@ -345,7 +350,7 @@ class NiContributionsAndCreditsConnectorItSpec
                 )
             )
 
-            val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+            val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
             result shouldBe Right(
               DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(statusCode))
@@ -367,32 +372,10 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ParsingError]
-        }
-      }
-
-      "when the NiContributionsAndCredits endpoint returns valid JSON with missing required fields" - {
-        "should return validation error" in {
-
-          val incompleteResponse = """{"identifier":"AB123456C"}"""
-
-          server.stubFor(
-            post(urlEqualTo(testPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(incompleteResponse)
-              )
-          )
-
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
-
-          result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[ValidationError]
         }
       }
 
@@ -407,10 +390,10 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[DownstreamError]
+          result.left.value shouldBe a[NpsClientError]
         }
       }
 

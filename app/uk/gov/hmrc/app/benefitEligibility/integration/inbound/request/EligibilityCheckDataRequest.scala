@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated
@@ -38,7 +39,9 @@ object EligibilityCheckDataRequest {
 
 }
 
-sealed trait EligibilityCheckDataRequest
+sealed trait EligibilityCheckDataRequest {
+  def `type`: BenefitType
+}
 
 case class MAEligibilityCheckDataRequest(
     nationalInsuranceNumber: String, // contribution credit api
@@ -55,7 +58,9 @@ case class MAEligibilityCheckDataRequest(
     archived: Option[Boolean],                                            // ma receipts api
     receiptDate: Option[ReceiptDate],                                     // ma receipts api
     sortBy: Option[MaternityAllowanceSortType]                            // ma receipts api
-) extends EligibilityCheckDataRequest
+) extends EligibilityCheckDataRequest {
+  val `type`: BenefitType = MA
+}
 
 object MAEligibilityCheckDataRequest {
   implicit val reads: Reads[MAEligibilityCheckDataRequest]   = Json.reads[MAEligibilityCheckDataRequest]
@@ -67,7 +72,9 @@ case class ESAEligibilityCheckDataRequest(
     dateOfBirth: LocalDate,          // contribution credit api
     startTaxYear: Int,               // contribution credit api
     endTaxYear: Int                  // contribution credit api
-) extends EligibilityCheckDataRequest
+) extends EligibilityCheckDataRequest {
+  val `type`: BenefitType = ESA
+}
 
 object ESAEligibilityCheckDataRequest {
   implicit val reads: Reads[ESAEligibilityCheckDataRequest]   = Json.reads[ESAEligibilityCheckDataRequest]
@@ -79,7 +86,9 @@ case class JSAEligibilityCheckDataRequest(
     dateOfBirth: LocalDate,          // contribution credit api
     startTaxYear: Int,               // contribution credit api
     endTaxYear: Int                  // contribution credit api
-) extends EligibilityCheckDataRequest
+) extends EligibilityCheckDataRequest {
+  val `type`: BenefitType = JSA
+}
 
 object JSAEligibilityCheckDataRequest {
   implicit val reads: Reads[JSAEligibilityCheckDataRequest]   = Json.reads[JSAEligibilityCheckDataRequest]
@@ -103,7 +112,9 @@ case class GYSPEligibilityCheckDataRequest(
     schemeMembershipSequenceNumber: Option[Int],         // scheme-membership-details API
     schemeMembershipTransferSequenceNumber: Option[Int], // scheme-membership-details API
     schemeMembershipOccurrenceNumber: Option[Int]        // scheme-membership-details API
-) extends EligibilityCheckDataRequest
+) extends EligibilityCheckDataRequest {
+  val `type`: BenefitType = GYSP
+}
 
 object GYSPEligibilityCheckDataRequest {
   implicit val reads: Reads[GYSPEligibilityCheckDataRequest]   = Json.reads[GYSPEligibilityCheckDataRequest]
@@ -120,7 +131,9 @@ case class BSPEligibilityCheckDataRequest(
     searchEndYear: Option[Int],      // Marriage Details API
     latest: Option[Boolean],         // Marriage Details API
     sequence: Option[Int]            // Marriage Details API
-) extends EligibilityCheckDataRequest
+) extends EligibilityCheckDataRequest {
+  val `type`: BenefitType = BSP
+}
 
 object BSPEligibilityCheckDataRequest {
   implicit val reads: Reads[BSPEligibilityCheckDataRequest]   = Json.reads[BSPEligibilityCheckDataRequest]

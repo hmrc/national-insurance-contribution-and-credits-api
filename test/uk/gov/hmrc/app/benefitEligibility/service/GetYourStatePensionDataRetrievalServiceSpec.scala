@@ -22,7 +22,7 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Identifier, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType, Identifier, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
@@ -88,8 +88,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
       "should retrieve data successfully" in {
 
         (mockMarriageDetailsConnector
-          .fetchMarriageDetails(_: String)(_: HeaderCarrier))
-          .expects("some url path", *)
+          .fetchMarriageDetails(_: BenefitType, _: String)(_: HeaderCarrier))
+          .expects(BenefitType.GYSP, "some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)

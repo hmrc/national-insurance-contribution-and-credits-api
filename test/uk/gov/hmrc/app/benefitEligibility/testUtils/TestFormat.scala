@@ -18,13 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.testUtils
 
 import play.api.libs.json.{Format, Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.ErrorCode422
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
-  Class2MAReceiptsError400,
-  Class2MAReceiptsError422,
-  Class2MAReceiptsErrorResponse400,
-  Class2MAReceiptsErrorResponse403,
-  Class2MAReceiptsErrorResponse422
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsError400,
   LiabilitySummaryDetailsError422,
@@ -32,22 +26,10 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
   LiabilitySummaryDetailsErrorResponse403,
   LiabilitySummaryDetailsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.{
-  NiContributionsAndCredits400,
-  NiContributionsAndCredits422,
-  NiContributionsAndCreditsResponse400,
-  NiContributionsAndCreditsResponse403,
-  NiContributionsAndCreditsResponse422
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.{
-  ContributionCategoryLetter,
-  EmployerName,
-  NiContributionsAndCreditsSuccessResponse,
-  NicClass1,
-  NicClass2,
-  PrimaryContribution,
-  PrimaryPaidEarnings
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
 
 object TestFormat {
 
@@ -92,11 +74,11 @@ object TestFormat {
     implicit val primaryPaidEarningsWrites: Writes[PrimaryPaidEarnings] =
       Json.valueWrites[PrimaryPaidEarnings]
 
-    implicit val nicClass1Format: Format[NicClass1] =
-      Json.format[NicClass1]
+    implicit val nicClass1Format: Format[NiClass1] =
+      Json.format[NiClass1]
 
-    implicit val nicClass2Format: Format[NicClass2] =
-      Json.format[NicClass2]
+    implicit val nicClass2Format: Format[NiClass2] =
+      Json.format[NiClass2]
 
     implicit val niContributionsAndCreditsSuccessResponseFormat: Format[NiContributionsAndCreditsSuccessResponse] =
       Json.format[NiContributionsAndCreditsSuccessResponse]
@@ -136,6 +118,37 @@ object TestFormat {
 
     implicit val liabilitySummaryDetailsErrorResponse422Writes: Writes[LiabilitySummaryDetailsErrorResponse422] =
       Json.writes[LiabilitySummaryDetailsErrorResponse422]
+
+  }
+
+  object SchemeMembership {
+
+    import CommonFormats.errorCode422
+
+    implicit val schemeMembershipDetailsError400Writes: Writes[SchemeMembershipDetailsError400] =
+      Json.writes[SchemeMembershipDetailsError400]
+
+    implicit val schemeMembershipDetailsErrorResponse400Writes: Writes[SchemeMembershipDetailsErrorResponse400] =
+      Json.writes[SchemeMembershipDetailsErrorResponse400]
+
+    implicit val schemeMembershipDetailsErrorResponse403Writes: Writes[SchemeMembershipDetailsErrorResponse403] =
+      Json.writes[SchemeMembershipDetailsErrorResponse403]
+
+    implicit val schemeMembershipDetailsError422Writes: Writes[SchemeMembershipDetailsError422] =
+      Json.writes[SchemeMembershipDetailsError422]
+
+    implicit val schemeMembershipDetailsErrorResponse422Writes: Writes[SchemeMembershipDetailsErrorResponse422] =
+      Json.writes[SchemeMembershipDetailsErrorResponse422]
+
+    implicit val schemeMembershipDetailsWrites: Writes[SchemeMembershipDetails] = Json.writes[SchemeMembershipDetails]
+
+    implicit val schemeMembershipDetailsSummaryWrites: Writes[SchemeMembershipDetailsSummary] =
+      Json.writes[SchemeMembershipDetailsSummary]
+
+    implicit val callbackWrites: Writes[Callback] = Json.writes[Callback]
+
+    implicit val schemeMembershipDetailsSuccessResponseWrites: Writes[SchemeMembershipDetailsSuccessResponse] =
+      Json.writes[SchemeMembershipDetailsSuccessResponse]
 
   }
 

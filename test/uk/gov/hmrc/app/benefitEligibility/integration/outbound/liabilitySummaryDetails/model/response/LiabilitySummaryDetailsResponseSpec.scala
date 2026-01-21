@@ -23,7 +23,8 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode400, ErrorCode422, Identifier, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
+import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, NpsErrorCode400, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
   LiabilitySummaryDetailsErrorResponse403,
@@ -220,11 +221,11 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         List(
           LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
             Reason("HTTP message not readable"),
-            ErrorCode400.ErrorCode400_2
+            NpsErrorCode400.NpsErrorCode400_2
           ),
           LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
             Reason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-            ErrorCode400.ErrorCode400_1
+            NpsErrorCode400.NpsErrorCode400_1
           )
         )
       )
@@ -253,13 +254,13 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
               Reason(
                 "some reason with way to many letters letters letters letters  letters letters  letters letters  letters letters  letters letters  letters letters  letters letters"
               ),
-              ErrorCode400.ErrorCode400_2
+              NpsErrorCode400_2
             ),
             LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
               Reason(
                 ""
               ),
-              ErrorCode400.ErrorCode400_1
+              NpsErrorCode400_1
             )
           )
         )

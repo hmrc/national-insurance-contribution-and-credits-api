@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums
 
-trait NpsApiResponse {}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import scala.collection.immutable
+
+sealed abstract class SspDeem(override val entryName: String) extends EnumEntry
+
+object SspDeem extends Enum[SspDeem] with PlayJsonEnum[SspDeem] {
+  val values: immutable.IndexedSeq[SspDeem] = findValues
+
+  case object SspTypeReceivablesNotDeemed         extends SspDeem("SSP TYPE RECEIVABLES NOT DEEMED")
+  case object SspTypeReceivablesToBeTreatAsDeemed extends SspDeem("SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED")
+}

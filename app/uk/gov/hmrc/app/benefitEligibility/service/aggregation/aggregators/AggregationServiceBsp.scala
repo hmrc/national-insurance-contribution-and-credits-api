@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators
 
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchError
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityDataFetchErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedDataBsp
@@ -33,6 +33,6 @@ object AggregationServiceBsp {
             List()
           )
         )
-      } else Left(BenefitEligibilityDataFetchError.from(eligibilityCheckDataResultBSP))
+      } else Left(BenefitEligibilityDataFetchErrorReport.from(eligibilityCheckDataResultBSP))
 
 }

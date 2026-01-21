@@ -20,15 +20,11 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode403.NpsErrorCode403_1
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamErrorReport,
   DownstreamSuccessResponse
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.enums.ErrorCode403.ErrorCode403_1
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.enums.{
-  ErrorCode403,
-  ErrorReason403
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
@@ -54,7 +50,10 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
 
       "should map Class2MAReceiptsErrorResponse403 to AccessForbidden error" in {
         val errorResponse =
-          Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_1)
+          Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(
+            NpsErrorReason403.Forbidden,
+            NpsErrorCode403.NpsErrorCode403_1
+          )
 
         val result = underTest.toApiResult(errorResponse)
 
@@ -65,7 +64,7 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
 
       "should map Class2MAReceiptsErrorResponse400 to BadRequest error" in {
         val failures =
-          List(Class2MAReceiptsError400(Reason(""), ErrorCode400.ErrorCode400_1))
+          List(Class2MAReceiptsError400(Reason(""), NpsErrorCode400.NpsErrorCode400_1))
         val errorResponse = Class2MAReceiptsError.Class2MAReceiptsErrorResponse400(failures)
 
         val result = underTest.toApiResult(errorResponse)
@@ -92,7 +91,7 @@ class Class2MAReceiptsResponseMapperSpec extends AnyFreeSpec with Matchers {
       "should create failure result with AccessForbidden error" in {
 
         val errorResponse =
-          Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403_1)
+          Class2MAReceiptsError.Class2MAReceiptsErrorResponse403(NpsErrorReason403.Forbidden, NpsErrorCode403_1)
         val result = underTest.toApiResult(errorResponse)
 
         val expected = DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)

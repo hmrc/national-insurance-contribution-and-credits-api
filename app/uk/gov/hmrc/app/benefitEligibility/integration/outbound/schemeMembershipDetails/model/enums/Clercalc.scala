@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.enums
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-
 import scala.collection.immutable
 
-sealed abstract class ErrorCode403(override val entryName: String) extends EnumEntry
+sealed abstract class Clercalc(override val entryName: String) extends EnumEntry
 
-object ErrorCode403 extends Enum[ErrorCode403] with PlayJsonEnum[ErrorCode403] {
-  val values: immutable.IndexedSeq[ErrorCode403] = findValues
+object Clercalc extends Enum[Clercalc] with PlayJsonEnum[Clercalc] {
+  val values: immutable.IndexedSeq[Clercalc] = findValues
 
-  case object ErrorCode403_2 extends ErrorCode403("403.2")
-
-  case object ErrorCode403_1 extends ErrorCode403("403.1")
+  case object ClericalCalculationInvolved   extends Clercalc("CLERICAL CALCULATION INVOLVED")
+  case object NoClericalCalculationInvolved extends Clercalc("NO CLERICAL CALCULATION INVOLVED")
 }

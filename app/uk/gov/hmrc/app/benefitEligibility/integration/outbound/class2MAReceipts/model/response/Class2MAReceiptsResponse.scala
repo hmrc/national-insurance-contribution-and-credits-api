@@ -18,10 +18,6 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.enums.{
-  ErrorCode403,
-  ErrorReason403
-}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -33,7 +29,7 @@ sealed trait Class2MAReceiptsResponse extends NpsApiResponse
 object Class2MAReceiptsError {
 
   // 400 start
-  case class Class2MAReceiptsError400(reason: Reason, code: ErrorCode400)
+  case class Class2MAReceiptsError400(reason: Reason, code: NpsErrorCode400)
 
   object Class2MAReceiptsError400 {
     implicit val npsErrorResponse400Reads: Reads[Class2MAReceiptsError400] = Json.reads[Class2MAReceiptsError400]
@@ -51,7 +47,7 @@ object Class2MAReceiptsError {
   // 400 end
 
   // 403 start
-  case class Class2MAReceiptsErrorResponse403(reason: ErrorReason403, code: ErrorCode403)
+  case class Class2MAReceiptsErrorResponse403(reason: NpsErrorReason403, code: NpsErrorCode403)
       extends Class2MAReceiptsResponse
       with NpsApiResponse
 

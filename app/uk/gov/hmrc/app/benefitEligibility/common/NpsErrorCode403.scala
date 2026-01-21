@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound
+package uk.gov.hmrc.app.benefitEligibility.common
 
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import scala.collection.immutable
 
-trait NpsResponseMapper[A <: NpsApiResponse, B <: NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]] {
-  def toApiResult(response: A): B
+sealed abstract class NpsErrorCode403(override val entryName: String) extends EnumEntry
+
+object NpsErrorCode403 extends Enum[NpsErrorCode403] with PlayJsonEnum[NpsErrorCode403] {
+  val values: immutable.IndexedSeq[NpsErrorCode403] = findValues
+
+  case object NpsErrorCode403_2 extends NpsErrorCode403("403.2")
+
+  case object NpsErrorCode403_1 extends NpsErrorCode403("403.1")
 }

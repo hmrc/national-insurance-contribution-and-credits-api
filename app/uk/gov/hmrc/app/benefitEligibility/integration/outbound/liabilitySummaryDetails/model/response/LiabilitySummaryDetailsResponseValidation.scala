@@ -26,7 +26,7 @@ object LiabilitySummaryDetailsResponseValidation {
 
   implicit val liabilitySummaryDetailsResponseValidator
       : NpsResponseValidator[LiabilitySummaryDetailsSuccessResponse] = {
-    (response: LiabilitySummaryDetailsSuccessResponse) => Validated.validNel(SuccessfulResult)
+    (_, response: LiabilitySummaryDetailsSuccessResponse) => Validated.validNel(SuccessfulResult)
   }
 
   // endregion Success Validation

@@ -24,6 +24,7 @@ import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.aggregator
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
@@ -52,8 +53,10 @@ class BenefitEligibilityDataController @Inject() (
                   .withHeaders("correlationId" -> correlationId)
               }
               .map { result =>
-                result.aggregate
-                Ok("success")
+                result.aggregate match {
+                  case Left(report)  => BadGateway("report")
+                  case Right(result) => Ok("result")
+                }
               }
               .value
               .map {

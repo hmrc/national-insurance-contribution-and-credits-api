@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound
+package uk.gov.hmrc.app.benefitEligibility.common
 
-trait NpsApiResponse {}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import scala.collection.immutable
+
+sealed abstract class NpsErrorReason403(override val entryName: String) extends EnumEntry
+
+object NpsErrorReason403 extends Enum[NpsErrorReason403] with PlayJsonEnum[NpsErrorReason403] {
+  val values: immutable.IndexedSeq[NpsErrorReason403] = findValues
+  case object Forbidden        extends NpsErrorReason403("Forbidden")
+  case object UserUnauthorised extends NpsErrorReason403("User Not Authorised")
+}
