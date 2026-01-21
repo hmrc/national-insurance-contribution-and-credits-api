@@ -305,7 +305,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
         ) shouldBe Validated.Invalid(
           NonEmptyList.of(
             """EmployersContractedOutNumberDetails value does not match regex pattern: ^([A-Z]{0,1}[3]\d{6}[A-Z ^GIO SUVZ]{0,1})$""",
-            """EmployersContractedOutNumberDetails value exceeds the max character limit of 7"""
+            """EmployersContractedOutNumberDetails value exceeds the max character limit of 9"""
           )
         )
 
