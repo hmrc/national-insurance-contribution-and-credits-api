@@ -1,0 +1,666 @@
+openapi: 3.0.3
+info:
+  title: Long Term Benefit Notes
+  description: |
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  version: 0.0.3 Draft
+  x-integration-catalogue:
+    reviewed-date: 2026-01-13T08:46:54Z
+    short-description: Long Term Benefit Notes
+    status: ALPHA
+    api-type: SIMPLE
+    platform: HIP
+    backends:
+      - NI
+    domain: 3
+    sub-domain: 3.1
+servers:
+  - url: https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate - Production
+  - url: https://api.ipaas.preprod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate – Pre-Production
+  - url: https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni
+    description: Corporate - Test
+  - url: https://hip.ws.hmrc.gov.uk/ni
+    description: MDTP - Production
+  - url: https://hip.ws.ibt.hmrc.gov.uk/ni
+    description: MDTP - QA
+security:
+  - oAuth2:
+      - read:retrieve-ltb-notes
+paths:
+  /long-term-benefits/{identifier}/calculation/{type}/notes/{seqNo}:
+    get:
+      tags:
+        - Long term Benefit
+      summary: Retrieve Long Term Benefit Notes
+      description: |-
+        # Purpose
+        This API provides the capability to retrieve Long Term Benefit notes.
+      operationId: GetLongTermBenefitNotes
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/govUkOrganisationId'
+        - $ref: '#/components/parameters/govUkUserId'
+        - $ref: '#/components/parameters/govUkUserName'
+        - $ref: '#/components/parameters/govUkJobRole'
+        - $ref: '#/components/parameters/Identifier'
+        - $ref: '#/components/parameters/AssociatedCalculationSequenceNumber'
+        - $ref: '#/components/parameters/BenefitType'
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/LongTermBenefitNotesResponse'
+              examples:
+                minimallyPopulatedResponse:
+                  summary: Minimally populated response. No notes present.
+                  value:
+                    longTermBenefitNotes: []
+                maximallyPopulatedResponse:
+                  summary: Maximally populated response. This includes possible note
+                    format that could be returned.
+                  value:
+                    longTermBenefitNotes:
+                      - Invalid Note Type Encountered.
+                      - Married Woman's/Widow's Reduced Rate Authority recorded on this
+                        account between 07/04/2020 and 07/04/2025.
+                      - Married Woman's/Widow's Reduced Rate Authority recorded on this
+                        account from 07/04/2025
+                      - Widow's Benefit Award UNKNOWN  recorded on this account between
+                        07/04/2020 and 07/04/2025.
+                      - Widow's Benefit Award UNKNOWN  recorded on this account from
+                        07/04/2025.
+                      - Retirement Position of UNKNOWN recorded on this account between
+                        07/04/2020 and 07/04/2025.
+                      - Retirement Position of UNKNOWN recorded on this account from
+                        07/04/2025.
+                      - Retirement Position of UNKNOWN recorded on this account between
+                        NOT KNOWN.
+                      - "Un-employability Supplement information recorded on this account,\
+                      \ of type UNKNOWN between 07/04/2024 and 07/04/2025."
+                      - "Un-employability Supplement information recorded on this account,\
+                      \ of type UNKNOWN from 07/04/2025."
+                      - Widow's Benefit Award UNKNOWN recorded on this account between
+                        07/04/2021 and 07/04/2023 with an overlapping period of abroad
+                        recorded.
+                      - Widow's Benefit Award UNKNOWN recorded on this account from
+                        07/04/2025 with an overlapping period of abroad recorded.
+                      - An Overlapping period of UNKNOWN is recorded on this account
+                        between 07/04/2022 and 07/04/2024.
+                      - An Overlapping period of UNKNOWN is recorded on this account
+                        from 07/04/2025.
+                      - An Overpayment of UNKNOWN is recorded on this account between
+                        07/04/2024 and 07/04/2025.
+                      - An Overpayment of UNKNOWN is recorded on this account from 07/04/2025.
+                      - An award of JOB SEEKER'S ALLOWANCE is recorded on this account
+                        between 15/3/06 and UNKNOWN.
+                      - An award of JOB SEEKER'S ALLOWANCE is recorded on this account
+                        from 07/04/2025.
+                      - An award of SICKNESS BENEFIT/IVB is recorded on this account
+                        between NOT KNOWN.
+                      - RPFA UNKNOWN LO UNKNOWN .
+                      - 'This account is recorded as having been UNKNOWN on JOB SEEKER''S
+                      ALLOWANCE.  The details of the old account are:'
+                      - "NINO. AA000001, Date of Birth 11/11/1960, Name Jack."
+                      - "A Widow's Cross reference is recorded on this account, to NINO\
+                      \ AA000001, with name detail of Jack. UNKNOWN. Smith."
+                      - 'The following marriage / Civil Partnership details are recorded
+                      on this account:'
+                      - "Start Date: 07/04/2020,  Verification : UNKNOWN,  End Date:\
+                      \ 07/04/2025,  Verification: UNKNOWN,  Status: CIVIL PARTNER,\
+                      \  Spouse's / Civil Partner's NINo: AB123456, Spouse's / Civil\
+                      \ Partner's Name: Lucy UNKNOWN Smith  UNKNOWN."
+                      - 'The following previous names are recorded on this account:'
+                      - Jack UNKNOWN. UNKNOWN.  UNKNOWN.
+                      - A marriage / Civil Partnership verification is recorded in the
+                        account under reference number UNKNOWN.
+                      - A GRB Total of 43 earned by the Widow's Deceased husband has
+                        been included in this assessment.
+                      - "The following overseas insurance details are recorded on the\
+                      \ account: Country France, Insurance Number UNKNOWN."
+                      - "The following overseas residential details are recorded on\
+                      \ the account: Country Italy from 07/04/2020 to 07/04/2025."
+                      - "The following overseas residential details are recorded on\
+                      \ the account: Country Australia from 07/04/2025."
+                      - "There are 10 years of HRP are recorded on this account in a\
+                      \ working life period of 35 years., UNKNOWN UNKNOWN UNKNOWN\
+                      \ UNKNOWN, UNKNOWN UNKNOWN UNKNOWN UNKNOWN, UNKNOWN UNKNOWN\
+                      \ UNKNOWN UNKNOWN, UNKNOWN UNKNOWN UNKNOWN UNKNOWN UNKNOWN UNKNOWN"
+                      - A GRB Total of 50 has been accumulated on this account.
+                      - 'The following Deferments are recorded on this account:'
+                      - "Deferment Type UNKNOWN, between 07/04/2020 and 07/04/2025."
+                      - "Deferment Type UNKNOWN, from 07/04/2025."
+                      - A previous Retirement Position of UNKNOWN was recorded on this
+                        account.
+                      - "The following GMP/COD details have been calculated on this\
+                      \ account: Pre-1988 GMP: 0.00, 1988 onwards GMP: 0.00,  Pre-1988\
+                      \ COD: 31.53, 1988 onwards COD: 5.84., "
+                      - "Substitution Calculation Method 1: Commencement Year: 1975,\
+                      \  Number of Requisite Years: 2,  Number of HRP Years: 10, \
+                      \ Number of Qualifying Years: 25, Basic Pension: 0.00, ,  Substitution\
+                      \ Calculation Method 2: Commencement Year:1997,  Number of Requisite\
+                      \ Years: 2,  Number of HRP Years: 5,  Number of Qualifying Years:\
+                      \ 15,  Basic Pension: 0.00"
+                      - "The Benefit Entitlement include the following Widower's Inheritance\
+                      \ Details: Spouse's NINo.: AB123456,  Spouse's Surname: Smith,\
+                      \  Spouse's Forenames: Lucy UNKNOWN,  Spouse's Date of Birth:\
+                      \ 25/11/1971,  Spouse's GRB Units: 43,  GRB Unit Value: 0.0748"
+                      - "Tax Year: 2024,  BP Increments Weekly Rate: 0.00,  AP Increments\
+                      \ Weekly Rate: 0.00, GRB Weekly Rate: 3.22,  GRB Increments\
+                      \ Weekly Rate: 0.00"
+                      - "Tax Year: 2024,  BP Increments Weekly Rate: 0.00,  AP Increments\
+                      \ Notional Amount (Pre 02): 0.00,  AP Increments Inheritable\
+                      \ Amount (Pre 02): 0.00,  AP Increments Notional Amount (Post\
+                      \ 02): 0.00,  AP Increments Inheritable Amount (Post 02): 0.00,\
+                      \  GRB Weekly Rate: 3.22,  GRB Increments Weekly Rate: 0.00"
+                      - A UNKNOWN Quarterly Billing arrangement is recorded on this
+                        account.
+                      - A UNKNOWN Cyclical Billing arrangement is recorded on this account
+                        from 07/04/2025.  The next bill issued under this arrangement
+                        will be dated 07/04/2026.
+                      - "The following Excess Contributions are recorded on the account:\
+                      \  <b>See Tax Year Contributions/Credits Screen for more detail"
+                      - "Tax Year: 2024"
+                      - "The following Erroneous Contributions are recorded on the account:\
+                      \ <b>See Tax Year Contributions/Credits Screen for more detail"
+                      - "Tax Year: 2024"
+                      - "The following Late Paid Contributions are recorded on the account:\
+                      \ <b>See Tax Year Contributions/Credits Screen for more detail"
+                      - "Tax Year: 2024"
+                      - "The following contributions are recorded on the account with\
+                      \ a posting query: <b>See Tax Year Contributions/Credits Screen\
+                      \ for more detail"
+                      - "Tax Year: 2024"
+                      - A date of death of 07/04/2025 is recorded on this account.
+                      - The current residential address is recorded as starting on 07/04/2025.
+                      - "An Uprating has been applied to this Benefit Entitlement on\
+                      \ 07/04/2025 with values of:CAT A Weekly Rate:0.00,  Corresponding\
+                      \ CAT BL Weekly Rate: UNKNOWN,  AP Total Weekly Rate (Pre 97):\
+                      \ 2.75,  AP Total Weekly Rate (Post 97): 0.00, Pre 88 GMP: 0.00\
+                      \ , Post 88 GMP Value: 0.00, Pre 88 COD Value: 31.53, POst 88\
+                      \ COD Value: 5.84, GRB Weekly Rate: 3.22, WB BP age related\
+                      \ cash value: UNKNOWN, WB AP age related cash value Pre 97:\
+                      \ UNKNOWN,  WB AP age related cash value Post 97: UNKNOWN"
+                      - "An Uprating has been applied to this Benefit Entitlement on\
+                      \ 07/04/2025 with values of:CAT A Weekly Rate:0.00,  Corresponding\
+                      \ CAT BL Weekly Rate: UNKNOWN,  AP Total Weekly Rate (Pre 97):\
+                      \ 2.75,  AP Total Weekly Rate (Post 97): 0.00,  AP Total Weekly\
+                      \ Rate (Post 02): UNKNOWN, Pre 88 GMP: 0.00, Post 88 GMP Value:\
+                      \ 0.00, Pre 88 COD Value: 31.61, POst 88 COD Value: 4.82, GRB\
+                      \ Weekly Rate: 4.32, WB BP age related cash value: UNKNOWN,\
+                      \ WB AP age related cash value Pre 97: UNKNOWN,  WB AP age related\
+                      \ cash value Post 97: UNKNOWN"
+                      - An Inheritance calculation could not be performed as there is
+                        more than one marriage on the account.
+                      - A Substitution calculation could not be performed as the relevant
+                        marriage could not be identified.
+                      - A Method 2 Substitution calculation has not been performed because
+                        the Substitution Fraction is 1/1.
+                      - A Method 1 Substitution calculation could not be performed as
+                        the Substitution Period involves Pre 75 years.
+                      - A period of UNKNOWN from 07/04/2020 to 07/04/2022 is recorded
+                        with a reference number of UNKNOWN.
+                      - "Contracted out Employment: Scheme Membership Sequence Number:\
+                      \ 1, Scheme Membership Start Date: '1978-04-06', Scheme Membership\
+                      \ End Date: '08/12/1983', Method of Preservation: 'CHANGE OF\
+                      \ RPA FROM COSR TO PP', Econ: 'E3004227R', Terminating Scon/Ascn:\
+                      \ 'A7990001X', Revaluation Rate: 'FIXED', Termination Microfilm\
+                      \ Number: '47510120', POST 88 GMP: 'UNKNOW', POST 88 COD: 0.00,\
+                      \ UNKNOWN"
+                      - "Contracted out Employment: Scheme Membership Sequence Number:\
+                      \ 1, Scheme Membership Start Date: '1978-04-06', Scheme Membership\
+                      \ End Date: '08/12/1983', Method of Preservation: 'CHANGE OF\
+                      \ RPA FROM COSR TO PP', Econ: 'E3004227R', Terminating Scon/Ascn:\
+                      \ 'A7990001X', Revaluation Rate: 'FIXED', Termination Microfilm\
+                      \ Number: '47510120', POST 88 GMP: 'UNKNOW', POST 88 COD: 0.00,\
+                      \ PRE 88 GMP: 'UNKNOWN', PRE 88 COD: 26.53, Date GMP Extinguished:\
+                      \ 'UNKNOWN', 'UNKNOWN'"
+                      - A Method 2 Substitution calculation could not be performed as
+                        the Substitution Period involves Pre 75 years.
+                      - Bereavement Benefit Award (UNKNOWN) recorded on this account
+                        from 07/04/2020 to 07/04/2025.
+                      - Bereavement Benefit Award (UNKNOWN) recorded on this account
+                        from 07/04/2025
+                      - Bereavement Benefit Award recorded on this account between 07/04/2023
+                        and 07/04/2024 with an overlapping period of abroad recorded.
+                      - Bereavement Benefit Award recorded on this account from 07/04/2024
+                        with an overlapping period of abroad recorded.
+                      - "A Widower's /Civil Partner's cross-reference is recorded on\
+                      \ this account, to NINO AA000001, with name Jack. UNKNOWN. Smith."
+                      - PP/COMP scheme involvement.  Please seek FRY and FRY+1 earnings.
+                      - Period(s) of CHB S2P are held on this account.
+                      - "CHB S2P Start Date 07/04/2024, CHB S2P End Date 07/04/2025."
+                      - Periods(s) of ICA S2P are held on this account.
+                      - "ICA S2P Start Date 07/04/2024, ICA S2P End Date 07/04/2025."
+                      - Period(s) of AA/CAA/DLA S2P are held on this account.
+                      - "AA/CAA/DLA S2P Start Date 07/04/2024, AA/ CAA/DLA S2P End Date\
+                      \ 07/04/2025"
+                      - Period(s) of IB (Long Term and Youth)/SDA/ESA S2P are held on
+                        this account
+                      - "IB (Long Term and Youth)/SDA/ESA S2P Start Date 07/04/2024,\
+                      \  IB (Long Term and Youth)/SDA/ESA S2P End Date 07/04/2025."
+                      - The LMA test has been satisfied
+                      - "The LMA test has not been satisfied, the number of S2P qualifying\
+                      \ years held is UNKNOWN. (If the LMA test is subsequently satisfied\
+                      \ following notification of foreign earnings by Overseas Division\
+                      \ a further calculation will be performed.)"
+                      - "The Benefit Entitlement include the following Widower's Inheritance\
+                      \ Details: Spouse's NINo.: AB123456,  Spouse's Surname: Smith,\
+                      \  Spouse's Forenames: Lucy UNKNOWN,  Spouse's Date of Birth:\
+                      \ 25/11/1971,  Spouse's GRB Units: 43,  GRB Unit Value: 0.0748"
+                      - "Tax Year: 2024,  BP Increments Weekly Rate: 0.08,  AP Increments\
+                      \ Notional Amount: UNKNOWN,  AP Increments Inheritable Amount:\
+                      \ UNKNOWN,  GRB Weekly Rate: 3.22,  GRB Increments Weekly Rate:\
+                      \ 0.00"
+                      - "The following contributions recorded on the account have not\
+                      \ yet been through Compliance and Yield checking: <b>See Tax\
+                      \ Year Contributions/Credits Screen for more detail"
+                      - "Tax Year: 2024"
+                      - Calculation routed to Pre-1975 Section
+                      - A period of UNKNOWN is recorded on the account between 07/04/2024
+                        and 07/04/2025.
+                      - 'NSP Upratings:'
+                      - "Uprating date: 07/04/2025 , NSP Entitlement: 252.05, Protected\
+                      \ Payment: 21.80, Category BL: 105.70"
+        "400":
+          description: Bad Request Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                Actual_Response:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                        - reason: "Constraint violation: Invalid/Missing input parameter:\
+                          \ <parameter>"
+                          code: "400.1"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "403":
+          description: Forbidden
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_403'
+        "404":
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+        "500":
+          description: Internal Server Error Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+components:
+  schemas:
+    correlationId:
+      format: uuid
+      description: |
+        Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      maxLength: 40
+      minLength: 3
+      type: string
+    govUkOrganisationId:
+      description: A unique organisation ID for the user.
+      maxLength: 40
+      minLength: 4
+      type: string
+      example: Department
+    govUkUserId:
+      description: A unique user ID for the user.
+      maxLength: 7
+      minLength: 7
+      type: string
+    govUkUserName:
+      description: A unique username for the user.
+      maxLength: 20
+      minLength: 4
+      type: string
+      example: Worker
+    govUkJobRole:
+      description: A unique job role for the user.
+      minLength: 4
+      type: string
+      example: Social
+    identifier:
+      description: |
+        NINO (with optional suffix A?D) or TRN (2 digits + 1 uppercase letter + 5 digits).
+      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+      type: string
+    associatedCalculationSequenceNumber:
+      description: Unique sequence number representing the position in the associated
+        calculation history (i.e. row) of the associated calculation details entry
+        for this individual - this would only be populated if the previous call did
+        not transfer all of the data i.e. there are more rows marked to be collected
+        still.
+      maximum: 126
+      minimum: 1
+      type: integer
+      example: 86
+    benefitType:
+      $ref: '#/components/schemas/EnumBenType'
+    LongTermBenefitNotesResponse:
+      description: Response containing concatenated Long Term Benefit notes.
+      type: object
+      properties:
+        longTermBenefitNotes:
+          description: List of concatenated note fields.
+          type: array
+          items:
+            $ref: '#/components/schemas/note'
+      additionalProperties: false
+    note:
+      description: Concatenated Note fields
+      type: string
+    EnumBenType:
+      enum:
+        - ALL
+        - AUTOPIE / AUTOJSP
+        - BEREAVED NSP
+        - BEREAVEMENT BENEFIT
+        - CAA/US
+        - CARER'S ALLOWANCE
+        - CATEGORY B
+        - CLAIMS PAPER
+        - DEPENDANT'S WAR PENSION
+        - EMPLOYMENT AND SUPPORT
+        - EQUIVALENT PENSION BENEFIT
+        - GBU
+        - GUARDIAN'S ALLOWANCE
+        - HOUSING BENEFIT
+        - INCAPACITY BENEFIT
+        - INDUSTRIAL DEATH BENEFIT
+        - JOB RELEASE ALLOWANCE
+        - JOB SEEKER'S ALLOWANCE
+        - LTB
+        - MATERNITY ALLOWANCE
+        - NOT KNOWN
+        - PENSION SHARING ON DIVORCE
+        - PRE-2001 WIDOWER
+        - RETIREMENT PENSION
+        - RPFA
+        - SICKNESS BENEFIT/IVB
+        - STB (NOT UB/JSA)
+        - UNEMPLOYMENT BENEFIT
+        - WIDOWS BENEFIT
+      type: string
+    errorResponse_400:
+      title: Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: object
+      properties:
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_400:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: |-
+            The error code representing the error that has occurred. Valid values are
+            400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'
+            400.2 - HTTP message not readable;
+          enum:
+            - "400.1"
+            - "400.2"
+          type: string
+    errorResponse_403:
+      title: Forbidden Error Response
+      description: Error Response Payload for this API
+      oneOf:
+        - $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+        - $ref: '#/components/schemas/errorResourceObj_403_UserNotAuthorised'
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Forbidden
+          type: string
+        code:
+          description: The error code representing the Forbidden Error.
+          enum:
+            - "403.2"
+          type: string
+    errorResourceObj_403_UserNotAuthorised:
+      title: 403_UserNotAuthorised
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - User Not Authorised
+          type: string
+        code:
+          description: User Not Authorised.
+          enum:
+            - "403.1"
+          type: string
+    errorResponse_422:
+      title: Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_422'
+    errorResponseFailure_422:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_422'
+    errorResourceObj_422:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: The error code representing the error that has occurred.
+          maxLength: 10
+          minLength: 1
+          type: string
+    HIP-originEnum:
+      enum:
+        - HIP
+        - HoD
+      type: string
+    HIP-failureResponse:
+      required:
+        - failures
+      type: object
+      properties:
+        failures:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            required:
+              - type
+              - reason
+            type: object
+            properties:
+              type:
+                type: string
+              reason:
+                type: string
+            additionalProperties: false
+    HIP-originResponse:
+      required:
+        - origin
+        - response
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/HIP-originEnum'
+        response:
+          $ref: '#/components/schemas/HIP-failureResponse'
+      additionalProperties: false
+  parameters:
+    correlationId:
+      name: correlationId
+      in: header
+      description: |
+        Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    govUkOriginatorId:
+      name: gov-uk-originator-id
+      in: header
+      description: Identity of the Originating System that made the API call.
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    govUkOrganisationId:
+      name: gov-uk-organisation-id
+      in: header
+      description: A unique organisation ID for the user.
+      schema:
+        $ref: '#/components/schemas/govUkOrganisationId'
+    govUkUserId:
+      name: gov-uk-user-id
+      in: header
+      description: A unique user ID for the user.
+      required: false
+      schema:
+        $ref: '#/components/schemas/govUkUserId'
+    govUkUserName:
+      name: gov-uk-user-name
+      in: header
+      description: A unique username for the user.
+      schema:
+        $ref: '#/components/schemas/govUkUserName'
+    govUkJobRole:
+      name: gov-uk-job-role
+      in: header
+      description: A unique job role for the user.
+      schema:
+        $ref: '#/components/schemas/govUkJobRole'
+    Identifier:
+      name: identifier
+      in: path
+      description: |
+        The identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO).
+      required: true
+      schema:
+        $ref: '#/components/schemas/identifier'
+    AssociatedCalculationSequenceNumber:
+      name: seqNo
+      in: path
+      description: |
+        Unique sequence number representing the position in the associated calculation history (i.e. row) of the associated calculation details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.
+      required: true
+      schema:
+        $ref: '#/components/schemas/associatedCalculationSequenceNumber'
+    BenefitType:
+      name: type
+      in: path
+      description: Denotes the benefit type.
+      required: true
+      schema:
+        $ref: '#/components/schemas/benefitType'
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: OAuth2 Client Credentials Flow
+      flows:
+        clientCredentials:
+          tokenUrl: /tokenUrl/not-required
+          scopes:
+            read:retrieve-ltb-notes: Long Term Benefit Notes
