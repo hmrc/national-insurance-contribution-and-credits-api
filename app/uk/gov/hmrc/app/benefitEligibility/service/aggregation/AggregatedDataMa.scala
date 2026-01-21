@@ -64,7 +64,7 @@ object NiContributionDataMa {
 }
 
 case class LiabilitiesMa(
-    startDate: Option[LocalDate],
+    startDate: LocalDate,
     endDate: LocalDate
 )
 
