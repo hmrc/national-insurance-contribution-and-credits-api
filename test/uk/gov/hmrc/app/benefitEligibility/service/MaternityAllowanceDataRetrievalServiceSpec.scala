@@ -29,11 +29,11 @@ import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibil
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated.AllLiabilities
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{Class2MaReceiptsResult, EligibilityCheckDataResult}
 import uk.gov.hmrc.app.config.AppConfig
@@ -56,6 +56,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   val mocNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
+  val mockLiabilityDetailsSummaryConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
+
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
 
   (mockServicesConfig.baseUrl(_: String)).expects("hip").returning("hip")
@@ -67,7 +69,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   lazy val underTest = new MaternityAllowanceDataRetrievalService(
     mockClass2MAReceiptsConnector,
-    mocNiContributionsAndCreditsConnector
+    mocNiContributionsAndCreditsConnector,
+    mockLiabilityDetailsSummaryConnector
   )
 
   private val eligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
@@ -140,6 +143,34 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(207))
+            )
+          )
+
+        (mockLiabilityDetailsSummaryConnector
+          .fetchLiabilitySummaryDetails(
+            _: BenefitType,
+            _: Identifier,
+            _: LiabilitySearchCategoryHyphenated,
+            _: Option[OccurrenceNumber],
+            _: Option[LiabilitySearchCategoryHyphenated],
+            _: Option[LocalDate],
+            _: Option[LocalDate],
+            _: Option[LocalDate]
+          )(_: HeaderCarrier))
+          .expects(
+            BenefitType.MA,
+            Identifier("GD379251T"),
+            LiabilitySearchCategoryHyphenated.AllLiabilities,
+            Some(OccurrenceNumber(233232323)),
+            Some(LiabilitySearchCategoryHyphenated.AllLiabilities),
+            Some(LocalDate.parse("1992-08-23")),
+            Some(LocalDate.parse("1992-08-23")),
+            Some(LocalDate.parse("1992-08-23")),
+            *
+          )
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](
+              DownstreamErrorReport(Liabilities, NpsNormalizedError.UnexpectedStatus(207))
             )
           )
 

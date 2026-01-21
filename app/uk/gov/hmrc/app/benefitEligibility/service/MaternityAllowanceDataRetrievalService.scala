@@ -20,15 +20,13 @@ import cats.Semigroup
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
@@ -39,7 +37,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MaternityAllowanceDataRetrievalService @Inject() (
     class2MAReceiptsConnector: Class2MAReceiptsConnector,
-    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector
+    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
+    liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector
 )(
     implicit ec: ExecutionContext
 ) {
@@ -72,7 +71,16 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           )
         )
       }.sequence,
-      EitherT.pure[Future, BenefitEligibilityError](DownstreamErrorReport(Liabilities, UnexpectedStatus(207)))
+      liabilitySummaryDetailsConnector.fetchLiabilitySummaryDetails(
+        eligibilityCheckDataRequest.`type`,
+        eligibilityCheckDataRequest.identifier,
+        eligibilityCheckDataRequest.liabilitySearchCategoryHyphenated,
+        eligibilityCheckDataRequest.liabilityOccurrenceNumber,
+        eligibilityCheckDataRequest.liabilityType,
+        eligibilityCheckDataRequest.earliestLiabilityStartDate,
+        eligibilityCheckDataRequest.liabilityStart,
+        eligibilityCheckDataRequest.liabilityEnd
+      )
     ).parTupled.map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
       EligibilityCheckDataResultMA(
         class2MaReceiptsResult,
