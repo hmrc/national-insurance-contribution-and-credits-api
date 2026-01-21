@@ -30,6 +30,7 @@ object AggregationServiceBsp {
         Right(
           AggregatedDataBsp(
             List(),
+            List(),
             List()
           )
         )

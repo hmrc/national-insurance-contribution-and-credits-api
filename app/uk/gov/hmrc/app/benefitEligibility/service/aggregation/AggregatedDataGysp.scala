@@ -36,13 +36,19 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 
 import java.time.LocalDate
 
-case class NiCreditsAndContributionsDataGysp(
-    taxYear: Int,
+case class Class1CreditsAnsContributionsDataGysp(
+    taxYear: Option[Int],
     contributionCategory: Option[ContributionCategory],
     contributionCategoryLetter: Option[ContributionCategoryLetter],
     contributionCreditType: Option[ContributionCreditType],
-    numberOfCreditsAndContributions: Option[NumberOfCreditsAndContributions],
+    numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions],
     employerName: Option[EmployerName]
+)
+
+case class Class2CreditsAnsContributionsGysp(
+    taxYear: Option[Int],
+    contributionCreditType: Option[ContributionCreditType],
+    numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions]
 )
 
 case class BenefitCalculationDetailsDataGysp(
@@ -73,7 +79,9 @@ case class SchemeMembershipDetailsDataGysp(
 )
 
 case class AggregatedDataGysp(
-    niContributionsAndCreditData: List[NiCreditsAndContributionsDataGysp],
+    totalGraduatedPensionUnits: Option[BigDecimal],
+    class1CreditsAnsContributions: List[Class1CreditsAnsContributionsDataGysp],
+    class2CreditsAnsContributions: List[Class2CreditsAnsContributionsGysp],
     benefitCalcDetails: List[BenefitCalculationDetailsDataGysp],
     marriageDetails: List[MarriageDetailsGysp],
     longTermBenefitNotes: List[LongTermBenefitNote],

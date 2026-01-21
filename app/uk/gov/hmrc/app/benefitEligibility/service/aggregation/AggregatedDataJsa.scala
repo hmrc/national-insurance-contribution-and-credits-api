@@ -27,16 +27,27 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
   ContributionCreditType,
   CreditSource
 }
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.domain.TaxYear
 
-case class NiContributionDataJsa(
-    taxYear: Int,
+case class Class1CreditsAndContributionsDataJsa(
+    taxYear: Option[TaxYear],
     primaryPaidEarnings: Option[PrimaryPaidEarnings],
+    contributionCreditType: Option[ContributionCreditType],
+    creditSource: Option[CreditSource],
+    numberOfCreditsAndContributions: Option[NumberOfCreditsAndContributions]
+)
+
+case class Class2CreditsAndContributionsDataJsa(
+    taxYear: Option[TaxYear],
     class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
     contributionCreditType: Option[ContributionCreditType],
     creditSource: Option[CreditSource],
     numberOfCreditsAndContributions: Option[NumberOfCreditsAndContributions]
 )
 
-case class AggregatedDataJsa(niContributionsAndCreditData: List[NiContributionDataJsa]) extends AggregatedData {
+case class AggregatedDataJsa(
+    class1CreditsAnsContributions: List[Class1CreditsAndContributionsDataJsa],
+    class2CreditsAnsContributions: List[Class2CreditsAndContributionsDataJsa]
+) extends AggregatedData {
   def benefitType: BenefitType = JSA
 }
