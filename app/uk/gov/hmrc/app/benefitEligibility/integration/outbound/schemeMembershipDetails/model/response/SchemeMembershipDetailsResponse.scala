@@ -242,12 +242,6 @@ object SchemeMembershipDetailsSuccess {
 
   }
 
-  case class Identifier(value: String) extends AnyVal
-
-  object Identifier {
-    implicit val reads: Format[Identifier] = Json.valueFormat[Identifier]
-  }
-
   case class TechnicalAmount(value: BigDecimal) extends AnyVal
 
   object TechnicalAmount {

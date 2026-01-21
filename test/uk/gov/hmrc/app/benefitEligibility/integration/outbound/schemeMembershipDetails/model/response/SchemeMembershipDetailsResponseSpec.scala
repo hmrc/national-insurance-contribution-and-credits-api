@@ -25,6 +25,7 @@ import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.common.{
   ErrorCode422,
+  Identifier,
   NpsErrorCode400,
   NpsErrorCode403,
   NpsErrorReason403,
