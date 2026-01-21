@@ -17,12 +17,20 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.connector
 
 import cats.data.EitherT
+import cats.implicits.catsSyntaxSemigroup
 import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.SchemeMembershipDetails
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.common.{
+  BenefitEligibilityError,
+  BenefitType,
+  Identifier,
+  OccurrenceNumber,
+  SequenceNumber,
+  TransferSequenceNumber
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.mapper.SchemeMembershipDetailsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.{
@@ -50,10 +58,14 @@ class SchemeMembershipDetailsConnector @Inject() (
 
   def fetchSchemeMembershipDetails(
       benefitType: BenefitType,
-      nationalInsuranceNumber: Identifier
+      nationalInsuranceNumber: Identifier,
+      sequenceNumber: Option[SequenceNumber],
+      transferSequenceNumber: Option[TransferSequenceNumber],
+      occurrenceNumber: Option[OccurrenceNumber]
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] = {
 
-    val path = s"${appConfig.hipBaseUrl}/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+    val path =
+      buildPath(appConfig.hipBaseUrl, nationalInsuranceNumber, sequenceNumber, transferSequenceNumber, occurrenceNumber)
 
     npsClient
       .get(path)
@@ -98,6 +110,24 @@ class SchemeMembershipDetailsConnector @Inject() (
         logger.error(s"call to downstream service failed: ${error.toString}")
         error
       }
+  }
+
+  private[connector] def buildPath(
+      hipBaseUrl: String,
+      nationalInsuranceNumber: Identifier,
+      sequenceNumber: Option[SequenceNumber],
+      transferSequenceNumber: Option[TransferSequenceNumber],
+      occurrenceNumber: Option[OccurrenceNumber]
+  ) = {
+    def sequenceNumberFilter: Option[String]         = sequenceNumber.map(sn => s"seqNo=${sn.value}&")
+    def transferSequenceNumberFilter: Option[String] = transferSequenceNumber.map(tsn => s"transferSeqNo=${tsn.value}&")
+    def occurrenceNumberFilter: Option[String]       = occurrenceNumber.map(on => s"occurrenceNo=${on.value}&")
+
+    val options =
+      sequenceNumberFilter.combine(transferSequenceNumberFilter).combine(occurrenceNumberFilter).getOrElse("")
+
+    s"$hipBaseUrl/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details?$options"
+      .dropRight(1)
   }
 
 }

@@ -259,7 +259,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
             DownstreamSuccessResponse(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse)
@@ -296,7 +297,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.BadRequest)
@@ -329,7 +331,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.AccessForbidden)
@@ -353,7 +356,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.NotFound)
@@ -390,7 +394,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnprocessableEntity)
@@ -412,7 +417,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
             DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.InternalServerError)
@@ -435,7 +441,8 @@ class SchemeMembershipDetailsConnectorItSpec
                 )
             )
 
-            val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            val result =
+              connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
             result shouldBe Right(
               DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnexpectedStatus(statusCode))
@@ -457,7 +464,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ParsingError]
@@ -475,7 +483,8 @@ class SchemeMembershipDetailsConnectorItSpec
               )
           )
 
-          val result = connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[NpsClientError]
@@ -483,6 +492,79 @@ class SchemeMembershipDetailsConnectorItSpec
       }
 
     }
+
+    ".buildPath" - {
+      "should with all filters" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          Some(SequenceNumber(1)),
+          Some(TransferSequenceNumber(2)),
+          Some(OccurrenceNumber(2))
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?seqNo=1&transferSeqNo=2&occurrenceNo=2"""
+      }
+
+      "should with SequenceNumber filter" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          Some(SequenceNumber(1)),
+          None,
+          None
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?seqNo=1"""
+      }
+
+      "should with TransferSequenceNumber filter" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          None,
+          Some(TransferSequenceNumber(2)),
+          None
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?transferSeqNo=2"""
+      }
+
+      "should with OccurrenceNumber filter" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          None,
+          None,
+          Some(OccurrenceNumber(2))
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?occurrenceNo=2"""
+      }
+
+      "should with SequenceNumber and TransferSequenceNumber filters" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          Some(SequenceNumber(1)),
+          Some(TransferSequenceNumber(2)),
+          None
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?seqNo=1&transferSeqNo=2"""
+      }
+
+      "should with SequenceNumber and OccurrenceNumber filters" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          Some(SequenceNumber(1)),
+          None,
+          Some(OccurrenceNumber(2))
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?seqNo=1&occurrenceNo=2"""
+      }
+
+      "should with TransferSequenceNumber and OccurrenceNumber filters" in {
+        connector.buildPath(
+          "http://localhost:6000",
+          Identifier("AB123456C"),
+          None,
+          Some(TransferSequenceNumber(2)),
+          Some(OccurrenceNumber(2))
+        ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?transferSeqNo=2&occurrenceNo=2"""
+      }
+    }
+
   }
 
 }
