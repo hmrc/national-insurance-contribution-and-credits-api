@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response
 
-import play.api.libs.json.{Format, Json, Reads}
+import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads}
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.enums.{
@@ -32,6 +32,23 @@ object IndividualStatePensionInformationError {
 
   // 400 start
   sealed trait IndividualStatePensionInformationErrorResponse400 extends IndividualStatePensionInformationResponse
+
+  object IndividualStatePensionInformationErrorResponse400 {
+
+    implicit val individualStatePensionInformationErrorResponse400Reads
+        : Reads[IndividualStatePensionInformationErrorResponse400] =
+      Reads[IndividualStatePensionInformationErrorResponse400] { resp =>
+        HipFailureResponse400.hipFailureResponse400Reads.reads(resp) match {
+          case JsSuccess(value, path) => JsSuccess(value, path)
+          case JsError(errors) =>
+            StandardErrorResponse400.standardErrorResponse400Reads.reads(resp) match {
+              case JsSuccess(value, path) => JsSuccess(value, path)
+              case JsError(errors)        => JsError(errors)
+            }
+        }
+      }
+
+  }
 
   case class ErrorResourceObj400(
       reason: Reason,
