@@ -19,6 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
@@ -42,6 +43,7 @@ type ContributionCreditResult      = NpsApiResult[NpsNormalizedError, NiContribu
 type SchemeMembershipDetailsResult = NpsApiResult[NpsNormalizedError, SchemeMembershipDetailsSuccessResponse]
 type MarriageDetailsResult         = NpsApiResult[NpsNormalizedError, MarriageDetailsSuccessResponse]
 type LiabilityResult               = NpsApiResult[NpsNormalizedError, LiabilitySummaryDetailsSuccessResponse]
+type IndividualStatePensionResult  = NpsApiResult[NpsNormalizedError, IndividualStatePensionInformationSuccessResponse]
 
 sealed trait NpsApiResult[+A, +B] {
   def apiName: ApiName
@@ -63,7 +65,7 @@ object NpsApiResult {
     override def getFailure: Option[NpsNormalizedError] = Some(value)
   }
 
-  final case class DownstreamSuccessResponse[A, B <: NpsSuccessfulApiResponse](apiName: ApiName, value: B)
+  final case class DownstreamSuccessResponse[B <: NpsSuccessfulApiResponse](apiName: ApiName, value: B)
       extends NpsApiResult[Nothing, B] {
     val isSuccess = true
     val isFailure = false

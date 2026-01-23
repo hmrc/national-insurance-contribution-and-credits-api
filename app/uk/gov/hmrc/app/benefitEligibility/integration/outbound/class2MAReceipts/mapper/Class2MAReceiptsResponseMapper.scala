@@ -35,9 +35,14 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
   Class2MAReceiptsResponse,
   Class2MAReceiptsSuccess
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, Class2MaReceiptsResult, NpsResponseMapper}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
+  ApiResult,
+  Class2MaReceiptsResult,
+  NpsResponseMapper,
+  NpsSuccessfulApiResponse
+}
 
-class Class2MAReceiptsResponseMapper extends NpsResponseMapper[Class2MAReceiptsResponse, ApiResult] {
+class Class2MAReceiptsResponseMapper extends NpsResponseMapper[Class2MAReceiptsResponse, Class2MaReceiptsResult] {
 
   def toApiResult(response: Class2MAReceiptsResponse): Class2MaReceiptsResult =
     response match {
