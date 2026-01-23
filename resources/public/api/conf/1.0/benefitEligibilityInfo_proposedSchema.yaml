@@ -5,7 +5,7 @@ info:
     API for retrieving data for a given benefit type that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 1.0.0
+  version: 0.0.1 Draft
   contact: {}
 servers:
   - url: https://test-api.service.hmrc.gov.uk
@@ -19,6 +19,14 @@ paths:
       summary: Request information that can be used to determine benefit eligibility
       description: Submit a request for benefit information based on benefit type
       operationId: getBenefitEligibilityInformation
+      parameters:
+        - name: benefitType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [BSP, GYSP, ESA, JSA, MA]
+          description: The benefit type to request information for
       requestBody:
         required: true
         content:
@@ -30,19 +38,10 @@ paths:
                 - $ref: '#/components/schemas/ESARequest'
                 - $ref: '#/components/schemas/JSARequest'
                 - $ref: '#/components/schemas/MARequest'
-              discriminator:
-                propertyName: type
-                mapping:
-                  BSP: '#/components/schemas/BSPRequest'
-                  GYSP: '#/components/schemas/GYSPRequest'
-                  ESA: '#/components/schemas/ESARequest'
-                  JSA: '#/components/schemas/JSARequest'
-                  MA: '#/components/schemas/MARequest'
             examples:
               BSP_minimal_request:
                 summary: BSP request - Minimal required fields
                 value:
-                  type: "BSP"
                   nationalInsuranceNumber: "AB123456C"
                   dateOfBirth: "1960-01-15"
                   startTaxYear: 2020
@@ -50,7 +49,6 @@ paths:
               BSP_full_request:
                 summary: BSP request - All fields including optional
                 value:
-                  type: "BSP"
                   nationalInsuranceNumber: "CD789012E"
                   dateOfBirth: "1958-03-22"
                   startTaxYear: 2018
@@ -62,7 +60,6 @@ paths:
               GYSP_minimal_request:
                 summary: GYSP request - Minimal required fields
                 value:
-                  type: "GYSP"
                   nationalInsuranceNumber: "GH567890J"
                   dateOfBirth: "1955-06-20"
                   startTaxYear: 2018
@@ -73,7 +70,6 @@ paths:
               GYSP_full_request:
                 summary: GYSP request - All fields including optional
                 value:
-                  type: "GYSP"
                   nationalInsuranceNumber: "JK901234L"
                   dateOfBirth: "1952-11-08"
                   startTaxYear: 2015
@@ -92,7 +88,6 @@ paths:
               ESA_request:
                 summary: ESA request
                 value:
-                  type: "ESA"
                   nationalInsuranceNumber: "QR456789S"
                   dateOfBirth: "1975-09-14"
                   startTaxYear: 2020
@@ -100,7 +95,6 @@ paths:
               JSA_request:
                 summary: JSA request
                 value:
-                  type: "JSA"
                   nationalInsuranceNumber: "AB234567C"
                   dateOfBirth: "1982-12-03"
                   startTaxYear: 2021
@@ -108,7 +102,6 @@ paths:
               MA_minimal_request:
                 summary: MA request - Minimal required fields
                 value:
-                  type: "MA"
                   nationalInsuranceNumber: "KL890123M"
                   dateOfBirth: "1985-04-18"
                   startTaxYear: 2022
@@ -117,7 +110,6 @@ paths:
               MA_full_request:
                 summary: MA request - All fields including optional
                 value:
-                  type: "MA"
                   nationalInsuranceNumber: "NP012345Q"
                   dateOfBirth: "1988-07-25"
                   startTaxYear: 2021
@@ -163,17 +155,21 @@ paths:
                     startTaxYear: 2020
                     endTaxYear: 2023
                     data:
-                      niContributionsAndCreditData:
+                      class1CreditsAndContributions:
                         - taxYear: 2020
                           primaryPaidEarnings: 25000.00
-                          class2Or3EarningsFactor: 1.5
                           contributionCategory: "STANDARD RATE"
                           contributionCategoryLetter: "A"
                           primaryContribution: 3000.00
-                          class2NIContributionAmount: 150.00
                           class1ContributionStatus: "VALID"
-                          class2Or3CreditStatus: "VALID"
                           contributionCreditType: "C1"
+                          numberOfCreditsAndContributions: 52
+                      class2CreditsAndContributions:
+                        - taxYear: 2020
+                          class2Or3EarningsFactor: 1.5
+                          class2NIContributionAmount: 150.00
+                          class2Or3CreditStatus: "VALID"
+                          contributionCreditType: "C2"
                           numberOfCreditsAndContributions: 52
                       marriageDetails:
                         - status: "MARRIED"
@@ -194,19 +190,24 @@ paths:
                     startTaxYear: 2018
                     endTaxYear: 2023
                     data:
-                      niContributionsAndCreditData:
+                      totalGraduatedPensionUnits: 15.5
+                      class1CreditsAndContributions:
                         - taxYear: 2019
                           contributionCategory: "STANDARD RATE"
                           contributionCategoryLetter: "A"
                           contributionCreditType: "C1"
-                          numberOfCreditsAndContributions: 52
+                          numberOfContributionsAndCredits: 52
                           employerName: "ACME"
                         - taxYear: 2020
                           contributionCategory: "STANDARD RATE"
                           contributionCategoryLetter: "A"
                           contributionCreditType: "C1"
-                          numberOfCreditsAndContributions: 52
+                          numberOfContributionsAndCredits: 52
                           employerName: "Global"
+                      class2CreditsAndContributions:
+                        - taxYear: 2019
+                          contributionCreditType: "C2"
+                          numberOfContributionsAndCredits: 26
                       benefitCalculationDetails:
                         - guaranteedMinimumPensionContractedOutDeductionsPre1988: 1500.00
                           guaranteedMinimumPensionContractedOutDeductionsPost1988: 2000.00
@@ -240,21 +241,19 @@ paths:
                     startTaxYear: 2020
                     endTaxYear: 2023
                     data:
-                      niContributionsAndCreditData:
+                      class1CreditsAndContributions:
                         - taxYear: 2021
                           primaryPaidEarnings: 15000.00
-                          class2Or3EarningsFactor: 1.0
                           contributionCreditType: "2A"
                           creditSource: "EMPLOYMENT AND SUPPORT"
                           numberOfCreditsAndContributions: 39
                         - taxYear: 2022
                           primaryPaidEarnings: 18000.00
-                          class2Or3EarningsFactor: 1.2
                           contributionCreditType: "2A"
                           creditSource: "EMPLOYMENT AND SUPPORT"
                           numberOfCreditsAndContributions: 26
+                      class2CreditsAndContributions:
                         - taxYear: 2023
-                          primaryPaidEarnings: 20000.00
                           class2Or3EarningsFactor: 1.3
                           contributionCreditType: "2A"
                           creditSource: "EMPLOYMENT AND SUPPORT"
@@ -269,21 +268,19 @@ paths:
                     startTaxYear: 2021
                     endTaxYear: 2023
                     data:
-                      niContributionsAndCreditData:
+                      class1CreditsAndContributions:
                         - taxYear: 2019
                           primaryPaidEarnings: 10000.00
-                          class2Or3EarningsFactor: 0.7
                           contributionCreditType: "2B"
                           creditSource: "JSA TAPE INPUT"
                           numberOfCreditsAndContributions: 15
                         - taxYear: 2021
                           primaryPaidEarnings: 12000.00
-                          class2Or3EarningsFactor: 0.8
                           contributionCreditType: "2B"
                           creditSource: "JSA TAPE INPUT"
                           numberOfCreditsAndContributions: 20
+                      class2CreditsAndContributions:
                         - taxYear: 2022
-                          primaryPaidEarnings: 16000.00
                           class2Or3EarningsFactor: 1.1
                           contributionCreditType: "2B"
                           creditSource: "JSA TAPE INPUT"
@@ -298,21 +295,21 @@ paths:
                     startTaxYear: 2022
                     endTaxYear: 2023
                     data:
-                      niContributionsAndCreditData:
+                      class1CreditsAndContributions:
                         - taxYear: 2021
                           contributionCreditType: "MAR"
-                          numberOfCreditsAndContributions: 39
+                          noOfCreditsAndContributions: 39
                           primaryPaidEarnings: 20000.00
                           latePaymentPeriod: "ZZ"
                         - taxYear: 2022
                           contributionCreditType: "MAR"
-                          numberOfCreditsAndContributions: 39
+                          noOfCreditsAndContributions: 39
                           primaryPaidEarnings: 22000.00
                           latePaymentPeriod: "ZZ"
+                      class2CreditsAndContributions:
                         - taxYear: 2023
                           contributionCreditType: "MAR"
-                          numberOfCreditsAndContributions: 26
-                          primaryPaidEarnings: 24000.00
+                          noOfCreditsAndContributions: 26
                           latePaymentPeriod: "ZZ"
                       class2MaReceiptDetails:
                         - receiptDate: "2021-03-10"
@@ -471,15 +468,11 @@ components:
     BaseRequest:
       type: object
       required:
-        - type
         - nationalInsuranceNumber
         - dateOfBirth
         - startTaxYear
         - endTaxYear
       properties:
-        type:
-          type: string
-          enum: [BSP, GYSP, ESA, JSA, MA]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
         dateOfBirth:
@@ -495,9 +488,6 @@ components:
         - $ref: '#/components/schemas/BaseRequest'
         - type: object
           properties:
-            type:
-              type: string
-              enum: [BSP]
             searchStartYear:
               $ref: '#/components/schemas/dateString'
             searchEndYear:
@@ -516,9 +506,6 @@ components:
             - associatedCalculationSequenceNumber
             - schemeContractedOutNumber
           properties:
-            type:
-              type: string
-              enum: [GYSP]
             benefitType:
               type: string
             associatedCalculationSequenceNumber:
@@ -543,22 +530,10 @@ components:
               type: integer
 
     ESARequest:
-      allOf:
-        - $ref: '#/components/schemas/BaseRequest'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [ESA]
+      $ref: '#/components/schemas/BaseRequest'
 
     JSARequest:
-      allOf:
-        - $ref: '#/components/schemas/BaseRequest'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [JSA]
+      $ref: '#/components/schemas/BaseRequest'
 
     MARequest:
       allOf:
@@ -567,15 +542,12 @@ components:
           required:
             - liabilitySearchCategoryHyphenated
           properties:
-            type:
-              type: string
-              enum: [MA]
             liabilitySearchCategoryHyphenated:
-              type: boolean
+              $ref: '#/components/schemas/LiabilitySearchCategoryHyphenated'
             liabilityOccurrenceNumber:
               type: integer
             liabilityType:
-              type: string
+              $ref: '#/components/schemas/LiabilitySearchCategoryHyphenated'
             earliestLiabilityStartDate:
               $ref: '#/components/schemas/dateString'
             liabilityStart:
@@ -675,14 +647,15 @@ components:
     # Response Data Schemas
     BSPResponseData:
       type: object
-      required:
-        - niContributionsAndCreditData
-        - marriageDetails
       properties:
-        niContributionsAndCreditData:
+        class1CreditsAndContributions:
           type: array
           items:
-            $ref: '#/components/schemas/NiContributionDataBSP'
+            $ref: '#/components/schemas/Class1CreditsAndContributionsDataBsp'
+        class2CreditsAndContributions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2CreditsAndContributionsDataBsp'
         marriageDetails:
           type: array
           items:
@@ -690,18 +663,17 @@ components:
 
     GYSPResponseData:
       type: object
-      required:
-        - niContributionsAndCreditData
-        - benefitCalculationDetails
-        - marriageDetails
-        - longTermBenefitNotes
-        - schemeMembershipDetails
-        - statePensionDetails
       properties:
-        niContributionsAndCreditData:
+        totalGraduatedPensionUnits:
+          $ref: '#/components/schemas/unsignedMoney'
+        class1CreditsAndContributions:
           type: array
           items:
-            $ref: '#/components/schemas/NiContributionDataGysp'
+            $ref: '#/components/schemas/Class1CreditsAndContributionsDataGysp'
+        class2CreditsAndContributions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2CreditsAndContributionsDataGysp'
         benefitCalculationDetails:
           type: array
           items:
@@ -725,35 +697,39 @@ components:
 
     ESAResponseData:
       type: object
-      required:
-        - niContributionsAndCreditData
       properties:
-        niContributionsAndCreditData:
+        class1CreditsAndContributions:
           type: array
           items:
-            $ref: '#/components/schemas/NiContributionDataEsaAndJsa'
+            $ref: '#/components/schemas/Class1CreditsAndContributionsDataEsa'
+        class2CreditsAndContributions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2CreditsAndContributionsDataEsa'
 
     JSAResponseData:
       type: object
-      required:
-        - niContributionsAndCreditData
       properties:
-        niContributionsAndCreditData:
+        class1CreditsAndContributions:
           type: array
           items:
-            $ref: '#/components/schemas/NiContributionDataEsaAndJsa'
+            $ref: '#/components/schemas/Class1CreditsAndContributionsDataJsa'
+        class2CreditsAndContributions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2CreditsAndContributionsDataJsa'
 
     MAResponseData:
       type: object
-      required:
-        - niContributionsAndCreditData
-        - class2MaReceiptDetails
-        - liabilitiesDetails
       properties:
-        niContributionsAndCreditData:
+        class1CreditsAndContributions:
           type: array
           items:
-            $ref: '#/components/schemas/NiContributionDataMa'
+            $ref: '#/components/schemas/Class1CreditsAndContributionsDataMa'
+        class2CreditsAndContributions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2CreditsAndContributionsDataMa'
         class2MaReceiptDetails:
           type: array
           items:
@@ -763,15 +739,13 @@ components:
           items:
             $ref: '#/components/schemas/LiabilitiesMa'
 
-    # NI Contribution Data Schemas
-    NiContributionDataBSP:
+    # Class 1 and Class 2 Credit and Contribution Data Schemas
+    Class1CreditsAndContributionsDataBsp:
       type: object
       properties:
         taxYear:
           $ref: '#/components/schemas/taxYear'
         primaryPaidEarnings:
-          $ref: '#/components/schemas/unsignedMoney'
-        class2Or3EarningsFactor:
           $ref: '#/components/schemas/unsignedMoney'
         contributionCategory:
           $ref: '#/components/schemas/EnumContCat'
@@ -779,10 +753,22 @@ components:
           $ref: '#/components/schemas/contributionCategoryLetter'
         primaryContribution:
           $ref: '#/components/schemas/unsignedMoney'
-        class2NIContributionAmount:
-          $ref: '#/components/schemas/unsignedMoney'
         class1ContributionStatus:
           $ref: '#/components/schemas/EnumCl1stat'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+
+    Class2CreditsAndContributionsDataBsp:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2NIContributionAmount:
+          $ref: '#/components/schemas/unsignedMoney'
         class2Or3CreditStatus:
           $ref: '#/components/schemas/EnumCl2Stat'
         contributionCreditType:
@@ -790,13 +776,25 @@ components:
         numberOfCreditsAndContributions:
           $ref: '#/components/schemas/numberOfCreditsAndContributions'
 
-    NiContributionDataEsaAndJsa:
+    Class1CreditsAndContributionsDataEsa:
       type: object
       properties:
         taxYear:
           $ref: '#/components/schemas/taxYear'
         primaryPaidEarnings:
           $ref: '#/components/schemas/unsignedMoney'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+
+    Class2CreditsAndContributionsDataEsa:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
         class2Or3EarningsFactor:
           $ref: '#/components/schemas/unsignedMoney'
         contributionCreditType:
@@ -806,21 +804,61 @@ components:
         numberOfCreditsAndContributions:
           $ref: '#/components/schemas/numberOfCreditsAndContributions'
 
-    NiContributionDataMa:
+    Class1CreditsAndContributionsDataJsa:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+
+    Class2CreditsAndContributionsDataJsa:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        numberOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+
+    Class1CreditsAndContributionsDataMa:
       type: object
       properties:
         taxYear:
           $ref: '#/components/schemas/taxYear'
         contributionCreditType:
           $ref: '#/components/schemas/EnumCCType'
-        numberOfCreditsAndContributions:
+        noOfCreditsAndContributions:
           $ref: '#/components/schemas/numberOfCreditsAndContributions'
         primaryPaidEarnings:
           $ref: '#/components/schemas/unsignedMoney'
         latePaymentPeriod:
           $ref: '#/components/schemas/EnumLpind'
 
-    NiContributionDataGysp:
+    Class2CreditsAndContributionsDataMa:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        noOfCreditsAndContributions:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
+        latePaymentPeriod:
+          $ref: '#/components/schemas/EnumLpind'
+
+    Class1CreditsAndContributionsDataGysp:
       type: object
       properties:
         taxYear:
@@ -831,10 +869,20 @@ components:
           $ref: '#/components/schemas/contributionCategoryLetter'
         contributionCreditType:
           $ref: '#/components/schemas/EnumCCType'
-        numberOfCreditsAndContributions:
+        numberOfContributionsAndCredits:
           $ref: '#/components/schemas/numberOfCreditsAndContributions'
         employerName:
           $ref: '#/components/schemas/employerName'
+
+    Class2CreditsAndContributionsDataGysp:
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        numberOfContributionsAndCredits:
+          $ref: '#/components/schemas/numberOfCreditsAndContributions'
 
     # Base marriage details with common fields
     BaseMarriageDetails:
@@ -1201,6 +1249,116 @@ components:
         - "VDC"
         - "VDD"
         - "2N"
+      type: string
+
+    LiabilitySearchCategoryHyphenated:
+      "enum":
+        - "ABROAD"
+        - "ABSOLUTE-WAIVER"
+        - "ALL-LIABILITIES"
+        - "APPROVED-TRAINING"
+        - "CA-S2P"
+        - "CL2-EC_BILATERAL-REGS"
+        - "CLASS-2-CONVERTED-FROM-NIRS1"
+        - "CLASS-2-IN-SA"
+        - "CLASS-2-LIABILITY-UK"
+        - "CLASS-2-MATERNITY-ALLOWANCE"
+        - "CLASS-2-VOLUNTARY-UK"
+        - "CLASS-3-UK"
+        - "CLASS-3-BILLING-OVERRIDE"
+        - "CLASS-3-CONVERTED-FROM-NIRS1"
+        - "CODED-OUT"
+        - "CONTINUING-CLASS-1-LIABILITY"
+        - "CONTINUING-CLASS-2-LIABILITY"
+        - "CONTRIBUTOR-INITIATED-NON-LIABILITY-OVERRIDE"
+        - "CRIMINAL-PROCEEDINGS"
+        - "CRS_RO"
+        - "Carer-of-AA_CAA_DLA-recipient"
+        - "Carer-Support-Payment"
+        - "Carers-Allowance"
+        - "Carers-Credit"
+        - "Child-Benefit"
+        - "Class-2-Billing-Override"
+        - "DEFERMENT-TYPE-1"
+        - "DEFERMENT-TYPE-2"
+        - "DEFERMENT-TYPE-3"
+        - "DEFERMENT-TYPE-4"
+        - "DPTC-GB-EMPLOYED"
+        - "DPTC-GB-SELF-EMPLOYED"
+        - "DPTC-NI-EMPLOYED"
+        - "DPTC-NI-SELF-EMPLOYED"
+        - "DUMMY-101"
+        - "DUMMY-102"
+        - "DWA-GB-EMPLOYED"
+        - "DWA-GB-SELF-EMPLOYED"
+        - "DWA-NI-EMPLOYED"
+        - "DWA-NI-SELF-EMPLOYED"
+        - "Disabled-Tax-Credit-Employed"
+        - "Disabled-Tax-Credit-Self-Employed"
+        - "ESA-S2P"
+        - "FULL-TIME-EDUCATION"
+        - "FamC-GB"
+        - "FamC-NI"
+        - "Foreign-Earnings-Qualification-S2P"
+        - "Foster-Carer"
+        - "HIGHER-RATE-PROVISION-OVERRIDE"
+        - "HMF"
+        - "HOME-RESPONSIBILITY-PROTECTION-AA_CAA"
+        - "HOME-RESPONSIBILITY-PROTECTION-CBC-AUTO"
+        - "HOME-RESPONSIBILITY-PROTECTION-CBC-CLERICAL"
+        - "HOME-RESPONSIBILITY-PROTECTION-DLA"
+        - "HOME-RESPONSIBILITY-PROTECTION-FOSTER-CARERS"
+        - "HOME-RESPONSIBILITY-PROTECTION-I_S"
+        - "IB-S2P"
+        - "INSOLVENCY-CLASS-1"
+        - "INSOLVENCY-CLASS-2"
+        - "IRRECOVERABLE-ARREARS"
+        - "ISLE-OF-MAN"
+        - "LCW_LCWRA"
+        - "LCW_LCWRA-Override"
+        - "LONG-TERM-NON-EMPLOYMENT"
+        - "LONG-TERM-SCALE-RATE-LTSR"
+        - "LOST-CARD"
+        - "MARINERS-VOLUNTARY-CLASS-2"
+        - "MARRIED-WOMANS-REDUCED-RATE"
+        - "NEGLIGENT-EMPLOYEE"
+        - "NOT-APPLICABLE"
+        - "PAYMENT-OF-ARREARS-BY-ADMINISTRATIVE-ORDER"
+        - "PAYMENT-OF-ARREARS-BY-INSTALMENTS"
+        - "PERIODS-OF-ESA-AUTO"
+        - "PERIODS-OF-ESA-CLERICAL"
+        - "PERIODS-OF-INCAPACITY-AUTO"
+        - "PERIODS-OF-INCAPACITY-CLERICAL"
+        - "PROVISIONAL-WAIVER"
+        - "PSEUDO-CIVIL-RECOVERY-SECTION"
+        - "PSEUDO-DEBT-MANAGEMENT-SECTION"
+        - "PSEUDO-INSOLVENCY-SECTION"
+        - "PSEUDO-SUBJECT-TO-NORMAL-COLLECTION-ACTION"
+        - "REDUCED-BENEFIT-DIRECTIVE-RBD"
+        - "SENT-TO-IDMS"
+        - "SHAREFISHERMAN"
+        - "SHAREFISHERMAN-IN-SA"
+        - "SHAREFISHERMAN-UNEMPLOYMENT-BENEFIT"
+        - "SICKNESS"
+        - "SMALL-EARNINGS-EXCEPTION"
+        - "SPT-LPT"
+        - "SPT-LPT-EC"
+        - "SYSTEM-INITIATED-NON-LIABILITY-OVERRIDE"
+        - "Specified-Adult-Carer"
+        - "Transferred-ChB-Liability"
+        - "UNDER-SMALL-PROFIT-THRESHOLD"
+        - "UNEMPLOYABILITY-SUPPLEMENT"
+        - "Universal-Credit"
+        - "Universal-Credit-S2P"
+        - "VOLUNTARY-CLASS-2-ABROAD"
+        - "VOLUNTARY-CLASS-2-ABROAD-BY-EMPLOYERS-SCHEDULE"
+        - "VOLUNTARY-CLASS-3-ABROAD"
+        - "VOLUNTARY-CLASS-3-ABROAD-BY-EMPLOYERS-SCHEDULE"
+        - "VOLUNTEER-DEVELOPMENT-WORKER"
+        - "WFTC-GB"
+        - "WFTC-NI"
+        - "Working-Tax-Credit-Employed"
+        - "Working-Tax-Credit-Self-Employed"
       type: string
 
     # Error and Failure Response Schemas

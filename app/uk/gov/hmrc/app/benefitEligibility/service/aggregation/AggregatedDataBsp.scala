@@ -37,15 +37,21 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
   ContributionCreditType
 }
 
-case class NiContributionDataBsp(
-    taxYear: TaxYear,
+case class Class1CreditsAndContributionsDataBsp(
+    taxYear: Option[TaxYear],
     primaryPaidEarnings: Option[PrimaryPaidEarnings],
-    class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
     contributionCategory: Option[ContributionCategory],
     contributionCategoryLetter: Option[ContributionCategoryLetter],
     primaryContribution: Option[PrimaryContribution],
-    class2NIContributionAmount: Option[Class2NIContributionAmount],
     class1ContributionStatus: Option[Class1ContributionStatus],
+    contributionCreditType: Option[ContributionCreditType],
+    numberOfCreditsAndContributions: Option[NumberOfCreditsAndContributions]
+)
+
+case class Class2CreditsAndContributionsDataBsp(
+    taxYear: Option[TaxYear],
+    class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
+    class2NIContributionAmount: Option[Class2NIContributionAmount],
     class2Or3CreditStatus: Option[Class2Or3CreditStatus],
     contributionCreditType: Option[ContributionCreditType],
     numberOfCreditsAndContributions: Option[NumberOfCreditsAndContributions]
@@ -63,7 +69,8 @@ case class MarriageDetailsBsp(
 )
 
 case class AggregatedDataBsp(
-    niContributionsAndCreditData: List[NiContributionDataBsp],
+    class1CreditsAnsContributions: List[Class1CreditsAndContributionsDataBsp],
+    class2CreditsAnsContributions: List[Class2CreditsAndContributionsDataBsp],
     marriageDetails: List[MarriageDetailsBsp]
 ) extends AggregatedData {
   def benefitType: BenefitType = BSP
