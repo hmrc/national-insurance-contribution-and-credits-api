@@ -26,6 +26,25 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
   LiabilitySummaryDetailsErrorResponse403,
   LiabilitySummaryDetailsErrorResponse422
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesError.{
+  HipFailureItem,
+  HipFailureResponse,
+  HipFailureResponse400,
+  HipFailureResponse500,
+  HipFailureResponse503,
+  LongTermBenefitNotesError400,
+  LongTermBenefitNotesError422,
+  LongTermBenefitNotesErrorItem400,
+  LongTermBenefitNotesErrorResponse400,
+  LongTermBenefitNotesErrorResponse403,
+  LongTermBenefitNotesErrorResponse404,
+  LongTermBenefitNotesErrorResponse422,
+  StandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
@@ -149,6 +168,44 @@ object TestFormat {
 
     implicit val schemeMembershipDetailsSuccessResponseWrites: Writes[SchemeMembershipDetailsSuccessResponse] =
       Json.writes[SchemeMembershipDetailsSuccessResponse]
+
+  }
+
+  object LongTermBenefitNotesFormats {
+
+    import CommonFormats.errorCode422
+
+    implicit val hipFailureItemWrites: Writes[HipFailureItem]               = Json.writes[HipFailureItem]
+    implicit val hipFailureResponseWrites: Writes[HipFailureResponse]       = Json.writes[HipFailureResponse]
+    implicit val hipFailureResponse400Writes: Writes[HipFailureResponse400] = Json.writes[HipFailureResponse400]
+    implicit val hipFailureResponse500Writes: Writes[HipFailureResponse500] = Json.writes[HipFailureResponse500]
+    implicit val hipFailureResponse503Writes: Writes[HipFailureResponse503] = Json.writes[HipFailureResponse503]
+
+    implicit val longTermBenefitNotesErrorItem400Write: Writes[LongTermBenefitNotesErrorItem400] =
+      Json.writes[LongTermBenefitNotesErrorItem400]
+
+    implicit val longTermBenefitNotesError400Writes: Writes[LongTermBenefitNotesError400] =
+      Json.writes[LongTermBenefitNotesError400]
+
+    implicit val standardErrorResponse400Writes: Writes[StandardErrorResponse400] =
+      Json.writes[StandardErrorResponse400]
+
+    implicit val longTermBenefitNotesErrorResponse403Writes: Writes[LongTermBenefitNotesErrorResponse403] =
+      Json.writes[LongTermBenefitNotesErrorResponse403]
+
+    implicit val longTermBenefitNotesErrorResponse404Writes: Writes[LongTermBenefitNotesErrorResponse404] =
+      Json.writes[LongTermBenefitNotesErrorResponse404]
+
+    implicit val longTermBenefitNotesError422Writes: Writes[LongTermBenefitNotesError422] =
+      Json.writes[LongTermBenefitNotesError422]
+
+    implicit val longTermBenefitNotesErrorResponse422Writes: Writes[LongTermBenefitNotesErrorResponse422] =
+      Json.writes[LongTermBenefitNotesErrorResponse422]
+
+    implicit val noteWrites: Writes[Note] = Json.valueWrites[Note]
+
+    implicit val longTermBenefitNotesSuccessResponseWrites: Writes[LongTermBenefitNotesSuccessResponse] =
+      Json.writes[LongTermBenefitNotesSuccessResponse]
 
   }
 
