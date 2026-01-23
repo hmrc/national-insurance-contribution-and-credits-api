@@ -19,6 +19,12 @@ package uk.gov.hmrc.app.benefitEligibility.testUtils
 import play.api.libs.json.{Format, Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.ErrorCode422
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.{
+  HipFailureResponse400,
+  IndividualStatePensionInformationErrorResponse503,
+  StandardErrorResponse400
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsError400,
   LiabilitySummaryDetailsError422,
@@ -149,6 +155,26 @@ object TestFormat {
 
     implicit val schemeMembershipDetailsSuccessResponseWrites: Writes[SchemeMembershipDetailsSuccessResponse] =
       Json.writes[SchemeMembershipDetailsSuccessResponse]
+
+  }
+
+  object IndividualStatePensionInformation {
+
+    implicit val hipFailureResponse400Writes: Writes[HipFailureResponse400] =
+      Json.writes[HipFailureResponse400]
+
+    implicit val errorResourceObj400Writes: Writes[IndividualStatePensionInformationError.ErrorResourceObj400] =
+      Json.writes[IndividualStatePensionInformationError.ErrorResourceObj400]
+
+    implicit val errorResponse400Writes: Writes[IndividualStatePensionInformationError.ErrorResponse400] =
+      Json.writes[IndividualStatePensionInformationError.ErrorResponse400]
+
+    implicit val standardErrorResponse400Writes: Writes[StandardErrorResponse400] =
+      Json.writes[StandardErrorResponse400]
+
+    implicit val individualStatePensionInformationErrorResponse503Writes
+        : Writes[IndividualStatePensionInformationErrorResponse503] =
+      Json.writes[IndividualStatePensionInformationErrorResponse503]
 
   }
 

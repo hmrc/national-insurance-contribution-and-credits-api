@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation
 
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.BSP
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, Identifier, TaxYear}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.{
   MarriageEndDate,
   MarriageStartDate,

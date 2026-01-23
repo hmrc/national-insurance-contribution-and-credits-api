@@ -664,6 +664,8 @@ components:
     GYSPResponseData:
       type: object
       properties:
+        benefitSchemeName:
+          $ref: '#/components/schemas/benefitSchemeName'
         totalGraduatedPensionUnits:
           $ref: '#/components/schemas/unsignedMoney'
         class1CreditsAndContributions:
@@ -1055,6 +1057,14 @@ components:
       minLength: 1
       maxLength: 6
       pattern: "^([A-Za-z ])+$"
+      type: string
+
+    benefitSchemeName:
+      description: The name of the scheme used for the institution details of
+        a benefit scheme.
+      maxLength: 54
+      minLength: 1
+      pattern: "^[a-zA-Z0-9\\/,'.&() -]+$"
       type: string
 
     # Enum Definitions

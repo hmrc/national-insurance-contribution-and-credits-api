@@ -23,7 +23,7 @@ import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult.SuccessfulResult
 
 object MoneyValidation {
 
-  private object Defaults {
+  object Defaults {
 
     val max: BigDecimal = BigDecimal("99999999999999.98")
 

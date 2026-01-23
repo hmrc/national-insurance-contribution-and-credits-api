@@ -17,19 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation
 
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, ReceiptDate, TaxYear}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.{
-  ContributionCategoryLetter,
-  EmployerName,
-  NiClass1,
-  NiClass2,
-  NiContributionsAndCreditsSuccessResponse,
   NumberOfCreditsAndContributions,
-  PrimaryPaidEarnings,
-  TaxYear
+  PrimaryPaidEarnings
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.{
-  ContributionCategory,
   ContributionCreditType,
   LatePaymentPeriod
 }

@@ -78,7 +78,12 @@ case class SchemeMembershipDetailsDataGysp(
     employersContractedOutNumberDetails: String
 )
 
+case class BenefitSchemeName(
+    schemeName: String
+)
+
 case class AggregatedDataGysp(
+    benefitSchemeName: Option[BenefitSchemeName],
     totalGraduatedPensionUnits: Option[BigDecimal],
     class1CreditsAnsContributions: List[Class1CreditsAnsContributionsDataGysp],
     class2CreditsAnsContributions: List[Class2CreditsAnsContributionsGysp],
