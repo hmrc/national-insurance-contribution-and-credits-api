@@ -152,12 +152,6 @@ object NiContributionsAndCreditsSuccess {
 
   }
 
-  case class TaxYear(value: Int) extends AnyVal
-
-  object TaxYear {
-    implicit val weeksPaidReads: Format[TaxYear] = Json.valueFormat[TaxYear]
-  }
-
   case class NumberOfCreditsAndContributions(value: Int) extends AnyVal
 
   object NumberOfCreditsAndContributions {

@@ -19,6 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.testUtils
 import cats.data.ValidatedNel
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.networknt.schema.regex.JDKRegularExpressionFactory
 import com.networknt.schema.{JsonSchema, JsonSchemaFactory, SchemaValidatorsConfig, SpecVersion}
 import org.scalactic.source.Position
@@ -42,6 +43,12 @@ sealed trait SchemaValidation {
     validateAndGetErrors(jsonNode)
   }
 
+  /** Converts YAML `String` to JSON, then validates it. */
+  final def validateYamlAndGetErrors(yaml: String)(implicit pos: Position): List[String] = {
+    val jsonNode: JsonNode = SchemaValidation.InternalUtils.yamlToJsonNode(yaml)
+    validateAndGetErrors(jsonNode)
+  }
+
   /** Converts a given `JsValue` to a `String`, then validates it. */
   final def validateAndGetErrors(json: JsValue)(implicit pos: Position): List[String] = {
     val jsonString: String = Json.asciiStringify(json)
@@ -50,7 +57,7 @@ sealed trait SchemaValidation {
 
   /** Reads JSON from a file, then validates it. */
   final def validateFromPathAndGetErrors(jsonPath: String)(implicit pos: Position): List[String] = {
-    val jsonNode = SchemaValidation.InternalUtils.readJsonNode(jsonPath = jsonPath)
+    val jsonNode = SchemaValidation.InternalUtils.readJsonNode(jsonOrYamlPath = jsonPath)
     validateAndGetErrors(jsonNode)
   }
 
@@ -63,17 +70,20 @@ object SchemaValidation {
     private val mapper: ObjectMapper   = new ObjectMapper()
     def createObjectNode(): ObjectNode = mapper.createObjectNode()
 
-    def readJsonNode(jsonPath: String)(implicit pos: Position): JsonNode = {
-      val fileContent = Using(Source.fromFile(jsonPath))(_.mkString).get
+    def readJsonNode(jsonOrYamlPath: String)(implicit pos: Position): JsonNode = {
+      val fileContent = Using(Source.fromFile(jsonOrYamlPath))(_.mkString).get
 
-      jsonPath.toLowerCase(Locale.ENGLISH) match {
-        case s"$_.json" => jsonToJsonNode(fileContent)
+      jsonOrYamlPath.toLowerCase(Locale.ENGLISH) match {
+        case s"$_.json"             => jsonToJsonNode(fileContent)
+        case s"$_.yaml" | s"$_.yml" => yamlToJsonNode(fileContent)
         case _ =>
-          fail(s"Cannot read file because it doesn't have a json file extension: $jsonPath")
+          fail(s"Cannot read file because it doesn't have a json/yaml/yml file extension: $jsonOrYamlPath")
       }
     }
 
     def jsonToJsonNode(json: String): JsonNode = mapper.readTree(json)
+
+    def yamlToJsonNode(yaml: String): JsonNode = new ObjectMapper(new YAMLFactory()).readTree(yaml)
   }
 
   final class SimpleJsonSchema(
@@ -108,7 +118,7 @@ object SchemaValidation {
         .build()
 
       schemaFactory.getSchema(
-        InternalUtils.readJsonNode(jsonPath = jsonSchemaFilePath),
+        InternalUtils.readJsonNode(jsonOrYamlPath = jsonSchemaFilePath),
         config
       )
     }

@@ -32,6 +32,7 @@ object AggregationServiceGysp {
         Right(
           AggregatedDataGysp(
             None,
+            None,
             List(),
             List(),
             List(),
