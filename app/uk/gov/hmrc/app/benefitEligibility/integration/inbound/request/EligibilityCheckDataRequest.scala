@@ -101,7 +101,7 @@ case class GYSPEligibilityCheckDataRequest(
     dateOfBirth: LocalDate,                              // contribution credit api
     startTaxYear: Int,                                   // contribution credit api
     endTaxYear: Int,                                     // contribution credit api
-    benefitType: String,                                 // benefit calculation API + benefit calculation notes API
+    benefitType: LongTermBenefitType,                    // benefit calculation API + benefit calculation notes API
     associatedCalculationSequenceNumber: Int,            // benefit calculation API + benefit calculation notes API
     schemeContractedOutNumber: Int,                      // benefit-scheme-details API
     searchStartYear: Option[Int],                        // Marriage Details API

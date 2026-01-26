@@ -145,7 +145,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     latest = Some(true),
     sequence = Some(12),
     associatedCalculationSequenceNumber = 1123232,
-    benefitType = "SOME BENEFIT",
+    benefitType = LongTermBenefitType.All,
     pensionProcessingArea = Some("pensionProcessingArea"),
     schemeContractedOutNumber = 32324343,
     schemeMembershipSequenceNumber = Some(4343343),

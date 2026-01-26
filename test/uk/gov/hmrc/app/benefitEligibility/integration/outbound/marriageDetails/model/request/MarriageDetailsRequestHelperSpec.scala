@@ -20,6 +20,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import uk.gov.hmrc.app.benefitEligibility.common.Identifier
+import uk.gov.hmrc.app.benefitEligibility.common.LongTermBenefitType.All
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   BSPEligibilityCheckDataRequest,
   GYSPEligibilityCheckDataRequest
@@ -66,7 +67,7 @@ class MarriageDetailsRequestHelperSpec extends AnyFreeSpec with MockFactory {
     latest = Some(true),
     sequence = Some(23),
     associatedCalculationSequenceNumber = 1123232,
-    benefitType = "SOME BENEFIT",
+    benefitType = All,
     pensionProcessingArea = Some("pensionProcessingArea"),
     schemeContractedOutNumber = 32324343,
     schemeMembershipSequenceNumber = Some(4343343),
