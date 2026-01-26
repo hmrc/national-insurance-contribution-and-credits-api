@@ -28,13 +28,14 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   NpsErrorCode400,
   NpsErrorCode403,
   NpsErrorReason403,
-  Reason
+  Reason,
+  TaxYear
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.ContributionCreditFormats._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.ContributionCreditFormats.*
 
 class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
 

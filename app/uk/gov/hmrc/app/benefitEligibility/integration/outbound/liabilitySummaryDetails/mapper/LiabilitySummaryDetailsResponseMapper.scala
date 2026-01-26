@@ -31,7 +31,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 
-class LiabilitySummaryDetailsResponseMapper extends NpsResponseMapper[LiabilitySummaryDetailsResponse, ApiResult] {
+class LiabilitySummaryDetailsResponseMapper
+    extends NpsResponseMapper[LiabilitySummaryDetailsResponse, LiabilityResult] {
 
   def toApiResult(response: LiabilitySummaryDetailsResponse): LiabilityResult =
     response match {

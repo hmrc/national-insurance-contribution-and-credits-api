@@ -49,6 +49,11 @@ object NpsNormalizedError extends Enum[NpsNormalizedError] with PlayJsonEnum[Nps
     val code    = 404
   }
 
+  case object ServiceUnavailable extends NpsNormalizedError("SERVICE_UNAVAILABLE") {
+    val message = "downstream is currently unable to handle request"
+    val code    = 503
+  }
+
   case object InternalServerError extends NpsNormalizedError("INTERNAL_SERVER_ERROR") {
     val message = "downstream failed to fulfil request"
     val code    = 500

@@ -22,22 +22,12 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedDataJsa
 
-case class NiContributionDataJsa(
-    taxYear: Int,
-    primaryPaidEarnings: Option[PrimaryPaidEarnings],
-    class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
-    contributionCreditType: Option[ContributionCreditType],
-    creditSource: Option[CreditSource],
-    numberOfCreditsAndContributions: Option[NumberOfCreditsAndContributions]
-)
-
-case class JSAResponse(
+case class JsaResponse(
     nationalInsuranceNumber: Identifier,
     dateOfBirth: DateOfBirth,
     startTaxYear: StartTaxYear,
     endTaxYear: EndTaxYear,
-    data: AggregatedDataJsa,
-    niContributionsAndCreditData: List[NiContributionDataJsa]
+    data: AggregatedDataJsa
 ) extends BenefitEligibilityResponse {
   val benefitType: BenefitType = BenefitType.JSA
 }

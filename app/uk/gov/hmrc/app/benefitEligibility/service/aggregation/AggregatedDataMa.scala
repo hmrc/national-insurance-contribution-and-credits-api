@@ -17,14 +17,10 @@
 package uk.gov.hmrc.app.benefitEligibility.service.aggregation
 
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, ReceiptDate, TaxYear}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.{
-  NiClass1,
-  NiClass2,
-  NiContributionsAndCreditsSuccessResponse,
   NumberOfCreditsAndContributions,
-  PrimaryPaidEarnings,
-  TaxYear
+  PrimaryPaidEarnings
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.{
   ContributionCreditType,
@@ -33,7 +29,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 
 import java.time.LocalDate
 
-case class NiContributionDataMa(
+case class Class1CreditsAnsContributionsDataMa(
     taxYear: Option[TaxYear],
     contributionCreditType: Option[ContributionCreditType],
     noOfCreditsAndContributions: Option[NumberOfCreditsAndContributions],
@@ -41,27 +37,12 @@ case class NiContributionDataMa(
     latePaymentPeriod: Option[LatePaymentPeriod]
 )
 
-object NiContributionDataMa {
-
-  def apply(niClass1: NiClass1) =
-    new NiContributionDataMa(
-      niClass1.taxYear,
-      niClass1.contributionCreditType,
-      None,
-      niClass1.primaryPaidEarnings,
-      niClass1.latePaymentPeriod
-    )
-
-  def apply(niClass2: NiClass2) =
-    new NiContributionDataMa(
-      niClass2.taxYear,
-      niClass2.contributionCreditType,
-      niClass2.noOfCreditsAndConts,
-      None,
-      niClass2.latePaymentPeriod
-    )
-
-}
+case class Class2CreditsAnsContributionsMa(
+    taxYear: Option[TaxYear],
+    contributionCreditType: Option[ContributionCreditType],
+    noOfCreditsAndContributions: Option[NumberOfCreditsAndContributions],
+    latePaymentPeriod: Option[LatePaymentPeriod]
+)
 
 case class LiabilitiesMa(
     startDate: LocalDate,
@@ -73,7 +54,8 @@ case class Class2MaReceiptData(
 )
 
 case class AggregatedDataMa(
-    niContributionsAndCreditData: List[NiContributionDataMa],
+    class1CreditsAnsContributions: List[Class1CreditsAnsContributionsDataMa],
+    class2CreditsAnsContributions: List[Class2CreditsAnsContributionsMa],
     class2MaReceiptDetails: List[Class2MaReceiptData],
     liabilitiesDetails: List[LiabilitiesMa]
 ) extends AggregatedData {

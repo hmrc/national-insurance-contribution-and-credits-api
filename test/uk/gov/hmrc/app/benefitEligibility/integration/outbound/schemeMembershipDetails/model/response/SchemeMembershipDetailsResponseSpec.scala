@@ -435,12 +435,14 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
 
       "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
         val jValue1: JsValue = Json.parse(schemeMembershipDetailsErrorResponse403_1JsonString)
-        val class2MAReceiptsErrorResponse403_1: SchemeMembershipDetailsErrorResponse403 = jsonFormat.reads(jValue1).get
-        val writtenJson1: JsValue = jsonFormat.writes(class2MAReceiptsErrorResponse403_1)
+        val schemeMembershipDetailsErrorResponse403_1: SchemeMembershipDetailsErrorResponse403 =
+          jsonFormat.reads(jValue1).get
+        val writtenJson1: JsValue = jsonFormat.writes(schemeMembershipDetailsErrorResponse403_1)
 
         val jValue2: JsValue = Json.parse(schemeMembershipDetailsErrorResponse403_2JsonString)
-        val class2MAReceiptsErrorResponse403_2: SchemeMembershipDetailsErrorResponse403 = jsonFormat.reads(jValue2).get
-        val writtenJson2: JsValue = jsonFormat.writes(class2MAReceiptsErrorResponse403_2)
+        val schemeMembershipDetailsErrorResponse403_2: SchemeMembershipDetailsErrorResponse403 =
+          jsonFormat.reads(jValue2).get
+        val writtenJson2: JsValue = jsonFormat.writes(schemeMembershipDetailsErrorResponse403_2)
 
         writtenJson1 shouldBe jValue1
         writtenJson2 shouldBe jValue2
