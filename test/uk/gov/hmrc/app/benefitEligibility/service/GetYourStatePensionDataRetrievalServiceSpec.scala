@@ -21,11 +21,19 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType, Identifier, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{LongTermBenefitNotes, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.common.LongTermBenefitType.All
+import uk.gov.hmrc.app.benefitEligibility.common.{
+  BenefitEligibilityError,
+  BenefitType,
+  Identifier,
+  LongTermBenefitType,
+  NpsNormalizedError
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.connector.LongTermBenefitNotesConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.config.AppConfig
@@ -43,8 +51,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
   implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
-  val mockMarriageDetailsConnector: MarriageDetailsConnector         = mock[MarriageDetailsConnector]
-  val mockMarriageDetailsRequestHelper: MarriageDetailsRequestHelper = mock[MarriageDetailsRequestHelper]
+  val mockMarriageDetailsConnector: MarriageDetailsConnector           = mock[MarriageDetailsConnector]
+  val mockMarriageDetailsRequestHelper: MarriageDetailsRequestHelper   = mock[MarriageDetailsRequestHelper]
+  val mockLongTermBenefitNotesConnector: LongTermBenefitNotesConnector = mock[LongTermBenefitNotesConnector]
 
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
 
@@ -58,6 +67,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
   val underTest = new GetYourStatePensionDataRetrievalService(
     mockMarriageDetailsConnector,
     mockMarriageDetailsRequestHelper,
+    mockLongTermBenefitNotesConnector,
     appConfig
   )
 
@@ -72,7 +82,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     latest = Some(true),
     sequence = Some(12),
     associatedCalculationSequenceNumber = 1123232,
-    benefitType = "SOME BENEFIT",
+    benefitType = All,
     pensionProcessingArea = Some("pensionProcessingArea"),
     schemeContractedOutNumber = 32324343,
     schemeMembershipSequenceNumber = Some(4343343),
@@ -93,6 +103,15 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+            )
+          )
+
+        (mockLongTermBenefitNotesConnector
+          .fetchLongTermBenefitNotes(_: BenefitType, _: Identifier, _: LongTermBenefitType, _: Int)(_: HeaderCarrier))
+          .expects(BenefitType.GYSP, Identifier("GD379251T"), LongTermBenefitType.All, 1123232, *)
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](
+              DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.AccessForbidden)
             )
           )
 

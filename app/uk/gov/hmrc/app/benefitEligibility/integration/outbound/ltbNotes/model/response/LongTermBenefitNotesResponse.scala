@@ -16,18 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response
 
-import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{
-  ErrorCode422,
-  HipFailureResponse,
-  HipOrigin,
-  NpsErrorCode400,
-  NpsErrorCode403,
-  NpsErrorCode404,
-  NpsErrorReason403,
-  NpsErrorReason404,
-  Reason
-}
+import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads}
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 sealed trait LongTermBenefitNotesResponse extends NpsApiResponse
@@ -37,6 +27,22 @@ object LongTermBenefitNotesError {
   // region Error400
 
   sealed trait LongTermBenefitNotesErrorResponse400 extends LongTermBenefitNotesResponse
+
+  object LongTermBenefitNotesErrorResponse400 {
+
+    implicit val longTermBenefitNotesErrorResponse400Reads: Reads[LongTermBenefitNotesErrorResponse400] =
+      Reads[LongTermBenefitNotesErrorResponse400] { resp =>
+        LongTermBenefitNotesStandardErrorResponse400.standardErrorResponse400Reads.reads(resp) match {
+          case JsSuccess(value, path) => JsSuccess(value, path)
+          case JsError(errors) =>
+            LongTermBenefitNotesHipFailureResponse400.hipFailureResponse400Reads.reads(resp) match {
+              case JsSuccess(value, path) => JsSuccess(value, path)
+              case JsError(errors)        => JsError(errors)
+            }
+        }
+      }
+
+  }
 
   case class LongTermBenefitNotesHipFailureResponse400(origin: HipOrigin, response: HipFailureResponse)
       extends LongTermBenefitNotesErrorResponse400

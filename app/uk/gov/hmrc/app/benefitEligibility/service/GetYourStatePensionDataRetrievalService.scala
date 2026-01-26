@@ -23,6 +23,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Benef
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.connector.LongTermBenefitNotesConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.config.AppConfig
@@ -33,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GetYourStatePensionDataRetrievalService @Inject() (
     marriageDetailsConnector: MarriageDetailsConnector,
     marriageDetailsRequestHelper: MarriageDetailsRequestHelper,
+    longTermBenefitNotesConnector: LongTermBenefitNotesConnector,
     appConfig: AppConfig
 )(implicit ec: ExecutionContext) {
 
@@ -43,6 +45,12 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       marriageDetailsResult <- marriageDetailsConnector.fetchMarriageDetails(
         BenefitType.GYSP,
         marriageDetailsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
+      )
+      longTermBenefitNotesResult <- longTermBenefitNotesConnector.fetchLongTermBenefitNotes(
+        BenefitType.GYSP,
+        eligibilityCheckDataRequest.identifier,
+        eligibilityCheckDataRequest.benefitType,
+        eligibilityCheckDataRequest.associatedCalculationSequenceNumber
       )
     } yield EligibilityCheckDataResultGYSP(
       marriageDetailsResult
