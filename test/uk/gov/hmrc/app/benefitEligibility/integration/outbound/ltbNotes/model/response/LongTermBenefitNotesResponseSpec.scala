@@ -30,14 +30,14 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason404.NotFound
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesError.{
   HipFailureItem,
   HipFailureResponse,
-  HipFailureResponse400,
-  HipFailureResponse500,
-  HipFailureResponse503,
   LongTermBenefitNotesErrorItem400,
   LongTermBenefitNotesErrorResponse403,
   LongTermBenefitNotesErrorResponse404,
   LongTermBenefitNotesErrorResponse422,
-  StandardErrorResponse400
+  LongTermBenefitNotesHipFailureResponse400,
+  LongTermBenefitNotesHipFailureResponse500,
+  LongTermBenefitNotesHipFailureResponse503,
+  LongTermBenefitNotesStandardErrorResponse400
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.enums.*
@@ -346,7 +346,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
 
   "StandardErrorResponse400" - {
 
-    val jsonFormat = implicitly[Format[StandardErrorResponse400]]
+    val jsonFormat = implicitly[Format[LongTermBenefitNotesStandardErrorResponse400]]
 
     def longTermBenefitNotes400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -356,7 +356,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val standardErrorResponse400 = StandardErrorResponse400(
+    val standardErrorResponse400 = LongTermBenefitNotesStandardErrorResponse400(
       HiporiginEnum.Hip,
       LongTermBenefitNotesError.LongTermBenefitNotesError400(
         List(
@@ -397,13 +397,13 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     }
 
     "deserialises to the model class" in {
-      val _: StandardErrorResponse400 =
+      val _: LongTermBenefitNotesStandardErrorResponse400 =
         jsonFormat.reads(Json.parse(standardErrorResponse400JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
       val jValue: JsValue = Json.parse(standardErrorResponse400JsonString)
-      val standardErrorResponse400Json: StandardErrorResponse400 =
+      val standardErrorResponse400Json: LongTermBenefitNotesStandardErrorResponse400 =
         jsonFormat.reads(jValue).get
       val writtenJson: JsValue = jsonFormat.writes(standardErrorResponse400Json)
 
@@ -413,7 +413,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
 
   "HipFailureResponse400" - {
 
-    val jsonFormat = implicitly[Format[HipFailureResponse400]]
+    val jsonFormat = implicitly[Format[LongTermBenefitNotesHipFailureResponse400]]
 
     def hipFailureResponse400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -423,7 +423,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val hipFailureResponse400 = HipFailureResponse400(
+    val hipFailureResponse400 = LongTermBenefitNotesHipFailureResponse400(
       HiporiginEnum.Hip,
       HipFailureResponse(
         List(
@@ -463,13 +463,13 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     }
 
     "deserialises to the model class" in {
-      val _: HipFailureResponse400 =
+      val _: LongTermBenefitNotesHipFailureResponse400 =
         jsonFormat.reads(Json.parse(hipFailureResponse400JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
       val jValue: JsValue = Json.parse(hipFailureResponse400JsonString)
-      val hipFailureResponse400Json: HipFailureResponse400 =
+      val hipFailureResponse400Json: LongTermBenefitNotesHipFailureResponse400 =
         jsonFormat.reads(jValue).get
       val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse400Json)
 
@@ -627,7 +627,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
 
   "HipFailureResponse500" - {
 
-    val jsonFormat = implicitly[Format[HipFailureResponse500]]
+    val jsonFormat = implicitly[Format[LongTermBenefitNotesHipFailureResponse500]]
 
     def hipFailureResponse500JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -637,7 +637,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val hipFailureResponse500 = HipFailureResponse500(
+    val hipFailureResponse500 = LongTermBenefitNotesHipFailureResponse500(
       HiporiginEnum.Hip,
       HipFailureResponse(
         List(
@@ -678,13 +678,13 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     }
 
     "deserialises to the model class" in {
-      val _: HipFailureResponse500 =
+      val _: LongTermBenefitNotesHipFailureResponse500 =
         jsonFormat.reads(Json.parse(hipFailureResponse500JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
       val jValue: JsValue = Json.parse(hipFailureResponse500JsonString)
-      val hipFailureResponse500Json: HipFailureResponse500 =
+      val hipFailureResponse500Json: LongTermBenefitNotesHipFailureResponse500 =
         jsonFormat.reads(jValue).get
       val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse500Json)
 
@@ -694,7 +694,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
 
   "HipFailureResponse503" - {
 
-    val jsonFormat = implicitly[Format[HipFailureResponse503]]
+    val jsonFormat = implicitly[Format[LongTermBenefitNotesHipFailureResponse503]]
 
     def hipFailureResponse503JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -704,7 +704,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val hipFailureResponse503 = HipFailureResponse503(
+    val hipFailureResponse503 = LongTermBenefitNotesHipFailureResponse503(
       HiporiginEnum.Hip,
       HipFailureResponse(
         List(
@@ -745,13 +745,13 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     }
 
     "deserialises to the model class" in {
-      val _: HipFailureResponse503 =
+      val _: LongTermBenefitNotesHipFailureResponse503 =
         jsonFormat.reads(Json.parse(hipFailureResponse503JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
       val jValue: JsValue = Json.parse(hipFailureResponse503JsonString)
-      val hipFailureResponse503Json: HipFailureResponse503 =
+      val hipFailureResponse503Json: LongTermBenefitNotesHipFailureResponse503 =
         jsonFormat.reads(jValue).get
       val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse503Json)
 

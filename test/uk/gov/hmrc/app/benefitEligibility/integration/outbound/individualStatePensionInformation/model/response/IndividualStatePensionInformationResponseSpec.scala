@@ -394,9 +394,9 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
     }
     "HipFailureResponse400" - {
 
-      val jsonFormat = implicitly[Format[HipFailureResponse400]]
+      val jsonFormat = implicitly[Format[IndividualStatePensionInformationHipFailureResponse400]]
 
-      val hipFailureResponse400 = HipFailureResponse400(
+      val hipFailureResponse400 = IndividualStatePensionInformationHipFailureResponse400(
         origin = HipOrigin.Hip,
         response = HipFailureResponse(failures =
           List(
@@ -435,13 +435,13 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       }
 
       "deserialises to the model class" in {
-        val _: HipFailureResponse400 =
+        val _: IndividualStatePensionInformationHipFailureResponse400 =
           jsonFormat.reads(Json.parse(hipFailureResponse400JsonString)).get
       }
 
       "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
         val jValue: JsValue = Json.parse(hipFailureResponse400JsonString)
-        val hipFailureResponse400: HipFailureResponse400 =
+        val hipFailureResponse400: IndividualStatePensionInformationHipFailureResponse400 =
           jsonFormat.reads(jValue).get
         val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse400)
 
@@ -450,9 +450,9 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
     }
     "StandardErrorResponse400" - {
 
-      val jsonFormat = implicitly[Format[StandardErrorResponse400]]
+      val jsonFormat = implicitly[Format[IndividualStatePensionInformationStandardErrorResponse400]]
 
-      val standardErrorResponse400 = StandardErrorResponse400(
+      val standardErrorResponse400 = IndividualStatePensionInformationStandardErrorResponse400(
         origin = HipOrigin.Hip,
         response = ErrorResponse400(
           failures = List(
@@ -486,13 +486,13 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       }
 
       "deserialises to the model class" in {
-        val _: StandardErrorResponse400 =
+        val _: IndividualStatePensionInformationStandardErrorResponse400 =
           jsonFormat.reads(Json.parse(standardErrorResponse400JsonString)).get
       }
 
       "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
         val jValue: JsValue = Json.parse(standardErrorResponse400JsonString)
-        val standardErrorResponse400: StandardErrorResponse400 =
+        val standardErrorResponse400: IndividualStatePensionInformationStandardErrorResponse400 =
           jsonFormat.reads(jValue).get
         val writtenJson: JsValue = jsonFormat.writes(standardErrorResponse400)
 

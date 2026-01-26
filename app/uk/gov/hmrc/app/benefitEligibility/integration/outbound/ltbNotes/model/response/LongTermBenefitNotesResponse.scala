@@ -49,11 +49,14 @@ object LongTermBenefitNotesError {
 
   sealed trait LongTermBenefitNotesErrorResponse400 extends LongTermBenefitNotesResponse
 
-  case class HipFailureResponse400(origin: HiporiginEnum, response: HipFailureResponse)
+  case class LongTermBenefitNotesHipFailureResponse400(origin: HiporiginEnum, response: HipFailureResponse)
       extends LongTermBenefitNotesErrorResponse400
 
-  object HipFailureResponse400 {
-    implicit val hipFailureResponse400Reads: Reads[HipFailureResponse400] = Json.reads[HipFailureResponse400]
+  object LongTermBenefitNotesHipFailureResponse400 {
+
+    implicit val hipFailureResponse400Reads: Reads[LongTermBenefitNotesHipFailureResponse400] =
+      Json.reads[LongTermBenefitNotesHipFailureResponse400]
+
   }
 
   case class LongTermBenefitNotesErrorItem400(reason: Reason, code: NpsErrorCode400)
@@ -74,13 +77,16 @@ object LongTermBenefitNotesError {
 
   }
 
-  case class StandardErrorResponse400(
+  case class LongTermBenefitNotesStandardErrorResponse400(
       origin: HiporiginEnum,
       response: LongTermBenefitNotesError400
   ) extends LongTermBenefitNotesErrorResponse400
 
-  object StandardErrorResponse400 {
-    implicit val standardErrorResponse400Reads: Reads[StandardErrorResponse400] = Json.reads[StandardErrorResponse400]
+  object LongTermBenefitNotesStandardErrorResponse400 {
+
+    implicit val standardErrorResponse400Reads: Reads[LongTermBenefitNotesStandardErrorResponse400] =
+      Json.reads[LongTermBenefitNotesStandardErrorResponse400]
+
   }
 
   // endregion Error400
@@ -138,22 +144,28 @@ object LongTermBenefitNotesError {
 
   // region Error500
 
-  case class HipFailureResponse500(origin: HiporiginEnum, response: HipFailureResponse)
+  case class LongTermBenefitNotesHipFailureResponse500(origin: HiporiginEnum, response: HipFailureResponse)
       extends LongTermBenefitNotesResponse
 
-  object HipFailureResponse500 {
-    implicit val hipFailureResponse500Reads: Reads[HipFailureResponse500] = Json.reads[HipFailureResponse500]
+  object LongTermBenefitNotesHipFailureResponse500 {
+
+    implicit val hipFailureResponse500Reads: Reads[LongTermBenefitNotesHipFailureResponse500] =
+      Json.reads[LongTermBenefitNotesHipFailureResponse500]
+
   }
 
   // endregion Error500
 
   // region Error503
 
-  case class HipFailureResponse503(origin: HiporiginEnum, response: HipFailureResponse)
+  case class LongTermBenefitNotesHipFailureResponse503(origin: HiporiginEnum, response: HipFailureResponse)
       extends LongTermBenefitNotesResponse
 
-  object HipFailureResponse503 {
-    implicit val hipFailureResponse503Reads: Reads[HipFailureResponse503] = Json.reads[HipFailureResponse503]
+  object LongTermBenefitNotesHipFailureResponse503 {
+
+    implicit val hipFailureResponse503Reads: Reads[LongTermBenefitNotesHipFailureResponse503] =
+      Json.reads[LongTermBenefitNotesHipFailureResponse503]
+
   }
 
   // endregion Error503
