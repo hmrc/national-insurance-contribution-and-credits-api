@@ -87,11 +87,11 @@ object SchemaValidation {
   }
 
   final class SimpleJsonSchema(
-                                jsonSchemaFilePath: String,
-                                version: SpecVersion.VersionFlag,
-                                schemaComponent: Option[String],
-                                metaSchemaValidation: Option[ValidatedNel[String, Unit]]
-                              ) extends SchemaValidation {
+      jsonSchemaFilePath: String,
+      version: SpecVersion.VersionFlag,
+      schemaComponent: Option[String],
+      metaSchemaValidation: Option[ValidatedNel[String, Unit]]
+  ) extends SchemaValidation {
 
     /** Constructing this class will automatically verify it against the meta-schema. */
     metaSchemaValidation match {
