@@ -38,10 +38,10 @@ object IndividualStatePensionInformationError {
     implicit val individualStatePensionInformationErrorResponse400Reads
         : Reads[IndividualStatePensionInformationErrorResponse400] =
       Reads[IndividualStatePensionInformationErrorResponse400] { resp =>
-        HipFailureResponse400.hipFailureResponse400Reads.reads(resp) match {
+        IndividualStatePensionInformationHipFailureResponse400.hipFailureResponse400Reads.reads(resp) match {
           case JsSuccess(value, path) => JsSuccess(value, path)
           case JsError(errors) =>
-            StandardErrorResponse400.standardErrorResponse400Reads.reads(resp) match {
+            IndividualStatePensionInformationStandardErrorResponse400.standardErrorResponse400Reads.reads(resp) match {
               case JsSuccess(value, path) => JsSuccess(value, path)
               case JsError(errors)        => JsError(errors)
             }

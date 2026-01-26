@@ -28,8 +28,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode404.ErrorCode404
 import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason403.Forbidden
 import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason404.NotFound
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesError.{
-  HipFailureItem,
-  HipFailureResponse,
   LongTermBenefitNotesErrorItem400,
   LongTermBenefitNotesErrorResponse403,
   LongTermBenefitNotesErrorResponse404,
@@ -40,7 +38,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.re
   LongTermBenefitNotesStandardErrorResponse400
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.LongTermBenefitNotesFormats.*
 
@@ -357,7 +354,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
       )
 
     val standardErrorResponse400 = LongTermBenefitNotesStandardErrorResponse400(
-      HiporiginEnum.Hip,
+      HipOrigin.Hip,
       LongTermBenefitNotesError.LongTermBenefitNotesError400(
         List(
           LongTermBenefitNotesErrorItem400(
@@ -424,15 +421,15 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
       )
 
     val hipFailureResponse400 = LongTermBenefitNotesHipFailureResponse400(
-      HiporiginEnum.Hip,
+      HipOrigin.Hip,
       HipFailureResponse(
         List(
           HipFailureItem(
-            "",
+            FailureType(""),
             Reason("")
           ),
           HipFailureItem(
-            "",
+            FailureType(""),
             Reason("")
           )
         )
@@ -638,15 +635,15 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
       )
 
     val hipFailureResponse500 = LongTermBenefitNotesHipFailureResponse500(
-      HiporiginEnum.Hip,
+      HipOrigin.Hip,
       HipFailureResponse(
         List(
           HipFailureItem(
-            "",
+            FailureType(""),
             Reason("")
           ),
           HipFailureItem(
-            "",
+            FailureType(""),
             Reason("")
           )
         )
@@ -705,15 +702,15 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
       )
 
     val hipFailureResponse503 = LongTermBenefitNotesHipFailureResponse503(
-      HiporiginEnum.Hip,
+      HipOrigin.Hip,
       HipFailureResponse(
         List(
           HipFailureItem(
-            "",
+            FailureType(""),
             Reason("")
           ),
           HipFailureItem(
-            "",
+            FailureType(""),
             Reason("")
           )
         )

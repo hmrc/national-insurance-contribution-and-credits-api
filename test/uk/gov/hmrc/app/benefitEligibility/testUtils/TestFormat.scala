@@ -154,9 +154,6 @@ object TestFormat {
 
     import CommonFormats.errorCode422
 
-    implicit val hipFailureItemWrites: Writes[HipFailureItem]         = Json.writes[HipFailureItem]
-    implicit val hipFailureResponseWrites: Writes[HipFailureResponse] = Json.writes[HipFailureResponse]
-
     implicit val longTermBenefitNotesHipFailureResponse400Writes: Writes[LongTermBenefitNotesHipFailureResponse400] =
       Json.writes[LongTermBenefitNotesHipFailureResponse400]
 
