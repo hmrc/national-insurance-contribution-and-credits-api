@@ -134,7 +134,7 @@ class IndividualStatePensionInformationResponseMapperSpec extends AnyFreeSpec wi
     )
   )
 
-  val hipFailureResponse400 = HipFailureResponse400(
+  val hipFailureResponse400 = IndividualStatePensionInformationHipFailureResponse400(
     origin = HipOrigin.Hip,
     response = HipFailureResponse(failures =
       List(
@@ -145,7 +145,7 @@ class IndividualStatePensionInformationResponseMapperSpec extends AnyFreeSpec wi
     )
   )
 
-  val standardErrorResponse400 = StandardErrorResponse400(
+  val standardErrorResponse400 = IndividualStatePensionInformationStandardErrorResponse400(
     origin = HipOrigin.Hip,
     response = ErrorResponse400(
       failures = List(

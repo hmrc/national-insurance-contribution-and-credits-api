@@ -59,11 +59,14 @@ object IndividualStatePensionInformationError {
     implicit val errorResourceObj400Reads: Reads[ErrorResourceObj400] = Json.reads[ErrorResourceObj400]
   }
 
-  case class HipFailureResponse400(origin: HipOrigin, response: HipFailureResponse)
+  case class IndividualStatePensionInformationHipFailureResponse400(origin: HipOrigin, response: HipFailureResponse)
       extends IndividualStatePensionInformationErrorResponse400
 
-  object HipFailureResponse400 {
-    implicit val hipFailureResponse400Reads: Reads[HipFailureResponse400] = Json.reads[HipFailureResponse400]
+  object IndividualStatePensionInformationHipFailureResponse400 {
+
+    implicit val hipFailureResponse400Reads: Reads[IndividualStatePensionInformationHipFailureResponse400] =
+      Json.reads[IndividualStatePensionInformationHipFailureResponse400]
+
   }
 
   case class ErrorResponse400(failures: List[ErrorResourceObj400])
@@ -72,11 +75,14 @@ object IndividualStatePensionInformationError {
     implicit val errorResponse400Reads: Reads[ErrorResponse400] = Json.reads[ErrorResponse400]
   }
 
-  case class StandardErrorResponse400(origin: HipOrigin, response: ErrorResponse400)
+  case class IndividualStatePensionInformationStandardErrorResponse400(origin: HipOrigin, response: ErrorResponse400)
       extends IndividualStatePensionInformationErrorResponse400
 
-  object StandardErrorResponse400 {
-    implicit val standardErrorResponse400Reads: Reads[StandardErrorResponse400] = Json.reads[StandardErrorResponse400]
+  object IndividualStatePensionInformationStandardErrorResponse400 {
+
+    implicit val standardErrorResponse400Reads: Reads[IndividualStatePensionInformationStandardErrorResponse400] =
+      Json.reads[IndividualStatePensionInformationStandardErrorResponse400]
+
   }
   // 400 end
 

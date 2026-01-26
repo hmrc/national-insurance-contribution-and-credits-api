@@ -20,18 +20,10 @@ import play.api.libs.json.{Format, Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.ErrorCode422
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.{
-  HipFailureResponse400,
-  IndividualStatePensionInformationErrorResponse503,
-  StandardErrorResponse400
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
-  LiabilitySummaryDetailsError400,
-  LiabilitySummaryDetailsError422,
-  LiabilitySummaryDetailsErrorResponse400,
-  LiabilitySummaryDetailsErrorResponse403,
-  LiabilitySummaryDetailsErrorResponse422
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
@@ -158,10 +150,56 @@ object TestFormat {
 
   }
 
+  object LongTermBenefitNotesFormats {
+
+    import CommonFormats.errorCode422
+
+    implicit val hipFailureItemWrites: Writes[HipFailureItem]         = Json.writes[HipFailureItem]
+    implicit val hipFailureResponseWrites: Writes[HipFailureResponse] = Json.writes[HipFailureResponse]
+
+    implicit val longTermBenefitNotesHipFailureResponse400Writes: Writes[LongTermBenefitNotesHipFailureResponse400] =
+      Json.writes[LongTermBenefitNotesHipFailureResponse400]
+
+    implicit val longTermBenefitNotesHipFailureResponse500Writes: Writes[LongTermBenefitNotesHipFailureResponse500] =
+      Json.writes[LongTermBenefitNotesHipFailureResponse500]
+
+    implicit val longTermBenefitNotesHipFailureResponse503Writes: Writes[LongTermBenefitNotesHipFailureResponse503] =
+      Json.writes[LongTermBenefitNotesHipFailureResponse503]
+
+    implicit val longTermBenefitNotesErrorItem400Write: Writes[LongTermBenefitNotesErrorItem400] =
+      Json.writes[LongTermBenefitNotesErrorItem400]
+
+    implicit val longTermBenefitNotesError400Writes: Writes[LongTermBenefitNotesError400] =
+      Json.writes[LongTermBenefitNotesError400]
+
+    implicit val longTermBenefitNotesStandardErrorResponse400Writes
+        : Writes[LongTermBenefitNotesStandardErrorResponse400] =
+      Json.writes[LongTermBenefitNotesStandardErrorResponse400]
+
+    implicit val longTermBenefitNotesErrorResponse403Writes: Writes[LongTermBenefitNotesErrorResponse403] =
+      Json.writes[LongTermBenefitNotesErrorResponse403]
+
+    implicit val longTermBenefitNotesErrorResponse404Writes: Writes[LongTermBenefitNotesErrorResponse404] =
+      Json.writes[LongTermBenefitNotesErrorResponse404]
+
+    implicit val longTermBenefitNotesError422Writes: Writes[LongTermBenefitNotesError422] =
+      Json.writes[LongTermBenefitNotesError422]
+
+    implicit val longTermBenefitNotesErrorResponse422Writes: Writes[LongTermBenefitNotesErrorResponse422] =
+      Json.writes[LongTermBenefitNotesErrorResponse422]
+
+    implicit val noteWrites: Writes[Note] = Json.valueWrites[Note]
+
+    implicit val longTermBenefitNotesSuccessResponseWrites: Writes[LongTermBenefitNotesSuccessResponse] =
+      Json.writes[LongTermBenefitNotesSuccessResponse]
+
+  }
+
   object IndividualStatePensionInformation {
 
-    implicit val hipFailureResponse400Writes: Writes[HipFailureResponse400] =
-      Json.writes[HipFailureResponse400]
+    implicit val individualStatePensionInformationHipFailureResponse400Writes
+        : Writes[IndividualStatePensionInformationHipFailureResponse400] =
+      Json.writes[IndividualStatePensionInformationHipFailureResponse400]
 
     implicit val errorResourceObj400Writes: Writes[IndividualStatePensionInformationError.ErrorResourceObj400] =
       Json.writes[IndividualStatePensionInformationError.ErrorResourceObj400]
@@ -169,8 +207,9 @@ object TestFormat {
     implicit val errorResponse400Writes: Writes[IndividualStatePensionInformationError.ErrorResponse400] =
       Json.writes[IndividualStatePensionInformationError.ErrorResponse400]
 
-    implicit val standardErrorResponse400Writes: Writes[StandardErrorResponse400] =
-      Json.writes[StandardErrorResponse400]
+    implicit val individualStatePensionInformationStandardErrorResponse400Writes
+        : Writes[IndividualStatePensionInformationStandardErrorResponse400] =
+      Json.writes[IndividualStatePensionInformationStandardErrorResponse400]
 
     implicit val individualStatePensionInformationErrorResponse503Writes
         : Writes[IndividualStatePensionInformationErrorResponse503] =
