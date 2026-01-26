@@ -19,6 +19,8 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.r
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.{
   ErrorCode422,
+  HipFailureResponse,
+  HipOrigin,
   NpsErrorCode400,
   NpsErrorCode403,
   NpsErrorCode404,
@@ -26,30 +28,17 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   NpsErrorReason404,
   Reason
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.enums.HiporiginEnum
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 sealed trait LongTermBenefitNotesResponse extends NpsApiResponse
 
 object LongTermBenefitNotesError {
 
-  case class HipFailureItem(`type`: String, reason: Reason)
-
-  object HipFailureItem {
-    implicit val hipFailureItemReads: Reads[HipFailureItem] = Json.reads[HipFailureItem]
-  }
-
-  case class HipFailureResponse(failures: List[HipFailureItem])
-
-  object HipFailureResponse {
-    implicit val hipFailureResponseReads: Reads[HipFailureResponse] = Json.reads[HipFailureResponse]
-  }
-
   // region Error400
 
   sealed trait LongTermBenefitNotesErrorResponse400 extends LongTermBenefitNotesResponse
 
-  case class LongTermBenefitNotesHipFailureResponse400(origin: HiporiginEnum, response: HipFailureResponse)
+  case class LongTermBenefitNotesHipFailureResponse400(origin: HipOrigin, response: HipFailureResponse)
       extends LongTermBenefitNotesErrorResponse400
 
   object LongTermBenefitNotesHipFailureResponse400 {
@@ -78,7 +67,7 @@ object LongTermBenefitNotesError {
   }
 
   case class LongTermBenefitNotesStandardErrorResponse400(
-      origin: HiporiginEnum,
+      origin: HipOrigin,
       response: LongTermBenefitNotesError400
   ) extends LongTermBenefitNotesErrorResponse400
 
@@ -144,7 +133,7 @@ object LongTermBenefitNotesError {
 
   // region Error500
 
-  case class LongTermBenefitNotesHipFailureResponse500(origin: HiporiginEnum, response: HipFailureResponse)
+  case class LongTermBenefitNotesHipFailureResponse500(origin: HipOrigin, response: HipFailureResponse)
       extends LongTermBenefitNotesResponse
 
   object LongTermBenefitNotesHipFailureResponse500 {
@@ -158,7 +147,7 @@ object LongTermBenefitNotesError {
 
   // region Error503
 
-  case class LongTermBenefitNotesHipFailureResponse503(origin: HiporiginEnum, response: HipFailureResponse)
+  case class LongTermBenefitNotesHipFailureResponse503(origin: HipOrigin, response: HipFailureResponse)
       extends LongTermBenefitNotesResponse
 
   object LongTermBenefitNotesHipFailureResponse503 {
