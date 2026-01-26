@@ -20,6 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamErrorReport,

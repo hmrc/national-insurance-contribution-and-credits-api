@@ -17,8 +17,8 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper
 
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
+import NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamErrorReport,
   DownstreamSuccessResponse

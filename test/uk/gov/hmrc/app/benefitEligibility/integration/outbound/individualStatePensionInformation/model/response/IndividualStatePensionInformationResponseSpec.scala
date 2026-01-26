@@ -24,13 +24,21 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.enums.{
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  FailureType,
+  HipFailureItem,
+  HipFailureResponse,
+  HipOrigin,
+  NpsErrorCode403,
+  NpsErrorReason403
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   ContributionCreditType,
   CreditSourceType
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.IndividualStatePensionInformation.*
 
