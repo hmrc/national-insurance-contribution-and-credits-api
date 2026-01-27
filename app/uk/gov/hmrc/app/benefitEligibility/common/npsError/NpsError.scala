@@ -127,5 +127,5 @@ case class NpsErrorResponse503(
 ) extends NpsError
 
 object NpsErrorResponse503 {
-  implicit val npsErrorResponse500Reads: Reads[NpsErrorResponse500] = Json.reads[NpsErrorResponse500]
+  implicit val npsErrorResponse503Reads: Reads[NpsErrorResponse503] = Json.reads[NpsErrorResponse503]
 }

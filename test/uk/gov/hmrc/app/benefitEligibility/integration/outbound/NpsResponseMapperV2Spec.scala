@@ -20,14 +20,11 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.common._
+import uk.gov.hmrc.app.benefitEligibility.common.npsError._
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess._
 
 import scala.util.Random
 
@@ -104,43 +101,43 @@ class NpsResponseMapperV2Spec extends AnyFreeSpec with MockFactory {
         val mockSuccessResponse = MockSuccessResponse()
 
         underTest.toApiResult(mockSuccessResponse) shouldBe
-          DownstreamSuccessResponse(randomApiName, mockSuccessResponse)
+          SuccessResult(randomApiName, mockSuccessResponse)
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 400 (HipFailureResponse)" in {
         underTest.toApiResult(hipFailureResponse) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.BadRequest)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.BadRequest, Some(hipFailureResponse)))
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 400 (StandardErrorResponse400)" in {
 
         underTest.toApiResult(standardErrorResponse400) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.BadRequest)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.BadRequest, Some(standardErrorResponse400)))
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 403" in {
         underTest.toApiResult(npsErrorResponse403) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.AccessForbidden)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.AccessForbidden, Some(npsErrorResponse403)))
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 404" in {
         underTest.toApiResult(npsErrorResponse404) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.NotFound)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.NotFound, Some(npsErrorResponse404)))
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 422" in {
         underTest.toApiResult(npsErrorResponse422) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.UnprocessableEntity)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(npsErrorResponse422)))
       }
 
       "should successfully return a DownstreamErrorReport result when when handling a 500" in {
         underTest.toApiResult(npsErrorResponse500) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.InternalServerError)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.InternalServerError, Some(npsErrorResponse500)))
       }
 
       "should successfully return a DownstreamErrorReport result when when handling a 503" in {
         underTest.toApiResult(npsErrorResponse503) shouldBe
-          DownstreamErrorReport(randomApiName, NpsNormalizedError.ServiceUnavailable)
+          FailureResult(randomApiName, ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(npsErrorResponse503)))
       }
 
     }

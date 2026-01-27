@@ -35,10 +35,7 @@ import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.IndividualStatePension
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   ContributionCreditType,
   CreditSourceType
@@ -296,7 +293,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamSuccessResponse(IndividualStatePension, individualStatePensionInformationSuccessResponse)
+            SuccessResult(IndividualStatePension, individualStatePensionInformationSuccessResponse)
           )
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
@@ -341,7 +338,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.BadRequest)
+            FailureResult(IndividualStatePension, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -386,7 +383,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.BadRequest)
+            FailureResult(IndividualStatePension, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -420,7 +417,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.AccessForbidden)
+            FailureResult(IndividualStatePension, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
@@ -445,7 +442,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.NotFound)
+            FailureResult(IndividualStatePension, NpsNormalizedError.NotFound)
           )
 
           server.verify(
@@ -494,7 +491,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.ServiceUnavailable)
+            FailureResult(IndividualStatePension, NpsNormalizedError.ServiceUnavailable)
           )
 
           server.verify(
@@ -517,7 +514,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.InternalServerError)
+            FailureResult(IndividualStatePension, NpsNormalizedError.InternalServerError)
           )
         }
       }
@@ -541,7 +538,7 @@ class IndividualStatePensionInformationConnectorItSpec
               connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(IndividualStatePension, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(IndividualStatePension, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 

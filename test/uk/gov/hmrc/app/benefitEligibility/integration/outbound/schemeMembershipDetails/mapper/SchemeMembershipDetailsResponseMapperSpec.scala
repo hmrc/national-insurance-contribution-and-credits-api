@@ -27,10 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorCode403,
   NpsErrorReason403
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
@@ -156,25 +153,25 @@ class SchemeMembershipDetailsResponseMapperSpec extends AnyFreeSpec with MockFac
       "should successfully return a Success result when given a SuccessResponse" in {
 
         underTest.toApiResult(schemeMembershipDetailsSuccessResponse) shouldBe
-          DownstreamSuccessResponse(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse)
+          SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse)
       }
 
       "should successfully return a Failure result when given an ErrorResponse400" in {
 
         underTest.toApiResult(schemeMembershipDetailsErrorResponse400) shouldBe
-          DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.BadRequest)
+          FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.BadRequest)
       }
 
       "should successfully return a Failure result when given a ErrorResponse403" in {
 
         underTest.toApiResult(schemeMembershipDetailsErrorResponse403) shouldBe
-          DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.AccessForbidden)
+          FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.AccessForbidden)
       }
 
       "should successfully return a Failure result when given a ErrorResponse422" in {
 
         underTest.toApiResult(schemeMembershipDetailsErrorResponse422) shouldBe
-          DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnprocessableEntity)
+          FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnprocessableEntity)
       }
     }
   }

@@ -45,10 +45,7 @@ import play.api.test.Helpers.{
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
@@ -263,7 +260,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
-            DownstreamSuccessResponse(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse)
+            SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse)
           )
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
@@ -301,7 +298,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.BadRequest)
+            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -335,7 +332,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.AccessForbidden)
+            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
@@ -360,7 +357,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.NotFound)
+            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.NotFound)
           )
 
           server.verify(
@@ -398,7 +395,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnprocessableEntity)
           )
 
           server.verify(
@@ -421,7 +418,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.InternalServerError)
+            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.InternalServerError)
           )
         }
       }
@@ -445,7 +442,7 @@ class SchemeMembershipDetailsConnectorItSpec
               connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 

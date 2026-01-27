@@ -35,10 +35,7 @@ import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.LongTermBenefitNotes
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.GYSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesSuccess.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -108,7 +105,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamSuccessResponse(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse)
+            SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse)
           )
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
@@ -153,7 +150,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.BadRequest)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -198,7 +195,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.BadRequest)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -232,7 +229,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.AccessForbidden)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
@@ -266,7 +263,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.NotFound)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.NotFound)
           )
 
           server.verify(
@@ -304,7 +301,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.UnprocessableEntity)
           )
 
           server.verify(
@@ -353,7 +350,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.InternalServerError)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.InternalServerError)
           )
 
           server.verify(
@@ -402,7 +399,7 @@ class LongTermBenefitNotesConnectorItSpec
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.ServiceUnavailable)
+            FailureResult(LongTermBenefitNotes, NpsNormalizedError.ServiceUnavailable)
           )
 
           server.verify(
@@ -430,7 +427,7 @@ class LongTermBenefitNotesConnectorItSpec
               connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(LongTermBenefitNotes, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 

@@ -24,7 +24,7 @@ import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.mapper.LiabilitySummaryDetailsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
@@ -111,10 +111,10 @@ class LiabilitySummaryDetailsConnector @Inject() (
                 liabilitySummaryDetailsResponseMapper.toApiResult(resp)
               }
             case NOT_FOUND =>
-              Right(DownstreamErrorReport(Liabilities, NotFound))
+              Right(FailureResult(Liabilities, NotFound))
             case INTERNAL_SERVER_ERROR =>
-              Right(DownstreamErrorReport(Liabilities, InternalServerError))
-            case code => Right(DownstreamErrorReport(Liabilities, UnexpectedStatus(code)))
+              Right(FailureResult(Liabilities, InternalServerError))
+            case code => Right(FailureResult(Liabilities, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](liabilityResult).leftMap { error =>

@@ -26,26 +26,28 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 
 trait NpsResponseMapperV2 {
 
   def apiName: ApiName
 
-  def toApiResult(response: NpsSuccessfulApiResponse): DownstreamSuccessResponse[NpsSuccessfulApiResponse] =
-    DownstreamSuccessResponse(apiName, response)
+  def toApiResult[A <: ErrorReport, B <: NpsSuccessfulApiResponse](response: B): NpsApiResult[A, B] =
+    SuccessResult(apiName, response)
 
-  def toApiResult(npsError: NpsError): DownstreamErrorReport =
-    npsError match {
-      case _: NpsErrorResponse400 => DownstreamErrorReport(apiName, BadRequest)
-      case _: NpsErrorResponse403 => DownstreamErrorReport(apiName, AccessForbidden)
-      case _: NpsErrorResponse404 => DownstreamErrorReport(apiName, NotFound)
-      case _: NpsErrorResponse422 => DownstreamErrorReport(apiName, UnprocessableEntity)
-      case _: NpsErrorResponse500 => DownstreamErrorReport(apiName, InternalServerError)
-      case _: NpsErrorResponse503 => DownstreamErrorReport(apiName, ServiceUnavailable)
-    }
+  def toApiResult[A <: ErrorReport, B <: NpsSuccessfulApiResponse](npsError: NpsError): NpsApiResult[A, B] = {
+    val errorReport =
+      npsError match {
+        case errorResponse: NpsErrorResponse400 => ErrorReport(BadRequest, Some(errorResponse))
+        case errorResponse: NpsErrorResponse403 => ErrorReport(AccessForbidden, Some(errorResponse))
+        case errorResponse: NpsErrorResponse404 => ErrorReport(NotFound, Some(errorResponse))
+        case errorResponse: NpsErrorResponse422 => ErrorReport(UnprocessableEntity, Some(errorResponse))
+        case errorResponse: NpsErrorResponse500 => ErrorReport(InternalServerError, Some(errorResponse))
+        case errorResponse: NpsErrorResponse503 => ErrorReport(ServiceUnavailable, Some(errorResponse))
+      }
+
+    FailureResult(apiName, errorReport.asInstanceOf[A])
+
+  }
 
 }

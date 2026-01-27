@@ -34,7 +34,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus.Failure
 import MaternityAllowanceSortType.NinoDescending
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   Class2MAReceipts,
@@ -86,16 +86,16 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   private val marriageDetailsResult =
-    DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+    FailureResult(MarriageDetails, NpsNormalizedError.AccessForbidden)
 
   private val class2MaReceiptsResult =
-    DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+    FailureResult(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
 
   private val liabilityResult =
-    DownstreamErrorReport(Liabilities, NpsNormalizedError.AccessForbidden)
+    FailureResult(Liabilities, NpsNormalizedError.AccessForbidden)
 
   private val contributionCreditResult = List(
-    DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
+    FailureResult(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
   )
 
   private val eligibilityCheckDataRequestMA = MAEligibilityCheckDataRequest(

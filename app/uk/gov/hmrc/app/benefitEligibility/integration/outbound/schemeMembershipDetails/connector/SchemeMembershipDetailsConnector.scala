@@ -31,7 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   SequenceNumber,
   TransferSequenceNumber
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.mapper.SchemeMembershipDetailsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.{
   SchemeMembershipDetailsErrorResponse400,
@@ -94,10 +94,10 @@ class SchemeMembershipDetailsConnector @Inject() (
                 schemeMembershipDetailsResponseMapper.toApiResult(resp)
               }
 
-            case NOT_FOUND => Right(DownstreamErrorReport(SchemeMembershipDetails, NotFound))
+            case NOT_FOUND => Right(FailureResult(SchemeMembershipDetails, NotFound))
             case INTERNAL_SERVER_ERROR =>
-              Right(DownstreamErrorReport(SchemeMembershipDetails, InternalServerError))
-            case code => Right(DownstreamErrorReport(SchemeMembershipDetails, UnexpectedStatus(code)))
+              Right(FailureResult(SchemeMembershipDetails, InternalServerError))
+            case code => Right(FailureResult(SchemeMembershipDetails, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](schemeMembershipDetailsResult).leftMap { error =>
