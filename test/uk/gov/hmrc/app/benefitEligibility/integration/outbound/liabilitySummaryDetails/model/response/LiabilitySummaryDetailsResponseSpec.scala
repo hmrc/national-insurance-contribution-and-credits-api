@@ -25,7 +25,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
-import uk.gov.hmrc.app.benefitEligibility.common.{Identifier, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.{Country, Identifier, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
   LiabilitySummaryDetailsErrorResponse403,
@@ -65,7 +65,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
             endDateStatus = Some(EnumLtpedttp.EndDateHeld),
             startDate = StartDate(LocalDate.parse("2026-01-01")),
             endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
-            country = Some(EnumCountry.GreatBritain),
+            country = Some(Country.GreatBritain),
             trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
             casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
             homeResponsibilitiesProtectionBenefitReference =
@@ -100,7 +100,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
                 endDateStatus = Some(EnumLtpedttp.EndDateHeld),
                 startDate = StartDate(LocalDate.parse("2026-01-01")),
                 endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
-                country = Some(EnumCountry.GreatBritain),
+                country = Some(Country.GreatBritain),
                 trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
                 casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
                 homeResponsibilitiesProtectionBenefitReference =

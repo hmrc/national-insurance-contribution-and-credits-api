@@ -19,7 +19,9 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
+  InternalServerError,
   NotFound,
+  ServiceUnavailable,
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
@@ -29,20 +31,21 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
   DownstreamSuccessResponse
 }
 
-trait NpsResponseMapperV2[
-    A <: NpsSuccessfulApiResponse,
-    B <: NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]
-] {
+trait NpsResponseMapperV2 {
 
   def apiName: ApiName
-  def toApiResult(response: A): DownstreamSuccessResponse[A] = DownstreamSuccessResponse(apiName, response)
+
+  def toApiResult(response: NpsSuccessfulApiResponse): DownstreamSuccessResponse[NpsSuccessfulApiResponse] =
+    DownstreamSuccessResponse(apiName, response)
 
   def toApiResult(npsError: NpsError): DownstreamErrorReport =
     npsError match {
-      case _: NpsErrorResponse400            => DownstreamErrorReport(apiName, BadRequest)
-      case NpsErrorResponse403(code, reason) => DownstreamErrorReport(apiName, AccessForbidden)
-      case NpsErrorResponse404(code, reason) => DownstreamErrorReport(apiName, NotFound)
-      case NpsErrorResponse422(_)            => DownstreamErrorReport(apiName, UnprocessableEntity)
+      case _: NpsErrorResponse400 => DownstreamErrorReport(apiName, BadRequest)
+      case _: NpsErrorResponse403 => DownstreamErrorReport(apiName, AccessForbidden)
+      case _: NpsErrorResponse404 => DownstreamErrorReport(apiName, NotFound)
+      case _: NpsErrorResponse422 => DownstreamErrorReport(apiName, UnprocessableEntity)
+      case _: NpsErrorResponse500 => DownstreamErrorReport(apiName, InternalServerError)
+      case _: NpsErrorResponse503 => DownstreamErrorReport(apiName, ServiceUnavailable)
     }
 
 }

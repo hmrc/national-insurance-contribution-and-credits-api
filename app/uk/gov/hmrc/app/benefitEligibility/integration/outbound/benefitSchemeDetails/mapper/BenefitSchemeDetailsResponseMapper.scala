@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.mapper
 
-trait NpsApiResponse
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsResponseMapperV2
+
+class BenefitSchemeDetailsResponseMapper extends NpsResponseMapperV2 {
+  val apiName: ApiName = ApiName.BenefitSchemeDetails
+}

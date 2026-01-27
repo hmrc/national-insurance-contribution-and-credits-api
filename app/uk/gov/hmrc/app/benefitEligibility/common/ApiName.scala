@@ -32,4 +32,5 @@ object ApiName extends Enum[ApiName] with PlayJsonEnum[ApiName] {
   case object SchemeMembershipDetails  extends ApiName("Scheme Membership Details")
   case object IndividualStatePension   extends ApiName("Individual State Pension Information")
   case object LongTermBenefitNotes     extends ApiName("Long Term Benefit Notes")
+  case object BenefitSchemeDetails     extends ApiName("Benefit Scheme Details")
 }

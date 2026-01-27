@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model
 
 import play.api.libs.json.{Format, Json, Reads}
-import uk.gov.hmrc.app.benefitEligibility.common.Reason
+import uk.gov.hmrc.app.benefitEligibility.common.{Country, Reason}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsSuccessfulApiResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*

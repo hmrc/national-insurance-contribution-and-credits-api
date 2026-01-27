@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummary
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
-import uk.gov.hmrc.app.benefitEligibility.common.{Identifier, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.{Country, Identifier, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -201,7 +201,7 @@ object LiabilitySummaryDetailsSuccess {
       endDateStatus: Option[EnumLtpedttp],
       startDate: StartDate,
       endDate: Option[EndDate],
-      country: Option[EnumCountry],
+      country: Option[Country],
       trainingCreditApprovalStatus: Option[EnumAtcredfg],
       casepaperReferenceNumber: Option[CasepaperReferenceNumber],
       homeResponsibilitiesProtectionBenefitReference: Option[HomeResponsibilitiesProtectionBenefitReference],
@@ -240,7 +240,7 @@ object LiabilitySummaryDetailsSuccess {
       endDateStatus: Option[EnumLtpedttp],
       startDate: StartDate,
       endDate: Option[EndDate],
-      country: Option[EnumCountry],
+      country: Option[Country],
       trainingCreditApprovalStatus: Option[EnumAtcredfg],
       casepaperReferenceNumber: Option[CasepaperReferenceNumber],
       homeResponsibilitiesProtectionBenefitReference: Option[HomeResponsibilitiesProtectionBenefitReference],

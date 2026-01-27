@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
@@ -46,6 +47,7 @@ type MarriageDetailsResult         = NpsApiResult[NpsNormalizedError, MarriageDe
 type LiabilityResult               = NpsApiResult[NpsNormalizedError, LiabilitySummaryDetailsSuccessResponse]
 type IndividualStatePensionResult  = NpsApiResult[NpsNormalizedError, IndividualStatePensionInformationSuccessResponse]
 type LongTermBenefitNotesResult    = NpsApiResult[NpsNormalizedError, LongTermBenefitNotesSuccessResponse]
+type BenefitSchemeDetailsResult    = NpsApiResult[NpsNormalizedError, BenefitSchemeDetailsSuccessResponse]
 
 sealed trait NpsApiResult[+A, +B] {
   def apiName: ApiName
