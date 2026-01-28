@@ -19,6 +19,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembership
 import enumeratum.EnumEntry.*
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  ErrorCode422,
+  NpsErrorCode400,
+  NpsErrorCode403,
+  NpsErrorReason403
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}

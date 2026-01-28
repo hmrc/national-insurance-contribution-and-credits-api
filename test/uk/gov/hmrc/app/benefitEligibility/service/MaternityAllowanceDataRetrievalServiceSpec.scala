@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, Liabilities, NiContributionAndCredits}
 import uk.gov.hmrc.app.benefitEligibility.common.MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, UnexpectedStatus}
+import NpsNormalizedError.{AccessForbidden, UnexpectedStatus}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport

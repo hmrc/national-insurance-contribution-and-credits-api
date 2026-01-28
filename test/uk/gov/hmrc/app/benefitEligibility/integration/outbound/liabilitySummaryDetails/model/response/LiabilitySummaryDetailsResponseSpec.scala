@@ -23,8 +23,9 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, NpsErrorCode400, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
+import uk.gov.hmrc.app.benefitEligibility.common.{Identifier, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
   LiabilitySummaryDetailsErrorResponse403,

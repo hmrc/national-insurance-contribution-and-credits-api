@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service.aggregation
 
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.GYSP
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeName
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.{
   MarriageEndDate,
   MarriageStartDate,
@@ -36,7 +37,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 
 import java.time.LocalDate
 
-case class Class1CreditsAnsContributionsDataGysp(
+case class Class1CreditsAndContributionsDataGysp(
     taxYear: Option[Int],
     contributionCategory: Option[ContributionCategory],
     contributionCategoryLetter: Option[ContributionCategoryLetter],
@@ -45,7 +46,7 @@ case class Class1CreditsAnsContributionsDataGysp(
     employerName: Option[EmployerName]
 )
 
-case class Class2CreditsAnsContributionsGysp(
+case class Class2CreditsAndContributionsGysp(
     taxYear: Option[Int],
     contributionCreditType: Option[ContributionCreditType],
     numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions]
@@ -78,15 +79,11 @@ case class SchemeMembershipDetailsDataGysp(
     employersContractedOutNumberDetails: String
 )
 
-case class BenefitSchemeName(
-    schemeName: String
-)
-
 case class AggregatedDataGysp(
     benefitSchemeName: Option[BenefitSchemeName],
     totalGraduatedPensionUnits: Option[BigDecimal],
-    class1CreditsAnsContributions: List[Class1CreditsAnsContributionsDataGysp],
-    class2CreditsAnsContributions: List[Class2CreditsAnsContributionsGysp],
+    class1CreditsAnsContributions: List[Class1CreditsAndContributionsDataGysp],
+    class2CreditsAnsContributions: List[Class2CreditsAndContributionsGysp],
     benefitCalcDetails: List[BenefitCalculationDetailsDataGysp],
     marriageDetails: List[MarriageDetailsGysp],
     longTermBenefitNotes: List[LongTermBenefitNote],

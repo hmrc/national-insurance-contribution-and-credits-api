@@ -17,17 +17,23 @@
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
 import play.api.libs.json.{Format, Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.ErrorCode422
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.ErrorCode422
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{
+  BenefitSchemeAddressDetails,
+  BenefitSchemeDetails,
+  BenefitSchemeDetailsSuccessResponse,
+  SchemeAddressDetails
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.model.response.LongTermBenefitNotesSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess._
 
 object TestFormat {
 
@@ -36,8 +42,6 @@ object TestFormat {
   }
 
   object Class2MAReceiptsFormats {
-
-    import CommonFormats.errorCode422
 
     implicit val class2MAReceiptsError400Writes: Writes[Class2MAReceiptsError400] =
       Json.writes[Class2MAReceiptsError400]
@@ -57,8 +61,6 @@ object TestFormat {
   }
 
   object ContributionCreditFormats {
-
-    import CommonFormats.errorCode422
 
     implicit val contributionCategoryLetterWrites: Writes[ContributionCategoryLetter] =
       Json.valueWrites[ContributionCategoryLetter]
@@ -100,8 +102,6 @@ object TestFormat {
 
   object LiabilitySummaryDetailsFormats {
 
-    import CommonFormats.errorCode422
-
     implicit val liabilitySummaryDetailsError400Writes: Writes[LiabilitySummaryDetailsError400] =
       Json.writes[LiabilitySummaryDetailsError400]
 
@@ -120,8 +120,6 @@ object TestFormat {
   }
 
   object SchemeMembership {
-
-    import CommonFormats.errorCode422
 
     implicit val schemeMembershipDetailsError400Writes: Writes[SchemeMembershipDetailsError400] =
       Json.writes[SchemeMembershipDetailsError400]
@@ -151,8 +149,6 @@ object TestFormat {
   }
 
   object LongTermBenefitNotesFormats {
-
-    import CommonFormats.errorCode422
 
     implicit val longTermBenefitNotesHipFailureResponse400Writes: Writes[LongTermBenefitNotesHipFailureResponse400] =
       Json.writes[LongTermBenefitNotesHipFailureResponse400]
@@ -211,6 +207,22 @@ object TestFormat {
     implicit val individualStatePensionInformationErrorResponse503Writes
         : Writes[IndividualStatePensionInformationErrorResponse503] =
       Json.writes[IndividualStatePensionInformationErrorResponse503]
+
+  }
+
+  object BenefitSchemeDetails {
+
+    implicit val benefitSchemeAddressDetailsWrites: Writes[BenefitSchemeAddressDetails] =
+      Json.writes[BenefitSchemeAddressDetails]
+
+    implicit val schemeAddressDetailsWrites: Writes[SchemeAddressDetails] =
+      Json.writes[SchemeAddressDetails]
+
+    implicit val benefitSchemeDetailsWrites: Writes[BenefitSchemeDetails] =
+      Json.writes[BenefitSchemeDetails]
+
+    implicit val benefitSchemeDetailsSuccessResponseWrites: Writes[BenefitSchemeDetailsSuccessResponse] =
+      Json.writes[BenefitSchemeDetailsSuccessResponse]
 
   }
 
