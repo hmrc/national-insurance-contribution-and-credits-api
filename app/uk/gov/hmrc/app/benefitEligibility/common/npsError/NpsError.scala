@@ -111,3 +111,21 @@ object NpsErrorResponse422 {
     Json.reads[NpsErrorResponse422]
 
 }
+
+case class NpsErrorResponse500(
+    origin: HipOrigin,
+    response: HipFailureResponse
+) extends NpsError
+
+object NpsErrorResponse500 {
+  implicit val npsErrorResponse500Reads: Reads[NpsErrorResponse500] = Json.reads[NpsErrorResponse500]
+}
+
+case class NpsErrorResponse503(
+    origin: HipOrigin,
+    response: HipFailureResponse
+) extends NpsError
+
+object NpsErrorResponse503 {
+  implicit val npsErrorResponse500Reads: Reads[NpsErrorResponse500] = Json.reads[NpsErrorResponse500]
+}
