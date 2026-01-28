@@ -23,10 +23,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode403.NpsErrorCode403_2
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode404.ErrorCode404
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason403.Forbidden
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason404.NotFound
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.enums.{
@@ -443,7 +440,7 @@ class BenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Matchers {
     val jsonFormat = implicitly[Format[BenefitCalculationDetailsErrorResponse403]]
 
     val benefitCalculationDetailsErrorResponse403_2 =
-      BenefitCalculationDetailsErrorResponse403(Forbidden, NpsErrorCode403_2)
+      BenefitCalculationDetailsErrorResponse403(NpsErrorReason403.Forbidden, NpsErrorCode403.NpsErrorCode403_2)
 
     val benefitCalculationDetailsErrorResponse403_2JsonString =
       """{
@@ -478,7 +475,7 @@ class BenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Matchers {
     val jsonFormat = implicitly[Format[BenefitCalculationDetailsErrorResponse404]]
 
     val benefitCalculationDetailsErrorResponse404 =
-      BenefitCalculationDetailsErrorResponse404(ErrorCode404, NotFound)
+      BenefitCalculationDetailsErrorResponse404(NpsErrorCode404.ErrorCode404, NpsErrorReason404.NotFound)
 
     val benefitCalculationDetailsErrorResponse404JsonString =
       """{

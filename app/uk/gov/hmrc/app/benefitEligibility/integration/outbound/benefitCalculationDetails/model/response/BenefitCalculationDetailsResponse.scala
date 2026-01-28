@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculati
 
 import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads}
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.enums.{
   CalculationSource,

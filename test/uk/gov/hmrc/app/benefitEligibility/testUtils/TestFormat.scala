@@ -25,7 +25,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDeta
   SchemeAddressDetails
 }
 import play.api.libs.json.{Format, Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.ErrorCode422
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsError.{
   BenefitCalculationDetailsError400,
   BenefitCalculationDetailsError422,
