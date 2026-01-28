@@ -24,6 +24,20 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDeta
   BenefitSchemeDetailsSuccessResponse,
   SchemeAddressDetails
 }
+import play.api.libs.json.{Format, Json, Writes}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsError.{
+  BenefitCalculationDetailsError400,
+  BenefitCalculationDetailsError422,
+  BenefitCalculationDetailsErrorItem400,
+  BenefitCalculationDetailsErrorResponse403,
+  BenefitCalculationDetailsErrorResponse404,
+  BenefitCalculationDetailsErrorResponse422,
+  BenefitCalculationDetailsHipFailureResponse400,
+  BenefitCalculationDetailsHipFailureResponse500,
+  BenefitCalculationDetailsHipFailureResponse503,
+  BenefitCalculationDetailsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.*
@@ -223,6 +237,44 @@ object TestFormat {
 
     implicit val benefitSchemeDetailsSuccessResponseWrites: Writes[BenefitSchemeDetailsSuccessResponse] =
       Json.writes[BenefitSchemeDetailsSuccessResponse]
+
+  }
+
+  object BenefitCalculationDetailsFormats {
+
+    implicit val benefitCalculationDetailsHipFailureResponse400Writes
+        : Writes[BenefitCalculationDetailsHipFailureResponse400] =
+      Json.writes[BenefitCalculationDetailsHipFailureResponse400]
+
+    implicit val benefitCalculationDetailsHipFailureResponse500Writes
+        : Writes[BenefitCalculationDetailsHipFailureResponse500] =
+      Json.writes[BenefitCalculationDetailsHipFailureResponse500]
+
+    implicit val benefitCalculationDetailsHipFailureResponse503Writes
+        : Writes[BenefitCalculationDetailsHipFailureResponse503] =
+      Json.writes[BenefitCalculationDetailsHipFailureResponse503]
+
+    implicit val benefitCalculationDetailsErrorItem400Write: Writes[BenefitCalculationDetailsErrorItem400] =
+      Json.writes[BenefitCalculationDetailsErrorItem400]
+
+    implicit val benefitCalculationDetailsError400Writes: Writes[BenefitCalculationDetailsError400] =
+      Json.writes[BenefitCalculationDetailsError400]
+
+    implicit val benefitCalculationDetailsStandardErrorResponse400Writes
+        : Writes[BenefitCalculationDetailsStandardErrorResponse400] =
+      Json.writes[BenefitCalculationDetailsStandardErrorResponse400]
+
+    implicit val benefitCalculationDetailsErrorResponse403Writes: Writes[BenefitCalculationDetailsErrorResponse403] =
+      Json.writes[BenefitCalculationDetailsErrorResponse403]
+
+    implicit val benefitCalculationDetailsErrorResponse404Writes: Writes[BenefitCalculationDetailsErrorResponse404] =
+      Json.writes[BenefitCalculationDetailsErrorResponse404]
+
+    implicit val benefitCalculationDetailsError422Writes: Writes[BenefitCalculationDetailsError422] =
+      Json.writes[BenefitCalculationDetailsError422]
+
+    implicit val benefitCalculationDetailsErrorResponse422Writes: Writes[BenefitCalculationDetailsErrorResponse422] =
+      Json.writes[BenefitCalculationDetailsErrorResponse422]
 
   }
 
