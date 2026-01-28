@@ -28,7 +28,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,41 +45,33 @@ class MaternityAllowanceDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: MAEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] = {
-
-    val taxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
-      eligibilityCheckDataRequest.startTaxYear,
-      eligibilityCheckDataRequest.endTaxYear
-    )
-
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] =
     (
       class2MAReceiptsConnector.fetchClass2MAReceipts(
-        eligibilityCheckDataRequest.`type`,
-        eligibilityCheckDataRequest.identifier,
-        eligibilityCheckDataRequest.archived,
-        eligibilityCheckDataRequest.receiptDate,
-        eligibilityCheckDataRequest.sortBy
+        eligibilityCheckDataRequest.benefitType,
+        eligibilityCheckDataRequest.nationalInsuranceNumber,
+        eligibilityCheckDataRequest.class2MaReceipts.archived,
+        eligibilityCheckDataRequest.class2MaReceipts.receiptDate,
+        eligibilityCheckDataRequest.class2MaReceipts.sortBy
       ),
-      taxWindows.map { window =>
-        niContributionsAndCreditsConnector.fetchContributionsAndCredits(
-          eligibilityCheckDataRequest.`type`,
-          NiContributionsAndCreditsRequest(
-            eligibilityCheckDataRequest.identifier,
-            eligibilityCheckDataRequest.dateOfBirth,
-            window.startTaxYear,
-            window.endTaxYear
-          )
+      niContributionsAndCreditsConnector.fetchContributionsAndCredits(
+        eligibilityCheckDataRequest.benefitType,
+        NiContributionsAndCreditsRequest(
+          eligibilityCheckDataRequest.nationalInsuranceNumber,
+          eligibilityCheckDataRequest.contributionsAndCredits.dateOfBirth,
+          eligibilityCheckDataRequest.contributionsAndCredits.startTaxYear,
+          eligibilityCheckDataRequest.contributionsAndCredits.endTaxYear
         )
-      }.sequence,
+      ),
       liabilitySummaryDetailsConnector.fetchLiabilitySummaryDetails(
-        eligibilityCheckDataRequest.`type`,
-        eligibilityCheckDataRequest.identifier,
-        eligibilityCheckDataRequest.liabilitySearchCategoryHyphenated,
-        eligibilityCheckDataRequest.liabilityOccurrenceNumber,
-        eligibilityCheckDataRequest.liabilityType,
-        eligibilityCheckDataRequest.earliestLiabilityStartDate,
-        eligibilityCheckDataRequest.liabilityStart,
-        eligibilityCheckDataRequest.liabilityEnd
+        eligibilityCheckDataRequest.benefitType,
+        eligibilityCheckDataRequest.nationalInsuranceNumber,
+        eligibilityCheckDataRequest.liabilities.liabilitySearchCategoryHyphenated,
+        eligibilityCheckDataRequest.liabilities.liabilityOccurrenceNumber,
+        eligibilityCheckDataRequest.liabilities.liabilityType,
+        eligibilityCheckDataRequest.liabilities.earliestLiabilityStartDate,
+        eligibilityCheckDataRequest.liabilities.liabilityStart,
+        eligibilityCheckDataRequest.liabilities.liabilityEnd
       )
     ).parTupled.map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
       EligibilityCheckDataResultMA(
@@ -88,36 +80,6 @@ class MaternityAllowanceDataRetrievalService @Inject() (
         contributionsAndCreditResult
       )
     }
-
-//    for {
-//      class2MaReceiptsResult <- class2MAReceiptsConnector.fetchClass2MAReceipts(
-//        eligibilityCheckDataRequest.`type`,
-//        eligibilityCheckDataRequest.identifier,
-//        eligibilityCheckDataRequest.archived,
-//        eligibilityCheckDataRequest.receiptDate,
-//        eligibilityCheckDataRequest.sortBy
-//      )
-//
-//      contributionsAndCreditResult <- taxWindows.map { window =>
-//        niContributionsAndCreditsConnector.fetchContributionsAndCredits(
-//          eligibilityCheckDataRequest.`type`,
-//          NiContributionsAndCreditsRequest(
-//            eligibilityCheckDataRequest.identifier,
-//            eligibilityCheckDataRequest.dateOfBirth,
-//            window.startTaxYear,
-//            window.endTaxYear
-//          )
-//        )
-//      }.sequence
-//
-//      liabilityResult = DownstreamErrorReport(Liabilities, UnexpectedStatus(207))
-//
-//    } yield EligibilityCheckDataResultMA(
-//      class2MaReceiptsResult,
-//      liabilityResult,
-//      contributionsAndCreditResult
-//    )
-  }
 
 }
 

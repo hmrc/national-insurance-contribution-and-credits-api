@@ -19,19 +19,39 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.instances.future.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.JSAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
+  ESAEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.{
+  EligibilityCheckDataResultESA,
+  EligibilityCheckDataResultJSA
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class JobSeekersAllowanceDataRetrievalService(implicit ec: ExecutionContext) {
+class JobSeekersAllowanceDataRetrievalService(niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector)(
+    implicit ec: ExecutionContext
+) {
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: JSAEligibilityCheckDataRequest
-  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultJSA] =
-    EitherT.pure[Future, BenefitEligibilityError](
-      EligibilityCheckDataResultJSA()
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultJSA] =
+
+    niContributionsAndCreditsConnector
+      .fetchContributionsAndCredits(
+        eligibilityCheckDataRequest.benefitType,
+        NiContributionsAndCreditsRequest(
+          eligibilityCheckDataRequest.nationalInsuranceNumber,
+          eligibilityCheckDataRequest.contributionsAndCredits.dateOfBirth,
+          eligibilityCheckDataRequest.contributionsAndCredits.startTaxYear,
+          eligibilityCheckDataRequest.contributionsAndCredits.endTaxYear
+        )
+      )
+      .map(EligibilityCheckDataResultJSA(_))
 
 }

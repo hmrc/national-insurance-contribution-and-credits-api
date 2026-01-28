@@ -22,25 +22,43 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.SchemeMembershipDetails
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse400,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse
+}
 import uk.gov.hmrc.app.benefitEligibility.common.{
+  ApiName,
   BenefitEligibilityError,
   BenefitType,
   Identifier,
-  OccurrenceNumber,
+  SchemeMembershipDetailsOccurrenceNumber,
   SequenceNumber,
   TransferSequenceNumber
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.mapper.SchemeMembershipDetailsResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError.{
   SchemeMembershipDetailsErrorResponse400,
   SchemeMembershipDetailsErrorResponse403,
   SchemeMembershipDetailsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsResponseValidation.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsClient, SchemeMembershipDetailsResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsResponseValidation.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
+  NpsClient,
+  NpsResponseHandler,
+  SchemeMembershipDetailsResult
+}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -50,9 +68,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SchemeMembershipDetailsConnector @Inject() (
     npsClient: NpsClient,
-    schemeMembershipDetailsResponseMapper: SchemeMembershipDetailsResponseMapper,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.SchemeMembershipDetails
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -61,7 +81,7 @@ class SchemeMembershipDetailsConnector @Inject() (
       nationalInsuranceNumber: Identifier,
       sequenceNumber: Option[SequenceNumber],
       transferSequenceNumber: Option[TransferSequenceNumber],
-      occurrenceNumber: Option[OccurrenceNumber]
+      occurrenceNumber: Option[SchemeMembershipDetailsOccurrenceNumber]
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] = {
 
     val path =
@@ -74,30 +94,41 @@ class SchemeMembershipDetailsConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[SchemeMembershipDetailsSuccessResponse](benefitType, response).map(
-                schemeMembershipDetailsResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[SchemeMembershipDetailsErrorResponse400](response).map { resp =>
-                logger.warn(s"SchemeMembershipDetails returned a 400: ${resp.failures.mkString(",")}")
-                schemeMembershipDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsErrorResponse400](response).map { resp =>
+                logger.warn(s"SchemeMembershipDetails returned a 400: $resp")
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[SchemeMembershipDetailsErrorResponse403](response).map { resp =>
-                logger.warn(
-                  s"SchemeMembershipDetails returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
-                )
-                schemeMembershipDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
+                logger.warn(s"SchemeMembershipDetails returned a 403: $resp")
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[SchemeMembershipDetailsErrorResponse422](response).map { resp =>
-                logger.warn(s"SchemeMembershipDetails returned a 422: ${resp.failures.mkString(",")}")
-                schemeMembershipDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
+                logger.warn(s"SchemeMembershipDetails returned a 422: $resp")
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
 
-            case NOT_FOUND => Right(FailureResult(SchemeMembershipDetails, NotFound))
+            case NOT_FOUND =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
+                logger.warn(s"SchemeMembershipDetails returned a 404: $resp")
+                toFailureResult(NotFound, Some(resp))
+              }
             case INTERNAL_SERVER_ERROR =>
-              Right(FailureResult(SchemeMembershipDetails, InternalServerError))
-            case code => Right(FailureResult(SchemeMembershipDetails, UnexpectedStatus(code)))
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"SchemeMembershipDetails returned a 500: $resp")
+                toFailureResult(InternalServerError, Some(resp))
+              }
+
+            case SERVICE_UNAVAILABLE =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"SchemeMembershipDetails returned a 503: $resp")
+                toFailureResult(ServiceUnavailable, Some(resp))
+              }
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](schemeMembershipDetailsResult).leftMap { error =>
@@ -117,7 +148,7 @@ class SchemeMembershipDetailsConnector @Inject() (
       nationalInsuranceNumber: Identifier,
       sequenceNumber: Option[SequenceNumber],
       transferSequenceNumber: Option[TransferSequenceNumber],
-      occurrenceNumber: Option[OccurrenceNumber]
+      occurrenceNumber: Option[SchemeMembershipDetailsOccurrenceNumber]
   ) = {
     def sequenceNumberFilter: Option[String]         = sequenceNumber.map(sn => s"seqNo=${sn.value}&")
     def transferSequenceNumberFilter: Option[String] = transferSequenceNumber.map(tsn => s"transferSeqNo=${tsn.value}&")

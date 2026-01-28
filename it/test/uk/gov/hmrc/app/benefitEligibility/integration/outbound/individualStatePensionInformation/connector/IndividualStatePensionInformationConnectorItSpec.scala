@@ -29,18 +29,23 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.*
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.IndividualStatePension
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponseHipOrigin,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   ContributionCreditType,
   CreditSourceType
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -337,8 +342,14 @@ class IndividualStatePensionInformationConnectorItSpec
           val result =
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
+          val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
+          val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(IndividualStatePension, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.IndividualStatePension,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -382,8 +393,14 @@ class IndividualStatePensionInformationConnectorItSpec
           val result =
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(IndividualStatePension, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.IndividualStatePension,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -416,8 +433,14 @@ class IndividualStatePensionInformationConnectorItSpec
           val result =
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(IndividualStatePension, NpsNormalizedError.AccessForbidden)
+            FailureResult(
+              ApiName.IndividualStatePension,
+              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+            )
           )
 
           server.verify(
@@ -442,7 +465,10 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            FailureResult(IndividualStatePension, NpsNormalizedError.NotFound)
+            FailureResult(
+              ApiName.IndividualStatePension,
+              ErrorReport(NpsNormalizedError.NotFound, None)
+            )
           )
 
           server.verify(
@@ -490,8 +516,14 @@ class IndividualStatePensionInformationConnectorItSpec
           val result =
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(IndividualStatePension, NpsNormalizedError.ServiceUnavailable)
+            FailureResult(
+              ApiName.IndividualStatePension,
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+            )
           )
 
           server.verify(
@@ -514,7 +546,10 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe Right(
-            FailureResult(IndividualStatePension, NpsNormalizedError.InternalServerError)
+            FailureResult(
+              ApiName.IndividualStatePension,
+              ErrorReport(NpsNormalizedError.InternalServerError, None)
+            )
           )
         }
       }
@@ -538,7 +573,10 @@ class IndividualStatePensionInformationConnectorItSpec
               connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
             result shouldBe Right(
-              FailureResult(IndividualStatePension, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(
+                ApiName.IndividualStatePension,
+                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+              )
             )
           }
 

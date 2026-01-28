@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.app.benefitEligibility.common.npsError
 
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Format, Json, Reads}
 
 final case class NpsErrorCode(value: String) extends AnyVal
 
 object NpsErrorCode {
-  implicit val reads: Reads[NpsErrorCode] = Json.valueReads[NpsErrorCode]
+  implicit val reads: Format[NpsErrorCode] = Json.valueFormat[NpsErrorCode]
 }

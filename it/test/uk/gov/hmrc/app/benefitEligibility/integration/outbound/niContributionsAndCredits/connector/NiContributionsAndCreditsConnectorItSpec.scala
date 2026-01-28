@@ -29,7 +29,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.{
   BAD_REQUEST,
   FORBIDDEN,
@@ -45,11 +45,24 @@ import play.api.test.Helpers.{
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{GYSP, MA}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.{
+  Class1ContributionStatus,
+  Class2Or3CreditStatus,
+  ContributionCategory,
+  ContributionCreditType,
+  CreditSource,
+  LatePaymentPeriod
+}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -99,10 +112,12 @@ class NiContributionsAndCreditsConnectorItSpec
       "when the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
           val successResponse = NiContributionsAndCreditsSuccessResponse(
+            Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
             Some(
               List(
-                NiClass1(
+                Class1ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
                   contributionCategory = Some(ContributionCategory.None),
                   contributionCreditType = Some(ContributionCreditType.C1),
@@ -117,9 +132,9 @@ class NiContributionsAndCreditsConnectorItSpec
             ),
             Some(
               List(
-                NiClass2(
+                Class2ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
-                  noOfCreditsAndConts = Some(NumberOfCreditsAndContributions(53)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCreditType = Some(ContributionCreditType.C1),
                   class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
                   class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
@@ -133,9 +148,11 @@ class NiContributionsAndCreditsConnectorItSpec
 
           val successResponseJson =
             """{
-              |  "niClass1": [
+              |  "totalGraduatedPensionUnits": 100,
+              |  "class1ContributionAndCredits": [
               |    {
               |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
               |      "contributionCategoryLetter": "U",
               |      "contributionCategory": "(NONE)",
               |      "contributionCreditType": "C1",
@@ -147,10 +164,10 @@ class NiContributionsAndCreditsConnectorItSpec
               |      "latePaymentPeriod": "L"
               |    }
               |  ],
-              |  "niClass2": [
+              |  "class2ContributionAndCredits": [
               |    {
               |      "taxYear": 2022,
-              |      "noOfCreditsAndConts": 53,
+              |      "numberOfContributionsAndCredits": 53,
               |      "contributionCreditType": "C1",
               |      "class2Or3EarningsFactor": 99999999999999.98,
               |      "class2NIContributionAmount": 99999999999999.98,
@@ -183,17 +200,24 @@ class NiContributionsAndCreditsConnectorItSpec
         }
       }
 
-      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (400)" - {
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (400 - StandardErrorResponse400)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
             """{
-              |"failures":[
-              | {
-              |   "reason":"Some reason",
-              |   "code":"400.2"
-              | }
-              |]
+              |  "origin": "HIP",
+              |  "response": {
+              |    "failures": [
+              |      {
+              |        "reason": "reason_1",
+              |        "code": "400.1"
+              |      },
+              |      {
+              |        "reason": "reason_2",
+              |        "code": "400.2"
+              |      }
+              |    ]
+              |  }
               |}""".stripMargin
 
           val responseBody = Json.parse(errorResponse).toString()
@@ -208,10 +232,17 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result =
+            connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+
+          val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
+          val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
-            FailureResult(NiContributionAndCredits, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -220,7 +251,58 @@ class NiContributionsAndCreditsConnectorItSpec
         }
       }
 
-      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (403)" - {
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (400 - HipFailureResponse400) " - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo(testPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_REQUEST)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(testPath))
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns FORBIDDEN (403)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -243,8 +325,14 @@ class NiContributionsAndCreditsConnectorItSpec
 
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+            )
           )
 
           server.verify(
@@ -253,7 +341,7 @@ class NiContributionsAndCreditsConnectorItSpec
         }
       }
 
-      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (404)" - {
+      "when the NiContributionsAndCredits endpoint returns NOT_FOUND (404)" - {
         "should parse error response and map to result" in {
 
           server.stubFor(
@@ -268,7 +356,10 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            FailureResult(NiContributionAndCredits, NpsNormalizedError.NotFound)
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.NotFound, None)
+            )
           )
 
           server.verify(
@@ -277,7 +368,7 @@ class NiContributionsAndCreditsConnectorItSpec
         }
       }
 
-      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (422)" - {
+      "when the NiContributionsAndCredits endpoint returns UNPROCESSABLE_ENTITY (422)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -304,8 +395,14 @@ class NiContributionsAndCreditsConnectorItSpec
 
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
+          val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
+          val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+            )
           )
 
           server.verify(
@@ -327,7 +424,10 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            FailureResult(NiContributionAndCredits, NpsNormalizedError.InternalServerError)
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.InternalServerError, None)
+            )
           )
         }
       }
@@ -336,7 +436,7 @@ class NiContributionsAndCreditsConnectorItSpec
         "should map to InternalServerError result" in {
 
           val statusCodes: TableFor1[Int] =
-            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED, SERVICE_UNAVAILABLE)
+            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED)
 
           forAll(statusCodes) { statusCode =>
             server.stubFor(
@@ -350,7 +450,10 @@ class NiContributionsAndCreditsConnectorItSpec
             val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
             result shouldBe Right(
-              FailureResult(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+              )
             )
           }
 

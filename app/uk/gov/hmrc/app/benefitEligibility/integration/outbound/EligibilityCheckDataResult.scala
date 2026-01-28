@@ -16,94 +16,67 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.NotFound
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, OverallResultStatus, OverallResultSummary}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.AggregatedData
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.ResultAggregator
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.aggregators.{
-  AggregationServiceBsp,
-  AggregationServiceGysp,
-  AggregationServiceMa
-}
 
 sealed trait EligibilityCheckDataResult {
   def benefitType: BenefitType
   def allResults: List[ApiResult]
-
-  def overallResultStatus: OverallResultStatus =
-    if (allResults.forall(_.isSuccess)) OverallResultStatus.Success
-    else if (allResults.forall(_.isFailure)) OverallResultStatus.Failure
-    else OverallResultStatus.Partial
-
-  def resultSummary: OverallResultSummary = OverallResultSummary(
-    totalCalls = allResults.size,
-    successful = allResults.count(_.isSuccess),
-    failed = allResults.count(_.isFailure)
-  )
-
 }
 
 object EligibilityCheckDataResult {
 
-  implicit val aggregator: ResultAggregator[EligibilityCheckDataResult, AggregatedData] = {
-    case result: EligibilityCheckDataResultMA => AggregationServiceMa.aggregator.aggregate(result)
-    case _: EligibilityCheckDataResultESA =>
-      AggregationServiceMa.aggregator.aggregate(
-        EligibilityCheckDataResultMA(
-          FailureResult(Class2MAReceipts, NotFound),
-          FailureResult(Class2MAReceipts, NotFound),
-          List()
-        )
-      )
-    case _: EligibilityCheckDataResultJSA =>
-      AggregationServiceMa.aggregator.aggregate(
-        EligibilityCheckDataResultMA(
-          FailureResult(Class2MAReceipts, NotFound),
-          FailureResult(Class2MAReceipts, NotFound),
-          List()
-        )
-      )
-    case result: EligibilityCheckDataResultGYSP => AggregationServiceGysp.aggregator.aggregate(result)
-    case result: EligibilityCheckDataResultBSP  => AggregationServiceBsp.aggregator.aggregate(result)
-  }
-
   case class EligibilityCheckDataResultMA(
       class2MaReceiptsResult: Class2MaReceiptsResult,
       liabilityResult: LiabilityResult,
-      contributionCreditResult: List[ContributionCreditResult]
+      contributionCreditResult: ContributionCreditResult
   ) extends EligibilityCheckDataResult {
     val benefitType: BenefitType = BenefitType.MA
 
     val allResults: List[ApiResult] =
-      List(class2MaReceiptsResult, liabilityResult) ++ contributionCreditResult
+      List(contributionCreditResult, class2MaReceiptsResult, liabilityResult)
 
   }
 
-  case class EligibilityCheckDataResultESA() extends EligibilityCheckDataResult {
+  case class EligibilityCheckDataResultESA(contributionCreditResult: ContributionCreditResult)
+      extends EligibilityCheckDataResult {
     val benefitType: BenefitType             = BenefitType.ESA
-    override def allResults: List[ApiResult] = ???
+    override def allResults: List[ApiResult] = List(contributionCreditResult)
   }
 
-  case class EligibilityCheckDataResultJSA() extends EligibilityCheckDataResult {
+  case class EligibilityCheckDataResultJSA(contributionCreditResult: ContributionCreditResult)
+      extends EligibilityCheckDataResult {
     val benefitType: BenefitType             = BenefitType.JSA
-    override def allResults: List[ApiResult] = ???
+    override def allResults: List[ApiResult] = List(contributionCreditResult)
   }
 
   case class EligibilityCheckDataResultGYSP(
-      marriageDetailsResult: MarriageDetailsResult
+      contributionCreditResult: List[ContributionCreditResult],
+      schemeMembershipDetails: SchemeMembershipDetailsResult,
+      benefitSchemeDetails: List[BenefitSchemeDetailsResult],
+      marriageDetailsResult: MarriageDetailsResult,
+      longTermBenefitNotes: LongTermBenefitNotesResult,
+      statePensionData: IndividualStatePensionResult
   ) extends EligibilityCheckDataResult {
-    val benefitType: BenefitType             = BenefitType.GYSP
-    override def allResults: List[ApiResult] = List(marriageDetailsResult)
+    val benefitType: BenefitType = BenefitType.GYSP
+
+    override def allResults: List[ApiResult] = contributionCreditResult ++ benefitSchemeDetails ++ List(
+      marriageDetailsResult,
+      longTermBenefitNotes,
+      schemeMembershipDetails,
+      statePensionData
+    )
+
   }
 
   case class EligibilityCheckDataResultBSP(
+      contributionCreditResult: ContributionCreditResult,
       marriageDetailsResult: MarriageDetailsResult
   ) extends EligibilityCheckDataResult {
-    val benefitType: BenefitType             = BenefitType.BSP
-    override def allResults: List[ApiResult] = List(marriageDetailsResult)
+    val benefitType: BenefitType = BenefitType.BSP
+
+    override def allResults: List[ApiResult] = List(marriageDetailsResult, contributionCreditResult)
+
   }
 
 }

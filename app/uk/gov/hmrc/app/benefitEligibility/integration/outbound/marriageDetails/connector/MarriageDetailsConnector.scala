@@ -19,18 +19,31 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 import cats.data.EitherT
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper.MarriageDetailsResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.{
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, BenefitEligibilityError, BenefitType}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse400,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsError.{
   MarriageDetailsErrorResponse400,
   MarriageDetailsErrorResponse403,
   MarriageDetailsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsResponseValidation.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{MarriageDetailsResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsResponseValidation.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{MarriageDetailsResult, NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,9 +52,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class MarriageDetailsConnector @Inject() (
-    npsClient: NpsClient,
-    marriageDetailsResponseMapper: MarriageDetailsResponseMapper
-)(implicit ec: ExecutionContext) {
+    npsClient: NpsClient
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.MarriageDetails
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -56,29 +71,41 @@ class MarriageDetailsConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[MarriageDetailsSuccessResponse](benefitType, response).map(
-                marriageDetailsResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[MarriageDetailsErrorResponse400](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 400: ${resp.failures.mkString(",")}")
-                marriageDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsErrorResponse400](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 400: $resp")
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[MarriageDetailsErrorResponse403](response).map { resp =>
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"MarriageDetails returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"MarriageDetails returned a 403: $resp"
                 )
-                marriageDetailsResponseMapper.toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[MarriageDetailsErrorResponse422](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 422: ${resp.failures.mkString(",")}")
-                marriageDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 422: $resp")
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
-            case NOT_FOUND => Right(FailureResult(MarriageDetails, NotFound))
+            case NOT_FOUND =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 404: $resp")
+                toFailureResult(NotFound, Some(resp))
+              }
             case INTERNAL_SERVER_ERROR =>
-              Right(FailureResult(MarriageDetails, InternalServerError))
-            case code => Right(FailureResult(MarriageDetails, UnexpectedStatus(code)))
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 500: $resp")
+                toFailureResult(InternalServerError, Some(resp))
+              }
+            case SERVICE_UNAVAILABLE =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"MarriageDetails returned a 503: $resp")
+                toFailureResult(ServiceUnavailable, Some(resp))
+              }
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](marriageDetailsResult).leftMap { error =>
