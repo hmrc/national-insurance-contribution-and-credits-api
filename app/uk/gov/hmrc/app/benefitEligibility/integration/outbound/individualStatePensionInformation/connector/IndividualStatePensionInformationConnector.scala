@@ -24,7 +24,7 @@ import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.IndividualStatePension
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.mapper.IndividualStatePensionInformationResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.{
@@ -86,10 +86,10 @@ class IndividualStatePensionInformationConnector @Inject() (
                 individualStatePensionInformationResponseMapper.toApiResult(resp)
               }
             case NOT_FOUND =>
-              Right(DownstreamErrorReport(IndividualStatePension, NotFound))
+              Right(FailureResult(IndividualStatePension, NotFound))
             case INTERNAL_SERVER_ERROR =>
-              Right(DownstreamErrorReport(IndividualStatePension, InternalServerError))
-            case code => Right(DownstreamErrorReport(IndividualStatePension, UnexpectedStatus(code)))
+              Right(FailureResult(IndividualStatePension, InternalServerError))
+            case code => Right(FailureResult(IndividualStatePension, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](individualStatePensionResult).leftMap { error =>

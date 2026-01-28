@@ -28,10 +28,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorCode403,
   NpsErrorReason403
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
@@ -108,25 +105,25 @@ class NiContributionsAndCreditsResponseMapperSpec extends AnyFreeSpec with MockF
       "should successfully return a Success result when given a SuccessResponse" in {
 
         underTest.toApiResult(niContributionsAndCreditsSuccessResponse1) shouldBe
-          DownstreamSuccessResponse(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse1)
+          SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse1)
       }
 
       "should successfully return a Failure result when given an ErrorResponse400" in {
 
         underTest.toApiResult(niContributionsAndCreditsResponse400) shouldBe
-          DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.BadRequest)
+          FailureResult(NiContributionAndCredits, NpsNormalizedError.BadRequest)
       }
 
       "should successfully return a Failure result when given a ErrorResponse403" in {
 
         underTest.toApiResult(niContributionsAndCreditsResponse403) shouldBe
-          DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
+          FailureResult(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
       }
 
       "should successfully return a Failure result when given a ErrorResponse422" in {
 
         underTest.toApiResult(niContributionsAndCreditsResponse422) shouldBe
-          DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
+          FailureResult(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
       }
     }
   }

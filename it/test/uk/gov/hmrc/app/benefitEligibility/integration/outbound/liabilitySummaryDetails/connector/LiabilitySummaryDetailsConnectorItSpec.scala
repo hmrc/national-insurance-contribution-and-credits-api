@@ -35,10 +35,7 @@ import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.{
   Callback,
   LiabilitySummaryDetailsSuccessResponse,
@@ -133,7 +130,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               .value
               .futureValue
 
-          result shouldBe Right(DownstreamSuccessResponse(Liabilities, successResponse))
+          result shouldBe Right(SuccessResult(Liabilities, successResponse))
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
           )
@@ -182,7 +179,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Liabilities, NpsNormalizedError.BadRequest)
+            FailureResult(Liabilities, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -228,7 +225,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Liabilities, NpsNormalizedError.AccessForbidden)
+            FailureResult(Liabilities, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
@@ -265,7 +262,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Liabilities, NpsNormalizedError.NotFound)
+            FailureResult(Liabilities, NpsNormalizedError.NotFound)
           )
 
           server.verify(
@@ -315,7 +312,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Liabilities, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(Liabilities, NpsNormalizedError.UnprocessableEntity)
           )
 
           server.verify(
@@ -350,7 +347,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Liabilities, NpsNormalizedError.InternalServerError)
+            FailureResult(Liabilities, NpsNormalizedError.InternalServerError)
           )
         }
       }
@@ -386,7 +383,7 @@ class LiabilitySummaryDetailsConnectorItSpec
                 .futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(Liabilities, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(Liabilities, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 

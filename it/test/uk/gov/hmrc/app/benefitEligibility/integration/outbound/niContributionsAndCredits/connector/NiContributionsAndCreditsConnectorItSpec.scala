@@ -46,10 +46,7 @@ import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
@@ -178,7 +175,7 @@ class NiContributionsAndCreditsConnectorItSpec
 
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
-          result shouldBe Right(DownstreamSuccessResponse(NiContributionAndCredits, successResponse))
+          result shouldBe Right(SuccessResult(NiContributionAndCredits, successResponse))
           server.verify(
             postRequestedFor(urlEqualTo(testPath))
           )
@@ -214,7 +211,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.BadRequest)
+            FailureResult(NiContributionAndCredits, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -247,7 +244,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
+            FailureResult(NiContributionAndCredits, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
@@ -271,7 +268,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.NotFound)
+            FailureResult(NiContributionAndCredits, NpsNormalizedError.NotFound)
           )
 
           server.verify(
@@ -308,7 +305,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(NiContributionAndCredits, NpsNormalizedError.UnprocessableEntity)
           )
 
           server.verify(
@@ -330,7 +327,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.InternalServerError)
+            FailureResult(NiContributionAndCredits, NpsNormalizedError.InternalServerError)
           )
         }
       }
@@ -353,7 +350,7 @@ class NiContributionsAndCreditsConnectorItSpec
             val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 

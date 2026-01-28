@@ -24,7 +24,7 @@ import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.LongTermBenefitNotes
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.mapper.LongTermBenefitNotesResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesResponseValidation.longTermBenefitNotesResponseValidator
@@ -102,7 +102,7 @@ class LongTermBenefitNotesConnector @Inject() (
                 logger.warn(s"LongTermBenefitNotes returned a 503: $resp")
                 longTermBenefitNotesResponseMapper.toApiResult(resp)
               }
-            case code => Right(DownstreamErrorReport(LongTermBenefitNotes, UnexpectedStatus(code)))
+            case code => Right(FailureResult(LongTermBenefitNotes, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](longTermBenefitNotesResult).leftMap { error =>

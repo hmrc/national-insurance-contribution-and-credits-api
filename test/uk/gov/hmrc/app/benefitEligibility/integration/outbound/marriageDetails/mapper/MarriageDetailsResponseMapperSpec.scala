@@ -21,10 +21,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.{
   MarriageDetailsErrorResponse400,
@@ -58,25 +55,25 @@ class MarriageDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
       "should successfully return a Success result when given a SuccessResponse" in {
 
         underTest.toApiResult(mockMarriageDetailsSuccessResponse) shouldBe
-          DownstreamSuccessResponse(ApiName.MarriageDetails, mockMarriageDetailsSuccessResponse)
+          SuccessResult(ApiName.MarriageDetails, mockMarriageDetailsSuccessResponse)
       }
 
       "should successfully return a Failure result when given an ErrorResponse400" in {
 
         underTest.toApiResult(mockMarriageDetailsErrorResponse400) shouldBe
-          DownstreamErrorReport(MarriageDetails, NpsNormalizedError.BadRequest)
+          FailureResult(MarriageDetails, NpsNormalizedError.BadRequest)
       }
 
       "should successfully return a Failure result when given a ErrorResponse403" in {
 
         underTest.toApiResult(mockMarriageDetailsErrorResponse403) shouldBe
-          DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+          FailureResult(MarriageDetails, NpsNormalizedError.AccessForbidden)
       }
 
       "should successfully return a Failure result when given a ErrorResponse422" in {
 
         underTest.toApiResult(mockMarriageDetailsErrorResponse422) shouldBe
-          DownstreamErrorReport(MarriageDetails, NpsNormalizedError.UnprocessableEntity)
+          FailureResult(MarriageDetails, NpsNormalizedError.UnprocessableEntity)
       }
     }
   }

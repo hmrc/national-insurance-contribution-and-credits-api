@@ -20,16 +20,13 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common._
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums._
 
 class BenefitSchemeDetailsResponseMapperSpec extends AnyFreeSpec with MockFactory {
 
@@ -146,38 +143,56 @@ class BenefitSchemeDetailsResponseMapperSpec extends AnyFreeSpec with MockFactor
     ".toApiResult" - {
       "should successfully return a Success result when given a SuccessResponse" in {
         underTest.toApiResult(benefitSchemeDetailsSuccessResponse) shouldBe
-          DownstreamSuccessResponse(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse)
+          SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse)
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 400 (HipFailureResponse)" in {
         underTest.toApiResult(hipFailureResponse) shouldBe
-          DownstreamErrorReport(ApiName.BenefitSchemeDetails, NpsNormalizedError.BadRequest)
+          FailureResult(
+            ApiName.BenefitSchemeDetails,
+            ErrorReport(NpsNormalizedError.BadRequest, Some(hipFailureResponse))
+          )
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 400 (StandardErrorResponse400)" in {
 
         underTest.toApiResult(standardErrorResponse400) shouldBe
-          DownstreamErrorReport(ApiName.BenefitSchemeDetails, NpsNormalizedError.BadRequest)
+          FailureResult(
+            ApiName.BenefitSchemeDetails,
+            ErrorReport(NpsNormalizedError.BadRequest, Some(standardErrorResponse400))
+          )
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 403" in {
         underTest.toApiResult(npsErrorResponse403) shouldBe
-          DownstreamErrorReport(ApiName.BenefitSchemeDetails, NpsNormalizedError.AccessForbidden)
+          FailureResult(
+            ApiName.BenefitSchemeDetails,
+            ErrorReport(NpsNormalizedError.AccessForbidden, Some(npsErrorResponse403))
+          )
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 422" in {
         underTest.toApiResult(npsErrorResponse422) shouldBe
-          DownstreamErrorReport(ApiName.BenefitSchemeDetails, NpsNormalizedError.UnprocessableEntity)
+          FailureResult(
+            ApiName.BenefitSchemeDetails,
+            ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(npsErrorResponse422))
+          )
       }
 
       "should successfully return a DownstreamErrorReport result when when handling a 500" in {
         underTest.toApiResult(npsErrorResponse500) shouldBe
-          DownstreamErrorReport(ApiName.BenefitSchemeDetails, NpsNormalizedError.InternalServerError)
+          FailureResult(
+            ApiName.BenefitSchemeDetails,
+            ErrorReport(NpsNormalizedError.InternalServerError, Some(npsErrorResponse500))
+          )
       }
 
       "should successfully return a DownstreamErrorReport result when when handling a 503" in {
         underTest.toApiResult(npsErrorResponse503) shouldBe
-          DownstreamErrorReport(ApiName.BenefitSchemeDetails, NpsNormalizedError.ServiceUnavailable)
+          FailureResult(
+            ApiName.BenefitSchemeDetails,
+            ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(npsErrorResponse503))
+          )
       }
 
     }

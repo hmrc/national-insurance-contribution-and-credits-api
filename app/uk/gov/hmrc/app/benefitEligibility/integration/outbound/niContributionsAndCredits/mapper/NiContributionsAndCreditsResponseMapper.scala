@@ -21,10 +21,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredit
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.{
   NiContributionsAndCreditsError,
@@ -39,13 +36,13 @@ class NiContributionsAndCreditsResponseMapper
   ): ContributionCreditResult =
     response match {
       case NiContributionsAndCreditsError.NiContributionsAndCreditsResponse400(failures) =>
-        DownstreamErrorReport(NiContributionAndCredits, BadRequest)
+        FailureResult(NiContributionAndCredits, BadRequest)
       case NiContributionsAndCreditsError.NiContributionsAndCreditsResponse403(reason, code) =>
-        DownstreamErrorReport(NiContributionAndCredits, AccessForbidden)
+        FailureResult(NiContributionAndCredits, AccessForbidden)
       case NiContributionsAndCreditsError.NiContributionsAndCreditsResponse422(failures) =>
-        DownstreamErrorReport(NiContributionAndCredits, UnprocessableEntity)
+        FailureResult(NiContributionAndCredits, UnprocessableEntity)
       case response: NiContributionsAndCreditsSuccessResponse =>
-        DownstreamSuccessResponse(NiContributionAndCredits, response)
+        SuccessResult(NiContributionAndCredits, response)
     }
 
 }

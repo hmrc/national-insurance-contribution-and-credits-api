@@ -30,10 +30,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorCode403,
   NpsErrorReason403
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   ContributionCreditType,
   CreditSourceType
@@ -183,28 +180,28 @@ class IndividualStatePensionInformationResponseMapperSpec extends AnyFreeSpec wi
     ".toApiResult" - {
       "should successfully return a Success result when given a SuccessResponse" in {
         underTest.toApiResult(individualStatePensionInformationSuccessResponse) shouldBe
-          DownstreamSuccessResponse(ApiName.IndividualStatePension, individualStatePensionInformationSuccessResponse)
+          SuccessResult(ApiName.IndividualStatePension, individualStatePensionInformationSuccessResponse)
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 400 (HipFailureResponse400)" in {
         underTest.toApiResult(hipFailureResponse400) shouldBe
-          DownstreamErrorReport(ApiName.IndividualStatePension, NpsNormalizedError.BadRequest)
+          FailureResult(ApiName.IndividualStatePension, NpsNormalizedError.BadRequest)
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 400 (StandardErrorResponse400)" in {
 
         underTest.toApiResult(standardErrorResponse400) shouldBe
-          DownstreamErrorReport(ApiName.IndividualStatePension, NpsNormalizedError.BadRequest)
+          FailureResult(ApiName.IndividualStatePension, NpsNormalizedError.BadRequest)
       }
 
       "should successfully return a DownstreamErrorReport result when handling a 403" in {
         underTest.toApiResult(individualStatePensionInformationErrorResponse403) shouldBe
-          DownstreamErrorReport(ApiName.IndividualStatePension, NpsNormalizedError.AccessForbidden)
+          FailureResult(ApiName.IndividualStatePension, NpsNormalizedError.AccessForbidden)
       }
 
       "should successfully return a DownstreamErrorReport result when when handling a 503" in {
         underTest.toApiResult(individualStatePensionInformationErrorResponse503) shouldBe
-          DownstreamErrorReport(ApiName.IndividualStatePension, NpsNormalizedError.ServiceUnavailable)
+          FailureResult(ApiName.IndividualStatePension, NpsNormalizedError.ServiceUnavailable)
       }
     }
   }

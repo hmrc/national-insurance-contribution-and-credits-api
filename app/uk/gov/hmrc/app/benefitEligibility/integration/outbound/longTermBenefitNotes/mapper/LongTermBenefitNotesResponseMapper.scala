@@ -18,10 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitN
 
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.LongTermBenefitNotes
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{LongTermBenefitNotesResult, NpsResponseMapper}
 
@@ -31,19 +28,19 @@ class LongTermBenefitNotesResponseMapper
   def toApiResult(response: LongTermBenefitNotesResponse): LongTermBenefitNotesResult =
     response match {
       case _: LongTermBenefitNotesError.LongTermBenefitNotesErrorResponse400 =>
-        DownstreamErrorReport(LongTermBenefitNotes, BadRequest)
+        FailureResult(LongTermBenefitNotes, BadRequest)
       case _: LongTermBenefitNotesError.LongTermBenefitNotesErrorResponse403 =>
-        DownstreamErrorReport(LongTermBenefitNotes, AccessForbidden)
+        FailureResult(LongTermBenefitNotes, AccessForbidden)
       case _: LongTermBenefitNotesError.LongTermBenefitNotesErrorResponse404 =>
-        DownstreamErrorReport(LongTermBenefitNotes, NotFound)
+        FailureResult(LongTermBenefitNotes, NotFound)
       case _: LongTermBenefitNotesError.LongTermBenefitNotesErrorResponse422 =>
-        DownstreamErrorReport(LongTermBenefitNotes, UnprocessableEntity)
+        FailureResult(LongTermBenefitNotes, UnprocessableEntity)
       case _: LongTermBenefitNotesError.LongTermBenefitNotesHipFailureResponse500 =>
-        DownstreamErrorReport(LongTermBenefitNotes, InternalServerError)
+        FailureResult(LongTermBenefitNotes, InternalServerError)
       case _: LongTermBenefitNotesError.LongTermBenefitNotesHipFailureResponse503 =>
-        DownstreamErrorReport(LongTermBenefitNotes, ServiceUnavailable)
+        FailureResult(LongTermBenefitNotes, ServiceUnavailable)
       case response: LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse =>
-        DownstreamSuccessResponse(LongTermBenefitNotes, response)
+        SuccessResult(LongTermBenefitNotes, response)
     }
 
 }

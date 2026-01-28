@@ -24,7 +24,7 @@ import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.mapper.Class2MAReceiptsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
   Class2MAReceiptsErrorResponse400,
@@ -95,10 +95,10 @@ class Class2MAReceiptsConnector @Inject() (
                 class2MAReceiptsResponseMapper.toApiResult(resp)
               }
             case NOT_FOUND =>
-              Right(DownstreamErrorReport(Class2MAReceipts, NotFound))
+              Right(FailureResult(Class2MAReceipts, NotFound))
             case INTERNAL_SERVER_ERROR =>
-              Right(DownstreamErrorReport(Class2MAReceipts, InternalServerError))
-            case code => Right(DownstreamErrorReport(Class2MAReceipts, UnexpectedStatus(code)))
+              Right(FailureResult(Class2MAReceipts, InternalServerError))
+            case code => Right(FailureResult(Class2MAReceipts, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](class2MAReceiptsResult).leftMap { error =>

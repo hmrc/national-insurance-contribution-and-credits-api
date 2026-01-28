@@ -21,10 +21,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.SchemeMembershipDetails
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.{
   SchemeMembershipDetailsError,
@@ -39,13 +36,13 @@ class SchemeMembershipDetailsResponseMapper
   ): SchemeMembershipDetailsResult =
     response match {
       case SchemeMembershipDetailsError.SchemeMembershipDetailsErrorResponse400(failures) =>
-        DownstreamErrorReport(SchemeMembershipDetails, BadRequest)
+        FailureResult(SchemeMembershipDetails, BadRequest)
       case SchemeMembershipDetailsError.SchemeMembershipDetailsErrorResponse403(reason, code) =>
-        DownstreamErrorReport(SchemeMembershipDetails, AccessForbidden)
+        FailureResult(SchemeMembershipDetails, AccessForbidden)
       case SchemeMembershipDetailsError.SchemeMembershipDetailsErrorResponse422(failures) =>
-        DownstreamErrorReport(SchemeMembershipDetails, UnprocessableEntity)
+        FailureResult(SchemeMembershipDetails, UnprocessableEntity)
       case response: SchemeMembershipDetailsSuccessResponse =>
-        DownstreamSuccessResponse(SchemeMembershipDetails, response)
+        SuccessResult(SchemeMembershipDetails, response)
     }
 
 }

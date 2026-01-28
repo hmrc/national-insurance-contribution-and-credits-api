@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response
 
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.LiabilitySummaryDetailsFormats.*
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.LiabilitySummaryDetailsFormats._
 import cats.data.Validated.Valid
 import cats.data.{NonEmptyList, Validated}
 import com.networknt.schema.SpecVersion
@@ -31,8 +31,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
   LiabilitySummaryDetailsErrorResponse403,
   LiabilitySummaryDetailsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums._
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 
 import java.time.LocalDate

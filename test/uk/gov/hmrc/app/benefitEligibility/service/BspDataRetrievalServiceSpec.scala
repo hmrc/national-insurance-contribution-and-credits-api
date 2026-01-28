@@ -25,7 +25,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType, Identifier, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.BSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.config.AppConfig
@@ -74,7 +74,7 @@ class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
   )
 
   private val marriageDetailsResult =
-    DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+    FailureResult(MarriageDetails, NpsNormalizedError.AccessForbidden)
 
   "BspDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -85,7 +85,7 @@ class BspDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
           .expects(BenefitType.BSP, "some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+              FailureResult(MarriageDetails, NpsNormalizedError.AccessForbidden)
             )
           )
 
