@@ -20,6 +20,7 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsError
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
@@ -50,6 +51,7 @@ type LiabilityResult               = NpsApiResult[NpsNormalizedError, LiabilityS
 type IndividualStatePensionResult  = NpsApiResult[NpsNormalizedError, IndividualStatePensionInformationSuccessResponse]
 type LongTermBenefitNotesResult    = NpsApiResult[NpsNormalizedError, LongTermBenefitNotesSuccessResponse]
 type BenefitSchemeDetailsResult    = NpsApiResult[ErrorReport, BenefitSchemeDetailsSuccessResponse]
+type BenefitCalculationDetailsResult = NpsApiResult[ErrorReport, BenefitCalculationDetailsSuccessResponse]
 
 //TODO - change type constraints to NpsApiResult[+A <: ErrorReport, +B <: NpsSuccessfulApiResponse] after we move all connectors to extend NpsResponseMapperV2
 sealed trait NpsApiResult[+A, +B] {
