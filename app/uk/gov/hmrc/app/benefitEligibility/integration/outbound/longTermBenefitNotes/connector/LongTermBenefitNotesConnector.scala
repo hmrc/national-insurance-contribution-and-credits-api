@@ -23,13 +23,25 @@ import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.LongTermBenefitNotes
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.mapper.LongTermBenefitNotesResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesResponseValidation.longTermBenefitNotesResponseValidator
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{LongTermBenefitNotesResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesResponseValidation.longTermBenefitNotesResponseValidator
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
+  LongTermBenefitNotesResult,
+  NpsClient,
+  NpsResponseHandler
+}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -39,9 +51,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LongTermBenefitNotesConnector @Inject() (
     npsClient: NpsClient,
-    longTermBenefitNotesResponseMapper: LongTermBenefitNotesResponseMapper,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.LongTermBenefitNotes
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -64,45 +78,45 @@ class LongTermBenefitNotesConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[LongTermBenefitNotesSuccessResponse](benefitType, response).map(
-                longTermBenefitNotesResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[LongTermBenefitNotesErrorResponse400](response).map { resp =>
+              attemptParse[NpsErrorResponse400](response).map { resp =>
                 logger.warn(s"LongTermBenefitNotes returned a 400: $resp")
-                longTermBenefitNotesResponseMapper.toApiResult(resp)
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[LongTermBenefitNotesErrorResponse403](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"LongTermBenefitNotes returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"LongTermBenefitNotes returned a 403: $resp"
                 )
-                longTermBenefitNotesResponseMapper.toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case NOT_FOUND =>
-              attemptParse[LongTermBenefitNotesErrorResponse404](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"LongTermBenefitNotes returned a 404: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"LongTermBenefitNotes returned a 404: $resp"
                 )
-                longTermBenefitNotesResponseMapper.toApiResult(resp)
+                toFailureResult(NotFound, Some(resp))
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[LongTermBenefitNotesErrorResponse422](response).map { resp =>
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
                 logger.warn(
                   s"LongTermBenefitNotes returned a 422: $resp"
                 )
-                longTermBenefitNotesResponseMapper.toApiResult(resp)
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
             case INTERNAL_SERVER_ERROR =>
-              attemptParse[LongTermBenefitNotesHipFailureResponse500](response).map { resp =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
                 logger.warn(s"LongTermBenefitNotes returned a 500: $resp")
-                longTermBenefitNotesResponseMapper.toApiResult(resp)
+                toFailureResult(InternalServerError, Some(resp))
               }
             case SERVICE_UNAVAILABLE =>
-              attemptParse[LongTermBenefitNotesHipFailureResponse503](response).map { resp =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
                 logger.warn(s"LongTermBenefitNotes returned a 503: $resp")
-                longTermBenefitNotesResponseMapper.toApiResult(resp)
+                toFailureResult(ServiceUnavailable, Some(resp))
               }
-            case code => Right(FailureResult(LongTermBenefitNotes, UnexpectedStatus(code)))
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](longTermBenefitNotesResult).leftMap { error =>

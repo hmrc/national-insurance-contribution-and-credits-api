@@ -348,8 +348,8 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                     = implicitly[Reads[NpsErrorResponse403]]
-          val response: NpsErrorResponse403 = jsonReads.reads(Json.parse(errorResponse)).get
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
             FailureResult(
@@ -389,8 +389,8 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                     = implicitly[Reads[NpsErrorResponse404]]
-          val response: NpsErrorResponse404 = jsonReads.reads(Json.parse(errorResponse)).get
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
             FailureResult(
@@ -434,8 +434,8 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                     = implicitly[Reads[NpsErrorResponse422]]
-          val response: NpsErrorResponse422 = jsonReads.reads(Json.parse(errorResponse)).get
+          val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
+          val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
             FailureResult(
@@ -492,8 +492,8 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                     = implicitly[Reads[NpsErrorResponse503]]
-          val response: NpsErrorResponse503 = jsonReads.reads(Json.parse(errorResponse)).get
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
             FailureResult(
@@ -547,8 +547,8 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                     = implicitly[Reads[NpsErrorResponse500]]
-          val response: NpsErrorResponse500 = jsonReads.reads(Json.parse(errorResponse)).get
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
             FailureResult(

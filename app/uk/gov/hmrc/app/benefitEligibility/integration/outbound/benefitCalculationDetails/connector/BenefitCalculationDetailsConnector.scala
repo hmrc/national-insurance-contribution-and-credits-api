@@ -23,13 +23,12 @@ import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.BenefitCalculationDetails
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnexpectedStatus
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsResponseValidation.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsResponseValidation.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -41,7 +40,7 @@ class BenefitCalculationDetailsConnector @Inject() (
     npsClient: NpsClient,
     appConfig: AppConfig
 )(implicit ec: ExecutionContext)
-    extends NpsResponseMapperV2 {
+    extends NpsResponseHandler {
 
   val apiName: ApiName = ApiName.BenefitCalculationDetails
 
@@ -76,42 +75,42 @@ class BenefitCalculationDetailsConnector @Inject() (
         val benefitCalculationDetailsResult =
           response.status match {
             case OK =>
-              attemptStrictParse[BenefitCalculationDetailsSuccessResponse](benefitType, response).map(toApiResult)
+              attemptStrictParse[BenefitCalculationDetailsSuccessResponse](benefitType, response).map(toSuccessResult)
             case BAD_REQUEST =>
               attemptParse[NpsErrorResponse400](response).map { resp =>
                 logger.warn(s"Benefit Calculation Details returned a 400: $resp")
-                toApiResult(resp)
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[NpsErrorResponse403](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"Benefit Calculation Details returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"Benefit Calculation Details returned a 403: code: $resp"
                 )
-                toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case NOT_FOUND =>
-              attemptParse[NpsErrorResponse404](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(s"Benefit Calculation Details returned a 404: $resp")
-                toApiResult(resp)
+                toFailureResult(NotFound, Some(resp))
               }
 
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[NpsErrorResponse422](response).map { resp =>
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
                 logger.warn(s"Benefit Calculation Details returned a 422: $resp")
-                toApiResult(resp)
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
 
             case SERVICE_UNAVAILABLE =>
-              attemptParse[NpsErrorResponse503](response).map { resp =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
                 logger.warn(s"Benefit Calculation Details returned a 503: $resp")
-                toApiResult(resp)
+                toFailureResult(ServiceUnavailable, Some(resp))
               }
             case INTERNAL_SERVER_ERROR =>
-              attemptParse[NpsErrorResponse500](response).map { resp =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
                 logger.warn(s"Benefit Calculation Details returned a 500: $resp")
-                toApiResult(resp)
+                toFailureResult(InternalServerError, Some(resp))
               }
-            case code => Right(FailureResult(BenefitCalculationDetails, ErrorReport(UnexpectedStatus(code), None)))
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](benefitCalculationDetailsResult).leftMap { error =>

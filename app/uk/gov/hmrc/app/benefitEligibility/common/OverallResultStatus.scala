@@ -17,6 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ApiResult
 
 import scala.collection.immutable
 
@@ -27,5 +28,10 @@ object OverallResultStatus extends Enum[OverallResultStatus] with PlayJsonEnum[O
   case object Success extends OverallResultStatus("SUCCESS")
   case object Failure extends OverallResultStatus("FAILURE")
   case object Partial extends OverallResultStatus("PARTIAL FAILURE")
+
+  def fromApiResults(allResults: List[ApiResult]): OverallResultStatus =
+    if (allResults.forall(_.isSuccess)) OverallResultStatus.Success
+    else if (allResults.forall(_.isFailure)) OverallResultStatus.Failure
+    else OverallResultStatus.Partial
 
 }

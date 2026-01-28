@@ -29,7 +29,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.{
   BAD_REQUEST,
   FORBIDDEN,
@@ -44,10 +44,16 @@ import play.api.test.Helpers.{
 }
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{GYSP, MA}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -269,17 +275,24 @@ class SchemeMembershipDetailsConnectorItSpec
         }
       }
 
-      "when the SchemeMembershipDetails endpoint returns BAD_REQUEST (400)" - {
+      "when the LongTermBenefitNotes endpoint returns BAD_REQUEST (400 - StandardErrorResponse400)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
             """{
-              |"failures":[
-              | {
-              |   "reason":"Some reason",
-              |   "code":"400.2"
-              | }
-              |]
+              |  "origin": "HIP",
+              |  "response": {
+              |    "failures": [
+              |      {
+              |        "reason": "reason_1",
+              |        "code": "400.1"
+              |      },
+              |      {
+              |        "reason": "reason_2",
+              |        "code": "400.2"
+              |      }
+              |    ]
+              |  }
               |}""".stripMargin
 
           val responseBody = Json.parse(errorResponse).toString()
@@ -297,8 +310,14 @@ class SchemeMembershipDetailsConnectorItSpec
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
+          val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
+          val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -307,7 +326,58 @@ class SchemeMembershipDetailsConnectorItSpec
         }
       }
 
-      "when the SchemeMembershipDetails endpoint returns BAD_REQUEST (403)" - {
+      "when the SchemeMembershipDetails endpoint returns BAD_REQUEST (400 - HipFailureResponse400) " - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            get(urlEqualTo(testPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_REQUEST)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
+
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
+          )
+
+          server.verify(
+            getRequestedFor(urlEqualTo(testPath))
+          )
+        }
+      }
+
+      "when the SchemeMembershipDetails endpoint returns FORBIDDEN (403)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -331,8 +401,14 @@ class SchemeMembershipDetailsConnectorItSpec
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.AccessForbidden)
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+            )
           )
 
           server.verify(
@@ -341,8 +417,14 @@ class SchemeMembershipDetailsConnectorItSpec
         }
       }
 
-      "when the SchemeMembershipDetails endpoint returns BAD_REQUEST (404)" - {
+      "when the SchemeMembershipDetails endpoint returns NOT_FOUND (404)" - {
         "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |   "reason":"Forbidden",
+              |   "code":"403.2"
+              |}""".stripMargin
 
           server.stubFor(
             get(urlEqualTo(testPath))
@@ -350,14 +432,21 @@ class SchemeMembershipDetailsConnectorItSpec
                 aResponse()
                   .withStatus(NOT_FOUND)
                   .withHeader("Content-Type", "application/json")
+                  .withBody(errorResponse)
               )
           )
 
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.NotFound)
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+            )
           )
 
           server.verify(
@@ -366,7 +455,7 @@ class SchemeMembershipDetailsConnectorItSpec
         }
       }
 
-      "when the SchemeMembershipDetails endpoint returns BAD_REQUEST (422)" - {
+      "when the SchemeMembershipDetails endpoint returns UNPROCESSABLE_ENTITY (422)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -394,8 +483,14 @@ class SchemeMembershipDetailsConnectorItSpec
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
+          val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
+          val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+            )
           )
 
           server.verify(
@@ -406,19 +501,95 @@ class SchemeMembershipDetailsConnectorItSpec
 
       "when the SchemeMembershipDetails endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
         "should map to InternalServerError result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
           server.stubFor(
             get(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(INTERNAL_SERVER_ERROR)
+                  .withBody(errorResponse)
               )
           )
 
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.InternalServerError)
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+            )
+          )
+        }
+      }
+
+      "when the SchemeMembershipDetails endpoint returns SERVICE_UNAVAILABLE (503)" - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            get(urlEqualTo(testPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
+
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            FailureResult(
+              ApiName.SchemeMembershipDetails,
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+            )
+          )
+
+          server.verify(
+            getRequestedFor(urlEqualTo(testPath))
           )
         }
       }
@@ -427,7 +598,7 @@ class SchemeMembershipDetailsConnectorItSpec
         "should map to InternalServerError result" in {
 
           val statusCodes: TableFor1[Int] =
-            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED, SERVICE_UNAVAILABLE)
+            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED)
 
           forAll(statusCodes) { statusCode =>
             server.stubFor(
@@ -442,7 +613,10 @@ class SchemeMembershipDetailsConnectorItSpec
               connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C"), None, None, None).value.futureValue
 
             result shouldBe Right(
-              FailureResult(ApiName.SchemeMembershipDetails, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(
+                ApiName.SchemeMembershipDetails,
+                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+              )
             )
           }
 
@@ -497,7 +671,7 @@ class SchemeMembershipDetailsConnectorItSpec
           Identifier("AB123456C"),
           Some(SequenceNumber(1)),
           Some(TransferSequenceNumber(2)),
-          Some(OccurrenceNumber(2))
+          Some(SchemeMembershipDetailsOccurrenceNumber(2))
         ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?seqNo=1&transferSeqNo=2&occurrenceNo=2"""
       }
 
@@ -527,7 +701,7 @@ class SchemeMembershipDetailsConnectorItSpec
           Identifier("AB123456C"),
           None,
           None,
-          Some(OccurrenceNumber(2))
+          Some(SchemeMembershipDetailsOccurrenceNumber(2))
         ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?occurrenceNo=2"""
       }
 
@@ -547,7 +721,7 @@ class SchemeMembershipDetailsConnectorItSpec
           Identifier("AB123456C"),
           Some(SequenceNumber(1)),
           None,
-          Some(OccurrenceNumber(2))
+          Some(SchemeMembershipDetailsOccurrenceNumber(2))
         ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?seqNo=1&occurrenceNo=2"""
       }
 
@@ -557,7 +731,7 @@ class SchemeMembershipDetailsConnectorItSpec
           Identifier("AB123456C"),
           None,
           Some(TransferSequenceNumber(2)),
-          Some(OccurrenceNumber(2))
+          Some(SchemeMembershipDetailsOccurrenceNumber(2))
         ) shouldBe """http://localhost:6000/benefit-scheme/AB123456C/scheme-membership-details?transferSeqNo=2&occurrenceNo=2"""
       }
     }

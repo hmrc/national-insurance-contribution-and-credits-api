@@ -25,7 +25,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDeta
   SchemeAddressDetails
 }
 import play.api.libs.json.{Format, Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsError.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsError.{
   BenefitCalculationDetailsError400,
   BenefitCalculationDetailsError422,
   BenefitCalculationDetailsErrorItem400,
@@ -37,17 +37,17 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculatio
   BenefitCalculationDetailsHipFailureResponse503,
   BenefitCalculationDetailsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError
+import IndividualStatePensionInformationError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
 
 object TestFormat {
 
@@ -88,11 +88,11 @@ object TestFormat {
     implicit val primaryPaidEarningsWrites: Writes[PrimaryPaidEarnings] =
       Json.valueWrites[PrimaryPaidEarnings]
 
-    implicit val nicClass1Format: Format[NiClass1] =
-      Json.format[NiClass1]
+    implicit val nicClass1Format: Format[Class1ContributionAndCredits] =
+      Json.format[Class1ContributionAndCredits]
 
-    implicit val nicClass2Format: Format[NiClass2] =
-      Json.format[NiClass2]
+    implicit val nicClass2Format: Format[Class2ContributionAndCredits] =
+      Json.format[Class2ContributionAndCredits]
 
     implicit val niContributionsAndCreditsSuccessResponseFormat: Format[NiContributionsAndCreditsSuccessResponse] =
       Json.format[NiContributionsAndCreditsSuccessResponse]

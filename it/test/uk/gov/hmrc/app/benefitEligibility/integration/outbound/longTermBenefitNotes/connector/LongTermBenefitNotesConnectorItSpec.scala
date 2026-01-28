@@ -29,14 +29,20 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.*
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.LongTermBenefitNotes
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.GYSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -149,8 +155,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
+          val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -194,8 +206,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -228,8 +246,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.AccessForbidden)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+            )
           )
 
           server.verify(
@@ -262,8 +286,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.NotFound)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+            )
           )
 
           server.verify(
@@ -300,8 +330,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
+          val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+            )
           )
 
           server.verify(
@@ -349,8 +385,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.InternalServerError)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+            )
           )
 
           server.verify(
@@ -398,8 +440,14 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(LongTermBenefitNotes, NpsNormalizedError.ServiceUnavailable)
+            FailureResult(
+              ApiName.LongTermBenefitNotes,
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+            )
           )
 
           server.verify(
@@ -427,7 +475,10 @@ class LongTermBenefitNotesConnectorItSpec
               connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
             result shouldBe Right(
-              FailureResult(LongTermBenefitNotes, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(
+                ApiName.LongTermBenefitNotes,
+                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+              )
             )
           }
 

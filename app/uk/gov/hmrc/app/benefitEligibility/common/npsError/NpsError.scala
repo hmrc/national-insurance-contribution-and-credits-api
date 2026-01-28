@@ -17,12 +17,24 @@
 package uk.gov.hmrc.app.benefitEligibility.common.npsError
 
 import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads}
-import uk.gov.hmrc.app.benefitEligibility.common.Reason
+import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponse
 
 sealed trait NpsError extends NpsApiResponse
 
 sealed trait NpsErrorResponse400 extends NpsError
+
+case class NpsSingleErrorResponse(reason: NpsErrorReason, code: NpsErrorCode) extends NpsError
+
+object NpsSingleErrorResponse {
+  implicit val npsErrorResponseV1Reads: Reads[NpsSingleErrorResponse] = Json.reads[NpsSingleErrorResponse]
+}
+
+case class NpsMultiErrorResponse(failures: List[NpsSingleErrorResponse]) extends NpsError
+
+object NpsMultiErrorResponse {
+  implicit val npsErrorResponseV2Reads: Reads[NpsMultiErrorResponse] = Json.reads[NpsMultiErrorResponse]
+}
 
 case class NpsErrorResponseHipOrigin(
     origin: HipOrigin,
@@ -36,22 +48,7 @@ object NpsErrorResponseHipOrigin {
 
 }
 
-case class ErrorResourceObj400(
-    reason: Reason,
-    code: NpsErrorCode400
-)
-
-object ErrorResourceObj400 {
-  implicit val errorResourceObj400Reads: Reads[ErrorResourceObj400] = Json.reads[ErrorResourceObj400]
-}
-
-case class ErrorResponse400(failures: List[ErrorResourceObj400])
-
-object ErrorResponse400 {
-  implicit val errorResponse400Reads: Reads[ErrorResponse400] = Json.reads[ErrorResponse400]
-}
-
-case class NpsStandardErrorResponse400(origin: HipOrigin, response: ErrorResponse400) extends NpsErrorResponse400
+case class NpsStandardErrorResponse400(origin: HipOrigin, response: NpsMultiErrorResponse) extends NpsErrorResponse400
 
 object NpsStandardErrorResponse400 {
 
@@ -76,56 +73,16 @@ object NpsErrorResponse400 {
 
 }
 
-case class NpsErrorResponse403(
-    code: NpsErrorCode403,
-    reason: NpsErrorReason403
+case class NpsErrorResponse422Special(
+    failures: Option[List[NpsSingleErrorResponse]],
+    askUser: Option[Boolean],
+    fixRequired: Option[Boolean],
+    workItemRaised: Option[Boolean]
 ) extends NpsError
 
-object NpsErrorResponse403 {
+object NpsErrorResponse422Special {
 
-  implicit val npsErrorResponse4033Reads: Format[NpsErrorResponse403] =
-    Json.format[NpsErrorResponse403]
+  implicit val npsErrorResponse422SpecialReads: Reads[NpsErrorResponse422Special] =
+    Json.reads[NpsErrorResponse422Special]
 
-}
-
-case class NpsErrorResponse404(code: NpsErrorCode, reason: Reason) extends NpsError
-
-object NpsErrorResponse404 {
-  implicit val npsErrorResponse404Reads: Reads[NpsErrorResponse404] = Json.reads[NpsErrorResponse404]
-}
-
-case class NpsError422(code: NpsErrorCode, reason: Reason)
-
-object NpsError422 {
-
-  implicit val NpsError422Reads: Reads[NpsError422] =
-    Json.reads[NpsError422]
-
-}
-
-case class NpsErrorResponse422(failures: List[NpsError422]) extends NpsError
-
-object NpsErrorResponse422 {
-
-  implicit val NpsErrorResponse422Reads: Reads[NpsErrorResponse422] =
-    Json.reads[NpsErrorResponse422]
-
-}
-
-case class NpsErrorResponse500(
-    origin: HipOrigin,
-    response: HipFailureResponse
-) extends NpsError
-
-object NpsErrorResponse500 {
-  implicit val npsErrorResponse500Reads: Reads[NpsErrorResponse500] = Json.reads[NpsErrorResponse500]
-}
-
-case class NpsErrorResponse503(
-    origin: HipOrigin,
-    response: HipFailureResponse
-) extends NpsError
-
-object NpsErrorResponse503 {
-  implicit val npsErrorResponse503Reads: Reads[NpsErrorResponse503] = Json.reads[NpsErrorResponse503]
 }

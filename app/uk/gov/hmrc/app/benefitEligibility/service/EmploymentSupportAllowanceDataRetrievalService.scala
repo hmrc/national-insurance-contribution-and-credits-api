@@ -20,18 +20,32 @@ import cats.data.EitherT
 import cats.instances.future.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.ESAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultESA
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmploymentSupportAllowanceDataRetrievalService(implicit ec: ExecutionContext) {
+class EmploymentSupportAllowanceDataRetrievalService(
+    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector
+)(implicit ec: ExecutionContext) {
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: ESAEligibilityCheckDataRequest
-  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultESA] =
-    EitherT.pure[Future, BenefitEligibilityError](
-      EligibilityCheckDataResultESA()
-    )
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultESA] =
+
+    niContributionsAndCreditsConnector
+      .fetchContributionsAndCredits(
+        eligibilityCheckDataRequest.benefitType,
+        NiContributionsAndCreditsRequest(
+          eligibilityCheckDataRequest.nationalInsuranceNumber,
+          eligibilityCheckDataRequest.contributionsAndCredits.dateOfBirth,
+          eligibilityCheckDataRequest.contributionsAndCredits.startTaxYear,
+          eligibilityCheckDataRequest.contributionsAndCredits.endTaxYear
+        )
+      )
+      .map(EligibilityCheckDataResultESA(_))
 
 }

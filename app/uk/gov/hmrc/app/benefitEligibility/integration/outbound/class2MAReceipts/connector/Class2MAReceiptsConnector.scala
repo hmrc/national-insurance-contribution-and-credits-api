@@ -22,19 +22,32 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.mapper.Class2MAReceiptsResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsError.{
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse400,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsError.{
   Class2MAReceiptsErrorResponse400,
   Class2MAReceiptsErrorResponse403,
   Class2MAReceiptsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{Class2MaReceiptsResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{Class2MaReceiptsResult, NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -44,9 +57,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class Class2MAReceiptsConnector @Inject() (
     npsClient: NpsClient,
-    class2MAReceiptsResponseMapper: Class2MAReceiptsResponseMapper,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.Class2MAReceipts
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -75,30 +90,35 @@ class Class2MAReceiptsConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[Class2MAReceiptsSuccessResponse](benefitType, response).map(
-                class2MAReceiptsResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[Class2MAReceiptsErrorResponse400](response).map { resp =>
-                logger.warn(s"Class2MAReceipts returned a 400: ${resp.failures.mkString(",")}")
-                class2MAReceiptsResponseMapper.toApiResult(resp)
+              attemptParse[NpsErrorResponse400](response).map { resp =>
+                logger.warn(s"Class2MAReceipts returned a 400: $resp")
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[Class2MAReceiptsErrorResponse403](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"Class2MAReceipts returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"Class2MAReceipts returned a 403: $resp"
                 )
-                class2MAReceiptsResponseMapper.toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[Class2MAReceiptsErrorResponse422](response).map { resp =>
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
                 logger.warn(s"Class2MAReceipts returned a 422: ${resp.failures.mkString(",")}")
-                class2MAReceiptsResponseMapper.toApiResult(resp)
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
             case NOT_FOUND =>
-              Right(FailureResult(Class2MAReceipts, NotFound))
+              Right(toFailureResult(NotFound, None))
             case INTERNAL_SERVER_ERROR =>
-              Right(FailureResult(Class2MAReceipts, InternalServerError))
-            case code => Right(FailureResult(Class2MAReceipts, UnexpectedStatus(code)))
+              Right(toFailureResult(InternalServerError, None))
+            case SERVICE_UNAVAILABLE =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"Class2MAReceipts returned a 503: $resp")
+                toFailureResult(ServiceUnavailable, Some(resp))
+              }
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](class2MAReceiptsResult).leftMap { error =>

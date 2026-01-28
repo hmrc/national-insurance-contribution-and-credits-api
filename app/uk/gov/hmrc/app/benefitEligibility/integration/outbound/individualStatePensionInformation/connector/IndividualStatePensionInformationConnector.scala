@@ -23,18 +23,33 @@ import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.IndividualStatePension
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.mapper.IndividualStatePensionInformationResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationError.{
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus
+}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse400,
+  NpsErrorResponseHipOrigin,
+  NpsSingleErrorResponse
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError
+import IndividualStatePensionInformationError.{
   IndividualStatePensionInformationErrorResponse400,
   IndividualStatePensionInformationErrorResponse403,
   IndividualStatePensionInformationErrorResponse503
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationResponseValidation.individualStatePensionInformationResponseValidator
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{IndividualStatePensionResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationResponseValidation.individualStatePensionInformationResponseValidator
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
+  IndividualStatePensionResult,
+  NpsClient,
+  NpsResponseHandler
+}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -44,9 +59,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IndividualStatePensionInformationConnector @Inject() (
     npsClient: NpsClient,
-    individualStatePensionInformationResponseMapper: IndividualStatePensionInformationResponseMapper,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.IndividualStatePension
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -66,30 +83,30 @@ class IndividualStatePensionInformationConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[IndividualStatePensionInformationSuccessResponse](benefitType, response).map(
-                individualStatePensionInformationResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[IndividualStatePensionInformationErrorResponse400](response).map { resp =>
+              attemptParse[NpsErrorResponse400](response).map { resp =>
                 logger.warn(s"IndividualStatePensionInformation returned a 400: $resp")
-                individualStatePensionInformationResponseMapper.toApiResult(resp)
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[IndividualStatePensionInformationErrorResponse403](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"IndividualStatePensionInformation returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"IndividualStatePensionInformation returned a 403: code: $resp"
                 )
-                individualStatePensionInformationResponseMapper.toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case SERVICE_UNAVAILABLE =>
-              attemptParse[IndividualStatePensionInformationErrorResponse503](response).map { resp =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
                 logger.warn(s"IndividualStatePensionInformation returned a 503: $resp")
-                individualStatePensionInformationResponseMapper.toApiResult(resp)
+                toFailureResult(ServiceUnavailable, Some(resp))
               }
             case NOT_FOUND =>
-              Right(FailureResult(IndividualStatePension, NotFound))
+              Right(toFailureResult(NotFound, None))
             case INTERNAL_SERVER_ERROR =>
-              Right(FailureResult(IndividualStatePension, InternalServerError))
-            case code => Right(FailureResult(IndividualStatePension, UnexpectedStatus(code)))
+              Right(toFailureResult(InternalServerError, None))
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](individualStatePensionResult).leftMap { error =>
