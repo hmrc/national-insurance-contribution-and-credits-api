@@ -20,11 +20,9 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.{
@@ -47,7 +45,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
 
         val result = underTest.toApiResult(successResponse)
 
-        val expected = DownstreamSuccessResponse(Liabilities, successResponse)
+        val expected = SuccessResult(Liabilities, successResponse)
 
         result shouldBe expected
       }
@@ -61,7 +59,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
 
         val result = underTest.toApiResult(errorResponse)
 
-        val expected = DownstreamErrorReport(Liabilities, NpsNormalizedError.AccessForbidden)
+        val expected = FailureResult(Liabilities, NpsNormalizedError.AccessForbidden)
 
         result shouldBe expected
       }
@@ -73,7 +71,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
 
         val result = underTest.toApiResult(errorResponse)
 
-        val expected = DownstreamErrorReport(Liabilities, NpsNormalizedError.BadRequest)
+        val expected = FailureResult(Liabilities, NpsNormalizedError.BadRequest)
 
         result shouldBe expected
       }
@@ -89,7 +87,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
 
         val result = underTest.toApiResult(errorResponse)
 
-        val expected = DownstreamErrorReport(Liabilities, NpsNormalizedError.UnprocessableEntity)
+        val expected = FailureResult(Liabilities, NpsNormalizedError.UnprocessableEntity)
 
         result shouldBe expected
       }
@@ -103,7 +101,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
           LiabilitySummaryDetailsError.LiabilitySummaryDetailsErrorResponse403(Forbidden, ErrorCode403_2)
         val result = underTest.toApiResult(errorResponse)
 
-        val expected = DownstreamErrorReport(Liabilities, NpsNormalizedError.AccessForbidden)
+        val expected = FailureResult(Liabilities, NpsNormalizedError.AccessForbidden)
 
         result shouldBe expected
       }
@@ -113,7 +111,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
         val errorResponse = LiabilitySummaryDetailsError.LiabilitySummaryDetailsErrorResponse400(Some(List()))
         val result        = underTest.toApiResult(errorResponse)
 
-        val expected = DownstreamErrorReport(Liabilities, NpsNormalizedError.BadRequest)
+        val expected = FailureResult(Liabilities, NpsNormalizedError.BadRequest)
 
         result shouldBe expected
       }
@@ -127,7 +125,7 @@ class LiabilitySummaryDetailsResponseMapperSpec extends AnyFreeSpec with Matcher
         )
         val result = underTest.toApiResult(errorResponse)
 
-        val expected = DownstreamErrorReport(Liabilities, NpsNormalizedError.UnprocessableEntity)
+        val expected = FailureResult(Liabilities, NpsNormalizedError.UnprocessableEntity)
 
         result shouldBe expected
       }

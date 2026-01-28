@@ -21,7 +21,7 @@ import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.mapper.MarriageDetailsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsError.{
   MarriageDetailsErrorResponse400,
@@ -75,10 +75,10 @@ class MarriageDetailsConnector @Inject() (
                 logger.warn(s"MarriageDetails returned a 422: ${resp.failures.mkString(",")}")
                 marriageDetailsResponseMapper.toApiResult(resp)
               }
-            case NOT_FOUND => Right(DownstreamErrorReport(MarriageDetails, NotFound))
+            case NOT_FOUND => Right(FailureResult(MarriageDetails, NotFound))
             case INTERNAL_SERVER_ERROR =>
-              Right(DownstreamErrorReport(MarriageDetails, InternalServerError))
-            case code => Right(DownstreamErrorReport(MarriageDetails, UnexpectedStatus(code)))
+              Right(FailureResult(MarriageDetails, InternalServerError))
+            case code => Right(FailureResult(MarriageDetails, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](marriageDetailsResult).leftMap { error =>

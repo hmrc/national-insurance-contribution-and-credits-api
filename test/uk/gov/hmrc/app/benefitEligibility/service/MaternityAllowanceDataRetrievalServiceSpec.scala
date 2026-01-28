@@ -24,10 +24,10 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, Liabilities, NiContributionAndCredits}
 import uk.gov.hmrc.app.benefitEligibility.common.MaternityAllowanceSortType.NinoDescending
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, UnexpectedStatus}
+import NpsNormalizedError.{AccessForbidden, UnexpectedStatus}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.OccurrenceNumber
@@ -121,7 +121,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           )
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+              FailureResult(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
             )
           )
 
@@ -142,7 +142,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           )
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              DownstreamErrorReport(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(207))
+              FailureResult(NiContributionAndCredits, NpsNormalizedError.UnexpectedStatus(207))
             )
           )
 
@@ -170,7 +170,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           )
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              DownstreamErrorReport(Liabilities, NpsNormalizedError.UnexpectedStatus(207))
+              FailureResult(Liabilities, NpsNormalizedError.UnexpectedStatus(207))
             )
           )
 
@@ -180,9 +180,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .futureValue shouldBe
           Right(
             EligibilityCheckDataResultMA(
-              DownstreamErrorReport(Class2MAReceipts, AccessForbidden),
-              DownstreamErrorReport(Liabilities, UnexpectedStatus(207)),
-              List(DownstreamErrorReport(NiContributionAndCredits, UnexpectedStatus(207)))
+              FailureResult(Class2MAReceipts, AccessForbidden),
+              FailureResult(Liabilities, UnexpectedStatus(207)),
+              List(FailureResult(NiContributionAndCredits, UnexpectedStatus(207)))
             )
           )
 

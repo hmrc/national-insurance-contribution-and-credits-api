@@ -32,8 +32,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.ltbNotes.connector.LongTermBenefitNotesConnector
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.connector.LongTermBenefitNotesConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.request.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.config.AppConfig
@@ -91,7 +91,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
   )
 
   private val marriageDetailsResult =
-    DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+    FailureResult(MarriageDetails, NpsNormalizedError.AccessForbidden)
 
   "GetYourStatePensionDataRetrievalService" - {
     ".fetchEligibilityData" - {
@@ -102,7 +102,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .expects(BenefitType.GYSP, "some url path", *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              DownstreamErrorReport(MarriageDetails, NpsNormalizedError.AccessForbidden)
+              FailureResult(MarriageDetails, NpsNormalizedError.AccessForbidden)
             )
           )
 
@@ -111,7 +111,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .expects(BenefitType.GYSP, Identifier("GD379251T"), LongTermBenefitType.All, 1123232, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              DownstreamErrorReport(LongTermBenefitNotes, NpsNormalizedError.AccessForbidden)
+              FailureResult(LongTermBenefitNotes, NpsNormalizedError.AccessForbidden)
             )
           )
 

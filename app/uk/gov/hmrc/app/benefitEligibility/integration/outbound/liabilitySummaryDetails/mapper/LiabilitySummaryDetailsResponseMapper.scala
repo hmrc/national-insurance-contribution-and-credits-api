@@ -18,10 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummary
 
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, UnprocessableEntity}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, LiabilityResult, NpsResponseMapper}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
@@ -37,12 +34,12 @@ class LiabilitySummaryDetailsResponseMapper
   def toApiResult(response: LiabilitySummaryDetailsResponse): LiabilityResult =
     response match {
       case LiabilitySummaryDetailsErrorResponse400(failures) =>
-        DownstreamErrorReport(Liabilities, BadRequest)
+        FailureResult(Liabilities, BadRequest)
       case LiabilitySummaryDetailsErrorResponse403(reason, code) =>
-        DownstreamErrorReport(Liabilities, AccessForbidden)
+        FailureResult(Liabilities, AccessForbidden)
       case LiabilitySummaryDetailsErrorResponse422(failures, askUser, fixRequired, workItemRaised) =>
-        DownstreamErrorReport(Liabilities, UnprocessableEntity)
-      case response: LiabilitySummaryDetailsSuccessResponse => DownstreamSuccessResponse(Liabilities, response)
+        FailureResult(Liabilities, UnprocessableEntity)
+      case response: LiabilitySummaryDetailsSuccessResponse => SuccessResult(Liabilities, response)
     }
 
 }

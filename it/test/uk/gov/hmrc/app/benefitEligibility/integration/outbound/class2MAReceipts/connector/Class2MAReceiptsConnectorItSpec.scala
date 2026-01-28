@@ -35,10 +35,7 @@ import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -109,7 +106,7 @@ class Class2MAReceiptsConnectorItSpec
           val result =
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
-          result shouldBe Right(DownstreamSuccessResponse(Class2MAReceipts, successResponse))
+          result shouldBe Right(SuccessResult(Class2MAReceipts, successResponse))
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
           )
@@ -146,7 +143,7 @@ class Class2MAReceiptsConnectorItSpec
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.BadRequest)
+            FailureResult(Class2MAReceipts, NpsNormalizedError.BadRequest)
           )
 
           server.verify(
@@ -180,7 +177,7 @@ class Class2MAReceiptsConnectorItSpec
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
+            FailureResult(Class2MAReceipts, NpsNormalizedError.AccessForbidden)
           )
 
           server.verify(
@@ -205,7 +202,7 @@ class Class2MAReceiptsConnectorItSpec
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.NotFound)
+            FailureResult(Class2MAReceipts, NpsNormalizedError.NotFound)
           )
 
           server.verify(
@@ -243,7 +240,7 @@ class Class2MAReceiptsConnectorItSpec
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(Class2MAReceipts, NpsNormalizedError.UnprocessableEntity)
           )
 
           server.verify(
@@ -266,7 +263,7 @@ class Class2MAReceiptsConnectorItSpec
             connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
           result shouldBe Right(
-            DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.InternalServerError)
+            FailureResult(Class2MAReceipts, NpsNormalizedError.InternalServerError)
           )
         }
       }
@@ -290,7 +287,7 @@ class Class2MAReceiptsConnectorItSpec
               connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
 
             result shouldBe Right(
-              DownstreamErrorReport(Class2MAReceipts, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(Class2MAReceipts, NpsNormalizedError.UnexpectedStatus(statusCode))
             )
           }
 

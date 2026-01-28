@@ -18,10 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStateP
 
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.IndividualStatePension
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{AccessForbidden, BadRequest, ServiceUnavailable}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{
-  DownstreamErrorReport,
-  DownstreamSuccessResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.{
   IndividualStatePensionInformationError,
   IndividualStatePensionInformationResponse,
@@ -35,13 +32,13 @@ class IndividualStatePensionInformationResponseMapper
   def toApiResult(response: IndividualStatePensionInformationResponse): IndividualStatePensionResult =
     response match {
       case _: IndividualStatePensionInformationError.IndividualStatePensionInformationErrorResponse400 =>
-        DownstreamErrorReport(IndividualStatePension, BadRequest)
+        FailureResult(IndividualStatePension, BadRequest)
       case _: IndividualStatePensionInformationError.IndividualStatePensionInformationErrorResponse403 =>
-        DownstreamErrorReport(IndividualStatePension, AccessForbidden)
+        FailureResult(IndividualStatePension, AccessForbidden)
       case _: IndividualStatePensionInformationError.IndividualStatePensionInformationErrorResponse503 =>
-        DownstreamErrorReport(IndividualStatePension, ServiceUnavailable)
+        FailureResult(IndividualStatePension, ServiceUnavailable)
       case response: IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse =>
-        DownstreamSuccessResponse(IndividualStatePension, response)
+        SuccessResult(IndividualStatePension, response)
     }
 
 }

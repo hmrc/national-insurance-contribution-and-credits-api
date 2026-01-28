@@ -18,8 +18,15 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStateP
 
 import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads}
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  HipFailureResponse,
+  HipOrigin,
+  NpsErrorCode400,
+  NpsErrorCode403,
+  NpsErrorReason403
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.enums.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   ContributionCreditType,
   CreditSourceType
 }

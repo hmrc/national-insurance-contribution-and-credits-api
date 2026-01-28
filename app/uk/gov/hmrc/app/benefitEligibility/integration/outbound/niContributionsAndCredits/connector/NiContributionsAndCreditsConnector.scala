@@ -23,7 +23,7 @@ import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
 import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.DownstreamErrorReport
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.mapper.NiContributionsAndCreditsResponseMapper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
@@ -84,10 +84,10 @@ class NiContributionsAndCreditsConnector @Inject() (
                 niContributionsAndCreditsResponseMapper.toApiResult(resp)
               }
 
-            case NOT_FOUND => Right(DownstreamErrorReport(NiContributionAndCredits, NotFound))
+            case NOT_FOUND => Right(FailureResult(NiContributionAndCredits, NotFound))
             case INTERNAL_SERVER_ERROR =>
-              Right(DownstreamErrorReport(NiContributionAndCredits, InternalServerError))
-            case code => Right(DownstreamErrorReport(NiContributionAndCredits, UnexpectedStatus(code)))
+              Right(FailureResult(NiContributionAndCredits, InternalServerError))
+            case code => Right(FailureResult(NiContributionAndCredits, UnexpectedStatus(code)))
           }
 
         EitherT.fromEither[Future](contributionsAndCreditsResult).leftMap { error =>

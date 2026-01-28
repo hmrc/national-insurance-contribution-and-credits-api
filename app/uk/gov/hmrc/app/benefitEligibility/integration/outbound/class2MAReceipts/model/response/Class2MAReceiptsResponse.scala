@@ -18,6 +18,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  ErrorCode422,
+  NpsErrorCode400,
+  NpsErrorCode403,
+  NpsErrorReason403
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 

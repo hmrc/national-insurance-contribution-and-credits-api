@@ -18,7 +18,8 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.common.{ErrorCode422, Identifier, NpsErrorCode400, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
+import uk.gov.hmrc.app.benefitEligibility.common.{Identifier, Reason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}

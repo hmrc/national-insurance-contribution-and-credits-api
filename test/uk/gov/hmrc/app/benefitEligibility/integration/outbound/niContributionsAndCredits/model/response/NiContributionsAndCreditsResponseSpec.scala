@@ -22,15 +22,13 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.{
-  BenefitType,
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   ErrorCode422,
   NpsErrorCode400,
   NpsErrorCode403,
-  NpsErrorReason403,
-  Reason,
-  TaxYear
+  NpsErrorReason403
 }
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitType, Reason, TaxYear}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*

@@ -18,6 +18,12 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsA
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  ErrorCode422,
+  NpsErrorCode400,
+  NpsErrorCode403,
+  NpsErrorReason403
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.enums.*
