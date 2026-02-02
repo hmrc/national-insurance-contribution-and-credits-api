@@ -18,15 +18,18 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.app.benefitEligibility.common.CorrelationId
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{
+  BenefitEligibilityInfoErrorResponse,
+  BenefitEligibilityInfoRequestKey,
+  BenefitEligibilityInfoResponse
+}
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
-import uk.gov.hmrc.app.benefitEligibility.service.aggregation.ResultAggregation.AggregatorSyntax.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.aggregator
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,29 +42,36 @@ class BenefitEligibilityDataController @Inject() (
     extends BackendController(cc) {
 
   def benefitEligibilityData: Action[AnyContent] = identity.async { implicit request =>
-    val correlationId: String = UUID.randomUUID().toString
-    val correlationIdHeader   = "correlationId" -> correlationId
+    val correlationId: CorrelationId = CorrelationId.generate
+    val correlationIdHeader          = "correlationId" -> correlationId.value.toString
 
     request.body.asJson match {
       case Some(data) =>
         data.validate[EligibilityCheckDataRequest] match {
           case JsSuccess(request, _) =>
+            BenefitEligibilityInfoRequestKey(request)
             benefitEligibilityDataRetrievalService
-              .getEligibilityData(request)(headerCarrier.withExtraHeaders("correlationId" -> correlationId), ec)
+              .getEligibilityData(request)(
+                headerCarrier.withExtraHeaders("correlationId" -> correlationId.value.toString),
+                ec
+              )
               .leftMap { result =>
-                BadRequest(Json.toJson(new Response(Seq(new Failure("There was a problem with the request", "400")))))
-                  .withHeaders("correlationId" -> correlationId)
+                InternalServerError(
+                  Json.toJson(new Response(Seq(new Failure("There was a problem processing the request", "400"))))
+                )
+                  .withHeaders("correlationId" -> correlationId.value.toString)
               }
-              .map { result =>
-                result.aggregate match {
-                  case Left(report)  => BadGateway("report")
-                  case Right(result) => Ok("result")
-                }
-              }
+              .map(result =>
+                BenefitEligibilityInfoResponse.from(result, correlationId, BenefitEligibilityInfoRequestKey(request))
+              )
               .value
               .map {
-                case Left(value)  => value
-                case Right(value) => value
+                case Left(apiResponse) => apiResponse
+                case Right(benefitEligibilityInfoErrorResponse) =>
+                  benefitEligibilityInfoErrorResponse match {
+                    case response: BenefitEligibilityInfoErrorResponse => BadGateway(Json.toJson(response))
+                    case response                                      => Ok(Json.toJson(response))
+                  }
               }
 
           case JsError(_) =>

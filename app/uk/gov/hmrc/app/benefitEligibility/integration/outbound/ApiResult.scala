@@ -20,15 +20,15 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsError
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.response.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.response.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.response.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.response.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.response.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.response.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 
 import scala.collection.immutable
 
@@ -42,19 +42,19 @@ object NpsApiResponseStatus extends Enum[NpsApiResponseStatus] with PlayJsonEnum
   case object Failure extends NpsApiResponseStatus("FAILURE")
 }
 
-type ApiResult                     = NpsApiResult[NpsNormalizedError, NpsSuccessfulApiResponse]
-type Class2MaReceiptsResult        = NpsApiResult[NpsNormalizedError, Class2MAReceiptsSuccessResponse]
-type ContributionCreditResult      = NpsApiResult[NpsNormalizedError, NiContributionsAndCreditsSuccessResponse]
-type SchemeMembershipDetailsResult = NpsApiResult[NpsNormalizedError, SchemeMembershipDetailsSuccessResponse]
-type MarriageDetailsResult         = NpsApiResult[NpsNormalizedError, MarriageDetailsSuccessResponse]
-type LiabilityResult               = NpsApiResult[NpsNormalizedError, LiabilitySummaryDetailsSuccessResponse]
-type IndividualStatePensionResult  = NpsApiResult[NpsNormalizedError, IndividualStatePensionInformationSuccessResponse]
-type LongTermBenefitNotesResult    = NpsApiResult[NpsNormalizedError, LongTermBenefitNotesSuccessResponse]
-type BenefitSchemeDetailsResult    = NpsApiResult[ErrorReport, BenefitSchemeDetailsSuccessResponse]
+type ApiResult                       = NpsApiResult[ErrorReport, NpsSuccessfulApiResponse]
+type Class2MaReceiptsResult          = NpsApiResult[ErrorReport, Class2MAReceiptsSuccessResponse]
+type ContributionCreditResult        = NpsApiResult[ErrorReport, NiContributionsAndCreditsSuccessResponse]
+type SchemeMembershipDetailsResult   = NpsApiResult[ErrorReport, SchemeMembershipDetailsSuccessResponse]
+type MarriageDetailsResult           = NpsApiResult[ErrorReport, MarriageDetailsSuccessResponse]
+type LiabilityResult                 = NpsApiResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse]
+type IndividualStatePensionResult    = NpsApiResult[ErrorReport, IndividualStatePensionInformationSuccessResponse]
+type LongTermBenefitNotesResult      = NpsApiResult[ErrorReport, LongTermBenefitNotesSuccessResponse]
+type BenefitSchemeDetailsResult      = NpsApiResult[ErrorReport, BenefitSchemeDetailsSuccessResponse]
 type BenefitCalculationDetailsResult = NpsApiResult[ErrorReport, BenefitCalculationDetailsSuccessResponse]
 
 //TODO - change type constraints to NpsApiResult[+A <: ErrorReport, +B <: NpsSuccessfulApiResponse] after we move all connectors to extend NpsResponseMapperV2
-sealed trait NpsApiResult[+A, +B] {
+sealed trait NpsApiResult[+A <: ErrorReport, +B] {
   def apiName: ApiName
   def isSuccess: Boolean
   def isFailure: Boolean
@@ -64,11 +64,11 @@ sealed trait NpsApiResult[+A, +B] {
 
 object NpsApiResult {
 
-  final case class ErrorReport(value: NpsNormalizedError, option: Option[NpsError])
+  final case class ErrorReport(normalizedError: NpsNormalizedError, npsError: Option[NpsError])
 
-  final case class SuccessReport(apiName: ApiName, value: NpsSuccessfulApiResponse)
+  final case class SuccessReport(apiName: ApiName, successResponse: NpsSuccessfulApiResponse)
 
-  final case class FailureResult[+A, +B](
+  final case class FailureResult[+A <: ErrorReport, +B](
       apiName: ApiName,
       result: A
   ) extends NpsApiResult[A, Nothing] {

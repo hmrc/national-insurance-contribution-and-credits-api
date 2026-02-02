@@ -40,7 +40,7 @@ object FailureType {
 
 case class HipFailureItem(
     `type`: FailureType,
-    reason: Reason
+    reason: NpsErrorReason
 )
 
 object HipFailureItem {

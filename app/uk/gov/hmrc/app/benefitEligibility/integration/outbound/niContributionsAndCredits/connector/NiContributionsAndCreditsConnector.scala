@@ -21,21 +21,36 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse400,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse
+}
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, BenefitEligibilityError, BenefitType}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.mapper.NiContributionsAndCreditsResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.reqeust.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsError.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.{
+  NiContributionsAndCreditsRequest,
+  NiContributionsAndCreditsResponse
+}
+import NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsError.{
   NiContributionsAndCreditsResponse400,
   NiContributionsAndCreditsResponse403,
   NiContributionsAndCreditsResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsResponseValidation.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.response.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsResponseValidation.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -45,9 +60,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class NiContributionsAndCreditsConnector @Inject() (
     npsClient: NpsClient,
-    niContributionsAndCreditsResponseMapper: NiContributionsAndCreditsResponseMapper,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.NiContributionAndCredits
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -64,30 +81,37 @@ class NiContributionsAndCreditsConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[NiContributionsAndCreditsSuccessResponse](benefitType, response).map(
-                niContributionsAndCreditsResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[NiContributionsAndCreditsResponse400](response).map { resp =>
-                logger.warn(s"ContributionsAndCredits returned a 400: ${resp.failures.mkString(",")}")
-                niContributionsAndCreditsResponseMapper.toApiResult(resp)
+              attemptParse[NpsErrorResponse400](response).map { resp =>
+                logger.warn(s"ContributionsAndCredits returned a 400: $resp")
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[NiContributionsAndCreditsResponse403](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"ContributionsAndCredits returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"ContributionsAndCredits returned a 403: code: $resp"
                 )
-                niContributionsAndCreditsResponseMapper.toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[NiContributionsAndCreditsResponse422](response).map { resp =>
-                logger.warn(s"ContributionsAndCredits returned a 422: ${resp.failures.mkString(",")}")
-                niContributionsAndCreditsResponseMapper.toApiResult(resp)
+              attemptParse[NpsMultiErrorResponse](response).map { resp =>
+                logger.warn(s"ContributionsAndCredits returned a 422: $resp")
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
 
-            case NOT_FOUND => Right(FailureResult(NiContributionAndCredits, NotFound))
+            case NOT_FOUND => Right(toFailureResult(NotFound, None))
+
             case INTERNAL_SERVER_ERROR =>
-              Right(FailureResult(NiContributionAndCredits, InternalServerError))
-            case code => Right(FailureResult(NiContributionAndCredits, UnexpectedStatus(code)))
+              Right(toFailureResult(InternalServerError, None))
+
+            case SERVICE_UNAVAILABLE =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"ContributionsAndCredits returned a 503: $resp")
+                toFailureResult(ServiceUnavailable, Some(resp))
+              }
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](contributionsAndCreditsResult).leftMap { error =>

@@ -29,19 +29,26 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.*
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.{
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse422Special,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
   Callback,
   LiabilitySummaryDetailsSuccessResponse,
   OccurrenceNumber
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -83,7 +90,7 @@ class LiabilitySummaryDetailsConnectorItSpec
       val identifier: Identifier = Identifier("AB123456C")
       val liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated =
         LiabilitySearchCategoryHyphenated.Abroad
-      val occurrenceNumber: Option[OccurrenceNumber]            = None
+      val occurrenceNumber: Option[LiabilitiesOccurrenceNumber] = None
       val typeFilter: Option[LiabilitySearchCategoryHyphenated] = None
       val earliestStartDate: Option[LocalDate]                  = None
       val liabilityStartDate: Option[LocalDate]                 = None
@@ -93,7 +100,6 @@ class LiabilitySummaryDetailsConnectorItSpec
         "should parse response and map to result successfully" in {
           val successResponse = LiabilitySummaryDetailsSuccessResponse(
             liabilityDetailsList = Some(List()),
-            liabilityEmploymentDetailsList = Some(List()),
             callback = Some(Callback(""))
           )
 
@@ -138,17 +144,24 @@ class LiabilitySummaryDetailsConnectorItSpec
         }
       }
 
-      "when the LiabilitySummaryDetails endpoint returns BAD_REQUEST (400)" - {
+      "when the LiabilitySummaryDetails endpoint returns BAD_REQUEST (400 - StandardErrorResponse400)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
             """{
-              |"failures":[
-              | {
-              |   "reason":"Some reason",
-              |   "code":"400.2"
-              | }
-              |]
+              |  "origin": "HIP",
+              |  "response": {
+              |    "failures": [
+              |      {
+              |        "reason": "reason_1",
+              |        "code": "400.1"
+              |      },
+              |      {
+              |        "reason": "reason_2",
+              |        "code": "400.2"
+              |      }
+              |    ]
+              |  }
               |}""".stripMargin
 
           val responseBody = Json.parse(errorResponse).toString()
@@ -178,8 +191,14 @@ class LiabilitySummaryDetailsConnectorItSpec
               .value
               .futureValue
 
+          val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
+          val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(Liabilities, NpsNormalizedError.BadRequest)
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
           )
 
           server.verify(
@@ -188,7 +207,69 @@ class LiabilitySummaryDetailsConnectorItSpec
         }
       }
 
-      "when the LiabilitySummaryDetails endpoint returns BAD_REQUEST (403)" - {
+      "when the LiabilitySummaryDetails endpoint returns BAD_REQUEST (400 - HipFailureResponse400) " - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            get(urlEqualTo(testPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_REQUEST)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            connector
+              .fetchLiabilitySummaryDetails(
+                MA,
+                identifier,
+                liabilitySearchCategoryHyphenated,
+                occurrenceNumber,
+                typeFilter,
+                earliestStartDate,
+                liabilityStartDate,
+                liabilityEndDate
+              )
+              .value
+              .futureValue
+
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            )
+          )
+          server.verify(
+            getRequestedFor(urlEqualTo(testPath))
+          )
+        }
+      }
+
+      "when the LiabilitySummaryDetails endpoint returns FORBIDDEN (403)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -224,8 +305,14 @@ class LiabilitySummaryDetailsConnectorItSpec
               .value
               .futureValue
 
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(Liabilities, NpsNormalizedError.AccessForbidden)
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+            )
           )
 
           server.verify(
@@ -234,7 +321,7 @@ class LiabilitySummaryDetailsConnectorItSpec
         }
       }
 
-      "when the LiabilitySummaryDetails endpoint returns BAD_REQUEST (404)" - {
+      "when the LiabilitySummaryDetails endpoint returns NOT_FOUND (404)" - {
         "should parse error response and map to result" in {
 
           server.stubFor(
@@ -262,7 +349,10 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            FailureResult(Liabilities, NpsNormalizedError.NotFound)
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.NotFound, None)
+            )
           )
 
           server.verify(
@@ -271,7 +361,7 @@ class LiabilitySummaryDetailsConnectorItSpec
         }
       }
 
-      "when the LiabilitySummaryDetails endpoint returns BAD_REQUEST (422)" - {
+      "when the LiabilitySummaryDetails endpoint returns UNPROCESSABLE_ENTITY (422)" - {
         "should parse error response and map to result" in {
 
           val errorResponse =
@@ -311,8 +401,14 @@ class LiabilitySummaryDetailsConnectorItSpec
               .value
               .futureValue
 
+          val jsonReads                            = implicitly[Reads[NpsErrorResponse422Special]]
+          val response: NpsErrorResponse422Special = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(Liabilities, NpsNormalizedError.UnprocessableEntity)
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+            )
           )
 
           server.verify(
@@ -323,11 +419,30 @@ class LiabilitySummaryDetailsConnectorItSpec
 
       "when the LiabilitySummaryDetails endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
         "should map to InternalServerError result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
           server.stubFor(
             get(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(INTERNAL_SERVER_ERROR)
+                  .withBody(errorResponse)
               )
           )
 
@@ -346,8 +461,70 @@ class LiabilitySummaryDetailsConnectorItSpec
               .value
               .futureValue
 
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
           result shouldBe Right(
-            FailureResult(Liabilities, NpsNormalizedError.InternalServerError)
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+            )
+          )
+        }
+      }
+
+      "when the LiabilitySummaryDetails endpoint returns an SERVICE_UNAVAILABLE (503)" - {
+        "should map to InternalServerError result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
+          server.stubFor(
+            get(urlEqualTo(testPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withBody(errorResponse)
+              )
+          )
+
+          val result =
+            connector
+              .fetchLiabilitySummaryDetails(
+                MA,
+                identifier,
+                liabilitySearchCategoryHyphenated,
+                occurrenceNumber,
+                typeFilter,
+                earliestStartDate,
+                liabilityStartDate,
+                liabilityEndDate
+              )
+              .value
+              .futureValue
+
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            FailureResult(
+              ApiName.Liabilities,
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+            )
           )
         }
       }
@@ -356,7 +533,7 @@ class LiabilitySummaryDetailsConnectorItSpec
         "should map to InternalServerError result" in {
 
           val statusCodes: TableFor1[Int] =
-            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED, SERVICE_UNAVAILABLE)
+            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED)
 
           forAll(statusCodes) { statusCode =>
             server.stubFor(
@@ -383,7 +560,10 @@ class LiabilitySummaryDetailsConnectorItSpec
                 .futureValue
 
             result shouldBe Right(
-              FailureResult(Liabilities, NpsNormalizedError.UnexpectedStatus(statusCode))
+              FailureResult(
+                ApiName.Liabilities,
+                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+              )
             )
           }
 

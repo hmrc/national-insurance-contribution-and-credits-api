@@ -1,0 +1,5060 @@
+openapi: 3.0.3
+info:
+  title: Benefit Eligibility Info API
+  description: |-
+    API for retrieving data for a given benefit type that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  version: 0.0.2 Draft
+  contact: {}
+servers:
+  - url: https://test-api.service.hmrc.gov.uk
+    description: Sandbox
+  - url: https://api.service.hmrc.gov.uk
+    description: Production
+
+paths:
+  /misc/national-insurance-contributions-and-credits/benefit-eligibility-info:
+    post:
+      summary: Request information that can be used to determine benefit eligibility
+      description: Submit a request for benefit information based on benefit type
+      security:
+        - applicationRestricted:
+            - write:protect-connect
+      operationId: getBenefitEligibilityInformation
+      parameters:
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/accept"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/BSPRequest'
+                - $ref: '#/components/schemas/GYSPRequest'
+                - $ref: '#/components/schemas/ESARequest'
+                - $ref: '#/components/schemas/JSARequest'
+                - $ref: '#/components/schemas/MARequest'
+            examples:
+              BSP_minimal_request:
+                summary: BSP request - Minimal required fields
+                value:
+                  benefitType: "BSP"
+                  nationalInsuranceNumber: "AB123456C"
+                  contributionsAndCredits:
+                    dateOfBirth: "1960-01-15"
+                    startTaxYear: 2020
+                    endTaxYear: 2023
+              BSP_full_request:
+                summary: BSP request - All fields including optional
+                value:
+                  benefitType: "BSP"
+                  nationalInsuranceNumber: "CD789012E"
+                  contributionsAndCredits:
+                    dateOfBirth: "1958-03-22"
+                    startTaxYear: 2018
+                    endTaxYear: 2024
+                  marriageDetails:
+                    searchStartYear: 2018
+                    latest: true
+                    sequence: 1
+              GYSP_minimal_request:
+                summary: GYSP request - Minimal required fields
+                value:
+                  benefitType: "GYSP"
+                  nationalInsuranceNumber: "GH567890J"
+                  contributionsAndCredits:
+                    dateOfBirth: "1955-06-20"
+                    startTaxYear: 2018
+                    endTaxYear: 2023
+                  benefitCalculation:
+                    benefitType: "GRADUATED"
+                    pensionProcessingArea: "NORTH"
+              GYSP_full_request:
+                summary: GYSP request - All fields including optional
+                value:
+                  benefitType: "GYSP"
+                  nationalInsuranceNumber: "JK901234L"
+                  contributionsAndCredits:
+                    dateOfBirth: "1952-11-08"
+                    startTaxYear: 2015
+                    endTaxYear: 2023
+                  benefitCalculation:
+                    benefitType: "STATE_PENSION"
+                    pensionProcessingArea: "NORTH"
+                  benefitCalculationNotes:
+                    benefitType: "STATE_PENSION"
+                  marriageDetails:
+                    searchStartYear: 2015
+                    latest: false
+                    sequence: 3
+                  schemeMembershipDetails:
+                    schemeMembershipSequenceNumber: 101
+                    schemeMembershipTransferSequenceNumber: 201
+                    schemeMembershipOccurrenceNumber: 301
+              ESA_request:
+                summary: ESA request
+                value:
+                  benefitType: "ESA"
+                  nationalInsuranceNumber: "QR456789S"
+                  contributionsAndCredits:
+                    dateOfBirth: "1975-09-14"
+                    startTaxYear: 2020
+                    endTaxYear: 2023
+              JSA_request:
+                summary: JSA request
+                value:
+                  benefitType: "JSA"
+                  nationalInsuranceNumber: "AB234567C"
+                  contributionsAndCredits:
+                    dateOfBirth: "1982-12-03"
+                    startTaxYear: 2021
+                    endTaxYear: 2023
+              MA_minimal_request:
+                summary: MA request - Minimal required fields
+                value:
+                  benefitType: "MA"
+                  nationalInsuranceNumber: "KL890123M"
+                  contributionsAndCredits:
+                    dateOfBirth: "1985-04-18"
+                    startTaxYear: 2022
+                    endTaxYear: 2023
+                  liabilities:
+                    liabilitySearchCategoryHyphenated: "CLASS-2-LIABILITY-UK"
+              MA_full_request:
+                summary: MA request - All fields including optional
+                value:
+                  benefitType: "MA"
+                  nationalInsuranceNumber: "NP012345Q"
+                  contributionsAndCredits:
+                    dateOfBirth: "1988-07-25"
+                    startTaxYear: 2021
+                    endTaxYear: 2023
+                  liabilities:
+                    liabilitySearchCategoryHyphenated: "CLASS-2-LIABILITY-UK"
+                    liabilityOccurrenceNumber: 1
+                    liabilityType: "CLASS-2-LIABILITY-UK"
+                    earliestLiabilityStartDate: "2021-01-01"
+                    liabilityStart: "2021-06-15"
+                    liabilityEnd: "2022-06-14"
+                  class2MaReceipts:
+                    archived: false
+                    receiptDate: "2021-05-20"
+                    sortBy: "DATE_DESC"
+
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BSPSuccessResponse'
+                  - $ref: '#/components/schemas/GYSPSuccessResponse'
+                  - $ref: '#/components/schemas/ESASuccessResponse'
+                  - $ref: '#/components/schemas/JSASuccessResponse'
+                  - $ref: '#/components/schemas/MASuccessResponse'
+                discriminator:
+                  propertyName: benefitType
+                  mapping:
+                    BSP: '#/components/schemas/BSPSuccessResponse'
+                    GYSP: '#/components/schemas/GYSPSuccessResponse'
+                    ESA: '#/components/schemas/ESASuccessResponse'
+                    JSA: '#/components/schemas/JSASuccessResponse'
+                    MA: '#/components/schemas/MASuccessResponse'
+              examples:
+                BSP_minimal_success:
+                  summary: BSP - Minimal response
+                  value:
+                    correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    benefitType: "BSP"
+                    nationalInsuranceNumber: "AB123456C"
+                    marriageDetails: []
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 0
+                      class1ContributionAndCredits: []
+                      class2ContributionAndCredits: []
+                BSP_maximal_success:
+                  summary: BSP - Maximal response
+                  value:
+                    correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    benefitType: "BSP"
+                    nationalInsuranceNumber: "AB123456C"
+                    marriageDetails:
+                      - status: "MARRIED"
+                        startDate: "1985-06-15"
+                        startDateStatus: "VERIFIED"
+                        endDate: "2010-03-20"
+                        endDateStatus: "VERIFIED"
+                        spouseIdentifier: "CD789012E"
+                        spouseForename: "Jane"
+                        spouseSurname: "Smith"
+                      - status: "DIVORCED"
+                        startDate: "2012-03-10"
+                        startDateStatus: "VERIFIED"
+                        endDate: "2018-07-25"
+                        endDateStatus: "VERIFIED"
+                        spouseIdentifier: "EF456789G"
+                        spouseForename: "Michael"
+                        spouseSurname: "Johnson"
+                        separationDate: "2017-01-15"
+                        reconciliationDate: "2017-06-20"
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 9.5
+                      class1ContributionAndCredits:
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 52
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "C1"
+                          primaryContribution: 3000.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 25000.0
+                          creditSource: "EMPLOYMENT SERVICES"
+                          employerName: "ACME"
+                          latePaymentPeriod: "L"
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 48
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "C1"
+                          primaryContribution: 2880.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 24000.0
+                          creditSource: "EMPLOYMENT SERVICES"
+                          employerName: "CORP"
+                          latePaymentPeriod: "ZZ"
+                      class2ContributionAndCredits:
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 52
+                          contributionCreditType: "C2"
+                          class2Or3EarningsFactor: 1.5
+                          class2NIContributonAmount: 150.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "DIRECT DEBIT"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 30
+                          contributionCreditType: "C2"
+                          class2Or3EarningsFactor: 2.1
+                          class2NIContributonAmount: 120.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "QUARTERLY BILLING"
+                          latePaymentPeriod: "L"
+                GYSP_minimal_success:
+                  summary: GYSP - Minimal response
+                  value:
+                    correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
+                    benefitType: "GYSP"
+                    nationalInsuranceNumber: "GH567890J"
+                    benefitSchemeDetails: []
+                    marriageDetails: []
+                    longTermBenefitNotes: []
+                    schemeMembershipDetails:
+                      schemeMembershipDetailsSummaryList: []
+                    statePensionData: []
+                    niContributionsAndCredits: []
+                GYSP_maximal_success:
+                  summary: GYSP - Maximal response
+                  value:
+                    correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
+                    benefitType: "GYSP"
+                    nationalInsuranceNumber: "GH567890J"
+                    benefitSchemeDetails:
+                      - benefitSchemeName: "Graduated Retirement Benefit Scheme"
+                        totalGraduatedPensionUnits: 15.5
+                        benefitCalculationDetails:
+                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 1500.00
+                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 2000.00
+                            contractedOutDeductionsPre1988: 800.00
+                            contractedOutDeductionsPost1988: 1200.00
+                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 750.00
+                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 950.00
+                            contractedOutDeductionsPre1988: 400.00
+                            contractedOutDeductionsPost1988: 600.00
+                      - benefitSchemeName: "Graduated Retirement Benefit Scheme 2"
+                        totalGraduatedPensionUnits: 15.5
+                        benefitCalculationDetails:
+                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 1500.00
+                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 2000.00
+                            contractedOutDeductionsPre1988: 800.00
+                            contractedOutDeductionsPost1988: 1200.00
+                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 750.00
+                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 950.00
+                            contractedOutDeductionsPre1988: 400.00
+                            contractedOutDeductionsPost1988: 600.00
+                    marriageDetails:
+                      - startDate: "1980-08-12"
+                        startDateStatus: "VERIFIED"
+                        endDate: "2005-11-30"
+                        endDateStatus: "VERIFIED"
+                        spouseIdentifier: "EF345678G"
+                        spouseForename: "Robert"
+                        spouseSurname: "Johnson"
+                        separationDate: "2004-03-15"
+                        reconciliationDate: "2004-09-20"
+                      - startDate: "2007-06-22"
+                        startDateStatus: "VERIFIED"
+                        spouseIdentifier: "HI678901K"
+                        spouseForename: "Sarah"
+                        spouseSurname: "Williams"
+                    longTermBenefitNotes:
+                      - "Pension credit awarded for caring responsibilities"
+                      - "Additional credit for unemployment period"
+                      - "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025"
+                      - "Widow's Benefit Award WIDOWED recorded on this account between 07/04/2018 and 07/04/2020"
+                    schemeMembershipDetails:
+                      schemeMembershipDetailsSummaryList:
+                        - stakeholderPensionSchemeType: "Non-Stakeholder Pension"
+                          schemeMembershipDetails:
+                            nationalInsuranceNumber: "GH567890"
+                            schemeMembershipSequenceNumber: 1
+                            schemeMembershipStartDate: "1990-04-06"
+                            schemeMembershipEndDate: "2010-04-05"
+                            methodOfPreservationType: "TRANSFER FROM COSR TO COSR (3)"
+                            totalLinkedGuaranteedMinimumPensionContractedOutDeductions: 156.0
+                            accruedPensionContractedOutDeductionsValue: 156.0
+                            totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988: 156.0
+                            accruedPensionContractedOutDeductionsValuePost1988: 156.0
+                            revaluationRate: "LIMITED"
+                            guaranteedMinimumPensionReconciliationStatus: "RECONCILIATION ACTION NOT TAKEN"
+                            employeesReference: "EMP/123/ABC"
+                            finalYearEarnings: 1733.0
+                            penultimateYearEarnings: 1650.0
+                            retrospectiveEarnings: 0.0
+                            furtherPaymentsConfirmation: "FURTHER PAYMENT ALLOWED"
+                            survivorStatus: "NOT APPLICABLE"
+                            transferPremiumElectionDate: "2010-03-15"
+                            revaluationApplied: false
+                            stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
+                            stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
+                            apparentUnnotifiedTerminationStatus: "No Apparent Unnotified Termination"
+                            terminationMicrofilmNumber: 44012399
+                            debitVoucherMicrofilmNumber: 40599123
+                            creationMicrofilmNumber: 40599124
+                            inhibitSchemeProcessing: false
+                            extensionDate: "2011-04-05"
+                            guaranteedMinimumPensionContractedOutDeductionsRevalued: 165.0
+                            clericalCalculationInvolved: "NO CLERICAL CALCULATION INVOLVED"
+                            clericallyControlledTotal: 0.0
+                            clericallyControlledTotalPost1988: 0.0
+                            certifiedAmount: 50.0
+                            enforcementStatus: "NOT ENFORCED"
+                            stateSchemePremiumDeemed: "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED"
+                            transferTakeUpDate: "1990-04-06"
+                            schemeMembershipOccurrenceNumber: 4
+                            schemeMembershipTransferSequenceNumber: 2
+                            contributionCategoryFinalYear: "A"
+                            contributionCategoryPenultimateYear: "A"
+                            contributionCategoryRetrospectiveYear: "B"
+                            protectedRightsStartDate: "1988-04-06"
+                            schemeMembershipDebitReason: "NOT APPLICABLE"
+                            technicalAmount: 25.0
+                            minimumFundTransferAmount: 100.0
+                            actualTransferValue: 1500.0
+                            schemeSuspensionType: "NO SUSPENSION"
+                            guaranteedMinimumPensionConversionApplied: true
+                            employersContractedOutNumberDetails: "E3022666E"
+                            schemeCreatingContractedOutNumberDetails: "A7123456Q"
+                            schemeTerminatingContractedOutNumberDetails: "S4002629K"
+                            importingAppropriateSchemeNumberDetails: "S4200091P"
+                            apparentUnnotifiedTerminationDestinationDetails: "S2123456B"
+                        - stakeholderPensionSchemeType: "Stakeholder Pension"
+                          schemeMembershipDetails:
+                            nationalInsuranceNumber: "GH567890"
+                            schemeMembershipSequenceNumber: 2
+                            schemeMembershipStartDate: "2010-04-06"
+                            furtherPaymentsConfirmation: "FURTHER PAYMENT ALLOWED"
+                            survivorStatus: "NOT APPLICABLE"
+                            revaluationApplied: false
+                            stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
+                            stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
+                            apparentUnnotifiedTerminationStatus: "No Apparent Unnotified Termination"
+                            inhibitSchemeProcessing: false
+                            clericalCalculationInvolved: "NO CLERICAL CALCULATION INVOLVED"
+                            clericallyControlledTotal: 0.0
+                            clericallyControlledTotalPost1988: 0.0
+                            enforcementStatus: "NOT ENFORCED"
+                            stateSchemePremiumDeemed: "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED"
+                            schemeMembershipOccurrenceNumber: 9
+                            schemeMembershipTransferSequenceNumber: 2
+                            employersContractedOutNumberDetails: "E3900000M"
+                            schemeTerminatingContractedOutNumberDetails: "S4200091P"
+                      callback:
+                        callbackURL: "/benefit-scheme/GH567890/scheme-membership-details?seqNo=1&occurrenceNo=4&transferSeqNo=2"
+                    statePensionData:
+                      - numberOfQualifyingYears: 35
+                        qualifyingTaxYear: true
+                      - numberOfQualifyingYears: 40
+                        qualifyingTaxYear: false
+                    niContributionsAndCredits:
+                      - totalGraduatedPensionUnits: 15.5
+                        class1ContributionAndCredits:
+                          - taxYear: 2019
+                            numberOfContributionsAndCredits: 52
+                            contributionCategoryLetter: "A"
+                            contributionCategory: "STANDARD RATE"
+                            contributionCreditType: "C1"
+                            primaryContribution: 2850.0
+                            class1ContributionStatus: "VALID"
+                            primaryPaidEarnings: 32000.0
+                            creditSource: "EMPLOYMENT SERVICES"
+                            employerName: "ACME"
+                            latePaymentPeriod: "L"
+                          - taxYear: 2020
+                            numberOfContributionsAndCredits: 52
+                            contributionCategoryLetter: "A"
+                            contributionCategory: "STANDARD RATE"
+                            contributionCreditType: "C1"
+                            primaryContribution: 2700.0
+                            class1ContributionStatus: "VALID"
+                            primaryPaidEarnings: 30000.0
+                            creditSource: "EMPLOYMENT SERVICES"
+                            employerName: "Global"
+                            latePaymentPeriod: "L"
+                        class2ContributionAndCredits:
+                          - taxYear: 2019
+                            numberOfContributionsAndCredits: 26
+                            contributionCreditType: "C2"
+                            class2Or3EarningsFactor: 3250.0
+                            class2NIContributonAmount: 81.9
+                            class2Or3CreditStatus: "VALID"
+                            creditSource: "DIRECT DEBIT"
+                            latePaymentPeriod: "L"
+                          - taxYear: 2021
+                            numberOfContributionsAndCredits: 40
+                            contributionCreditType: "C2"
+                            class2Or3EarningsFactor: 4000.0
+                            class2NIContributonAmount: 100.0
+                            class2Or3CreditStatus: "VALID"
+                            creditSource: "QUARTERLY BILLING"
+                            latePaymentPeriod: "ZZ"
+                      - totalGraduatedPensionUnits: 15.5
+                        class1ContributionAndCredits:
+                          - taxYear: 2019
+                            numberOfContributionsAndCredits: 52
+                            contributionCategoryLetter: "A"
+                            contributionCategory: "STANDARD RATE"
+                            contributionCreditType: "C1"
+                            primaryContribution: 2850.0
+                            class1ContributionStatus: "VALID"
+                            primaryPaidEarnings: 32000.0
+                            creditSource: "EMPLOYMENT SERVICES"
+                            employerName: "ACME"
+                            latePaymentPeriod: "L"
+                          - taxYear: 2020
+                            numberOfContributionsAndCredits: 52
+                            contributionCategoryLetter: "A"
+                            contributionCategory: "STANDARD RATE"
+                            contributionCreditType: "C1"
+                            primaryContribution: 2700.0
+                            class1ContributionStatus: "VALID"
+                            primaryPaidEarnings: 30000.0
+                            creditSource: "EMPLOYMENT SERVICES"
+                            employerName: "Global"
+                            latePaymentPeriod: "L"
+                        class2ContributionAndCredits:
+                          - taxYear: 2019
+                            numberOfContributionsAndCredits: 26
+                            contributionCreditType: "C2"
+                            class2Or3EarningsFactor: 3250.0
+                            class2NIContributonAmount: 81.9
+                            class2Or3CreditStatus: "VALID"
+                            creditSource: "DIRECT DEBIT"
+                            latePaymentPeriod: "L"
+                          - taxYear: 2021
+                            numberOfContributionsAndCredits: 40
+                            contributionCreditType: "C2"
+                            class2Or3EarningsFactor: 4000.0
+                            class2NIContributonAmount: 100.0
+                            class2Or3CreditStatus: "VALID"
+                            creditSource: "QUARTERLY BILLING"
+                            latePaymentPeriod: "ZZ"
+                ESA_minimal_success:
+                  summary: ESA - Minimal response
+                  value:
+                    correlationId: "22222222-3333-4444-5555-666666666666"
+                    benefitType: "ESA"
+                    nationalInsuranceNumber: "QR456789S"
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 0
+                      class1ContributionAndCredits: []
+                      class2ContributionAndCredits: []
+                ESA_maximal_success:
+                  summary: ESA - Maximal response
+                  value:
+                    correlationId: "22222222-3333-4444-5555-666666666666"
+                    benefitType: "ESA"
+                    nationalInsuranceNumber: "QR456789S"
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 2.5
+                      class1ContributionAndCredits:
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 39
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "2A"
+                          primaryContribution: 1800.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 15000.0
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          employerName: "Widget"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 26
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "2A"
+                          primaryContribution: 2160.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 18000.0
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          employerName: "Widget"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 20
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "CR1"
+                          primaryContribution: 0.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 0.0
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          employerName: ""
+                          latePaymentPeriod: "ZZ"
+                      class2ContributionAndCredits:
+                        - taxYear: 2023
+                          numberOfContributionsAndCredits: 20
+                          contributionCreditType: "2A"
+                          class2Or3EarningsFactor: 1.3
+                          class2NIContributonAmount: 52.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 15
+                          contributionCreditType: "2A"
+                          class2Or3EarningsFactor: 0.8
+                          class2NIContributonAmount: 30.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "EMPLOYMENT AND SUPPORT"
+                          latePaymentPeriod: "L"
+                JSA_minimal_success:
+                  summary: JSA - Minimal response
+                  value:
+                    correlationId: "44444444-5555-6666-7777-888888888888"
+                    benefitType: "JSA"
+                    nationalInsuranceNumber: "AB234567C"
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 0
+                      class1ContributionAndCredits: []
+                      class2ContributionAndCredits: []
+                JSA_maximal_success:
+                  summary: JSA - Maximal response
+                  value:
+                    correlationId: "44444444-5555-6666-7777-888888888888"
+                    benefitType: "JSA"
+                    nationalInsuranceNumber: "AB234567C"
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 1.2
+                      class1ContributionAndCredits:
+                        - taxYear: 2019
+                          numberOfContributionsAndCredits: 15
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "2B"
+                          primaryContribution: 1200.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 10000.0
+                          creditSource: "JSA TAPE INPUT"
+                          employerName: "Temp"
+                          latePaymentPeriod: "L"
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 20
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "2B"
+                          primaryContribution: 1440.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 12000.0
+                          creditSource: "JSA TAPE INPUT"
+                          employerName: "Temp"
+                          latePaymentPeriod: "L"
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 30
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "CR1"
+                          primaryContribution: 0.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 0.0
+                          creditSource: "JSA TAPE INPUT"
+                          employerName: ""
+                          latePaymentPeriod: "ZZ"
+                      class2ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 30
+                          contributionCreditType: "2B"
+                          class2Or3EarningsFactor: 1.1
+                          class2NIContributonAmount: 44.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "JSA TAPE INPUT"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2023
+                          numberOfContributionsAndCredits: 25
+                          contributionCreditType: "2B"
+                          class2Or3EarningsFactor: 0.9
+                          class2NIContributonAmount: 36.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "JSA PAPER INPUT"
+                          latePaymentPeriod: "L"
+                MA_minimal_success:
+                  summary: MA - Minimal response
+                  value:
+                    correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "KL890123M"
+                    class2MAReceipts:
+                      identifier: "KL890123M"
+                      class2MAReceiptDetails: []
+                    liabilitySummaryDetails:
+                      liabilityDetailsList: []
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 0
+                      class1ContributionAndCredits: []
+                      class2ContributionAndCredits: []
+                MA_maximal_success:
+                  summary: MA - Maximal response
+                  value:
+                    correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "KL890123M"
+                    class2MAReceipts:
+                      identifier: "KL890123M"
+                      class2MAReceiptDetails:
+                        - initials: "KL"
+                          surname: "Smith"
+                          receivablePeriodStartDate: "2022-04-06"
+                          receivablePeriodEndDate: "2022-07-05"
+                          receivablePayment: 156.0
+                          receiptDate: "2022-07-05"
+                          liabilityStartDate: "2022-04-06"
+                          liabilityEndDate: "2022-07-05"
+                          billAmount: 156.0
+                          billScheduleNumber: 2001
+                          isClosedRecord: true
+                          weeksPaid: 13
+                        - initials: "KL"
+                          surname: "Smith"
+                          receivablePeriodStartDate: "2023-01-01"
+                          receivablePeriodEndDate: "2023-03-31"
+                          receivablePayment: 145.0
+                          receiptDate: "2023-03-31"
+                          liabilityStartDate: "2023-01-01"
+                          liabilityEndDate: "2023-03-31"
+                          billAmount: 145.0
+                          billScheduleNumber: 2002
+                          isClosedRecord: false
+                          weeksPaid: 13
+                        - initials: "KL"
+                          surname: "Smith"
+                          receivablePeriodStartDate: "2021-10-01"
+                          receivablePeriodEndDate: "2021-12-31"
+                          receivablePayment: 130.0
+                          receiptDate: "2021-12-31"
+                          liabilityStartDate: "2021-10-01"
+                          liabilityEndDate: "2021-12-31"
+                          billAmount: 130.0
+                          billScheduleNumber: 1999
+                          isClosedRecord: true
+                          weeksPaid: 13
+                    liabilitySummaryDetails:
+                      liabilityDetailsList:
+                        - identifier: "KL890123M"
+                          type: "CLASS 2 MATERNITY ALLOWANCE"
+                          occurrenceNumber: 1
+                          startDateStatus: "START DATE HELD"
+                          endDateStatus: "END DATE HELD"
+                          startDate: "2021-01-01"
+                          endDate: "2021-12-31"
+                          country: "ENGLAND"
+                          trainingCreditApprovalStatus: "NO CREDIT FOR APPROVED TRAINING"
+                          casepaperReferenceNumber: "SCH/123/4"
+                          homeResponsibilitiesProtectionBenefitReference: "12345678AB"
+                          homeResponsibilitiesProtectionRate: 10.56
+                          lostCardNotificationReason: "NOT APPLICABLE"
+                          lostCardRulingReason: "NOT APPLICABLE"
+                          homeResponsibilityProtectionCalculationYear: 2022
+                          awardAmount: 150.0
+                          resourceGroupIdentifier: 789
+                          homeResponsibilitiesProtectionIndicator: "(NONE)"
+                          officeDetails:
+                            officeLocationDecode: 1
+                            officeLocationValue: "HQ STATIONARY STORE"
+                            officeIdentifier: "NOT APPLICABLE"
+                        - identifier: "KL890123M"
+                          type: "CLASS 2 MATERNITY ALLOWANCE"
+                          occurrenceNumber: 2
+                          startDateStatus: "START DATE HELD"
+                          endDateStatus: "END DATE HELD"
+                          startDate: "2022-01-01"
+                          endDate: "2022-12-31"
+                          resourceGroupIdentifier: 789
+                        - identifier: "KL890123M"
+                          type: "CLASS 2 MATERNITY ALLOWANCE"
+                          occurrenceNumber: 3
+                          startDateStatus: "START DATE HELD"
+                          endDateStatus: "END DATE NOT HELD"
+                          startDate: "2023-01-01"
+                          resourceGroupIdentifier: 789
+                      callback:
+                        callbackURL: "/liability-summary/KL890123M/details?occurrenceNo=3"
+                    niContributionsAndCredits:
+                      totalGraduatedPensionUnits: 3.8
+                      class1ContributionAndCredits:
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 39
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "MAR"
+                          primaryContribution: 2400.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 20000.0
+                          creditSource: "STATUTORY MATERNITY PAY CREDIT"
+                          employerName: "Corp"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 39
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "MAR"
+                          primaryContribution: 2640.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 22000.0
+                          creditSource: "STATUTORY MATERNITY PAY CREDIT"
+                          employerName: "Corp"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 30
+                          contributionCategoryLetter: "A"
+                          contributionCategory: "STANDARD RATE"
+                          contributionCreditType: "C1"
+                          primaryContribution: 2100.0
+                          class1ContributionStatus: "VALID"
+                          primaryPaidEarnings: 17500.0
+                          creditSource: "EMPLOYMENT SERVICES"
+                          employerName: "Global"
+                          latePaymentPeriod: "L"
+                      class2ContributionAndCredits:
+                        - taxYear: 2023
+                          numberOfContributionsAndCredits: 26
+                          contributionCreditType: "MAR"
+                          class2Or3EarningsFactor: 1040.0
+                          class2NIContributonAmount: 104.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "STATUTORY MATERNITY PAY CREDIT"
+                          latePaymentPeriod: "ZZ"
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 20
+                          contributionCreditType: "C2"
+                          class2Or3EarningsFactor: 800.0
+                          class2NIContributonAmount: 80.0
+                          class2Or3CreditStatus: "VALID"
+                          creditSource: "DIRECT DEBIT"
+                          latePaymentPeriod: "L"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/PartialFailure'
+
+components:
+  parameters:
+    authorization:
+      description: Identity of the Originating System that made the API call.
+      in: header
+      name: Authorization
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authorization"
+    accept:
+      description: Request the version of the API you want to use by including an Accept header with a media type of.
+      in: header
+      name: Accept
+      required: true
+      schema:
+        $ref: "#/components/schemas/Accept"
+  headers:
+    Authorization:
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authorization"
+    Accept:
+      required: true
+      schema:
+        $ref: "#/components/schemas/Accept"
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_type:
+              summary: Missing benefit type
+              value:
+                code: "BAD_REQUEST"
+                reason: "type field is required"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_auth_token:
+              summary: Missing authentication token
+              value:
+                code: "FORBIDDEN"
+                reason: "authentication token is required"
+            invalid_auth_token:
+              summary: Invalid authentication token
+              value:
+                code: "FORBIDDEN"
+                reason: "invalid or expired authentication token"
+
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_ni_number_format:
+              summary: Invalid National Insurance number format
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "invalid national insurance number format"
+            invalid_date_format:
+              summary: Invalid date format
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "dateOfBirth must be in YYYY-MM-DD format"
+            "422_StartYearAfterEndYear":
+              summary: Start Year After End Year
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "Start tax year after end tax year"
+            "422_StartYearPre1975":
+              summary: Start Year Pre 1975
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "Start tax year before 1975"
+            "422_StartYearPostCY-1":
+              summary: Start Year Post CY-1
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "Start tax year after CY-1"
+            "422_EndYearPostCY-1":
+              summary: End Year Post CY-1
+              value:
+                code: "UNPROCESSABLE_ENTITY"
+                reason: "End tax year after CY-1"
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unexpected_error:
+              summary: Unexpected error
+              value:
+                code: "INTERNAL_SERVER_ERROR"
+                reason: "an unexpected error occurred while processing the request"
+
+    PartialFailure:
+      description: Partial or complete failure from downstream services
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FailureResponse'
+          examples:
+            partial_failure:
+              summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
+              value:
+                status: "PARTIAL_FAILURE"
+                correlationId: "55555555-6666-7777-8888-999999999999"
+                benefitType: "MA"
+                nationalInsuranceNumber: "KL890123M"
+                summary:
+                  totalCalls: 3
+                  successful: 2
+                  failed: 1
+                downStreams:
+                  - apiName: "NiContributionsAndCredits"
+                    status: "SUCCESS"
+                  - apiName: "Class2MAReceipts"
+                    status: "SUCCESS"
+                  - apiName: "Liabilities"
+                    status: "FAILURE"
+                    error:
+                      code: "TIMEOUT"
+                      message: "liability calculation service timeout"
+                      downstreamStatus: 408
+            complete_failure:
+              summary: Complete failure - every downstream called for a given benefit responds with a failure
+              value:
+                status: "FAILURE"
+                correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
+                benefitType: "MA"
+                nationalInsuranceNumber: "NP012345Q"
+                summary:
+                  totalCalls: 3
+                  successful: 0
+                  failed: 3
+                downStreams:
+                  - apiName: "NiContributionsAndCredits"
+                    status: "FAILURE"
+                    error:
+                      code: "FORBIDDEN"
+                      message: "access denied to maternity allowance service"
+                      downstreamStatus: 403
+                  - apiName: "Class2MAReceipts"
+                    status: "FAILURE"
+                    error:
+                      code: "INTERNAL_SERVER_ERROR"
+                      message: "class 2 MA receipts service internal error"
+                      downstreamStatus: 500
+                  - apiName: "Liabilities"
+                    status: "FAILURE"
+                    error:
+                      code: "BAD_REQUEST"
+                      message: "invalid liability calculation parameters"
+                      downstreamStatus: 400
+
+  schemas:
+    Authorization:
+      description: Authorization token used to contact api
+      type: string
+      example: Bearer <token>
+
+    Accept:
+      description: Request the version of the API you want to use by including an Accept header with a media type of
+      type: string
+      pattern: application/vnd.hmrc.[version]+[content-type]
+      example: application/vnd.hmrc.1.0+json
+
+    ContributionsAndCredits:
+      type: object
+      required:
+        - dateOfBirth
+        - startTaxYear
+        - endTaxYear
+      properties:
+        dateOfBirth:
+          $ref: '#/components/schemas/dateString'
+        startTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        endTaxYear:
+          $ref: '#/components/schemas/taxYear'
+
+    MarriageDetailsRequestSchema:
+      type: object
+      properties:
+        searchStartYear:
+          $ref: '#/components/schemas/taxYear'
+        latest:
+          type: boolean
+        sequence:
+          type: integer
+          
+
+    BenefitCalculation:
+      type: object
+      required:
+        - benefitType
+      properties:
+        benefitType:
+          type: string
+        pensionProcessingArea:
+          type: string
+
+    BenefitCalculationNotes:
+      type: object
+      required:
+        - benefitType
+      properties:
+        benefitType:
+          type: string
+
+    SchemeMembershipDetails:
+      type: object
+      properties:
+        schemeMembershipSequenceNumber:
+          type: integer
+        schemeMembershipTransferSequenceNumber:
+          type: integer
+        schemeMembershipOccurrenceNumber:
+          type: integer
+
+    Liabilities:
+      type: object
+      required:
+        - liabilitySearchCategoryHyphenated
+      properties:
+        liabilitySearchCategoryHyphenated:
+          $ref: '#/components/schemas/LiabilitySearchCategoryHyphenated'
+        liabilityOccurrenceNumber:
+          type: integer
+        liabilityType:
+          $ref: '#/components/schemas/LiabilitySearchCategoryHyphenated'
+        earliestLiabilityStartDate:
+          $ref: '#/components/schemas/dateString'
+        liabilityStart:
+          $ref: '#/components/schemas/dateString'
+        liabilityEnd:
+          $ref: '#/components/schemas/dateString'
+
+    Class2MaReceipts:
+      type: object
+      properties:
+        archived:
+          type: boolean
+        receiptDate:
+          $ref: '#/components/schemas/dateString'
+        sortBy:
+          type: string
+
+    BSPRequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+      properties:
+        benefitType:
+          type: string
+          enum: [ BSP ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        contributionsAndCredits:
+          $ref: '#/components/schemas/ContributionsAndCredits'
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetailsRequestSchema'
+
+    GYSPRequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+        - benefitCalculation
+      properties:
+        benefitType:
+          type: string
+          enum: [ GYSP ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        contributionsAndCredits:
+          $ref: '#/components/schemas/ContributionsAndCredits'
+        benefitCalculation:
+          $ref: '#/components/schemas/BenefitCalculation'
+        benefitCalculationNotes:
+          $ref: '#/components/schemas/BenefitCalculationNotes'
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetailsRequestSchema'
+        schemeMembershipDetails:
+          $ref: '#/components/schemas/SchemeMembershipDetails'
+
+    ESARequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+      properties:
+        benefitType:
+          type: string
+          enum: [ ESA ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        contributionsAndCredits:
+          $ref: '#/components/schemas/ContributionsAndCredits'
+
+    JSARequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+      properties:
+        benefitType:
+          type: string
+          enum: [ JSA ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        contributionsAndCredits:
+          $ref: '#/components/schemas/ContributionsAndCredits'
+
+    MARequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+        - liabilities
+      properties:
+        benefitType:
+          type: string
+          enum: [ MA ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        contributionsAndCredits:
+          $ref: '#/components/schemas/ContributionsAndCredits'
+        liabilities:
+          $ref: '#/components/schemas/Liabilities'
+        class2MaReceipts:
+          $ref: '#/components/schemas/Class2MaReceipts'
+
+    # Success Response Schemas
+
+    BSPSuccessResponse:
+      type: object
+      required:
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - marriageDetails
+        - niContributionsAndCredits
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [ BSP ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetails'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/PostNIContCredResponse'
+
+    GYSPSuccessResponse:
+      type: object
+      required:
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - benefitSchemeDetails
+        - marriageDetails
+        - longTermBenefitNotes
+        - schemeMembershipDetails
+        - statePensionData
+        - niContributionsAndCredits
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [ GYSP ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        benefitSchemeDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetBenefitSchemeDetailsResponse'
+        marriageDetails:
+          $ref: '#/components/schemas/RetrieveMarriageDetailsResponse'
+        longTermBenefitNotes:
+          $ref: '#/components/schemas/LongTermBenefitNotesResponse'
+        statePensionData:
+          $ref: '#/components/schemas/GetNIRecordResponse'
+        schemeMembershipDetails:
+          $ref: '#/components/schemas/GetSchemeMembershipDetailsResponse'
+        niContributionsAndCredits:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostNIContCredResponse'
+
+    ESASuccessResponse:
+      type: object
+      required:
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - niContributionsAndCredits
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [ ESA ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/PostNIContCredResponse'
+
+    JSASuccessResponse:
+      type: object
+      required:
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - niContributionsAndCredits
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [ JSA ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/PostNIContCredResponse'
+
+    MASuccessResponse:
+      type: object
+      required:
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - class2MAReceipts
+        - liabilitySummaryDetails
+        - niContributionsAndCredits
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [ MA ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        class2MAReceipts:
+          $ref: '#/components/schemas/GetClass2MAReceiptsResponse'
+        liabilitySummaryDetails:
+          $ref: '#/components/schemas/GetLiabilitySummaryResponseHIP'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/PostNIContCredResponse'
+
+    # Scheme Membership Details - Copied from the provided NPS schema
+    GetSchemeMembershipDetailsResponse:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        schemeMembershipDetailsSummaryList:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeMembershipDetailsSummary'
+        callback:
+          $ref: '#/components/schemas/schemeCallback'
+
+    SchemeMembershipDetailsSummary:
+      description: "Contains scheme membership details for an individual, including their stakeholder pension status."
+      required:
+        - stakeholderPensionSchemeType
+        - schemeMembershipDetails
+      type: object
+      properties:
+        stakeholderPensionSchemeType:
+          $ref: '#/components/schemas/EnumSchshptp'
+        schemeMembershipDetails:
+          $ref: '#/components/schemas/RetrieveSchemeMembershipDetails'
+
+    RetrieveSchemeMembershipDetails:
+      description: Contains scheme membership and transfer details for an individual.
+      required:
+        - nationalInsuranceNumber
+        - schemeMembershipOccurrenceNumber
+        - schemeMembershipSequenceNumber
+      type: object
+      properties:
+        nationalInsuranceNumber:
+          description: National Insurance Number - unique for an individual - note not all individuals qualify to be issued with one.
+          maxLength: 8
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$"
+          type: string
+          example: AA123456
+        schemeMembershipSequenceNumber:
+          description: Unique sequence number representing the position in the scheme membership history (i.e. row) of the scheme membership details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.
+          maximum: 65534
+          minimum: 1
+          type: integer
+          example: 123
+        schemeMembershipStartDate:
+          format: date
+          description: The start date of the benefit scheme membership.
+          type: string
+          example: 2022-06-27
+        contractedOutEmployerIdentifier:
+          description: An identifier for a contracted-out employer as part of the contracted-out scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 789
+        schemeMembershipEndDate:
+          format: date
+          description: The end date of the benefit scheme membership.
+          type: string
+          example: 2022-06-27
+        methodOfPreservationType:
+          $ref: '#/components/schemas/EnumMop'
+        totalLinkedGuaranteedMinimumPensionContractedOutDeductions:
+          description: Denotes the Guaranteed Minimum Pension / Contracted-Out Deduction value accrued from linked memberships of one or more schemes and transfers.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        accruedPensionContractedOutDeductionsValue:
+          description: The value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) that has been accrued.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988:
+          description: Denotes the Guaranteed Minimum Pension / Contracted-Out Deduction value accrued from linked memberships of one or more schemes and transfers.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        accruedPensionContractedOutDeductionsValuePost1988:
+          description: The value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) that has been accrued post 1988.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        revaluationRate:
+          $ref: '#/components/schemas/EnumRevRate'
+        guaranteedMinimumPensionReconciliationStatus:
+          $ref: '#/components/schemas/EnumGmpRec'
+        employeesReference:
+          description: Denotes the reference number that is associated with the employee's benefit scheme membership.
+          maxLength: 18
+          minLength: 1
+          pattern: "^[A-Za-z0-9()^*;:&.%,+=?\\\\\\/' -]+$"
+          type: string
+          example: 123/456/ABC
+        finalYearEarnings:
+          description: The final amount of earnings for the year for the guaranteed minimum pension calculation.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        penultimateYearEarnings:
+          description: The penultimate year's earnings amount used for guaranteed minimum pension calculations.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        retrospectiveEarnings:
+          description: "The total amount of retrospective monetary earnings that a taxpayer may be required to pay tax on, for a given tax period."
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        furtherPaymentsConfirmation:
+          $ref: '#/components/schemas/EnumFuthpayt'
+        survivorStatus:
+          $ref: '#/components/schemas/EnumWidStat'
+        transferPremiumElectionDate:
+          format: date
+          description: The date a Transfer Premium is elected to be paid.
+          type: string
+          example: 2022-06-27
+        revaluationApplied:
+          description: Denotes if a revaluation percentage has been applied to the benefit scheme membership.
+          type: boolean
+          example: true
+        stateEarningsRelatedPensionsSchemeNonRestorationValue:
+          description: Denotes the non-restoration value of the State Earnings Related Pensions Scheme (SERPS).
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        stateEarningsRelatedPensionsSchemeValuePost1988:
+          description: Denotes the value of the State Earnings Related Pensions Scheme (SERPS) post 1988.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        apparentUnnotifiedTerminationStatus:
+          $ref: '#/components/schemas/EnumAutStat'
+        terminationMicrofilmNumber:
+          description: Denotes the microfilm number associated with the termination of this benefit scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 789
+        debitVoucherMicrofilmNumber:
+          description: Denotes the microfilm number linked to the debit voucher of the benefit scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 40599123
+        creationMicrofilmNumber:
+          description: Denotes the microfilm number linked to the creation of the benefit scheme.
+          maximum: 2147483646
+          minimum: 0
+          type: integer
+          example: 40599123
+        inhibitSchemeProcessing:
+          description: Denotes whether or not to inhibit processing associated with a benefit scheme.
+          type: boolean
+          example: true
+        extensionDate:
+          format: date
+          description: The date that the original time limit period has been extended to.
+          type: string
+          example: 2022-06-27
+        guaranteedMinimumPensionContractedOutDeductionsRevalued:
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) after being revalued.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        clericalCalculationInvolved:
+          $ref: '#/components/schemas/EnumClercalc'
+        clericallyControlledTotal:
+          description: Denotes the total weekly Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) payable at state pension age which has been subjected to clerical revaluation.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        clericallyControlledTotalPost1988:
+          description: Denotes the total weekly Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) payable at state pension age which has been subjected to clerical revaluation post 1988.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        certifiedAmount:
+          description: Denotes the amount of money an employer can reclaim from an employee who is paying a contribution equivalent premium to restore rights back to the state scheme.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        enforcementStatus:
+          $ref: '#/components/schemas/EnumEnfcment'
+        stateSchemePremiumDeemed:
+          $ref: '#/components/schemas/EnumSspDeem'
+        transferTakeUpDate:
+          format: date
+          description: "The date on which the customer's membership in the benefits scheme started, following a transfer."
+          type: string
+          example: 2022-06-27
+        schemeMembershipOccurrenceNumber:
+          description: Denotes the occurrence number for the Scheme Membership.
+          maximum: 32766
+          minimum: 0
+          type: integer
+          example: 1
+        schemeMembershipTransferSequenceNumber:
+          description: Unique sequence number representing the position in the scheme membership transfer history (i.e. row) of the scheme membership transfer details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.
+          maximum: 65534
+          minimum: 1
+          type: integer
+          example: 123
+        contributionCategoryFinalYear:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        contributionCategoryPenultimateYear:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        contributionCategoryRetrospectiveYear:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        protectedRightsStartDate:
+          format: date
+          description: "The date that an individual's rights are protected from, with regards to scheme membership."
+          type: string
+          example: 2022-06-27
+        schemeMembershipDebitReason:
+          $ref: '#/components/schemas/EnumDschrsn'
+        technicalAmount:
+          description: The amount of money required to fully buy back a scheme member's additional pension rights in the event of scheme cessation.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        minimumFundTransferAmount:
+          description: Denotes the minimum funding amount required to qualify for transferring to the Contracted-Out Salary Related (COSR) schemes.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        actualTransferValue:
+          description: The amount of money that was actually transferred.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        schemeSuspensionType:
+          $ref: '#/components/schemas/EnumSuspflag'
+        guaranteedMinimumPensionConversionApplied:
+          description: Denotes whether or not the Guaranteed Minimum Pension (GMP) conversion has been applied.
+          type: boolean
+          example: true
+        employersContractedOutNumberDetails:
+          description: Denotes the Employer's Contracting-Out Number with prefix and suffix - used where an employer has an occupational pension scheme that is contracted-out of the State Second Pension.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A-Z]{0,1}\\d{6}[A-Z ^GIO SUVZ]{0,1})$"
+          type: string
+          example: S3123456B
+        schemeCreatingContractedOutNumberDetails:
+          description: Denotes the Benefit Scheme's Contracted-Out Number with prefix and suffix for the scheme being created.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: A7123456Q
+        schemeTerminatingContractedOutNumberDetails:
+          description: Denotes the Terminating Benefit Scheme's Contracted-Out Number with prefix and suffix.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+        importingAppropriateSchemeNumberDetails:
+          description: Denotes the importing ASN (Appropriate Scheme Number) / SCON (Scheme Contracted-Out Number) with prefix and suffix.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+        apparentUnnotifiedTerminationDestinationDetails:
+          description: Denotes the Scheme Contracted-Out Number (SCON) with prefix and suffix that falls under Apparent Unnotified Termination (AUT).
+          maxLength: 9
+          minLength: 7
+          pattern: "^([S]{0,1}\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+
+    schemeCallback:
+      properties:
+        callbackURL:
+          description: A URL in the response body that redirects the user to call the next set of data based on the prepared URL. This will only be populated if the call has not returned all the relevant data and another call is required.
+          type: string
+          example: /benefit-scheme/AA123456/scheme-membership-details?seqNo=123&occurrenceNo=1&transferSeqNo=123
+
+    # Scheme Membership Details Enums - Copied from the provided NPS schema
+
+    EnumMop:
+      enum:
+        - NOT APPLICABLE (0)
+        - CONTRIBUTIONS EQUIVALENT PREMIUM (1)
+        - GUARANTEED MINIMUM PENSION (2)
+        - TRANSFER FROM COSR TO COSR (3)
+        - TRANSFER FROM COSR TO COMP (4)
+        - TRANSFER FROM COSR TO PP (5)
+        - CHANGE OF RPA FROM COSR TO COSR (6)
+        - CHANGE OF RPA FROM COSR TO COMP (7)
+        - CHANGE OF RPA FROM COSR TO PP (8)
+        - BUYOUT OF GMP (9)
+        - PSEUDO TRANSFER (NEW ECON) (10)
+        - PSEUDO TRANSFER (PERIOD ABROAD) (11)
+        - ACCRUED RIGHTS PREMIUM (12)
+        - BLANK - NOT USED ON NIRS2 (13)
+        - PENSIONERS RIGHTS PREMIUM (14)
+        - PROTECTED RIGHTS PREMIUM (15)
+        - DUMMY TERMINATION (16)
+        - TRANSFER PREMIUM (17)
+        - PSEUDO TERMINATION DEATH RECORDED (18)
+        - CANCELLATION OF PP - COD (19)
+        - TRANSFER FROM PP TO COSR (20)
+        - TRANSFER FROM PP TO COMP (21)
+        - TRANSFER FROM PP TO PP (22)
+        - TREATED AS CHANGE OF RPA FROM PP TO PP (23)
+        - CHANGE OF RPA FROM PP TO COMP (24)
+        - CHANGE OF RPA FROM PP TO COSR (25)
+        - PROVISION OF A PENSION BY THE PP SCHEME (26)
+        - PURCHASE OF AN ANNUITY - PP (27)
+        - PROTECTED RIGHTS PAID IN THE FORM OF A LUMP SUM (28)
+        - PROTECTED RIGHTS RETAINED IN COMP SCHEME - COD (29)
+        - TRANSFER FROM COMP TO COMP (30)
+        - TRANSFER FROM COMP TO COSR (31)
+        - TRANSFER FROM COMP TO PP (32)
+        - CHANGE OF RPA FROM COMP TO COMP (33)
+        - CHANGE OF RPA FROM COMP TO COSR (34)
+        - CHANGE OF RPA FROM COMP TO PP (35)
+        - PROVISION OF A PENSION BY THE COMP SCHEME (36)
+        - PURCHASE OF AN ANNUITY - COMP (37)
+        - TREATED AS CHANGE OF RPA FROM COSR TO PP (38)
+        - TREATED AS CHANGE OF RPA FROM COMP TO PP (39)
+        - BLANK - NOT USED ON NIRS2 (40)
+        - CHANGE OF RPA FROM COSR TO PP (CONVERTED) (41)
+        - CHANGE OF RPA FROM COMP TO PP (CONVERTED) (42)
+        - CHANGE OF RPA FROM PP TO PP (CONVERTED) (43)
+        - GUARANTEED MINIMUM PENSION/COSR RIGHTS (44)
+        - COSR RIGHTS (45)
+        - PROTECTED RIGHTS RETAINED IN COMP SCHEME - COD/PR (46)
+        - PROTECTED RIGHTS RETAINED IN COMP SCHEME - PR (47)
+        - CANCELLATION OF PP - COD/PR (48)
+        - CANCELLATION OF PP - PR (49)
+        - COD/CR (50)
+        - COD/CR/PR (51)
+        - GMP/PR (52)
+        - GMP/CR/PR (53)
+        - CR/PR (54)
+        - REQUIRED AMOUNT PREMIUM (55)
+        - INCOME WITHDRAWAL (56)
+        - INCOME WITHDRAWAL - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (57)
+        - TRANSFER GMP/PR TO COSR (58)
+        - TRANSFER GMP/PR TO COMP (59)
+        - TRANSFER GMP/PR TO PP (60)
+        - TRANSFER COD/CR TO COSR (61)
+        - TRANSFER COD/CR TO COMP (62)
+        - TRANSFER COD/CR TO PP (63)
+        - TRANSFER GMP/CR/PR TO COSR (64)
+        - TRANSFER GMP/CR/PR TO COMP (65)
+        - TRANSFER GMP/CR/PR TO PP (66)
+        - TRANSFER COD/CR/PR TO COSR (67)
+        - TRANSFER COD/CR/PR TO COMP (68)
+        - TRANSFER COD/CR/PR TO PP (69)
+        - TRANSFER CR/PR TO COSR (70)
+        - TRANSFER CR/PR TO COMP (71)
+        - TRANSFER CR/PR TO PP (72)
+        - TREATED AS CHANGE OF RPA GMP/PR TO PP (73)
+        - TREATED AS CHANGE OF RPA COD/CR TO PP (74)
+        - TREATED AS CHANGE OF RPA GMP/CR/PR TO PP (75)
+        - TREATED AS CHANGE OF RPA COD/CR/PR TO PP (76)
+        - TREATED AS CHANGE OF RPA CR/PR TO PP (77)
+        - CHANGE OF RPA FROM PP TO PP (78)
+        - OVERSEAS TRANSFER (79)
+        - ASSURANCE/TAKING OUT OF AN APPROPRIATE INSURANCE POLICY (80)
+        - PROVISION OF A PENSION BY THE PP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (81)
+        - PROVISION OF A PENSION BY THE COMP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (82)
+        - PURCHASE OF AN ANNUITY - PP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (83)
+        - PURCHASE OF AN ANNUITY - COMP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (84)
+        - COMMUTATION (85)
+        - COMMUTATION - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (86)
+        - INTERNAL TRANSFER COMP RIGHTS RETAINED (87)
+        - INTERNAL TRANSFER COSR RIGHTS RETAINED (88)
+        - GMP SPLIT RIGHTS (89)
+        - COD SPLIT RIGHTS (90)
+        - BLANK - NOT USED ON NIRS2 (91)
+        - BLANK - NOT USED ON NIRS2 (92)
+        - BLANK - NOT USED ON NIRS2 (93)
+        - BLANK - NOT USED ON NIRS2 (94)
+        - BLANK - NOT USED ON NIRS2 (95)
+        - COMMUTATION-ILL HEALTH (96)
+        - CANCELLATION OF APP SHP - PR (97)
+        - TRANSFER FROM PP TO APP SHP (98)
+        - TRANSFER FROM APP SHP TO PP (99)
+        - TRANSFER FROM APP SHP TO APP SHP (100)
+        - TREATED AS CHANGE OF RPA FROM PP TO APP SHP (101)
+        - TREATED AS CHANGE OF RPA FROM APP SHP TO PP (102)
+        - TREATED AS CHANGE OF RPA FROM APP SHP TO APP SHP (103)
+        - PROTECTED RIGHTS RETAINED IN COMP SHP SCHEME - COD/PR (105)
+        - CHANGE OF RPA FROM PP TO COMP SHP (106)
+        - TRANSFER FROM PP TO COMP SHP (107)
+        - CHANGE OF RPA FROM APP SHP TO COMP (108)
+        - TRANSFER FROM APP SHP TO COMP (109)
+        - CHANGE OF RPA FROM APP SHP TO COMP SHP (110)
+        - TRANSFER FROM APP SHP TO COMP SHP (111)
+        - CHANGE OF RPA FROM APP SHP TO COSR (112)
+        - TRANSFER FROM APP SHP TO COSR (113)
+        - TRANSFER FROM COMP TO COMP SHP (114)
+        - TRANSFER FROM COMP SHP TO COMP (115)
+        - TRANSFER FROM COMP SHP TO COMP SHP (116)
+        - TRANSFER FROM COMP TO APP SHP (117)
+        - TREATED AS CHANGE OF RPA FROM COMP TO APP SHP (118)
+        - TRANSFER FROM COMP SHP TO PP (119)
+        - TREATED AS CHANGE OF RPA FROM COMP SHP TO PP (120)
+        - TRANSFER FROM COMP SHP TO APP SHP (121)
+        - TREATED AS CHANGE OF RPA FROM COMP SHP TO APP SHP (122)
+        - TRANSFER FROM COMP SHP TO COSR (123)
+        - TRANSFER FROM COSR TO COMP SHP (124)
+        - TRANSFER FROM COSR TO APP SHP (125)
+        - TREATED AS CHANGE OF RPA FROM COSR TO APP SHP (126)
+        - TRANSFER COD/CR TO COMP SHP (127)
+        - TRANSFER COD/CR TO APP SHP (128)
+        - TRANSFER GMP/CR/PR TO COMP SHP (129)
+        - TRANSFER GMP/CR/PR TO APP SHP (130)
+        - TRANSFER COD/CR/PR TO COMP SHP (131)
+        - TRANSFER COD/CR/PR TO APP SHP (132)
+        - TRANSFER CR/PR TO COMP SHP (133)
+        - TRANSFER CR/PR TO APP SHP (134)
+        - TREATED AS CHANGE OF RPA COD/CR TO APP SHP (135)
+        - TREATED AS CHANGE OF RPA GMP/CR/PR TO APP SHP (136)
+        - TREATED AS CHANGE OF RPA COD/CR/PR TO APP SHP (137)
+        - TREATED AS CHANGE OF RPA CR/PR TO APP SHP (138)
+        - CHANGE OF RPA FROM COSR TO COMP SHP (140)
+        - CHANGE OF RPA FROM COSR TO APP SHP (141)
+        - CHANGE OF RPA FROM COMP SHP TO COMP (142)
+        - CHANGE OF RPA FROM COMP SHP TO PP (143)
+        - CHANGE OF RPA FROM COMP SHP TO COMP SHP (144)
+        - CHANGE OF RPA FROM COMP SHP TO COSR (145)
+        - CHANGE OF RPA FROM COMP SHP TO APP SHP (146)
+        - PROTECTED RIGHTS RETAINED IN COMP SHP SCHEME - PR (150)
+        - PROVISION OF A PENSION BY THE APP SHP SCHEME (152)
+        - PROVISION OF A PENSION BY THE APP SHP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (153)
+        - PURCHASE OF AN ANNUITY - APP SHP (154)
+        - PURCHASE OF AN ANNUITY - APP SHP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (155)
+        - TREATED AS CHANGE OF RPA GMP/PR TO APP SHP (156)
+        - CANCELLATION OF APP SHP - COD/PR (157)
+        - PROVISION OF A PENSION BY THE COMP SHP SCHEME (158)
+        - PROVISION OF A PENSION BY THE COMP SHP SCHEME - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (159)
+        - PURCHASE OF AN ANNUITY - COMP SHP (160)
+        - PURCHASE OF AN ANNUITY - COMP SHP - WIDOW/WIDOWER/SURVIVING CIVIL PARTNER (161)
+        - CHANGE OF RPA FROM PP TO APP SHP (162)
+        - CHANGE OF RPA FROM APP SHP TO PP (163)
+        - CHANGE OF RPA FROM APP SHP TO APP SHP (164)
+        - CHANGE OF RPA FROM COMP TO COMP SHP (165)
+        - CHANGE OF RPA FROM COMP TO APP SHP (166)
+        - TRANSFER GMP/PR TO COMP SHP (167)
+        - TRANSFER GMP/PR TO APP SHP (168)
+        - BUYOUT OF PROTECTED RIGHTS (169)
+        - CHANGE OF RPA TO PPF (170)
+        - CHANGE OF RPA TO FAS (171)
+      type: string
+
+    EnumRevRate:
+      enum:
+        - (NONE)
+        - FIXED
+        - LIMITED
+        - S148
+      type: string
+
+    EnumGmpRec:
+      enum:
+        - GMP RECONCILED
+        - NOT APPLICABLE
+        - NOT KNOWN
+        - RECONCILIATION ACTION NOT TAKEN
+        - RECONCILIATION FAILURE
+      type: string
+
+    EnumFuthpayt:
+      enum:
+        - FURTHER PAYMENT ALLOWED
+        - NO FURTHER PAYMENT ALLOWED
+      type: string
+
+    EnumWidStat:
+      enum:
+        - ACTUAL LIABILITY
+        - ACTUAL LIABILITY (IVB)
+        - NOT APPLICABLE
+        - OPEN SCHEME MEMBERSHIP/CALC NOT POSSIBLE
+        - POSSIBLE WIDOW(ER) / SURVIVING CIVIL PARTNER
+        - REVISED STATEMENTS REQUIRED
+      type: string
+
+    EnumAutStat:
+      enum:
+        - Apparent Unnotified Termination Not Applicable
+        - Apparent Unnotified Termination Raised
+        - Apparent Unnotified Termination Raised and Enquiry Issued
+        - No Apparent Unnotified Termination
+      type: string
+
+    EnumClercalc:
+      enum:
+        - CLERICAL CALCULATION INVOLVED
+        - NO CLERICAL CALCULATION INVOLVED
+      type: string
+
+    EnumEnfcment:
+      enum:
+        - ENFORCED FOLLOWING AUT
+        - "ENFORCED FOLLOWING SSP: ALLOW CHANGE IN MOP"
+        - "ENFORCED FOLLOWING SSP: INHIBIT CHANGE OF MOP"
+        - ENFORCEMENT CARRIED FORWARD FROM NIRS1
+        - INHIBIT GMP SSP ENFORCEMENT
+        - NOT APPLICABLE
+        - NOT ENFORCED
+      type: string
+
+    EnumSspDeem:
+      enum:
+        - SSP TYPE RECEIVABLES NOT DEEMED
+        - SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED
+      type: string
+
+    EnumContCatLetter:
+      enum:
+        - (NONE)
+        - "Y"
+        - J
+        - O
+        - "N"
+        - T
+        - W
+        - R
+        - K
+        - H
+        - V
+        - I
+        - P
+        - G
+        - F
+        - M
+        - S
+        - L
+        - Q
+        - X
+        - Z
+        - B
+        - E
+        - A
+        - D
+        - U
+        - C
+      type: string
+
+    EnumDschrsn:
+      enum:
+        - APP/SHP APP CANCELLED FROM OUTSET
+        - AUTO GMP INCORRECT
+        - BENEFICIARY REMOVED
+        - CANCELLATION OF CHANGE OF RPA/BUY OUT
+        - CANCELLED 63 DOCKET ENTRY
+        - CEP REPLACING GMP
+        - CEP REPLACING TRANSFER
+        - CHANGE OF CONTRIBUTIONS/EARNINGS
+        - CHANGE OF DATE OF BIRTH
+        - CHANGE OF REVALUATION RATE
+        - CHANGE RPA REPLACING TRANSFER
+        - COD REPLACING GMP
+        - COD/GMP ENFORCED IN ERROR
+        - COD/GMP REPLACING CEP
+        - CONVERTED FROM NIRS1 ENTRY DEBITED
+        - DATA INTEGRITY CONVERSION ERROR
+        - DEBIT GMP CONVERSION
+        - DEBIT OF INCORRECT CHANGE OF RPA/BUY OUT
+        - GMP REPLACING COD
+        - GMP/COD REPLACING TRANSFER
+        - INCORRECT ECON/SCON ON NOTICE OF TERMINATION
+        - NON-SEQUENTIAL TRANSFER
+        - NOT APPLICABLE
+        - NOTICE OF TERMINATION SENT IN ERROR/CANCELLED
+        - OTHER REASON
+        - PERIOD INCORRECT
+        - PP DEBIT AND RE-ENTRY
+        - PSEUDO TRANSFER REPLACING PREVIOUS NOTICE OF TERMINATION
+        - SCHEME CESSATION CASE 12% REPLACED BY S148 AND VICE VERSA
+        - SPLIT RIGHTS REPLACING PREVIOUS NOTICE OF TERMINATION
+        - TERMINATION NOTICE RECEIVED FROM SCHEME REPLACING ENFORCED COD/GMP
+        - TERMINATION NOTICE TO BE INPUT USING CONTROLLED EARNINGS
+        - TERMINATION ON WRONG ACCOUNT
+        - TRANSFER REPLACING CEP
+        - TRANSFER REPLACING CHANGE RPA
+        - TRANSFER REPLACING GMP
+        - TRANSFER/RPA/COD DEBITED TO PROCESS EARLIER TRANSFER
+        - TWO OR MORE GMPS TO ONE ASCN
+      type: string
+
+    EnumSuspflag:
+      enum:
+        - ALL PAYMENTS SUSPENDED
+        - INCENTIVES SUSPENDED
+        - NO SUSPENSION
+      type: string
+
+    # Long term benefit notes response - Copied from the provided NPS schema
+    LongTermBenefitNotesResponse:
+      description: Response containing concatenated Long Term Benefit notes.
+      type: object
+      properties:
+        longTermBenefitNotes:
+          description: List of concatenated note fields.
+          type: array
+          items:
+            $ref: '#/components/schemas/note'
+      additionalProperties: false
+    note:
+      description: Concatenated Note fields
+      type: string
+
+    # Marriage details response - Copied from the provided NPS schema
+    RetrieveMarriageDetailsResponse:
+      required:
+        - marriageDetails
+      type: object
+      properties:
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetails'
+
+    # Get your state pension response - Copied from the provided NPS schema
+    GetNIRecordResponse:
+      description: Success response payload for this API.
+      required:
+        - identifier
+      type: object
+      properties:
+        identifier:
+          description: The identifier of which could be either a Temporary Reference
+            Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g.
+            AA000001A.
+          pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+          type: string
+          example: AA000001A
+        numberOfQualifyingYears:
+          description: Denotes the number of qualifying years an individual has for
+            receiving their basic pension.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        nonQualifyingYears:
+          description: The number of years during the individual's working life for
+            which they have not paid the required number of National Insurance Contributions
+            or received other relevant benefits.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        yearsToFinalRelevantYear:
+          description: The number of tax years remaining for the insured person up
+            to and including the Final Relevant Year. The Final Relevant Year is the
+            last complete tax year before death or pension age.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        nonQualifyingYearsPayable:
+          description: The number of non-qualifying years that are still payable.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 5
+        pre1975CCCount:
+          description: The total number of contribution credits for an individual
+            for years prior to 1975.
+          maximum: 9999
+          minimum: 0
+          type: integer
+          example: 789
+        dateOfEntry:
+          format: date
+          description: The date of entry onto the NPS system for the individual.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        contributionsByTaxYear:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionsByTaxYear'
+    ContributionsByTaxYear:
+      description: Contains details of the NI Contribution History for all relevant
+        Tax Years.
+      type: object
+      properties:
+        taxYear:
+          description: Denotes the current tax year.
+          maximum: 2099
+          minimum: 1900
+          type: integer
+          example: 2022
+        qualifyingTaxYear:
+          description: Indicates whether the tax year is a qualifying one for an individual's
+            basic pension.
+          type: boolean
+          example: true
+        payableAccepted:
+          description: Indicates whether contributions can still be paid for the tax
+            year towards an individual's basic pension.
+          type: boolean
+          example: true
+        amountNeeded:
+          description: "The total amount of retrospective monetary earnings that a\
+           \ taxpayer may be required to pay tax on, for a given tax period."
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        classThreePayable:
+          description: The amount of Class 3 contributions the taxpayer could pay
+            to make the year qualifying for a given tax year.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        classThreePayableBy:
+          format: date
+          description: The deadline for payment of Class 3 Contributions for a given
+            tax year.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classThreePayableByPenalty:
+          format: date
+          description: The deadline for payment of Class 3 Contributions with a penalty.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classTwoPayable:
+          description: The amount of voluntary class two payable for the tax year.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        classTwoPayableBy:
+          format: date
+          description: The deadline for payment of Class 2 Contributions for a given
+            tax year.
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classTwoPayableByPenalty:
+          format: date
+          description: "The deadline for payment of Class 2 Contributions for a given\
+           \ tax year, with a penalty."
+          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+          type: string
+          example: 2022-06-27
+        classTwoOutstandingWeeks:
+          description: The number of Class 2 credits that have not been paid with
+            a liability present.
+          maximum: 99
+          minimum: 0
+          type: integer
+          example: 3
+        totalPrimaryContributions:
+          description: The total amount of class 1 earnings paid.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        niEarnings:
+          description: The total amount of NI earnings for non-qualifying years.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        coClassOnePaid:
+          description: Total contracted out class 1 contributions paid that count
+            towards qualifying status.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        totalPrimaryEarnings:
+          description: Total contracted out class 1 earnings that count towards qualifying
+            status.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -9999999999999.99
+          type: number
+          example: 10.56
+        niEarningsSelfEmployed:
+          description: Total number of self-employed credits that count towards qualifying
+            status.
+          maximum: 99
+          minimum: 0
+          type: integer
+          example: 3
+        niEarningsVoluntary:
+          description: Total number of voluntary credits that count towards qualifying
+            status.
+          maximum: 99
+          minimum: 0
+          type: integer
+          example: 3
+        underInvestigationFlag:
+          description: Indicates whether an account is currently under investigation.
+          type: boolean
+          example: true
+        primaryPaidEarnings:
+          description: Total earnings including contracted out earnings that count
+            towards qualifying status.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        otherCredits:
+          type: array
+          items:
+            $ref: '#/components/schemas/OtherCredits'
+    OtherCredits:
+      description: Contains a list of other credits for an individual for the tax
+        year.
+      type: object
+      properties:
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumContributionCreditType'
+        creditSourceType:
+          $ref: '#/components/schemas/EnumCreditSourceType'
+        contributionCreditCount:
+          description: "Denotes the number of credits made to an individual's account\
+           \ for a given period - this number can be positive or negative, the latter\
+           \ of which indicates a debit."
+          maximum: 32766
+          minimum: -32768
+          type: integer
+          example: 86
+
+    # Individual Marriage details response - Copied from the provided NPS schema
+    MarriageDetails:
+      required:
+        - activeMarriage
+      type: object
+      properties:
+        activeMarriage:
+          $ref: '#/components/schemas/ActiveMarriage'
+        marriageDetailsList:
+          $ref: '#/components/schemas/MarriageDetailsList'
+        _links:
+          description: Contains link for the marriage details.
+          properties:
+            self:
+              $ref: '#/components/schemas/SelfLink'
+
+    ActiveMarriage:
+      description: Denotes whether or not a marriage/civil partnership is active for
+        the individual.
+      type: boolean
+    MarriageDetailsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/MarriageDetailsListElement'
+
+    MarriageDetailsListElement:
+      required:
+        - sequenceNumber
+        - status
+      type: object
+      properties:
+        sequenceNumber:
+          description: Unique sequence number representing the position in the marriage
+            history (i.e. row) of the marriage details entry for this individual
+          maximum: 126
+          minimum: 1
+          type: integer
+          example: 15
+        status:
+          $ref: '#/components/schemas/EnumMgstattp'
+        startDate:
+          format: date
+          description: The date on which the marriage started.
+          type: string
+        startDateStatus:
+          $ref: '#/components/schemas/EnumDateStat'
+        endDate:
+          format: date
+          description: The date on which the marriage ceased.
+          type: string
+        endDateStatus:
+          $ref: '#/components/schemas/EnumVfddttrm'
+        spouseIdentifier:
+          description: The spouse's identifier of which could be either a Temporary
+            Reference Number (TRN) or a National Insurance Number (NINO).
+          type: string
+        spouseForename:
+          description: The spouse's forename.
+          maxLength: 99
+          minLength: 1
+          pattern: "^([A-Za-z '-])+$"
+          type: string
+          example: Jean-Pierre
+        spouseSurname:
+          description: The spouse's surname.
+          maxLength: 99
+          minLength: 2
+          pattern: "^([A-Za-z '-])+$"
+          type: string
+          example: van Cholmondley-warner
+        separationDate:
+          format: date
+          description: The date on which this married couple separated but were still
+            legally married.
+          type: string
+        reconciliationDate:
+          format: date
+          description: The date on which the marriage was reconciled.
+          type: string
+
+      # NI Contributions and Credits - Copied from the provided NPS schema
+
+    # National insurance contributions and credits response - Copied from the provided NPS schema
+    PostNIContCredResponse:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        totalGraduatedPensionUnits:
+          format: double
+          description: "Denotes the total number of graduated pension units paid to an individual. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10
+        class1ContributionAndCredits:
+          description: Contains an array of Class 1 records.
+          type: array
+          items:
+            $ref: '#/components/schemas/Class1ContributionAndCredits'
+        class2ContributionAndCredits:
+          description: Contains an array of Class 2 records.
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2ContributionAndCredits'
+
+    Class1ContributionAndCredits:
+      description: Contains details of a Class 1 record.
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        numberOfContributionsAndCredits:
+          description: Number of weekly credits that apply to the credit record.
+          maximum: 53
+          minimum: 0
+          type: integer
+        contributionCategoryLetter:
+          $ref: '#/components/schemas/contributionCategoryLetter'
+        contributionCategory:
+          $ref: '#/components/schemas/EnumContCat'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        primaryContribution:
+          $ref: '#/components/schemas/unsignedMoney'
+        class1ContributionStatus:
+          $ref: '#/components/schemas/EnumCl1stat'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        employerName:
+          $ref: '#/components/schemas/employerName'
+        latePaymentPeriod:
+          $ref: '#/components/schemas/EnumLpind'
+
+    Class2ContributionAndCredits:
+      description: Contains details of a Class 2 record.
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        numberOfContributionsAndCredits:
+          $ref: '#/components/schemas/numberOfContributionsAndCredits'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2NIContributonAmount:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2Or3CreditStatus:
+          $ref: '#/components/schemas/EnumCl2Stat'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        latePaymentPeriod:
+          $ref: '#/components/schemas/EnumLpind'
+
+    numberOfContributionsAndCredits:
+      description: Number of weekly credits that apply to the credit record.
+      maximum: 53
+      minimum: 0
+      type: integer
+
+    # Liability Summary Details - Copied from the provided NPS schema
+    GetLiabilitySummaryResponseHIP:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        liabilityDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseLiabilityDetailsHIP'
+        callback:
+          $ref: '#/components/schemas/callback'
+
+    ResponseLiabilityDetailsHIP:
+      description: Contains liability details associated with an individual.
+      required:
+        - identifier
+        - type
+        - occurrenceNumber
+        - startDate
+      type: object
+      properties:
+        identifier:
+          description: The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. RN000001A.
+          pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+          type: string
+          example: RN000001A
+        type:
+          $ref: '#/components/schemas/EnumLiabtp'
+        occurrenceNumber:
+          description: Denotes the number of times a particular liability has occurred on an individual's account.
+          maximum: 32766
+          minimum: 1
+          type: integer
+          example: 1
+        startDateStatus:
+          $ref: '#/components/schemas/EnumLtpsdttp'
+        endDateStatus:
+          $ref: '#/components/schemas/EnumLtpedttp'
+        startDate:
+          format: date
+          description: The date on which this liability started.
+          type: string
+          example: 2022-06-27
+        endDate:
+          format: date
+          description: The date on which this liability ended.
+          type: string
+          example: 2022-06-27
+        country:
+          $ref: '#/components/schemas/EnumCountry'
+        trainingCreditApprovalStatus:
+          $ref: '#/components/schemas/EnumAtcredfg'
+        casepaperReferenceNumber:
+          description: Denotes the reference number of the casepaper associated with a liability.
+          maxLength: 9
+          minLength: 1
+          pattern: "^[A-Z0-9/ -]+$"
+          type: string
+          example: SCH/123/4
+        homeResponsibilitiesProtectionBenefitReference:
+          description: Denotes the Home Responsibilities Protection (HRP) benefit reference.
+          maxLength: 10
+          minLength: 1
+          pattern: "^[A-Za-z0-9- ]+$"
+          type: string
+          example: 12345678AB
+        homeResponsibilitiesProtectionRate:
+          description: The rate associated with the home responsibility protection benefit.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        lostCardNotificationReason:
+          $ref: '#/components/schemas/EnumLcheadtp'
+        lostCardRulingReason:
+          $ref: '#/components/schemas/EnumLcruletp'
+        homeResponsibilityProtectionCalculationYear:
+          description: Denotes the calculation year of the Home Responsibility Protection (HRP).
+          maximum: 2099
+          minimum: 1975
+          type: integer
+          example: 2022
+        awardAmount:
+          description: Denotes the amount of the award.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        resourceGroupIdentifier:
+          description: A unique identifier for a HMRC Resource Group.
+          maximum: 99999999
+          minimum: 0
+          type: integer
+          example: 789
+        homeResponsibilitiesProtectionIndicator:
+          $ref: '#/components/schemas/EnumHrpIndicator'
+        officeDetails:
+          $ref: '#/components/schemas/DecodedOfficeDetailsResponse'
+
+    callback:
+      properties:
+        callbackURL:
+          description: A URL in the response body that redirects the user to call the next set of data based on the prepared URL. This will only be populated if the call has not returned all the relevant data and another call is required.
+          type: string
+
+    DecodedOfficeDetailsResponse:
+      description: Contains office related details.
+      type: object
+      properties:
+        officeLocationDecode:
+          description: A unique identifier for an office location.
+          maximum: 99999
+          minimum: 0
+          type: integer
+          example: 1
+        officeLocationValue:
+          description: The description of the office location.
+          maxLength: 128
+          minLength: 1
+          type: string
+          example: HQ STATIONARY STORE
+        officeIdentifier:
+          $ref: '#/components/schemas/EnumOffidtp'
+
+    # Liability Summary Details Enums - Copied from the provided NPS schema
+    EnumAtcredfg:
+      enum:
+        - CREDIT FOR APPROVED TRAINING APPLIES
+        - NO CREDIT FOR APPROVED TRAINING
+      type: string
+
+    EnumCountry:
+      enum:
+        - ABROAD - NOT KNOWN
+        - AFGHANISTAN
+        - ALBANIA
+        - ALDERNEY
+        - ALGERIA
+        - AMERICAN SAMOA
+        - ANDORRA
+        - ANGOLA
+        - ANGUILLA
+        - ANTARCTIC TERRITORIES (BRITISH)
+        - ANTARCTICA
+        - ANTIGUA
+        - ANTIGUA AND BARBUDA
+        - ANTILLES (NETHERLANDS)
+        - ARAB EMIRATES (UNITED)
+        - ARGENTINA
+        - ARUBA
+        - ASCENCION ISLAND
+        - AUSTRALIA
+        - AUSTRIA
+        - BAHAMAS
+        - BAHRAIN
+        - BANGLADESH
+        - BARBADOS
+        - BARBUDA
+        - BELGIUM
+        - BELIZE
+        - BENIN
+        - BERMUDA
+        - BHUTAN
+        - BISSAU (GUINEA)
+        - BOLIVIA
+        - BOTSWANA
+        - BOUVET ISLAND
+        - BRAZIL
+        - BRITISH INDIAN OCEAN TERRITORIES
+        - BRUNEI
+        - BULGARIA
+        - BURKINA FASO
+        - BURMA
+        - BURUNDI
+        - CAMBODIA
+        - CAMEROON
+        - CANADA
+        - CAPE VERDE ISLANDS
+        - CARIBBEAN NETHERLANDS
+        - CAYMAN ISLANDS
+        - CENTRAL AFRICAN REPUBLIC
+        - CHAD
+        - CHANNEL ISLANDS
+        - CHILE
+        - CHINA PEOPLES REPUBLIC
+        - CHRISTMAS ISLAND
+        - COCOS (KEELING) ISLANDS
+        - COLOMBIA
+        - COMMONWEALTH OF DOMINICA
+        - COMORO ISLANDS
+        - CONGO
+        - COOK ISLANDS
+        - COSTA RICA
+        - COTE D'IVOIRE
+        - CUBA
+        - CURACAO
+        - CYPRUS
+        - CZECH REPUBLIC
+        - CZECHOSLOVAKIA
+        - DEMOCRATIC REPUBLIC OF CONGO
+        - DEMOCRATIC YEMEN
+        - DENMARK
+        - DJIBOUTI
+        - DOMINICAN REPUBLIC
+        - EAST GERMANY
+        - EAST TIMOR
+        - ECUADOR
+        - EGYPT
+        - EL SALVADOR
+        - ENGLAND
+        - EQUATORIAL GUINEA
+        - ERITREA
+        - ETHIOPIA
+        - FALKLAND ISLANDS
+        - FAROE ISLANDS
+        - FEDERAL REP OF YUGOSLAVIA
+        - FIJI
+        - FINLAND
+        - FORMER YUG REP OF MACEDONIA
+        - FRANCE
+        - FRENCH GUIANA
+        - FRENCH OVERSEAS DEPARTMENT
+        - FRENCH POLYNESIA
+        - FRENCH SOUTHERN TERRITORIES
+        - GABON
+        - GAMBIA
+        - GERMANY
+        - GHANA
+        - GIBRALTAR
+        - GREAT BRITAIN
+        - GREECE
+        - GREENLAND
+        - GRENADA
+        - GUADELOUPE
+        - GUAM
+        - GUATEMALA
+        - GUERNSEY
+        - GUINEA
+        - GUYANA
+        - HAITI
+        - HEARD ISLAND AND MCDONALD ISLANDS
+        - HONDURAS
+        - HONG KONG
+        - HUNGARY
+        - ICELAND
+        - INDIA
+        - INDONESIA
+        - IRAN
+        - IRAQ
+        - ISLE OF MAN
+        - ISRAEL
+        - ITALY
+        - JAMAICA
+        - JAPAN
+        - JERSEY
+        - JORDAN
+        - KAMPUCHEA
+        - KENYA
+        - KIRIBATI
+        - KUWAIT
+        - LAOS
+        - LEBANON
+        - LESOTHO
+        - LIBERIA
+        - LIBYA
+        - LIECHTENSTEIN
+        - LUXEMBOURG
+        - MACAU
+        - MADAGASCAR
+        - MALAWI
+        - MALAYSIA
+        - MALDIVE ISLANDS
+        - MALI
+        - MALTA
+        - MARSHALL ISLANDS
+        - MARTINIQUE
+        - MAURITANIA
+        - MAURITIUS
+        - MAYOTTE
+        - MEXICO
+        - MICRONESIA FEDERATION OF
+        - MONACO
+        - MONGOLIA
+        - MONTSERRAT
+        - MOROCCO
+        - MOZAMBIQUE
+        - MYANMAR
+        - NAMIBIA
+        - NAURU
+        - NEPAL
+        - NETHERLANDS
+        - "NEVIS,ST KITTS-NEVIS"
+        - NEW CALEDONIA
+        - NEW ZEALAND
+        - NICARAGUA
+        - NIGER
+        - NIGERIA
+        - NIUE
+        - NORFOLK ISLAND
+        - NORTH KOREA
+        - NORTH MACEDONIA
+        - NORTHERN IRELAND
+        - NORTHERN MARIANA ISLANDS
+        - NORWAY
+        - NOT SPECIFIED OR NOT USED
+        - NOT YET RECORDED
+        - OMAN
+        - PAKISTAN
+        - PALAU
+        - PANAMA
+        - PAPUA NEW GUINEA
+        - PARAGUAY
+        - PERU
+        - PHILIPPINES
+        - PITCAIRN
+        - POLAND
+        - PORTUGAL
+        - PRINCIPE AND SAO TOME
+        - PUERTO RICO
+        - QATAR
+        - REP OF BOSNIA-HERZEGOVINA
+        - REPUBLIC OF ARMENIA
+        - REPUBLIC OF AZERBAIJAN
+        - REPUBLIC OF BELARUS
+        - REPUBLIC OF CROATIA
+        - REPUBLIC OF ESTONIA
+        - REPUBLIC OF GEORGIA
+        - REPUBLIC OF IRELAND
+        - REPUBLIC OF KAZAKHSTAN
+        - REPUBLIC OF KOSOVO
+        - REPUBLIC OF KYRGYZSTAN
+        - REPUBLIC OF LATVIA
+        - REPUBLIC OF LITHUANIA
+        - REPUBLIC OF MOLDOVA
+        - REPUBLIC OF MONTENEGRO
+        - REPUBLIC OF SERBIA
+        - REPUBLIC OF SLOVENIA
+        - REPUBLIC OF TAJIKISTAN
+        - REPUBLIC OF TURKMENISTAN
+        - REPUBLIC OF UZBEKISTAN
+        - REPUBLIC OF YEMEN
+        - REUNION
+        - ROMANIA
+        - RUSSIA
+        - RUSSIAN FEDERATION
+        - RWANDA
+        - SABAH
+        - SAINT PIERRE AND MIQUELON
+        - SAMOA
+        - SAN MARINO
+        - SARAWAK
+        - SARK
+        - SAUDI ARABIA
+        - SCOTLAND
+        - SENEGAL
+        - SEYCHELLES
+        - SHARJAH
+        - SIERRA LEONE
+        - SINGAPORE
+        - SLOVAK REPUBLIC
+        - SOLOMON ISLANDS
+        - SOMALIA
+        - SOUTH AFRICA
+        - SOUTH GEORGIA AND SOUTH SANDWICH ISLAND
+        - SOUTH KOREA
+        - SPAIN
+        - SRI LANKA
+        - ST HELENA & DEPNDS
+        - ST LUCIA
+        - ST MARTINS
+        - ST VINCENT & GRENADINES
+        - STATELESS
+        - SUDAN
+        - SURINAM
+        - SVALBARD AND JAN MAYEN
+        - SWAZILAND
+        - SWEDEN
+        - SWITZERLAND
+        - SYRIA
+        - TAHITI
+        - TAIWAN
+        - TANZANIA
+        - THAILAND
+        - TOGO
+        - TOKELAU
+        - TONGA
+        - TOURS
+        - TRINIDAD & TOBAGO
+        - TRISTAN DA CUHNA
+        - TUNISIA
+        - TURKEY
+        - TURKS & CAICOS ISLANDS
+        - TUVALU
+        - UGANDA
+        - UKRAINE
+        - UNITED STATES MINOR OUTLYING ISLANDS
+        - URUGUAY
+        - USA
+        - USSR
+        - VANUATU
+        - VATICAN CITY STATE
+        - VENEZUELA
+        - VIETNAM
+        - VIRGIN ISLANDS (BRITISH)
+        - VIRGIN ISLANDS (USA)
+        - WALES
+        - WALLIS AND FUTUNA
+        - WESTERN SAHARA
+        - WESTERN SAMOA
+        - YUGOSLAVIA
+        - ZAIRE
+        - ZAMBIA
+        - ZIMBABWE
+        - NORTHERN PART OF CYPRUS
+      type: string
+
+    EnumLcheadtp:
+      enum:
+        - LOST IN DEPARTMENT'S CUSTODY
+        - NOT APPLICABLE
+        - OTHER
+      type: string
+
+    EnumLcruletp:
+      enum:
+        - ACCEPTED
+        - ACCEPTED AFTER REFUSAL
+        - CANCELLED
+        - NOT APPLICABLE
+        - REFUSED
+      type: string
+
+    EnumLiabtp:
+      enum:
+        - ABROAD
+        - ABSOLUTE WAIVER
+        - ALL LIABILITIES
+        - APPROVED TRAINING
+        - CA (S2P)
+        - CL2 EC/BILATERAL REGS
+        - CLASS 2 CONVERTED FROM NIRS1
+        - CLASS 2 IN SA
+        - CLASS 2 LIABILITY (UK)
+        - CLASS 2 MATERNITY ALLOWANCE
+        - CLASS 2 VOLUNTARY UK
+        - CLASS 3 (UK)
+        - CLASS 3 BILLING OVERRIDE
+        - CLASS 3 CONVERTED FROM NIRS1
+        - CODED OUT
+        - CONTINUING CLASS 1 LIABILITY
+        - CONTINUING CLASS 2 LIABILITY
+        - CONTRIBUTOR INITIATED NON-LIABILITY OVERRIDE
+        - CRIMINAL PROCEEDINGS
+        - CRS/RO
+        - Carer of AA/CAA/DLA recipient
+        - Carer Support Payment
+        - Carer's Allowance
+        - Carer's Credit
+        - Child Benefit
+        - Class 2 Billing Override
+        - DEFERMENT TYPE 1
+        - DEFERMENT TYPE 2
+        - DEFERMENT TYPE 3
+        - DEFERMENT TYPE 4
+        - DPTC (GB - EMPLOYED)
+        - DPTC (GB - SELF EMPLOYED)
+        - DPTC (NI - EMPLOYED)
+        - DPTC (NI - SELF EMPLOYED)
+        - DUMMY 101
+        - DUMMY 102
+        - DWA (GB EMPLOYED)
+        - DWA (GB SELF - EMPLOYED)
+        - DWA (NI EMPLOYED)
+        - DWA (NI SELF -EMPLOYED)
+        - Disabled Tax Credit (Employed)
+        - Disabled Tax Credit (Self-Employed)
+        - ESA (S2P)
+        - FULL TIME EDUCATION
+        - FamC (GB)
+        - FamC (NI)
+        - Foreign Earnings Qualification (S2P)
+        - Foster Carer
+        - HIGHER RATE PROVISION OVERRIDE
+        - HMF
+        - HOME RESPONSIBILITY PROTECTION (AA/CAA)
+        - HOME RESPONSIBILITY PROTECTION (CBC AUTO)
+        - HOME RESPONSIBILITY PROTECTION (CBC CLERICAL)
+        - HOME RESPONSIBILITY PROTECTION (DLA)
+        - HOME RESPONSIBILITY PROTECTION (FOSTER CARERS)
+        - HOME RESPONSIBILITY PROTECTION (I/S)
+        - IB (S2P)
+        - INSOLVENCY (CLASS 1)
+        - INSOLVENCY (CLASS 2)
+        - IRRECOVERABLE ARREARS
+        - ISLE OF MAN
+        - LCW/LCWRA
+        - LCW/LCWRA Override
+        - LONG TERM NON EMPLOYMENT
+        - LONG TERM SCALE RATE (LTSR)
+        - LOST CARD
+        - MARINER'S VOLUNTARY CLASS 2
+        - MARRIED WOMAN'S REDUCED RATE
+        - NEGLIGENT EMPLOYEE
+        - NOT APPLICABLE
+        - PAYMENT OF ARREARS BY ADMINISTRATIVE ORDER
+        - PAYMENT OF ARREARS BY INSTALMENTS
+        - PERIODS OF ESA (AUTO)
+        - PERIODS OF ESA (CLERICAL)
+        - PERIODS OF INCAPACITY (AUTO)
+        - PERIODS OF INCAPACITY (CLERICAL)
+        - PROVISIONAL WAIVER
+        - PSEUDO CIVIL RECOVERY SECTION
+        - PSEUDO DEBT MANAGEMENT SECTION
+        - PSEUDO INSOLVENCY SECTION
+        - PSEUDO SUBJECT TO NORMAL COLLECTION ACTION
+        - REDUCED BENEFIT DIRECTIVE (RBD)
+        - SENT TO IDMS
+        - SHAREFISHERMAN
+        - SHAREFISHERMAN IN SA
+        - SHAREFISHERMAN UNEMPLOYMENT BENEFIT
+        - SICKNESS
+        - SMALL EARNINGS EXCEPTION
+        - SPT-LPT
+        - SPT-LPT EC
+        - SYSTEM INITIATED NON-LIABILITY OVERRIDE
+        - Specified Adult Carer
+        - Transferred ChB Liability
+        - UNDER SMALL PROFIT THRESHOLD
+        - UNEMPLOYABILITY SUPPLEMENT
+        - Universal Credit
+        - Universal Credit (S2P)
+        - VOLUNTARY CLASS 2 ABROAD
+        - VOLUNTARY CLASS 2 ABROAD BY EMPLOYERS SCHEDULE
+        - VOLUNTARY CLASS 3 ABROAD
+        - VOLUNTARY CLASS 3 ABROAD BY EMPLOYERS SCHEDULE
+        - VOLUNTEER DEVELOPMENT WORKER
+        - WFTC (GB)
+        - WFTC (NI)
+        - Working Tax Credit (Employed)
+        - Working Tax Credit (Self-Employed)
+        - Replacement Credits for Parents and Carers
+      type: string
+
+    EnumLtpedttp:
+      enum:
+        - END DATE HELD
+        - END DATE NOT HELD
+        - END DATE PRE RNI
+        - INPUT/REMOVAL OF CONTRIBUTION/CREDIT OF RRE LAPSED BY LO
+        - PERIOD CLOSED DUE TO CLAIM FOR BENEFIT
+        - PSEUDO END DATE
+        - PSUEDO RETURN FROM ABROAD
+        - RRE ENDED FOR MPA
+        - RRE LAPSED BY CHANGE IN MARITAL STATUS
+        - RRE LAPSED BY CREDITS
+        - RRE LAPSED BY REVOCATION
+        - RRE LAPSED BY RPFA
+        - RRE LAPSED BY VPA APPLICATION
+        - RRE LAPSED DUE TO FAILURE OF 2 YEAR CHECK
+      type: string
+
+    EnumLtpsdttp:
+      enum:
+        - PSEUDO START DATE
+        - START DATE HELD
+        - START DATE NOT HELD
+        - START DATE PRE 1982
+        - START DATE PRE RNI
+      type: string
+
+    EnumOffidtp:
+      enum:
+        - (NONE)
+        - DE
+        - DSS
+        - Inland Revenue
+        - NOT APPLICABLE
+        - NOT KNOWN
+      type: string
+
+    EnumHrpIndicator:
+      enum:
+        - (NONE)
+        - HRP already recorded
+        - Missing HRP letter not sent - awarded
+        - Missing HRP letter not sent - refused
+        - Missing HRP letter sent
+        - Missing HRP letter sent - awarded
+        - Missing HRP letter sent - refused
+      type: string
+
+    # Benefit Scheme Details for GYSP
+    GetBenefitSchemeDetailsResponse:
+      description: Success response payload for this API.
+      required:
+        - schemeAddressDetailsList
+        - benefitSchemeDetails
+      type: object
+      properties:
+        benefitSchemeDetails:
+          $ref: '#/components/schemas/RetrieveBenefitSchemeDetails'
+        schemeAddressDetailsList:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/RetrieveSchemeAddressDetails'
+    RetrieveBenefitSchemeDetails:
+      description: Contains details of a benefit scheme.
+      required:
+        - schemeContractedOutNumberDetails
+        - schemeInhibitionStatus
+        - currentOptimisticLock
+      type: object
+      properties:
+        magneticTapeNumber:
+          description: "A unique number allocated to a pension scheme administrator,\
+            \ who receives data on magnetic media, or personal pension provider."
+          maximum: 99999
+          minimum: 0
+          type: integer
+          example: 789
+        schemeName:
+          description: The name of the scheme used for the institution details of
+            a benefit scheme.
+          maxLength: 54
+          minLength: 1
+          pattern: "^[a-zA-Z0-9\\/,'.&() -]+$"
+          type: string
+          example: ACME PENSION SCHEME
+        schemeStartDate:
+          format: date
+          description: The date on which the benefit scheme started.
+          type: string
+          example: 2022-06-27
+        schemeCessationDate:
+          format: date
+          description: The date that the benefit scheme ceased.
+          type: string
+          example: 2022-06-27
+        contractedOutDeductionExtinguishedDate:
+          format: date
+          description: Denotes the date that the Guaranteed Minimum Pension (GMP)
+            contracted-out deduction ceased to be.
+          type: string
+          example: 2022-06-27
+        paymentSuspensionDate:
+          format: date
+          description: The date that the scheme payments were suspended.
+          type: string
+          example: 2022-06-27
+        recoveriesSuspendedDate:
+          format: date
+          description: The date that the scheme recoveries were suspended.
+          type: string
+          example: 2022-06-27
+        paymentRestartDate:
+          format: date
+          description: The date that the scheme payments were restarted.
+          type: string
+          example: 2022-06-27
+        recoveriesRestartedDate:
+          format: date
+          description: The date that the scheme recoveries were restarted.
+          type: string
+          example: 2022-06-27
+        schemeNature:
+          $ref: '#/components/schemas/EnumNatSche'
+        benefitSchemeInstitution:
+          $ref: '#/components/schemas/EnumInsType'
+        accruedGMPLiabilityServiceDate:
+          format: date
+          description: The date that the accrued guaranteed minimum pension liability
+            service was provided by pension scheme administrators.
+          type: string
+          example: 2022-06-27
+        rerouteToSchemeCessation:
+          $ref: '#/components/schemas/EnumSendcess'
+        statementInhibitor:
+          $ref: '#/components/schemas/EnumInhibind'
+        certificateCancellationDate:
+          format: date
+          description: The date that the benefit scheme certificate was cancelled.
+          type: string
+          example: 2022-06-27
+        suspendedDate:
+          format: date
+          description: The date the benefit scheme is suspended for an individual.
+          type: string
+          example: 2022-06-27
+        isleOfManInterest:
+          description: Denotes whether or not the Isle of Man has an interest in the
+            notification of change for the individual's account.
+          type: boolean
+          example: true
+        schemeWindingUp:
+          description: Denotes whether or not a benefit scheme is in the process of
+            winding-up and will be discharging all of its liabilities.
+          type: boolean
+          example: true
+        revaluationRateSequenceNumber:
+          description: Unique sequence number representing the position in the revaluation
+            rate history (i.e. row) of the revaluation rate history details entry
+            for this individual - this would only be populated if the previous call
+            did not transfer all of the data i.e. there are more rows marked to be
+            collected still.
+          maximum: 32700
+          minimum: 1
+          type: integer
+          example: 123
+        benefitSchemeStatus:
+          $ref: '#/components/schemas/EnumSchStat'
+        dateFormallyCertified:
+          format: date
+          description: The date on which the existing benefit scheme or a benefit
+            scheme conversion was formally certified.
+          type: string
+          example: 2022-06-27
+        privatePensionSchemeSanctionDate:
+          format: date
+          description: Denotes the date on which a private pension was sanctioned.
+          type: string
+          example: 2022-06-27
+        currentOptimisticLock:
+          description: "Denotes the version of the data being viewed/processed - if\
+            \ this value is different to what is held in the database, any update\
+            \ requests would be rejected to avoid the risk of overwriting valid data\
+            \ with out of date data. The consumer must first refresh their data before\
+            \ re-attempting to perform any subsequent update requests."
+          maximum: 254
+          minimum: 0
+          type: integer
+          example: 86
+        schemeConversionDate:
+          format: date
+          description: Denotes the conversion date for the stakeholder pension scheme.
+          type: string
+          example: 2022-06-27
+        schemeInhibitionStatus:
+          $ref: '#/components/schemas/EnumSchshptp'
+        reconciliationDate:
+          format: date
+          description: The reconciliation date for the Scheme Contracted-Out Number
+            (SCON).
+          type: string
+          example: 2022-06-27
+        schemeContractedOutNumberDetails:
+          description: Scheme Contracted-Out Numbers of Personal Pension (ASCN) or
+            Occupational Pension (SCON) with prefix and suffix.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}[0124568]\\\
+            d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+    RetrieveSchemeAddressDetails:
+      description: Contains scheme address details.
+      required:
+        - schemeAddressSequenceNumber
+        - schemeContractedOutNumberDetails
+      type: object
+      properties:
+        schemeAddressType:
+          $ref: '#/components/schemas/EnumSAddtp'
+        schemeAddressSequenceNumber:
+          description: Unique sequence number representing the position in the scheme
+            correspondence address history (i.e. row) of the scheme correspondence
+            address details entry for this individual - this would only be populated
+            if the previous call did not transfer all of the data i.e. there are more
+            rows marked to be collected still.
+          maximum: 126
+          minimum: 1
+          type: integer
+          example: 86
+        schemeAddressStartDate:
+          format: date
+          description: The start date for the correspondence address for the benefit
+            scheme.
+          type: string
+          example: 2022-06-27
+        schemeAddressEndDate:
+          format: date
+          description: The end date for the correspondence address for the benefit
+            scheme.
+          type: string
+          example: 2022-06-27
+        country:
+          $ref: '#/components/schemas/EnumCountry'
+        areaDiallingCode:
+          $ref: '#/components/schemas/EnumCode2stdNIUI'
+        schemeTelephoneNumber:
+          description: The contact telephone number for the scheme operator.
+          maxLength: 15
+          minLength: 1
+          pattern: "^([0-9 ])+$"
+          type: string
+          example: 0191 123 4567
+        schemeContractedOutNumberDetails:
+          description: Scheme Contracted-Out Numbers of Personal Pension (ASCN) or
+            Occupational Pension (SCON) with prefix and suffix.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}[0124568]\\\
+            d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+          type: string
+          example: S2123456B
+        benefitSchemeAddressDetails:
+          $ref: '#/components/schemas/BenefitSchemeAddressDetails'
+    BenefitSchemeAddressDetails:
+      description: Contains benefit scheme address details.
+      type: object
+      properties:
+        schemeAddressLine1:
+          description: "The first line of a scheme's address - typically the primary\
+            \ address information i.e. sub-building name and building name - e.g.\
+            \ Flat 1 Rose House, or building number and dependant throughfare - e.g.\
+            \ 22 Church Mews, or building number and throughfare - e.g. 22 Church\
+            \ Street."
+          maxLength: 27
+          minLength: 1
+          pattern: "^([a-zA-Z0-9\\/,.&*\"'!%#?+<>;:() -])+$"
+          type: string
+          example: 22 Church Mews
+        schemeAddressLine2:
+          description: The second line of a scheme's address - typically the secondary
+            address information - i.e. dependant throughfare or throughfare.
+          maxLength: 27
+          minLength: 1
+          pattern: "^([a-zA-Z0-9\\/,.&*\"'!%#?+<>;:() -])+$"
+          type: string
+          example: East Benton Rise
+        schemeAddressLocality:
+          description: The third line of a scheme's address - i.e. the locality where
+            the address resides in.
+          maxLength: 27
+          minLength: 1
+          pattern: "^([a-zA-Z0-9\\/,.&*\"'!%#?+<>;:() -])+$"
+          type: string
+          example: Gosforth
+        schemeAddressPostalTown:
+          description: The fourth line of a scheme's address - i.e. the postal town
+            where the address resides in.
+          maxLength: 27
+          minLength: 1
+          pattern: "^([a-zA-Z0-9\\/,.&*\"'!%#?+<>;:() -])+$"
+          type: string
+          example: Newcastle
+        schemePostcode:
+          description: "The postal code for an address. Includes formats of: X9 9XX,\
+            \ X99 9XX, XX9 9XX, XX99 9XX, X9X 9XX, XX9X 9XX, BFPO 9999."
+          maxLength: 8
+          minLength: 6
+          type: string
+          example: XX9X 9XX
+
+    # Base marriage details with common fields
+    BaseMarriageDetails:
+      type: object
+      properties:
+        startDate:
+          $ref: '#/components/schemas/dateString'
+        startDateStatus:
+          $ref: '#/components/schemas/EnumMarriageStartDateStatus'
+        endDate:
+          $ref: '#/components/schemas/dateString'
+        endDateStatus:
+          $ref: '#/components/schemas/EnumMarriageEndDateStatus'
+        spouseIdentifier:
+          type: string
+        spouseForename:
+          $ref: '#/components/schemas/spouseForename'
+        spouseSurname:
+          $ref: '#/components/schemas/spouseSurname'
+        separationDate:
+          $ref: '#/components/schemas/dateString'
+        reconciliationDate:
+          $ref: '#/components/schemas/dateString'
+
+    # Class 2 MA Receipts - Copied from the provided NPS schema
+    GetClass2MAReceiptsResponse:
+      description: Success response payload for this API.
+      required:
+        - identifier
+        - class2MAReceiptDetails
+      type: object
+      properties:
+        identifier:
+          $ref: '#/components/schemas/identifier'
+        class2MAReceiptDetails:
+          description: Contains an array of Class 2 MA Receipt details.
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2MAReceiptDetails'
+
+    Class2MAReceiptDetails:
+      description: Contains MA Receipt details associated with an individual.
+      type: object
+      properties:
+        initials:
+          $ref: '#/components/schemas/initials'
+        surname:
+          $ref: '#/components/schemas/surname'
+        receivablePeriodStartDate:
+          $ref: '#/components/schemas/receivablePeriodStartDate'
+        receivablePeriodEndDate:
+          $ref: '#/components/schemas/receivablePeriodEndDate'
+        receivablePayment:
+          $ref: '#/components/schemas/receivablePayment'
+        receiptDate:
+          $ref: '#/components/schemas/receiptDate'
+        liabilityStartDate:
+          $ref: '#/components/schemas/liabilityStartDate'
+        liabilityEndDate:
+          $ref: '#/components/schemas/liabilityEndDate'
+        billAmount:
+          $ref: '#/components/schemas/billAmount'
+        billScheduleNumber:
+          $ref: '#/components/schemas/billScheduleNumber'
+        isClosedRecord:
+          $ref: '#/components/schemas/isClosedRecord'
+        weeksPaid:
+          $ref: '#/components/schemas/weeksPaid'
+
+    # Class 2 MA Receipts field definitions - Copied from the provided NPS schema
+    identifier:
+      description: The identifier of which could be either a Temporary Reference Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
+      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+      type: string
+      example: AA000001A
+
+    initials:
+      description: The Initials of the customer.
+      maxLength: 2
+      minLength: 1
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+      example: JP
+
+    surname:
+      description: The surname of the individual.
+      maxLength: 99
+      minLength: 2
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+      example: van Cholmondley-warner
+
+    receivablePeriodStartDate:
+      format: date
+      description: The receivable period start date.
+      type: string
+      example: 2023-06-27
+
+    receivablePeriodEndDate:
+      format: date
+      description: The receivable period end date.
+      type: string
+      example: 2023-06-27
+
+    receivablePayment:
+      description: The receivable payment of the receipt.
+      multipleOf: 0.00010
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      type: number
+      example: 10.56
+
+    receiptDate:
+      format: date
+      description: The receipt date.
+      type: string
+      example: 2023-06-27
+
+    liabilityStartDate:
+      format: date
+      description: The liability type start date.
+      type: string
+      example: 2023-06-27
+
+    liabilityEndDate:
+      format: date
+      description: The liability type end date.
+      type: string
+      example: 2023-06-27
+
+    billAmount:
+      description: Bill amount of the class 2 MA receipt
+      multipleOf: 0.00010
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      type: number
+      example: 10.56
+
+    billScheduleNumber:
+      format: number
+      description: Bill schedule number of the class 2 MA receipt
+      type: integer
+
+    isClosedRecord:
+      description: Confirms if the receipt is a closed / paid receipt.
+      type: boolean
+
+    weeksPaid:
+      description: A calculated number of weeks paid
+      type: integer
+
+    # Shared Type Definitions
+    taxYear:
+      description: "Denotes the tax year (e.g. 2023 for a 2023/2024 tax period)."
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+      type: integer
+
+    nationalInsuranceNumber:
+      description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+      maxLength: 9
+      minLength: 8
+      pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+      example: "AA000001A"
+      type: string
+
+    dateString:
+      description: "Date in YYYY-MM-DD format."
+      format: date
+      pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      type: string
+
+    spouseForename:
+      description: "The spouse's forename."
+      example: "Jean-Pierre"
+      maxLength: 99
+      minLength: 1
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+
+    spouseSurname:
+      description: "The spouse's surname."
+      example: "van Cholmondley-warner"
+      maxLength: 99
+      minLength: 2
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+
+    qualifyingTaxYear:
+      description: "Indicates whether the tax year is a qualifying one for an individual's basic pension."
+      example: true
+      type: boolean
+
+    numberOfQualifyingYears:
+      description: "Denotes the number of qualifying years an individual has for receiving their basic pension."
+      example: 5
+      maximum: 100
+      minimum: 0
+      type: integer
+
+    unsignedMoney:
+      description: "Positive or zero monetary value."
+      maximum: 99999999999999.98
+      minimum: 0
+      multipleOf: 0.01
+      type: number
+
+    signedMoney:
+      description: "Signed monetary value."
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      multipleOf: 0.01
+      type: number
+
+    contributionCategoryLetter:
+      description: "Letter associated with the contribution category."
+      maxLength: 1
+      minLength: 1
+      pattern: "^[A-Z]$"
+      type: string
+
+    employerName:
+      description: "Employer name, held as a checkbrick in NPS for employment details linked to a contribution."
+      minLength: 1
+      maxLength: 6
+      pattern: "^([A-Za-z ])+$"
+      type: string
+
+    benefitSchemeName:
+      description: The name of the scheme used for the institution details of a benefit scheme.
+      maxLength: 54
+      minLength: 1
+      pattern: "^[a-zA-Z0-9\\/,'.&() -]+$"
+      type: string
+
+    # Enum Definitions
+
+    EnumCode2stdNIUI:
+      enum:
+        - 00000 (0)
+        - 0113 (1)
+        - 0114 (2)
+        - 0115 (3)
+        - 0116 (4)
+        - 0117 (5)
+        - 0118 (6)
+        - 01200 (7)
+        - 01202 (8)
+        - 01203 (9)
+        - 01204 (10)
+        - 01205 (11)
+        - 01206 (12)
+        - 01207 (13)
+        - 01208 (14)
+        - 01209 (15)
+        - 0121 (16)
+        - 01222 (17)
+        - 01223 (18)
+        - 01224 (19)
+        - 01225 (20)
+        - 01226 (21)
+        - 01227 (22)
+        - 01228 (23)
+        - 01229 (24)
+        - 01232 (25)
+        - 01233 (26)
+        - 01234 (27)
+        - 01235 (28)
+        - 01236 (29)
+        - 01237 (30)
+        - 01238 (31)
+        - 01239 (32)
+        - 01241 (33)
+        - 01242 (34)
+        - 01243 (35)
+        - 01244 (36)
+        - 01245 (37)
+        - 01246 (38)
+        - 01247 (39)
+        - 01248 (40)
+        - 01249 (41)
+        - 01250 (42)
+        - 01252 (43)
+        - 01253 (44)
+        - 01254 (45)
+        - 01255 (46)
+        - 01256 (47)
+        - 01257 (48)
+        - 01258 (49)
+        - 01259 (50)
+        - 01260 (51)
+        - 01261 (52)
+        - 01262 (53)
+        - 01263 (54)
+        - 01264 (55)
+        - 01265 (56)
+        - 01266 (57)
+        - 01267 (58)
+        - 01268 (59)
+        - 01269 (60)
+        - 01270 (61)
+        - 01271 (62)
+        - 01273 (63)
+        - 01274 (64)
+        - 01275 (65)
+        - 01276 (66)
+        - 01277 (67)
+        - 01278 (68)
+        - 01279 (69)
+        - 01280 (70)
+        - 01282 (71)
+        - 01283 (72)
+        - 01284 (73)
+        - 01285 (74)
+        - 01286 (75)
+        - 01287 (76)
+        - 01288 (77)
+        - 01289 (78)
+        - 01290 (79)
+        - 01291 (80)
+        - 01292 (81)
+        - 01293 (82)
+        - 01294 (83)
+        - 01295 (84)
+        - 01296 (85)
+        - 01297 (86)
+        - 01298 (87)
+        - 01299 (88)
+        - 01300 (89)
+        - 01301 (90)
+        - 01302 (91)
+        - 01303 (92)
+        - 01304 (93)
+        - 01305 (94)
+        - 01306 (95)
+        - 01307 (96)
+        - 01308 (97)
+        - 01309 (98)
+        - 0131 (99)
+        - 01320 (100)
+        - 01322 (101)
+        - 01323 (102)
+        - 01324 (103)
+        - 01325 (104)
+        - 01326 (105)
+        - 01327 (106)
+        - 01328 (107)
+        - 01329 (108)
+        - 01330 (109)
+        - 01332 (110)
+        - 01333 (111)
+        - 01334 (112)
+        - 01335 (113)
+        - 01337 (114)
+        - 01339 (115)
+        - 01340 (116)
+        - 01341 (117)
+        - 01342 (118)
+        - 01343 (119)
+        - 01344 (120)
+        - 01346 (121)
+        - 01347 (122)
+        - 01348 (123)
+        - 01349 (124)
+        - 01350 (125)
+        - 01352 (126)
+        - 01353 (127)
+        - 01354 (128)
+        - 01355 (129)
+        - 01356 (130)
+        - 01357 (131)
+        - 01358 (132)
+        - 01359 (133)
+        - 01360 (134)
+        - 01361 (135)
+        - 01362 (136)
+        - 01363 (137)
+        - 01364 (138)
+        - 01365 (139)
+        - 01366 (140)
+        - 01367 (141)
+        - 01368 (142)
+        - 01369 (143)
+        - 01371 (144)
+        - 01372 (145)
+        - 01373 (146)
+        - 01375 (147)
+        - 01376 (148)
+        - 01377 (149)
+        - 01379 (150)
+        - 01380 (151)
+        - 01381 (152)
+        - 01382 (153)
+        - 01383 (154)
+        - 01384 (155)
+        - 01386 (156)
+        - 01387 (157)
+        - 01388 (158)
+        - 01389 (159)
+        - 01392 (160)
+        - 01394 (161)
+        - 01395 (162)
+        - 01396 (163)
+        - 01397 (164)
+        - 01398 (165)
+        - 01400 (166)
+        - 01403 (167)
+        - 01404 (168)
+        - 01405 (169)
+        - 01406 (170)
+        - 01407 (171)
+        - 01408 (172)
+        - 01409 (173)
+        - 0141 (174)
+        - 01420 (175)
+        - 01422 (176)
+        - 01423 (177)
+        - 01424 (178)
+        - 01425 (179)
+        - 01427 (180)
+        - 01428 (181)
+        - 01429 (182)
+        - 01430 (183)
+        - 01431 (184)
+        - 01432 (185)
+        - 01433 (186)
+        - 01434 (187)
+        - 01435 (188)
+        - 01436 (189)
+        - 01437 (190)
+        - 01438 (191)
+        - 01439 (192)
+        - 01440 (193)
+        - 01442 (194)
+        - 01443 (195)
+        - 01444 (196)
+        - 01445 (197)
+        - 01446 (198)
+        - 01449 (199)
+        - 01450 (200)
+        - 01451 (201)
+        - 01452 (202)
+        - 01453 (203)
+        - 01454 (204)
+        - 01455 (205)
+        - 01456 (206)
+        - 01457 (207)
+        - 01458 (208)
+        - 01460 (209)
+        - 01461 (210)
+        - 01462 (211)
+        - 01463 (212)
+        - 01464 (213)
+        - 01465 (214)
+        - 01466 (215)
+        - 01467 (216)
+        - 01469 (217)
+        - 01470 (218)
+        - 01471 (219)
+        - 01472 (220)
+        - 01473 (221)
+        - 01474 (222)
+        - 01475 (223)
+        - 01476 (224)
+        - 01477 (225)
+        - 01478 (226)
+        - 01479 (227)
+        - 01480 (228)
+        - 01481 (229)
+        - 01482 (230)
+        - 01483 (231)
+        - 01484 (232)
+        - 01485 (233)
+        - 01487 (234)
+        - 01488 (235)
+        - 01489 (236)
+        - 01490 (237)
+        - 01491 (238)
+        - 01492 (239)
+        - 01493 (240)
+        - 01494 (241)
+        - 01495 (242)
+        - 01496 (243)
+        - 01497 (244)
+        - 01499 (245)
+        - 01501 (246)
+        - 01502 (247)
+        - 01503 (248)
+        - 01504 (249)
+        - 01505 (250)
+        - 01506 (251)
+        - 01507 (252)
+        - 01508 (253)
+        - 01509 (254)
+        - 0151 (255)
+        - 01520 (256)
+        - 01522 (257)
+        - 01524 (258)
+        - 01525 (259)
+        - 01526 (260)
+        - 01527 (261)
+        - 01528 (262)
+        - 01529 (263)
+        - 01530 (264)
+        - 01531 (265)
+        - 01534 (266)
+        - 01535 (267)
+        - 01536 (268)
+        - 01538 (269)
+        - 01539 (270)
+        - 01540 (271)
+        - 01542 (272)
+        - 01543 (273)
+        - 01544 (274)
+        - 01545 (275)
+        - 01546 (276)
+        - 01547 (277)
+        - 01548 (278)
+        - 01549 (279)
+        - 01550 (280)
+        - 01553 (281)
+        - 01554 (282)
+        - 01555 (283)
+        - 01556 (284)
+        - 01557 (285)
+        - 01558 (286)
+        - 01559 (287)
+        - 01560 (288)
+        - 01561 (289)
+        - 01562 (290)
+        - 01563 (291)
+        - 01564 (292)
+        - 01565 (293)
+        - 01566 (294)
+        - 01567 (295)
+        - 01568 (296)
+        - 01569 (297)
+        - 01570 (298)
+        - 01571 (299)
+        - 01572 (300)
+        - 01573 (301)
+        - 01574 (302)
+        - 01575 (303)
+        - 01576 (304)
+        - 01577 (305)
+        - 01578 (306)
+        - 01579 (307)
+        - 01580 (308)
+        - 01581 (309)
+        - 01582 (310)
+        - 01583 (311)
+        - 01584 (312)
+        - 01586 (313)
+        - 01588 (314)
+        - 01590 (315)
+        - 01591 (316)
+        - 01592 (317)
+        - 01593 (318)
+        - 01594 (319)
+        - 01595 (320)
+        - 01597 (321)
+        - 01598 (322)
+        - 01599 (323)
+        - 01600 (324)
+        - 01603 (325)
+        - 01604 (326)
+        - 01606 (327)
+        - 01608 (328)
+        - 01609 (329)
+        - 01610 (330)
+        - 01620 (331)
+        - 01621 (332)
+        - 01622 (333)
+        - 01622 (334)
+        - 01623 (335)
+        - 01624 (336)
+        - 01625 (337)
+        - 01626 (338)
+        - 01628 (339)
+        - 01629 (340)
+        - 01630 (341)
+        - 01631 (342)
+        - 01633 (343)
+        - 01634 (344)
+        - 01635 (345)
+        - 01636 (346)
+        - 01637 (347)
+        - 01638 (348)
+        - 01639 (349)
+        - 01641 (350)
+        - 01642 (351)
+        - 01643 (352)
+        - 01644 (353)
+        - 01646 (354)
+        - 01647 (355)
+        - 01648 (356)
+        - 01650 (357)
+        - 01651 (358)
+        - 01652 (359)
+        - 01653 (360)
+        - 01654 (361)
+        - 01655 (362)
+        - 01656 (363)
+        - 01659 (364)
+        - 01661 (365)
+        - 01662 (366)
+        - 01663 (367)
+        - 01664 (368)
+        - 01665 (369)
+        - 01666 (370)
+        - 01667 (371)
+        - 01668 (372)
+        - 01669 (373)
+        - 01670 (374)
+        - 01671 (375)
+        - 01672 (376)
+        - 01673 (377)
+        - 01674 (378)
+        - 01675 (379)
+        - 01676 (380)
+        - 01677 (381)
+        - 01678 (382)
+        - 01680 (383)
+        - 01681 (384)
+        - 01683 (385)
+        - 01684 (386)
+        - 01685 (387)
+        - 01686 (388)
+        - 01687 (389)
+        - 01688 (390)
+        - 01688 (391)
+        - 01689 (392)
+        - 01690 (393)
+        - 01691 (394)
+        - 01692 (395)
+        - 01693 (396)
+        - 01694 (397)
+        - 01695 (398)
+        - 01698 (399)
+        - 01700 (400)
+        - 01702 (401)
+        - 01703 (402)
+        - 01704 (403)
+        - 01705 (404)
+        - 01706 (405)
+        - 01707 (406)
+        - 01708 (407)
+        - 01709 (408)
+        - 0171 (409)
+        - 01720 (410)
+        - 01721 (411)
+        - 01722 (412)
+        - 01723 (413)
+        - 01724 (414)
+        - 01725 (415)
+        - 01726 (416)
+        - 01727 (417)
+        - 01728 (418)
+        - 01729 (419)
+        - 01730 (420)
+        - 01732 (421)
+        - 01733 (422)
+        - 01736 (423)
+        - 01737 (424)
+        - 01738 (425)
+        - 01740 (426)
+        - 01743 (427)
+        - 01744 (428)
+        - 01745 (429)
+        - 01746 (430)
+        - 01747 (431)
+        - 01748 (432)
+        - 01749 (433)
+        - 01750 (434)
+        - 01751 (435)
+        - 01752 (436)
+        - 01753 (437)
+        - 01754 (438)
+        - 01756 (439)
+        - 01757 (440)
+        - 01758 (441)
+        - 01759 (442)
+        - 01760 (443)
+        - 01761 (444)
+        - 01762 (445)
+        - 01763 (446)
+        - 01764 (447)
+        - 01765 (448)
+        - 01766 (449)
+        - 01767 (450)
+        - 01768 (451)
+        - 01769 (452)
+        - 01770 (453)
+        - 01771 (454)
+        - 01772 (455)
+        - 01773 (456)
+        - 01775 (457)
+        - 01776 (458)
+        - 01777 (459)
+        - 01778 (460)
+        - 01779 (461)
+        - 01780 (462)
+        - 01782 (463)
+        - 01784 (464)
+        - 01785 (465)
+        - 01786 (466)
+        - 01787 (467)
+        - 01788 (468)
+        - 01789 (469)
+        - 01790 (470)
+        - 01792 (471)
+        - 01793 (472)
+        - 01794 (473)
+        - 01795 (474)
+        - 01796 (475)
+        - 01797 (476)
+        - 01798 (477)
+        - 01799 (478)
+        - 01803 (479)
+        - 01805 (480)
+        - 01806 (481)
+        - 01807 (482)
+        - 01808 (483)
+        - 01809 (484)
+        - 0181 (485)
+        - 01821 (486)
+        - 01822 (487)
+        - 01823 (488)
+        - 01824 (489)
+        - 01825 (490)
+        - 01827 (491)
+        - 01828 (492)
+        - 01829 (493)
+        - 01830 (494)
+        - 01832 (495)
+        - 01833 (496)
+        - 01834 (497)
+        - 01835 (498)
+        - 01837 (499)
+        - 01838 (500)
+        - 01840 (501)
+        - 01841 (502)
+        - 01842 (503)
+        - 01843 (504)
+        - 01844 (505)
+        - 01845 (506)
+        - 01846 (507)
+        - 01847 (508)
+        - 01848 (509)
+        - 01849 (510)
+        - 01851 (511)
+        - 01852 (512)
+        - 01854 (513)
+        - 01855 (514)
+        - 01856 (515)
+        - 01857 (516)
+        - 01858 (517)
+        - 01859 (518)
+        - 01861 (519)
+        - 01862 (520)
+        - 01863 (521)
+        - 01864 (522)
+        - 01865 (523)
+        - 01866 (524)
+        - 01868 (525)
+        - 01869 (526)
+        - 01870 (527)
+        - 01871 (528)
+        - 01872 (529)
+        - 01873 (530)
+        - 01874 (531)
+        - 01875 (532)
+        - 01876 (533)
+        - 01877 (534)
+        - 01878 (535)
+        - 01879 (536)
+        - 01880 (537)
+        - 01882 (538)
+        - 01883 (539)
+        - 01884 (540)
+        - 01885 (541)
+        - 01886 (542)
+        - 01887 (543)
+        - 01888 (544)
+        - 01889 (545)
+        - 01890 (546)
+        - 01892 (547)
+        - 01895 (548)
+        - 01896 (549)
+        - 01899 (550)
+        - 01900 (551)
+        - 01902 (552)
+        - 01903 (553)
+        - 01904 (554)
+        - 01905 (555)
+        - 01908 (556)
+        - 01909 (557)
+        - 0191 (558)
+        - 01920 (559)
+        - 01922 (560)
+        - 01923 (561)
+        - 01924 (562)
+        - 01925 (563)
+        - 01926 (564)
+        - 01928 (565)
+        - 01929 (566)
+        - 01931 (567)
+        - 01932 (568)
+        - 01933 (569)
+        - 01934 (570)
+        - 01935 (571)
+        - 01937 (572)
+        - 01938 (573)
+        - 01939 (574)
+        - 01942 (575)
+        - 01943 (576)
+        - 01944 (577)
+        - 01945 (578)
+        - 01946 (579)
+        - 01947 (580)
+        - 01948 (581)
+        - 01949 (582)
+        - 01950 (583)
+        - 01951 (584)
+        - 01952 (585)
+        - 01953 (586)
+        - 01954 (587)
+        - 01955 (588)
+        - 01957 (589)
+        - 01959 (590)
+        - 01960 (591)
+        - 01962 (592)
+        - 01963 (593)
+        - 01964 (594)
+        - 01967 (595)
+        - 01968 (596)
+        - 01969 (597)
+        - 01970 (598)
+        - 01971 (599)
+        - 01972 (600)
+        - 01974 (601)
+        - 01975 (602)
+        - 01977 (603)
+        - 01978 (604)
+        - 01980 (605)
+        - 01981 (606)
+        - 01982 (607)
+        - 01983 (608)
+        - 01984 (609)
+        - 01985 (610)
+        - 01986 (611)
+        - 01988 (612)
+        - 01989 (613)
+        - 01992 (614)
+        - 01993 (615)
+        - 01994 (616)
+        - 01995 (617)
+        - 01997 (618)
+        - 04481 (619)
+        - 04624 (620)
+        - 09797 (621)
+        - 0161 (622)
+        - 0321 (623)
+        - 0331 (624)
+        - 0336 (625)
+        - 0338 (626)
+        - 0345 (627)
+        - 0370 (628)
+        - 0374 (629)
+        - 0378 (630)
+        - 0385 (631)
+        - 0390 (632)
+        - 0421 (633)
+        - 0468 (634)
+        - 0500 (635)
+        - 0541 (636)
+        - 0585 (637)
+        - 0589 (638)
+        - 0632 (639)
+        - 0640 (640)
+        - 0645 (641)
+        - 0660 (642)
+        - 0696 (643)
+        - 0800 (644)
+        - 0802 (645)
+        - 0831 (646)
+        - 0836 (647)
+        - 0839 (648)
+        - 0850 (649)
+        - 0860 (650)
+        - 0881 (651)
+        - 0891 (652)
+        - 0894 (653)
+        - 0897 (654)
+        - 0898 (655)
+        - 0910 (656)
+        - 0918 (657)
+        - 0930 (658)
+        - 0941 (659)
+        - 0956 (660)
+        - 0958 (661)
+        - 0973 (662)
+        - 0976 (663)
+        - 0979 (664)
+        - 0990 (665)
+        - 0991 (666)
+        - 01399 (667)
+        - 01426 (668)
+        - 01459 (669)
+        - 01523 (670)
+        - 01697 (671)
+        - 01820 (672)
+        - 01893 (673)
+        - 04010 (674)
+        - 04011 (675)
+        - 04012 (676)
+        - 04013 (677)
+        - 04014 (678)
+        - 04015 (679)
+        - 04016 (680)
+        - 04017 (681)
+        - 04018 (682)
+        - 04019 (683)
+        - 04020 (684)
+        - 04021 (685)
+        - 04022 (686)
+        - 04023 (687)
+        - 04024 (688)
+        - 04025 (689)
+        - 04026 (690)
+        - 04027 (691)
+        - 04028 (692)
+        - 04029 (693)
+        - 04030 (694)
+        - 04031 (695)
+        - 04032 (696)
+        - 04033 (697)
+        - 04034 (698)
+        - 04035 (699)
+        - 04036 (700)
+        - 04037 (701)
+        - 04038 (702)
+        - 04039 (703)
+        - 04100 (704)
+        - 04101 (705)
+        - 04102 (706)
+        - 04103 (707)
+        - 04104 (708)
+        - 04105 (709)
+        - 04106 (710)
+        - 04107 (711)
+        - 04108 (712)
+        - 04109 (713)
+        - 04110 (714)
+        - 04111 (715)
+        - 04112 (716)
+        - 04113 (717)
+        - 04114 (718)
+        - 04115 (719)
+        - 04116 (720)
+        - 04117 (721)
+        - 04118 (722)
+        - 04119 (723)
+        - 04325 (724)
+        - 04410 (725)
+        - 04411 (726)
+        - 04412 (727)
+        - 04413 (728)
+        - 04414 (729)
+        - 04415 (730)
+        - 04416 (731)
+        - 04417 (732)
+        - 04418 (733)
+        - 04419 (734)
+        - 04670 (735)
+        - 04671 (736)
+        - 04672 (737)
+        - 04673 (738)
+        - 04674 (739)
+        - 04675 (740)
+        - 04676 (741)
+        - 04677 (742)
+        - 04678 (743)
+        - 04679 (744)
+        - 04980 (745)
+        - 04981 (746)
+        - 04982 (747)
+        - 04983 (748)
+        - 04984 (749)
+        - 04985 (750)
+        - 04986 (751)
+        - 04987 (752)
+        - 04988 (753)
+        - 04989 (754)
+        - 07000 (755)
+        - 07001 (756)
+        - 07002 (757)
+        - 07003 (758)
+        - 07004 (759)
+        - 07005 (760)
+        - 07006 (761)
+        - 07007 (762)
+        - 07009 (763)
+        - 07010 (764)
+        - 07014 (765)
+        - 07017 (766)
+        - 07020 (767)
+        - 07021 (768)
+        - 07028 (769)
+        - 07030 (770)
+        - 07031 (771)
+        - 07041 (772)
+        - 07043 (773)
+        - 07044 (774)
+        - 07046 (775)
+        - 07050 (776)
+        - 07051 (777)
+        - 07060 (778)
+        - 07061 (779)
+        - 07069 (780)
+        - 07070 (781)
+        - 07071 (782)
+        - 07074 (783)
+        - 07075 (784)
+        - 07077 (785)
+        - 07079 (786)
+        - 07080 (787)
+        - 07081 (788)
+        - 07090 (789)
+        - 07091 (790)
+        - 07099 (791)
+        - 07600 (792)
+        - 07602 (793)
+        - 07623 (794)
+        - 07624 (795)
+        - 07625 (796)
+        - 07626 (797)
+        - 07640 (798)
+        - 07641 (799)
+        - 07644 (800)
+        - 07654 (801)
+        - 07659 (802)
+        - 07660 (803)
+        - 07663 (804)
+        - 07666 (805)
+        - 07669 (806)
+        - 07693 (807)
+        - 07699 (808)
+        - 07700 (809)
+        - 07701 (810)
+        - 07702 (811)
+        - 07703 (812)
+        - 07705 (813)
+        - 07709 (814)
+        - 07710 (815)
+        - 07711 (816)
+        - 07717 (817)
+        - 07721 (818)
+        - 07741 (819)
+        - 07744 (820)
+        - 07755 (821)
+        - 07766 (822)
+        - 07767 (823)
+        - 07768 (824)
+        - 07770 (825)
+        - 07771 (826)
+        - 07774 (827)
+        - 07775 (828)
+        - 07778 (829)
+        - 07781 (830)
+        - 07785 (831)
+        - 07788 (832)
+        - 07797 (833)
+        - 07798 (834)
+        - 07800 (835)
+        - 07801 (836)
+        - 07802 (837)
+        - 07803 (838)
+        - 07808 (839)
+        - 07809 (840)
+        - 07831 (841)
+        - 07836 (842)
+        - 07850 (843)
+        - 07860 (844)
+        - 07885 (845)
+        - 07887 (846)
+        - 07889 (847)
+        - 07899 (848)
+        - 07901 (849)
+        - 07930 (850)
+        - 07931 (851)
+        - 07953 (852)
+        - 07956 (853)
+        - 07957 (854)
+        - 07958 (855)
+        - 07961 (856)
+        - 07966 (857)
+        - 07967 (858)
+        - 07970 (859)
+        - 07971 (860)
+        - 07973 (861)
+        - 07974 (862)
+        - 07976 (863)
+        - 07977 (864)
+        - 07979 (865)
+        - 08000 (866)
+        - 08001 (867)
+        - 08002 (868)
+        - 08003 (869)
+        - 08004 (870)
+        - 08005 (871)
+        - 08006 (872)
+        - 08007 (873)
+        - 08008 (874)
+        - 08009 (875)
+        - 08080 (876)
+        - 08081 (877)
+        - 08082 (878)
+        - 08088 (879)
+        - 08200 (880)
+        - 08201 (881)
+        - 08202 (882)
+        - 08203 (883)
+        - 08205 (884)
+        - 08207 (885)
+        - 08208 (886)
+        - 08450 (887)
+        - 08451 (888)
+        - 08452 (889)
+        - 08453 (890)
+        - 08454 (891)
+        - 08456 (892)
+        - 08457 (893)
+        - 08458 (894)
+        - 08459 (895)
+        - 08530 (896)
+        - 08700 (897)
+        - 08701 (898)
+        - 08702 (899)
+        - 08703 (900)
+        - 08704 (901)
+        - 08705 (902)
+        - 08706 (903)
+        - 08707 (904)
+        - 08708 (905)
+        - 08709 (906)
+        - 08791 (907)
+        - 08900 (908)
+        - 08901 (909)
+        - 08902 (910)
+        - 08903 (911)
+        - 08905 (912)
+        - 08906 (913)
+        - 08909 (914)
+        - 08950 (915)
+        - 08951 (916)
+        - 08952 (917)
+        - 08953 (918)
+        - 08957 (919)
+        - 08960 (920)
+        - 08961 (921)
+        - 08962 (922)
+        - 08963 (923)
+        - 08964 (924)
+        - 08965 (925)
+        - 08966 (926)
+        - 08999 (927)
+        - 09001 (928)
+        - 09002 (929)
+        - 09003 (930)
+        - 09004 (931)
+        - 09005 (932)
+        - 09006 (933)
+        - 09007 (934)
+        - 09008 (935)
+        - 09009 (936)
+        - 09010 (937)
+        - 09011 (938)
+        - 09012 (939)
+        - 09013 (940)
+        - 09014 (941)
+        - 09015 (942)
+        - 09016 (943)
+        - 09018 (944)
+        - 09019 (945)
+        - 09020 (946)
+        - 09021 (947)
+        - 09022 (948)
+        - 09025 (949)
+        - 09026 (950)
+        - 09029 (951)
+        - 09040 (952)
+        - 09042 (953)
+        - 09043 (954)
+        - 09046 (955)
+        - 09060 (956)
+        - 09061 (957)
+        - 09062 (958)
+        - 09063 (959)
+        - 09064 (960)
+        - 09065 (961)
+        - 09066 (962)
+        - 09067 (963)
+        - 09068 (964)
+        - 09069 (965)
+        - 09070 (966)
+        - 09071 (967)
+        - 09073 (968)
+        - 09075 (969)
+        - 09076 (970)
+        - 09090 (971)
+        - 09091 (972)
+        - 09092 (973)
+        - 09093 (974)
+        - 09094 (975)
+        - 09095 (976)
+        - 09096 (977)
+        - 09097 (978)
+        - 09098 (979)
+        - 09099 (980)
+        - 09610 (981)
+        - 09611 (982)
+        - 09612 (983)
+        - 09613 (984)
+        - 09614 (985)
+        - 09615 (986)
+        - 09616 (987)
+        - 09617 (988)
+        - 09618 (989)
+        - 09619 (990)
+        - 09660 (991)
+        - 09661 (992)
+        - 09662 (993)
+        - 09663 (994)
+        - 09664 (995)
+        - 09665 (996)
+        - 09666 (997)
+        - 09667 (998)
+        - 09668 (999)
+        - 09669 (1000)
+        - 024 (1001)
+        - 029 (1002)
+        - 028 (1003)
+        - 076 (1004)
+        - 023 (1005)
+        - 020 (1006)
+        - 0808 (1007)
+        - 0077 (1008)
+        - 0870 (1009)
+        - 0078 (1010)
+        - 0079 (1011)
+        - 0070 (1012)
+        - 0845 (1013)
+        - 0900 (1015)
+        - 0901 (1016)
+        - 0902 (1017)
+        - 0903 (1018)
+        - 0904 (1019)
+        - 0905 (1020)
+        - 0906 (1021)
+        - 0907 (1022)
+        - 0908 (1023)
+        - 0909 (1024)
+        - 02392 (1025)
+        - 0208 (1026)
+        - 0207 (1027)
+        - 02920 (1028)
+        - 02476 (1029)
+        - 02890 (1032)
+        - 02380 (1034)
+        - 079561 (1053)
+        - 079562 (1054)
+        - 079563 (1055)
+        - 079564 (1056)
+        - 079565 (1057)
+        - 079566 (1058)
+        - 079568 (1059)
+        - 079569 (1060)
+        - 079307 (1063)
+        - 07708 (1067)
+        - 028207 (1075)
+        - 028217 (1076)
+        - 02825 (1077)
+        - 028256 (1078)
+        - 028276 (1079)
+        - 02828 (1080)
+        - 028295 (1081)
+        - 02830 (1082)
+        - 028302 (1083)
+        - 02837 (1084)
+        - 02838 (1085)
+        - 028406 (1086)
+        - 028417 (1087)
+        - 028427 (1088)
+        - 028437 (1089)
+        - 02844 (1090)
+        - 02866 (1091)
+        - 028677 (1092)
+        - 028686 (1093)
+        - 02870 (1094)
+        - 028703 (1095)
+        - 02871 (1096)
+        - 028777 (1097)
+        - 02879 (1098)
+        - 028796 (1099)
+        - 028807 (1100)
+        - 028816 (1101)
+        - 02882 (1102)
+        - 028855 (1103)
+        - 028867 (1104)
+        - 02887 (1105)
+        - 028895 (1106)
+        - 02890 (1107)
+        - 02891 (1108)
+        - 02892 (1109)
+        - 02893 (1110)
+        - 02894 (1111)
+        - 02897 (1112)
+        - 02092 (1113)
+        - 01179 (1114)
+        - 01189 (1115)
+        - 0203 (1116)
+      type: string
+
+    EnumInhibind:
+      enum:
+        - SET
+        - NOT SET
+      type: string
+    EnumInsType:
+      enum:
+        - (NONE)
+        - BANK
+        - BUILDING SOCIETY
+        - FRIENDLY SOCIETY
+        - INSURANCE COMPANY
+        - INVESTMENT TRUST
+        - NOT KNOWN
+        - OTHER
+        - UNIT TRUST
+      type: string
+    EnumNatSche:
+      enum:
+        - (NONE)
+        - ANNUITY CONTRACTS
+        - ARRANGEMENT FOR INVESTMENT OF CONTRIBUTION IN AN INTEREST ACCOUNT
+        - INSURANCE POLICIES
+        - UNIT TRUSTS
+      type: string
+    EnumSAddtp:
+      enum:
+        - GENERAL CORRESPONDENCE
+        - PAYMENTS
+      type: string
+    EnumSchStat:
+      enum:
+        - ACTIVE
+        - BLOCK ON PROVIDER
+        - FORMALLY CERTIFIED
+        - NO BLOCK ON PROVIDER
+      type: string
+    EnumSchshptp:
+      enum:
+        - Converted Stakeholder Pension
+        - Non-Stakeholder Pension
+        - Stakeholder Pension
+      type: string
+    EnumSendcess:
+      enum:
+        - NO RE-ROUTE
+        - RE-ROUTE TO CESSATION
+      type: string
+
+    EnumMarriageStatus:
+      type: string
+      enum:
+        - "CIVIL PARTNER"
+        - "CIVIL PARTNERSHIP ANNULLED"
+        - "CIVIL PARTNERSHIP DISSOLVED"
+        - "CIVIL PARTNERSHIP TERMINATED - REASON N/K"
+        - "DIVORCED"
+        - "MARRIAGE ANNULLED"
+        - "MARRIAGE TERMINATED - REASON NOT KNOWN"
+        - "MARRIED"
+        - "SINGLE"
+        - "SURVIVING CIVIL PARTNER"
+        - "VOID"
+        - "WIDOWED"
+
+    EnumMarriageStartDateStatus:
+      type: string
+      enum:
+        - "COEG CONFIRMED"
+        - "NOT KNOWN"
+        - "NOT VERIFIED"
+        - "VERIFIED"
+
+    EnumMarriageEndDateStatus:
+      type: string
+      enum:
+        - "IN EFFECT"
+        - "NOT KNOWN"
+        - "UNVERIFIED"
+        - "VERIFIED"
+
+    EnumLpind:
+      enum:
+        - "L"
+        - "LX"
+        - "ZY"
+        - "ZZ"
+      type: string
+
+    EnumCreditSource:
+      description: "Denotes the credit source type."
+      enum:
+        - "NOT KNOWN"
+        - "ADP CENTRE LIVINGSTON"
+        - "DSS LOCAL OFFICES"
+        - "EMPLOYMENT SERVICES"
+        - "DIRECT DEBIT"
+        - "CARER'S ALLOWANCE (CA)"
+        - "HNCIP OR SDA"
+        - "NORTHERN IRELAND SICKNESS CREDITS"
+        - "JURY SERVICE"
+        - "NUBS 2"
+        - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+        - "DWA UNIT (BLACKPOOL) EMPLOYED EARNERS"
+        - "DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS"
+        - "DWA UNIT (BELFAST) EMPLOYED EARNERS"
+        - "DWA UNIT (BELFAST) SELF EMPLOYED EARNERS"
+        - "ISLE OF MAN"
+        - "AUTOCREDITS - INTERNALLY CALCULATED"
+        - "AUTOCREDITS - EXTERNALLY INPUT"
+        - "JUVENILE CREDITS (INTERNAL)"
+        - "WIDOWS CREDITS   (INTERNAL)"
+        - "APPROVED TRAINING CREDITS (INTERNAL)"
+        - "UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)"
+        - "PSCS INCAP"
+        - "LONG TERM SCALE RATE"
+        - "ADP READING"
+        - "NOT APPLICABLE"
+        - "QUARTERLY BILLING"
+        - "JSA TAPE INPUT"
+        - "JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)"
+        - "JSA PAPER INPUT"
+        - "FAMC-NI"
+        - "FAMC-GB"
+        - "CENTRAL AWARD"
+        - "ADP NORTHERN IRELAND"
+        - "FAMILY CREDIT (GB)"
+        - "FAMILY CREDIT (NI)"
+        - "INCAPACITY"
+        - "DPTC (GB) EMP"
+        - "DPTC (GB) S/EMP"
+        - "DPTC (NI) EMP"
+        - "DPTC (NI) S/EMP"
+        - "WFTC (GB)"
+        - "WFTC (NI)"
+        - "STATUTORY MATERNITY PAY CREDIT"
+        - "STATUTORY ADOPTION PAY CREDIT"
+        - "Disabled Tax Credit (Employed)"
+        - "Disabled Tax Credit (Self-employed)"
+        - "Working Tax Credit (Employed)"
+        - "Working Tax Credit (Self-employed)"
+        - "EMPLOYMENT AND SUPPORT"
+        - "HRP CONVERSION"
+        - "CHILD BENEFIT"
+        - "CARER'S CREDIT"
+        - "FOSTER CARER"
+        - "MoD Spouse/Civil Partner's Credits"
+        - "ADDITIONAL STATUTORY PATERNITY PAY"
+        - "SPECIFIED ADULT CARER"
+        - "UNIVERSAL CREDIT"
+        - "SHARED PARENTAL PAY"
+        - "Post 75 Service Spouses Credit"
+        - "Statutory Parental Bereavement Pay"
+        - "CARER SUPPORT PAYMENT (CSP)"
+        - "Statutory Neonatal Care Pay"
+        - "REPLACEMENT CREDITS FOR PARENTS AND CARERS"
+
+    EnumContCat:
+      description: "Denotes the contribution category."
+      enum:
+        - "(NONE)"
+        - "CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS"
+        - "CONVERTED ACCOUNT - CONTRACTED OUT"
+        - "MARINER FOREIGN GOING REBATE ( REDUCED CONTRACTED-OUT )"
+        - "MARINER FOREIGN GOING REBATE ( STANDARD CONTRACTED-OUT )"
+        - "MARINER FOREIGN GOING REBATE EQUIVALENT (REDUCED)"
+        - "MARINER FOREIGN GOING REBATE EQUIVALENT (SECONDARY ONLY)"
+        - "MARINER FOREIGN GOING REBATE EQUIVALENT (STANDARD)"
+        - "MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( REDUCED C-OUT)"
+        - "MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( STANDARD C-OUT)"
+        - "MARINER REDUNDANCY FUND & FOREIGN GOING REBATE EQUIV.(SECONDARY ONLY)"
+        - "MARINER REDUNDANCY FUND & FRGN GNG REBATE EQUIV.(STD)"
+        - "MARINER REDUNDANCY FUND & FRGN GOING REBATE EQUIV.(RDCD)"
+        - "MARINER REDUNDANCY FUND REBATE ( REDUCED CONTRACTED-OUT )"
+        - "MARINER REDUNDANCY FUND REBATE ( STANDARD CONTRACTED-OUT )"
+        - "MARINER REDUNDANCY FUND REBATE EQUIV. (RDCD)"
+        - "MARINER REDUNDANCY FUND REBATE EQUIVALENT (SECONDARY ONLY)"
+        - "MARINER REDUNDANCY FUND REBATE EQUIVALENT (STANDARD)"
+        - "MARRIED WOMAN'S REDUCED RATE ELECTION"
+        - "NO LIABILITY"
+        - "OFFICE HOLDERS"
+        - "REDUCED RATE"
+        - "REDUCED RATE CONTRACTED-OUT"
+        - "STANDARD RATE"
+        - "STANDARD RATE CONTRACTED-OUT"
+        - "UNALLOCATED"
+        - "ZERO RATE"
+      type: string
+
+    EnumCl1stat:
+      description: "Denotes the status for the contribution."
+      enum:
+        - "COMPLIANCE & YIELD INCOMPLETE"
+        - "CURRENT"
+        - "HISTORIC AMENDED"
+        - "HISTORIC CANCELLED"
+        - "INVALID - NO RCF"
+        - "INVALID - RCF"
+        - "INVALID COMPATIBILITY CHECK"
+        - "NOT KNOWN / NOT APPLICABLE"
+        - "POTENTIAL"
+        - "VALID"
+        - "VALID RCF"
+      type: string
+
+    EnumCl2Stat:
+      description: "Denotes the status for the credit."
+      enum:
+        - "NOT KNOWN/NOT APPLICABLE"
+        - "VALID"
+        - "INVALID"
+        - "POTENTIAL"
+        - "INVALID COMPATIBILITY CHECK"
+      type: string
+
+    EnumCCType:
+      description: "Short code relating to the type of contribution or credit."
+      enum:
+        - "C1"
+        - "HMF"
+        - "MAR"
+        - "CS"
+        - "EON"
+        - "CR1"
+        - "C2"
+        - "C2W"
+        - "SF"
+        - "2A"
+        - "2B"
+        - "2C"
+        - "2D"
+        - "SFA"
+        - "SFB"
+        - "SFC"
+        - "SFD"
+        - "VDA"
+        - "VDB"
+        - "VDC"
+        - "VDD"
+        - "2N"
+      type: string
+
+    EnumContributionCreditType:
+      enum:
+        - NOT KNOWN
+        - CLASS 1 - NORMAL DEDUCTION CARD
+        - CLASS 1- HMF
+        - CLASS 1- MARINER
+        - CLASS 1- CIVIL SERVANT/FRINGE BODY
+        - CLASS 1- EMPLOYEE ONLY
+        - CLASS 2 - NORMAL RATE
+        - CLASS 2 - WOMAN'S RATE
+        - CLASS 2 - SHAREFISHERMAN'S RATE
+        - CLASS 2 - NORMAL RATE A
+        - CLASS 2 - NORMAL RATE B
+        - CLASS 2 - NORMAL RATE C
+        - CLASS 2 - NORMAL RATE D
+        - CLASS 2 - SHAREFISHERMAN'S RATE A
+        - CLASS 2 - SHAREFISHERMAN'S RATE B
+        - CLASS 2 - SHAREFISHERMAN'S RATE C
+        - CLASS 2 - SHAREFISHERMAN'S RATE D
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE A
+        - CLASS 3 - PRE 85 RATE
+        - CLASS 3 - RATE A
+        - CLASS 3 - RATE B
+        - CLASS 3 - RATE C
+        - CLASS 3 - RATE D
+        - CLASS 1 CREDIT
+        - CLASS 3 CREDIT
+        - NOT APPLICABLE
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE B
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE C
+        - CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE D
+        - CLASS 2 - CONTRIBUTION CONVERTED FROM NIRS1
+        - CLASS 3 - CONTRIBUTION CONVERTED FROM NIRS1
+        - CREDIT CONVERTED FROM NIRS1
+      type: string
+    EnumCreditSourceType:
+      enum:
+        - NOT KNOWN
+        - ADP CENTRE LIVINGSTON
+        - DSS LOCAL OFFICES
+        - EMPLOYMENT SERVICES
+        - DIRECT DEBIT
+        - CARER'S ALLOWANCE (CA)
+        - HNCIP OR SDA
+        - NORTHERN IRELAND SICKNESS CREDITS
+        - JURY SERVICE
+        - NUBS 2
+        - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+        - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
+        - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
+        - DWA UNIT (BELFAST) EMPLOYED EARNERS
+        - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
+        - ISLE OF MAN
+        - AUTOCREDITS - INTERNALLY CALCULATED
+        - AUTOCREDITS - EXTERNALLY INPUT
+        - JUVENILE CREDITS (INTERNAL)
+        - WIDOWS CREDITS (INTERNAL)
+        - APPROVED TRAINING CREDITS (INTERNAL)
+        - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
+        - PSCS INCAP
+        - LONG TERM SCALE RATE
+        - ADP READING
+        - NOT APPLICABLE
+        - QUARTERLY BILLING
+        - JSA TAPE INPUT
+        - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
+        - JSA PAPER INPUT
+        - FAMC-NI
+        - FAMC-GB
+        - CENTRAL AWARD
+        - ADP NORTHERN IRELAND
+        - FAMILY CREDIT (GB)
+        - FAMILY CREDIT (NI)
+        - INCAPACITY
+        - DPTC (GB) EMP
+        - DPTC (GB) S/EMP
+        - DPTC (NI) EMP
+        - DPTC (NI) S/EMP
+        - WFTC (GB)
+        - WFTC (NI)
+        - STATUTORY MATERNITY PAY CREDIT
+        - STATUTORY ADOPTION PAY CREDIT
+        - DISABLED TAX CREDIT (EMPLOYED)
+        - DISABLED TAX CREDIT (SELF-EMPLOYED)
+        - WORKING TAX CREDIT (EMPLOYED)
+        - WORKING TAX CREDIT (SELF-EMPLOYED)
+        - EMPLOYMENT AND SUPPORT
+        - HRP CONVERSION
+        - CHILD BENEFIT
+        - CARER'S CREDIT
+        - FOSTER CARER
+        - MOD SPOUSE/CIVIL PARTNER'S CREDITS
+        - ADDITTIONAL STATUTORY PATERNITY PAY
+        - SPECIFIED ADULT CARER
+        - UNIVERSAL CREDIT
+        - SHARED PARENTAL PAY
+        - POST 75 SERVICE SPOUSES CREDIT
+        - STATUTORY PARENTAL BEREAVEMENT PAY
+      type: string
+
+    EnumMgstattp:
+      description: Current status of individual's marriage
+      enum:
+        - (NONE)
+        - CIVIL PARTNER
+        - CIVIL PARTNERSHIP ANNULLED
+        - CIVIL PARTNERSHIP DISSOLVED
+        - CIVIL PARTNERSHIP TERMINATED - REASON N/K
+        - DIVORCED
+        - MARRIAGE ANNULLED
+        - MARRIAGE TERMINATED - REASON NOT KNOWN
+        - MARRIED
+        - SINGLE
+        - SURVIVING CIVIL PARTNER
+        - VOID
+        - WIDOWED
+      type: string
+    EnumDateStat:
+      description: The status of the marriage start date.
+      enum:
+        - COEG Confirmed
+        - NOT KNOWN
+        - NOT VERIFIED
+        - VERIFIED
+      type: string
+    EnumVfddttrm:
+      description: The status of the marriage end date.
+      enum:
+        - IN EFFECT
+        - NOT KNOWN
+        - UNVERIFIED
+        - VERIFIED
+      type: string
+    SelfLink:
+      properties:
+        href:
+          description: Link for the marriage details.
+          type: string
+        methods:
+          description: Methods available.
+          enum:
+            - get
+          type: string
+
+    LiabilitySearchCategoryHyphenated:
+      enum:
+        - "ABROAD"
+        - "ABSOLUTE-WAIVER"
+        - "ALL-LIABILITIES"
+        - "APPROVED-TRAINING"
+        - "CA-S2P"
+        - "CL2-EC_BILATERAL-REGS"
+        - "CLASS-2-CONVERTED-FROM-NIRS1"
+        - "CLASS-2-IN-SA"
+        - "CLASS-2-LIABILITY-UK"
+        - "CLASS-2-MATERNITY-ALLOWANCE"
+        - "CLASS-2-VOLUNTARY-UK"
+        - "CLASS-3-UK"
+        - "CLASS-3-BILLING-OVERRIDE"
+        - "CLASS-3-CONVERTED-FROM-NIRS1"
+        - "CODED-OUT"
+        - "CONTINUING-CLASS-1-LIABILITY"
+        - "CONTINUING-CLASS-2-LIABILITY"
+        - "CONTRIBUTOR-INITIATED-NON-LIABILITY-OVERRIDE"
+        - "CRIMINAL-PROCEEDINGS"
+        - "CRS_RO"
+        - "Carer-of-AA_CAA_DLA-recipient"
+        - "Carer-Support-Payment"
+        - "Carers-Allowance"
+        - "Carers-Credit"
+        - "Child-Benefit"
+        - "Class-2-Billing-Override"
+        - "DEFERMENT-TYPE-1"
+        - "DEFERMENT-TYPE-2"
+        - "DEFERMENT-TYPE-3"
+        - "DEFERMENT-TYPE-4"
+        - "DPTC-GB-EMPLOYED"
+        - "DPTC-GB-SELF-EMPLOYED"
+        - "DPTC-NI-EMPLOYED"
+        - "DPTC-NI-SELF-EMPLOYED"
+        - "DUMMY-101"
+        - "DUMMY-102"
+        - "DWA-GB-EMPLOYED"
+        - "DWA-GB-SELF-EMPLOYED"
+        - "DWA-NI-EMPLOYED"
+        - "DWA-NI-SELF-EMPLOYED"
+        - "Disabled-Tax-Credit-Employed"
+        - "Disabled-Tax-Credit-Self-Employed"
+        - "ESA-S2P"
+        - "FULL-TIME-EDUCATION"
+        - "FamC-GB"
+        - "FamC-NI"
+        - "Foreign-Earnings-Qualification-S2P"
+        - "Foster-Carer"
+        - "HIGHER-RATE-PROVISION-OVERRIDE"
+        - "HMF"
+        - "HOME-RESPONSIBILITY-PROTECTION-AA_CAA"
+        - "HOME-RESPONSIBILITY-PROTECTION-CBC-AUTO"
+        - "HOME-RESPONSIBILITY-PROTECTION-CBC-CLERICAL"
+        - "HOME-RESPONSIBILITY-PROTECTION-DLA"
+        - "HOME-RESPONSIBILITY-PROTECTION-FOSTER-CARERS"
+        - "HOME-RESPONSIBILITY-PROTECTION-I_S"
+        - "IB-S2P"
+        - "INSOLVENCY-CLASS-1"
+        - "INSOLVENCY-CLASS-2"
+        - "IRRECOVERABLE-ARREARS"
+        - "ISLE-OF-MAN"
+        - "LCW_LCWRA"
+        - "LCW_LCWRA-Override"
+        - "LONG-TERM-NON-EMPLOYMENT"
+        - "LONG-TERM-SCALE-RATE-LTSR"
+        - "LOST-CARD"
+        - "MARINERS-VOLUNTARY-CLASS-2"
+        - "MARRIED-WOMANS-REDUCED-RATE"
+        - "NEGLIGENT-EMPLOYEE"
+        - "NOT-APPLICABLE"
+        - "PAYMENT-OF-ARREARS-BY-ADMINISTRATIVE-ORDER"
+        - "PAYMENT-OF-ARREARS-BY-INSTALMENTS"
+        - "PERIODS-OF-ESA-AUTO"
+        - "PERIODS-OF-ESA-CLERICAL"
+        - "PERIODS-OF-INCAPACITY-AUTO"
+        - "PERIODS-OF-INCAPACITY-CLERICAL"
+        - "PROVISIONAL-WAIVER"
+        - "PSEUDO-CIVIL-RECOVERY-SECTION"
+        - "PSEUDO-DEBT-MANAGEMENT-SECTION"
+        - "PSEUDO-INSOLVENCY-SECTION"
+        - "PSEUDO-SUBJECT-TO-NORMAL-COLLECTION-ACTION"
+        - "REDUCED-BENEFIT-DIRECTIVE-RBD"
+        - "SENT-TO-IDMS"
+        - "SHAREFISHERMAN"
+        - "SHAREFISHERMAN-IN-SA"
+        - "SHAREFISHERMAN-UNEMPLOYMENT-BENEFIT"
+        - "SICKNESS"
+        - "SMALL-EARNINGS-EXCEPTION"
+        - "SPT-LPT"
+        - "SPT-LPT-EC"
+        - "SYSTEM-INITIATED-NON-LIABILITY-OVERRIDE"
+        - "Specified-Adult-Carer"
+        - "Transferred-ChB-Liability"
+        - "UNDER-SMALL-PROFIT-THRESHOLD"
+        - "UNEMPLOYABILITY-SUPPLEMENT"
+        - "Universal-Credit"
+        - "Universal-Credit-S2P"
+        - "VOLUNTARY-CLASS-2-ABROAD"
+        - "VOLUNTARY-CLASS-2-ABROAD-BY-EMPLOYERS-SCHEDULE"
+        - "VOLUNTARY-CLASS-3-ABROAD"
+        - "VOLUNTARY-CLASS-3-ABROAD-BY-EMPLOYERS-SCHEDULE"
+        - "VOLUNTEER-DEVELOPMENT-WORKER"
+        - "WFTC-GB"
+        - "WFTC-NI"
+        - "Working-Tax-Credit-Employed"
+        - "Working-Tax-Credit-Self-Employed"
+      type: string
+
+    # Error and Failure Response Schemas
+    FailureResponse:
+      type: object
+      required:
+        - status
+        - correlationId
+        - benefitType
+        - nationalInsuranceNumber
+        - summary
+        - downStreams
+      properties:
+        status:
+          type: string
+          enum: [PARTIAL_FAILURE, FAILURE]
+        correlationId:
+          type: string
+          format: uuid
+        benefitType:
+          type: string
+          enum: [BSP, GYSP, ESA, JSA, MA]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        dateOfBirth:
+          $ref: '#/components/schemas/dateString'
+        startTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        endTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        summary:
+          $ref: '#/components/schemas/Summary'
+        downStreams:
+          type: array
+          items:
+            $ref: '#/components/schemas/DownstreamResult'
+
+    Summary:
+      type: object
+      required:
+        - totalCalls
+        - successful
+        - failed
+      properties:
+        totalCalls:
+          type: integer
+          minimum: 0
+        successful:
+          type: integer
+          minimum: 0
+        failed:
+          type: integer
+          minimum: 0
+
+    DownstreamResult:
+      type: object
+      required:
+        - apiName
+        - status
+      properties:
+        apiName:
+          type: string
+        status:
+          type: string
+          enum: [SUCCESS, FAILURE]
+        error:
+          $ref: '#/components/schemas/DownstreamError'
+
+    DownstreamError:
+      type: object
+      required:
+        - code
+        - message
+        - downstreamStatus
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        downstreamStatus:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        code:
+          type: string
+          enum: [BAD_REQUEST, FORBIDDEN, UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR]
+        reason:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+

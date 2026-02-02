@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model
 
 import play.api.libs.json.{Format, Json, Reads}
-import uk.gov.hmrc.app.benefitEligibility.common.{Country, Reason}
+import uk.gov.hmrc.app.benefitEligibility.common.{Country, NpsErrorReason}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsSuccessfulApiResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
@@ -248,8 +248,8 @@ object BenefitSchemeDetailsSuccess {
 
   object BenefitSchemeAddressDetails {
 
-    implicit val benefitSchemeAddressDetailsReads: Reads[BenefitSchemeAddressDetails] =
-      Json.reads[BenefitSchemeAddressDetails]
+    implicit val benefitSchemeAddressDetailsReads: Format[BenefitSchemeAddressDetails] =
+      Json.format[BenefitSchemeAddressDetails]
 
   }
 
@@ -266,7 +266,7 @@ object BenefitSchemeDetailsSuccess {
   )
 
   object SchemeAddressDetails {
-    implicit val schemeAddressDetailsReads: Reads[SchemeAddressDetails] = Json.reads[SchemeAddressDetails]
+    implicit val schemeAddressDetailsReads: Format[SchemeAddressDetails] = Json.format[SchemeAddressDetails]
   }
 
   case class BenefitSchemeDetails(
@@ -300,7 +300,7 @@ object BenefitSchemeDetailsSuccess {
   )
 
   object BenefitSchemeDetails {
-    implicit val benefitSchemeDetailsReads: Reads[BenefitSchemeDetails] = Json.reads[BenefitSchemeDetails]
+    implicit val benefitSchemeDetailsReads: Format[BenefitSchemeDetails] = Json.format[BenefitSchemeDetails]
   }
 
   case class BenefitSchemeDetailsSuccessResponse(
@@ -311,8 +311,8 @@ object BenefitSchemeDetailsSuccess {
 
   object BenefitSchemeDetailsSuccessResponse {
 
-    implicit val benefitSchemeDetailsSuccessResponseReads: Reads[BenefitSchemeDetailsSuccessResponse] =
-      Json.reads[BenefitSchemeDetailsSuccessResponse]
+    implicit val benefitSchemeDetailsSuccessResponseReads: Format[BenefitSchemeDetailsSuccessResponse] =
+      Json.format[BenefitSchemeDetailsSuccessResponse]
 
   }
 
@@ -321,12 +321,12 @@ object BenefitSchemeDetailsSuccess {
 object BenefitSchemeDetailsError {
 
   case class ErrorResourceObj400(
-      reason: Reason,
+      reason: NpsErrorReason,
       code: NpsErrorCode
   )
 
   object ErrorResourceObj400 {
-    implicit val errorResourceObj400Reads: Reads[ErrorResourceObj400] = Json.reads[ErrorResourceObj400]
+    implicit val errorResourceObj400Reads: Format[ErrorResourceObj400] = Json.format[ErrorResourceObj400]
   }
 
   case class ErrorResponse400(
@@ -334,40 +334,40 @@ object BenefitSchemeDetailsError {
   )
 
   object ErrorResponse400 {
-    implicit val errorResponse400Reads: Reads[ErrorResponse400] = Json.reads[ErrorResponse400]
+    implicit val errorResponse400Reads: Format[ErrorResponse400] = Json.format[ErrorResponse400]
   }
 
   case class ErrorResourceObj403Forbidden(
-      reason: Reason,
+      reason: NpsErrorReason,
       code: NpsErrorCode
   )
 
   object ErrorResourceObj403Forbidden {
 
-    implicit val errorResourceObj403ForbiddenReads: Reads[ErrorResourceObj403Forbidden] =
-      Json.reads[ErrorResourceObj403Forbidden]
+    implicit val errorResourceObj403ForbiddenReads: Format[ErrorResourceObj403Forbidden] =
+      Json.format[ErrorResourceObj403Forbidden]
 
   }
 
   case class ErrorResourceObj403UserNotAuthorised(
-      reason: Reason,
+      reason: NpsErrorReason,
       code: NpsErrorCode
   )
 
   object ErrorResourceObj403UserNotAuthorised {
 
-    implicit val errorResourceObj403UserNotAuthorisedReads: Reads[ErrorResourceObj403UserNotAuthorised] =
-      Json.reads[ErrorResourceObj403UserNotAuthorised]
+    implicit val errorResourceObj403UserNotAuthorisedReads: Format[ErrorResourceObj403UserNotAuthorised] =
+      Json.format[ErrorResourceObj403UserNotAuthorised]
 
   }
 
   case class ErrorResourceObj422(
-      reason: Reason,
+      reason: NpsErrorReason,
       code: NpsErrorCode
   )
 
   object ErrorResourceObj422 {
-    implicit val errorResourceObj422Reads: Reads[ErrorResourceObj422] = Json.reads[ErrorResourceObj422]
+    implicit val errorResourceObj422Reads: Format[ErrorResourceObj422] = Json.format[ErrorResourceObj422]
   }
 
   case class ErrorResponse422(
@@ -375,7 +375,7 @@ object BenefitSchemeDetailsError {
   )
 
   object ErrorResponse422 {
-    implicit val errorResponse422Reads: Reads[ErrorResponse422] = Json.reads[ErrorResponse422]
+    implicit val errorResponse422Reads: Format[ErrorResponse422] = Json.format[ErrorResponse422]
   }
 
 }

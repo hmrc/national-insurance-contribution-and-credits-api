@@ -23,22 +23,35 @@ import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{InternalServerError, NotFound, UnexpectedStatus}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.mapper.LiabilitySummaryDetailsResponseMapper
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsError.{
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  NpsErrorResponse400,
+  NpsErrorResponse422Special,
+  NpsErrorResponseHipOrigin,
+  NpsSingleErrorResponse
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
   LiabilitySummaryDetailsErrorResponse403,
   LiabilitySummaryDetailsErrorResponse422
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsResponseValidator
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.LiabilitySummaryDetailsSuccess.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsResponseValidator
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
   LiabilitySummaryDetailsSuccessResponse,
   OccurrenceNumber
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.response.enums.LiabilitySearchCategoryHyphenated
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{LiabilityResult, NpsClient}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{LiabilityResult, NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -49,9 +62,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LiabilitySummaryDetailsConnector @Inject() (
     npsClient: NpsClient,
-    liabilitySummaryDetailsResponseMapper: LiabilitySummaryDetailsResponseMapper,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends NpsResponseHandler {
+
+  val apiName: ApiName = ApiName.Liabilities
 
   private val logger = new RequestAwareLogger(this.getClass)
 
@@ -59,7 +74,7 @@ class LiabilitySummaryDetailsConnector @Inject() (
       benefitType: BenefitType,
       identifier: Identifier,
       liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated,
-      liabilityOccurrenceNumber: Option[OccurrenceNumber],
+      liabilityOccurrenceNumber: Option[LiabilitiesOccurrenceNumber],
       liabilityType: Option[LiabilitySearchCategoryHyphenated],
       earliestLiabilityStartDate: Option[LocalDate],
       startDate: Option[LocalDate],
@@ -91,30 +106,39 @@ class LiabilitySummaryDetailsConnector @Inject() (
           response.status match {
             case OK =>
               attemptStrictParse[LiabilitySummaryDetailsSuccessResponse](benefitType, response).map(
-                liabilitySummaryDetailsResponseMapper.toApiResult
+                toSuccessResult
               )
             case BAD_REQUEST =>
-              attemptParse[LiabilitySummaryDetailsErrorResponse400](response).map { resp =>
-                logger.warn(s"LiabilitySummaryDetails returned a 400: ${resp.failures.mkString(",")}")
-                liabilitySummaryDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsErrorResponse400](response).map { resp =>
+                logger.warn(s"LiabilitySummaryDetails returned a 400: $resp")
+                toFailureResult(BadRequest, Some(resp))
               }
             case FORBIDDEN =>
-              attemptParse[LiabilitySummaryDetailsErrorResponse403](response).map { resp =>
+              attemptParse[NpsSingleErrorResponse](response).map { resp =>
                 logger.warn(
-                  s"LiabilitySummaryDetails returned a 403: code: ${resp.code.entryName}, reason: ${resp.reason.entryName}"
+                  s"LiabilitySummaryDetails returned a 403: $resp"
                 )
-                liabilitySummaryDetailsResponseMapper.toApiResult(resp)
+                toFailureResult(AccessForbidden, Some(resp))
               }
             case UNPROCESSABLE_ENTITY =>
-              attemptParse[LiabilitySummaryDetailsErrorResponse422](response).map { resp =>
-                logger.warn(s"LiabilitySummaryDetails returned a 422: ${resp.failures.mkString(",")}")
-                liabilitySummaryDetailsResponseMapper.toApiResult(resp)
+              attemptParse[NpsErrorResponse422Special](response).map { resp =>
+                logger.warn(s"LiabilitySummaryDetails returned a 422: $resp")
+                toFailureResult(UnprocessableEntity, Some(resp))
               }
             case NOT_FOUND =>
-              Right(FailureResult(Liabilities, NotFound))
+              Right(toFailureResult(NotFound, None))
+
             case INTERNAL_SERVER_ERROR =>
-              Right(FailureResult(Liabilities, InternalServerError))
-            case code => Right(FailureResult(Liabilities, UnexpectedStatus(code)))
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"LiabilitySummaryDetails returned a 500: $resp")
+                toFailureResult(InternalServerError, Some(resp))
+              }
+            case SERVICE_UNAVAILABLE =>
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                logger.warn(s"LiabilitySummaryDetails returned a 503: $resp")
+                toFailureResult(ServiceUnavailable, Some(resp))
+              }
+            case code => Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
         EitherT.fromEither[Future](liabilityResult).leftMap { error =>
