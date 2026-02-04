@@ -404,30 +404,354 @@ paths:
                       callback:
                         callbackURL: "/benefit-scheme/GH567890/scheme-membership-details?seqNo=1&occurrenceNo=4&transferSeqNo=2"
                     individualStatePensionInfoResult:
-                      identifier: "GH567890J"
-                      numberOfQualifyingYears: 35
+                      identifier: AA000001A
+                      numberOfQualifyingYears: 50
+                      nonQualifyingYears: 0
+                      yearsToFinalRelevantYear: 0
+                      nonQualifyingYearsPayable: 0
+                      pre1975CCCount: 0
+                      dateOfEntry: 1975-07-18
                       contributionsByTaxYear:
+                        - taxYear: 1975
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 19.26
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 350.91
+                          otherCredits:
+                            - contributionCreditType: CLASS 3 CREDIT
+                              creditSourceType: NOT KNOWN
+                              contributionCreditCount: 50
+                        - taxYear: 1976
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 79.16
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 1377.39
+                          otherCredits:
+                            - contributionCreditType: CLASS 3 CREDIT
+                              creditSourceType: NOT KNOWN
+                              contributionCreditCount: 50
+                        - taxYear: 1977
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 153.21
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 2666.09
+                        - taxYear: 1978
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 299.4
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 4606.15
+                        - taxYear: 1979
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 249.92
+                          coClassOnePaid: 186.46
+                          coPrimaryPaidEarnings: 4665.0
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 5641.93
+                        - taxYear: 1980
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 246.18
+                          coClassOnePaid: 165.42
+                          coPrimaryPaidEarnings: 3894.12
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 5091.15
+                        - taxYear: 1981
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 85.57
+                          coClassOnePaid: 56.27
+                          coPrimaryPaidEarnings: 1072.38
+                          niEarningsSelfEmployed: 40
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 1450.44
+                        - taxYear: 1982
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 536.4
+                          coClassOnePaid: 415.14
+                          coPrimaryPaidEarnings: 6643.2
+                          niEarningsSelfEmployed: 4
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 8029.49
+                        - taxYear: 1983
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 685.3
+                          coClassOnePaid: 539.66
+                          coPrimaryPaidEarnings: 7880.29
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 9499.18
+                        - taxYear: 1984
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 836.68
+                          coClassOnePaid: 677.56
+                          coPrimaryPaidEarnings: 9891.97
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 11660.86
+                        - taxYear: 1985
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 701.43
+                          coClassOnePaid: 535.35
+                          coPrimaryPaidEarnings: 7815.33
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 9979.85
+                        - taxYear: 1986
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 872.97
+                          coClassOnePaid: 335.92
+                          coPrimaryPaidEarnings: 4903.94
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 12426.81
+                        - taxYear: 1987
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1301.4
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 14459.0
+                        - taxYear: 1988
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1213.15
+                          coClassOnePaid: 377.94
+                          coPrimaryPaidEarnings: 5399.0
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 14678.0
+                        - taxYear: 1989
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1106.22
+                          coClassOnePaid: 981.09
+                          coPrimaryPaidEarnings: 14015.0
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 16208.0
+                        - taxYear: 1990
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1128.91
+                          coClassOnePaid: 994.87
+                          coPrimaryPaidEarnings: 14212.0
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 17603.0
+                        - taxYear: 1991
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1460.16
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 18304.0
+                        - taxYear: 1992
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1452.88
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 18304.0
+                        - taxYear: 1993
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1445.6
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 18304.0
+                        - taxYear: 1994
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1595.88
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 18304.0
+                        - taxYear: 1995
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1800.83
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 20441.0
+                        - taxYear: 1996
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1821.99
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 20757.0
+                        - taxYear: 1997
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2160.08
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 24180.0
+                        - taxYear: 1998
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2255.76
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 25220.0
+                        - taxYear: 1999
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2256.8
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 26000.0
+                        - taxYear: 2000
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1798.0
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 21000.0
+                        - taxYear: 2001
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1097.35
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 15385.0
+                        - taxYear: 2002
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1237.05
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 16973.0
+                        - taxYear: 2003
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1226.6
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 14700.0
+                        - taxYear: 2004
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1504.36
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 18392.0
+                        - taxYear: 2005
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 937.55
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 12758.0
+                          otherCredits:
+                            - contributionCreditType: CLASS 1 CREDIT
+                              creditSourceType: JSA TAPE INPUT
+                              contributionCreditCount: 3
+                        - taxYear: 2006
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 655.26
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 9619.0
+                          otherCredits:
+                            - contributionCreditType: CLASS 1 CREDIT
+                              creditSourceType: JSA TAPE INPUT
+                              contributionCreditCount: 11
+                        - taxYear: 2007
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 830.72
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 12315.0
+                        - taxYear: 2008
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1229.8
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 16592.0
+                        - taxYear: 2009
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1078.88
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 15496.0
+                        - taxYear: 2010
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1478.4
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 19128.0
+                        - taxYear: 2011
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 369.98
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 6754.0
+                        - taxYear: 2012
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1488.88
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 19994.0
+                        - taxYear: 2013
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1927.74
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 23825.57
+                        - taxYear: 2014
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2056.97
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 25097.58
+                        - taxYear: 2015
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 3581.9
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 37668.89
+                        - taxYear: 2016
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 3366.29
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 36065.92
+                        - taxYear: 2017
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 4082.54
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 41810.62
+                        - taxYear: 2018
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2568.29
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 29826.46
+                        - taxYear: 2019
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1322.33
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 19442.84
                         - taxYear: 2020
                           qualifyingTaxYear: true
-                          payableAccepted: true
-                          amountNeeded: 0.0
-                          classThreePayable: 0.0
-                          classThreePayableBy: "2022-04-05"
-                          classTwoPayable: 0.0
-                          classTwoPayableBy: "2022-04-05"
-                          totalPrimaryContributions: 3000.0
-                          niEarnings: 25000.0
-                          primaryPaidEarnings: 25000.0
-                        - taxYear: 2021
-                          qualifyingTaxYear: false
                           payableAccepted: false
-                          amountNeeded: 500.0
-                          classThreePayable: 150.0
-                          classThreePayableBy: "2023-04-05"
-                          classTwoPayable: 0.0
-                          totalPrimaryContributions: 1500.0
-                          niEarnings: 12000.0
-                          primaryPaidEarnings: 12000.0
+                          totalPrimaryContributions: 2631.95
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 31592.0
+                        - taxYear: 2021
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2710.82
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 32042.0
+                        - taxYear: 2022
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2812.48
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 34249.0
+                        - taxYear: 2023
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 2688.36
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 35787.0
+                        - taxYear: 2024
+                          qualifyingTaxYear: true
+                          payableAccepted: false
+                          totalPrimaryContributions: 1947.32
+                          underInvestigationFlag: false
+                          totalPrimaryPaidEarnings: 36888.0
                     niContributionsAndCreditsResult:
                       - totalGraduatedPensionUnits: 15.5
                         class1ContributionAndCredits:
@@ -967,7 +1291,9 @@ components:
         - endTaxYear
       properties:
         dateOfBirth:
-          $ref: '#/components/schemas/dateString'
+          format: date
+          description: The date of birth of the individual.
+          type: string
         startTaxYear:
           $ref: '#/components/schemas/taxYear'
         endTaxYear:
@@ -979,56 +1305,91 @@ components:
         searchStartYear:
           $ref: '#/components/schemas/taxYear'
         latest:
+          description: "If this is set to true, then only return the latest marriage record\
+            \ - if not present will default to false."
           type: boolean
+          example: true
         sequence:
+          description: Marriage Sequence Number - used for paging
           type: integer
-          
+          example: 5
 
-    BenefitCalculation:
+
+    LongTermBenefitCalculation:
       type: object
       required:
         - benefitType
       properties:
         benefitType:
-          type: string
+          $ref: '#/components/schemas/EnumBenType'
         pensionProcessingArea:
-          type: string
+          $ref: '#/components/schemas/EnumEeppflg'
 
-    BenefitCalculationNotes:
+    LongTermBenefitCalculationNotes:
       type: object
       required:
         - benefitType
       properties:
         benefitType:
-          type: string
+          $ref: '#/components/schemas/EnumBenType'
+
+
 
     SchemeMembershipDetails:
       type: object
       properties:
         schemeMembershipSequenceNumber:
+          description: Unique sequence number representing the position in the scheme
+            membership history (i.e. row) of the scheme membership details entry for this
+            individual - this would only be populated if the previous call did not transfer
+            all of the data i.e. there are more rows marked to be collected still.
+          maximum: 65534
+          minimum: 1
           type: integer
+          example: 123
         schemeMembershipTransferSequenceNumber:
+          description: Unique sequence number representing the position in the scheme
+            membership transfer history (i.e. row) of the scheme membership transfer details
+            entry for this individual - this would only be populated if the previous call
+            did not transfer all of the data i.e. there are more rows marked to be collected
+            still.
+          maximum: 65534
+          minimum: 1
           type: integer
+          example: 123
         schemeMembershipOccurrenceNumber:
+          description: Denotes the occurrence number for the Scheme Membership.
+          maximum: 32766
+          minimum: 0
           type: integer
+          example: 1
 
     Liabilities:
       type: object
       required:
-        - liabilitySearchCategoryHyphenated
+        - searchCategory
       properties:
-        liabilitySearchCategoryHyphenated:
+        searchCategory:
           $ref: '#/components/schemas/LiabilitySearchCategoryHyphenated'
         liabilityOccurrenceNumber:
           type: integer
         liabilityType:
           $ref: '#/components/schemas/LiabilitySearchCategoryHyphenated'
         earliestLiabilityStartDate:
-          $ref: '#/components/schemas/dateString'
+          format: date
+          description: Denotes the earliest liability start date to retrieve data for.
+          type: string
+          example: 2022-06-27
         liabilityStart:
-          $ref: '#/components/schemas/dateString'
+          format: date
+          description: The date on which this liability started.
+          type: string
+          example: 2022-06-27
         liabilityEnd:
-          $ref: '#/components/schemas/dateString'
+          format: date
+          description: The date on which this liability ended.
+          type: string
+          example: 2022-06-27
 
     Class2MaReceipts:
       type: object
@@ -1036,9 +1397,12 @@ components:
         archived:
           type: boolean
         receiptDate:
-          $ref: '#/components/schemas/dateString'
-        sortBy:
+          format: date
+          description: The receipt date.
           type: string
+          example: 2023-06-27
+        sortBy:
+          $ref: '#/components/schemas/EnumSortMAReceiptBy'
 
     BSPRequest:
       type: object
@@ -1072,10 +1436,10 @@ components:
           $ref: '#/components/schemas/nationalInsuranceNumber'
         contributionsAndCredits:
           $ref: '#/components/schemas/ContributionsAndCredits'
-        benefitCalculation:
-          $ref: '#/components/schemas/BenefitCalculation'
-        benefitCalculationNotes:
-          $ref: '#/components/schemas/BenefitCalculationNotes'
+        longTermBenefitCalculation:
+          $ref: '#/components/schemas/LongTermBenefitCalculation'
+        longTermBenefitCalculationNotes:
+          $ref: '#/components/schemas/LongTermBenefitCalculationNotes'
         marriageDetails:
           $ref: '#/components/schemas/MarriageDetailsRequestSchema'
         schemeMembershipDetails:
@@ -1885,6 +2249,52 @@ components:
         - NO SUSPENSION
       type: string
 
+    EnumSortMAReceiptBy:
+      enum:
+        - NINO ASCENDING
+        - NINO DESCENDING
+        - DATE OF FINAL PAYMENT DESCENDING
+        - DATE OF FINAL PAYMENT ASCENDING
+      type: string
+
+    EnumBenType:
+      enum:
+        - ALL
+        - AUTOPIE / AUTOJSP
+        - BEREAVED NSP
+        - BEREAVEMENT BENEFIT
+        - CAA/US
+        - CARER'S ALLOWANCE
+        - CATEGORY B
+        - CLAIMS PAPER
+        - DEPENDANT'S WAR PENSION
+        - EMPLOYMENT AND SUPPORT
+        - EQUIVALENT PENSION BENEFIT
+        - GBU
+        - GUARDIAN'S ALLOWANCE
+        - HOUSING BENEFIT
+        - INCAPACITY BENEFIT
+        - INDUSTRIAL DEATH BENEFIT
+        - JOB RELEASE ALLOWANCE
+        - JOB SEEKER'S ALLOWANCE
+        - LTB
+        - MATERNITY ALLOWANCE
+        - NOT KNOWN
+        - PENSION SHARING ON DIVORCE
+        - PRE-2001 WIDOWER
+        - RETIREMENT PENSION
+        - RPFA
+        - SICKNESS BENEFIT/IVB
+        - STB (NOT UB/JSA)
+        - UNEMPLOYMENT BENEFIT
+        - WIDOWS BENEFIT
+      type: string
+
+    EnumEeppflg:
+      enum:
+        - Job Centre+ Electronic Enabled Pension Processing
+        - Standard Electronic Enabled Pension Processing
+      type: string
     # Long term benefit notes response - Copied from the provided NPS schema
     LongTermBenefitNotesResponse:
       description: Response containing concatenated Long Term Benefit notes.
@@ -1992,7 +2402,7 @@ components:
           example: true
         amountNeeded:
           description: "The total amount of retrospective monetary earnings that a\
-           \ taxpayer may be required to pay tax on, for a given tax period."
+            \ taxpayer may be required to pay tax on, for a given tax period."
           multipleOf: 0.01
           maximum: 99999999999999.98
           minimum: -9999999999999.99
@@ -2036,7 +2446,7 @@ components:
         classTwoPayableByPenalty:
           format: date
           description: "The deadline for payment of Class 2 Contributions for a given\
-           \ tax year, with a penalty."
+            \ tax year, with a penalty."
           pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
           type: string
           example: 2022-06-27
@@ -2069,7 +2479,7 @@ components:
           minimum: -9999999999999.99
           type: number
           example: 10.56
-        totalPrimaryEarnings:
+        coPrimaryPaidEarnings:
           description: Total contracted out class 1 earnings that count towards qualifying
             status.
           multipleOf: 0.01
@@ -2095,7 +2505,7 @@ components:
           description: Indicates whether an account is currently under investigation.
           type: boolean
           example: true
-        primaryPaidEarnings:
+        totalPrimaryPaidEarnings:
           description: Total earnings including contracted out earnings that count
             towards qualifying status.
           multipleOf: 0.01
@@ -2118,8 +2528,8 @@ components:
           $ref: '#/components/schemas/EnumCreditSourceType'
         contributionCreditCount:
           description: "Denotes the number of credits made to an individual's account\
-           \ for a given period - this number can be positive or negative, the latter\
-           \ of which indicates a debit."
+            \ for a given period - this number can be positive or negative, the latter\
+            \ of which indicates a debit."
           maximum: 32766
           minimum: -32768
           type: integer

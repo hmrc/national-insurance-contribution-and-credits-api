@@ -371,12 +371,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("3456.78"))),
           niEarnings = Some(NiEarnings(BigDecimal("45000.00"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("1234.56"))),
-          totalPrimaryEarnings = Some(TotalPrimaryEarnings(BigDecimal("52000.00"))),
+          coPrimaryPaidEarnings = Some(CoPrimaryPaidEarnings(BigDecimal("52000.00"))),
           niEarningsSelfEmployed = Some(NiEarningsSelfEmployed(25)),
           niEarningsVoluntary = Some(NiEarningsVoluntary(8)),
           underInvestigationFlag = Some(UnderInvestigationFlag(true)),
-          primaryPaidEarnings =
-            Some(IndividualStatePensionInformationSuccess.PrimaryPaidEarnings(BigDecimal("48500.75"))),
+          totalPrimaryPaidEarnings =
+            Some(IndividualStatePensionInformationSuccess.TotalPrimaryPaidEarnings(BigDecimal("48500.75"))),
           otherCredits = Some(
             List(
               OtherCredits(
@@ -412,12 +412,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("2987.45"))),
           niEarnings = Some(NiEarnings(BigDecimal("38500.25"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("987.65"))),
-          totalPrimaryEarnings = Some(TotalPrimaryEarnings(BigDecimal("41250.80"))),
+          coPrimaryPaidEarnings = Some(CoPrimaryPaidEarnings(BigDecimal("41250.80"))),
           niEarningsSelfEmployed = Some(NiEarningsSelfEmployed(42)),
           niEarningsVoluntary = Some(NiEarningsVoluntary(15)),
           underInvestigationFlag = Some(UnderInvestigationFlag(false)),
-          primaryPaidEarnings =
-            Some(IndividualStatePensionInformationSuccess.PrimaryPaidEarnings(BigDecimal("39875.90"))),
+          totalPrimaryPaidEarnings =
+            Some(IndividualStatePensionInformationSuccess.TotalPrimaryPaidEarnings(BigDecimal("39875.90"))),
           otherCredits = Some(
             List(
               OtherCredits(
@@ -710,8 +710,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should serialize to json correctly" in {
         val json =
           """{
-            |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
             |   "benefitType":"GYSP",
+            |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
             |   "nationalInsuranceNumber":"AB123456C",
             |   "benefitSchemeDetailsResult":[
             |      {
@@ -881,11 +881,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "totalPrimaryContributions":3456.78,
             |            "niEarnings":45000,
             |            "coClassOnePaid":1234.56,
-            |            "totalPrimaryEarnings":52000,
+            |            "coPrimaryPaidEarnings":52000,
             |            "niEarningsSelfEmployed":25,
             |            "niEarningsVoluntary":8,
             |            "underInvestigationFlag":true,
-            |            "primaryPaidEarnings":48500.75,
+            |            "totalPrimaryPaidEarnings":48500.75,
             |            "otherCredits":[
             |               {
             |                  "contributionCreditType":"CLASS 1 CREDIT",
@@ -919,11 +919,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "totalPrimaryContributions":2987.45,
             |            "niEarnings":38500.25,
             |            "coClassOnePaid":987.65,
-            |            "totalPrimaryEarnings":41250.8,
+            |            "coPrimaryPaidEarnings":41250.8,
             |            "niEarningsSelfEmployed":42,
             |            "niEarningsVoluntary":15,
             |            "underInvestigationFlag":false,
-            |            "primaryPaidEarnings":39875.9,
+            |            "totalPrimaryPaidEarnings":39875.9,
             |            "otherCredits":[
             |               {
             |                  "contributionCreditType":"CLASS 1 CREDIT",
