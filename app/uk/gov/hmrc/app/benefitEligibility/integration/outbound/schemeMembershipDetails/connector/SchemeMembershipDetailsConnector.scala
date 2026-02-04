@@ -42,6 +42,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   BenefitEligibilityError,
   BenefitType,
   Identifier,
+  RequestBuilder,
+  RequestOption,
   SchemeMembershipDetailsOccurrenceNumber,
   SequenceNumber,
   TransferSequenceNumber
@@ -84,8 +86,21 @@ class SchemeMembershipDetailsConnector @Inject() (
       occurrenceNumber: Option[SchemeMembershipDetailsOccurrenceNumber]
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] = {
 
+    def sequenceNumberFilter: Option[String]         = sequenceNumber.map(sn => sn.value.toString)
+    def transferSequenceNumberFilter: Option[String] = transferSequenceNumber.map(tsn => tsn.value.toString)
+    def occurrenceNumberFilter: Option[String]       = occurrenceNumber.map(on => on.value.toString)
+
+    val options = List(
+      RequestOption("seqNo", sequenceNumberFilter),
+      RequestOption("transferSeqNo", transferSequenceNumberFilter),
+      RequestOption("occurrenceNo", occurrenceNumberFilter)
+    )
+
     val path =
-      buildPath(appConfig.hipBaseUrl, nationalInsuranceNumber, sequenceNumber, transferSequenceNumber, occurrenceNumber)
+      RequestBuilder.buildPath(
+        s"${appConfig.hipBaseUrl}/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details",
+        options
+      )
 
     npsClient
       .get(path)
@@ -141,24 +156,6 @@ class SchemeMembershipDetailsConnector @Inject() (
         logger.error(s"call to downstream service failed: ${error.toString}")
         error
       }
-  }
-
-  private[connector] def buildPath(
-      hipBaseUrl: String,
-      nationalInsuranceNumber: Identifier,
-      sequenceNumber: Option[SequenceNumber],
-      transferSequenceNumber: Option[TransferSequenceNumber],
-      occurrenceNumber: Option[SchemeMembershipDetailsOccurrenceNumber]
-  ) = {
-    def sequenceNumberFilter: Option[String]         = sequenceNumber.map(sn => s"seqNo=${sn.value}&")
-    def transferSequenceNumberFilter: Option[String] = transferSequenceNumber.map(tsn => s"transferSeqNo=${tsn.value}&")
-    def occurrenceNumberFilter: Option[String]       = occurrenceNumber.map(on => s"occurrenceNo=${on.value}&")
-
-    val options =
-      sequenceNumberFilter.combine(transferSequenceNumberFilter).combine(occurrenceNumberFilter).getOrElse("")
-
-    s"$hipBaseUrl/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details?$options"
-      .dropRight(1)
   }
 
 }
