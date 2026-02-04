@@ -20,8 +20,8 @@ import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
-  ContributionCreditType,
-  CreditSourceType
+  CreditSourceType,
+  IndividualStatePensionContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -271,7 +271,7 @@ object IndividualStatePensionInformationSuccess {
   }
 
   case class OtherCredits(
-      contributionCreditType: Option[ContributionCreditType],
+      contributionCreditType: Option[IndividualStatePensionContributionCreditType],
       creditSourceType: Option[CreditSourceType],
       contributionCreditCount: Option[ContributionCreditCount]
   )

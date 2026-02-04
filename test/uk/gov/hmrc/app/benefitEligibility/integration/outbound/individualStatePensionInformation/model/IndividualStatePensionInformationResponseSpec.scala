@@ -29,8 +29,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
-  ContributionCreditType,
-  CreditSourceType
+  CreditSourceType,
+  IndividualStatePensionContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.IndividualStatePensionInformation._
@@ -87,17 +87,17 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
               otherCredits = Some(
                 List(
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                     creditSourceType = Some(CreditSourceType.JsaTapeInput),
                     contributionCreditCount = Some(ContributionCreditCount(15))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class3Credit),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3Credit),
                     creditSourceType = Some(CreditSourceType.CarersCredit),
                     contributionCreditCount = Some(ContributionCreditCount(52))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class2NormalRate),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class2NormalRate),
                     creditSourceType = Some(CreditSourceType.ChildBenefit),
                     contributionCreditCount = Some(ContributionCreditCount(-5))
                   )
@@ -127,22 +127,23 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
               otherCredits = Some(
                 List(
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                     creditSourceType = Some(CreditSourceType.UniversalCredit),
                     contributionCreditCount = Some(ContributionCreditCount(26))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
+                    contributionCreditType =
+                      Some(IndividualStatePensionContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
                     creditSourceType = Some(CreditSourceType.StatutoryMaternityPayCredit),
                     contributionCreditCount = Some(ContributionCreditCount(12))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class3RateC),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3RateC),
                     creditSourceType = Some(CreditSourceType.ModSpouseCivilPartnersCredits),
                     contributionCreditCount = Some(ContributionCreditCount(39))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class1EmployeeOnly),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1EmployeeOnly),
                     creditSourceType = Some(CreditSourceType.SharedParentalPay),
                     contributionCreditCount = Some(ContributionCreditCount(-3))
                   )
@@ -283,17 +284,17 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
                 otherCredits = Some(
                   List(
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                       creditSourceType = Some(CreditSourceType.JsaTapeInput),
                       contributionCreditCount = Some(ContributionCreditCount(15))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class3Credit),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3Credit),
                       creditSourceType = Some(CreditSourceType.CarersCredit),
                       contributionCreditCount = Some(ContributionCreditCount(52))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class2NormalRate),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class2NormalRate),
                       creditSourceType = Some(CreditSourceType.ChildBenefit),
                       contributionCreditCount = Some(ContributionCreditCount(-5))
                     )
@@ -323,22 +324,23 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
                 otherCredits = Some(
                   List(
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                       creditSourceType = Some(CreditSourceType.UniversalCredit),
                       contributionCreditCount = Some(ContributionCreditCount(26))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
+                      contributionCreditType =
+                        Some(IndividualStatePensionContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
                       creditSourceType = Some(CreditSourceType.StatutoryMaternityPayCredit),
                       contributionCreditCount = Some(ContributionCreditCount(12))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class3RateC),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3RateC),
                       creditSourceType = Some(CreditSourceType.ModSpouseCivilPartnersCredits),
                       contributionCreditCount = Some(ContributionCreditCount(39))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class1EmployeeOnly),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1EmployeeOnly),
                       creditSourceType = Some(CreditSourceType.SharedParentalPay),
                       contributionCreditCount = Some(ContributionCreditCount(-3))
                     )

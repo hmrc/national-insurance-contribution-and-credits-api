@@ -43,11 +43,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
   NiContributionsAndCreditsResponse
 }
 import NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsError.{
-  NiContributionsAndCreditsResponse400,
-  NiContributionsAndCreditsResponse403,
-  NiContributionsAndCreditsResponse422
-}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient, NpsResponseHandler}

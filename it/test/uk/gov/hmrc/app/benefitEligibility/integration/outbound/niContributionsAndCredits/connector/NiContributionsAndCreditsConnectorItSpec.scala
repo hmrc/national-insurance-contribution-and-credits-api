@@ -59,9 +59,9 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
   Class1ContributionStatus,
   Class2Or3CreditStatus,
   ContributionCategory,
-  ContributionCreditType,
   CreditSource,
-  LatePaymentPeriod
+  LatePaymentPeriod,
+  NiContributionCreditType
 }
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -120,7 +120,7 @@ class NiContributionsAndCreditsConnectorItSpec
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
                   contributionCategory = Some(ContributionCategory.None),
-                  contributionCreditType = Some(ContributionCreditType.C1),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
                   primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
                   class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
                   primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
@@ -135,7 +135,7 @@ class NiContributionsAndCreditsConnectorItSpec
                 Class2ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCreditType = Some(ContributionCreditType.C1),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
                   class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
                   class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
                   class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
@@ -427,6 +427,48 @@ class NiContributionsAndCreditsConnectorItSpec
             FailureResult(
               ApiName.NiContributionAndCredits,
               ErrorReport(NpsNormalizedError.InternalServerError, None)
+            )
+          )
+        }
+      }
+      "when the NiContributionsAndCredits endpoint returns an INTERNAL_SERVER_ERROR (503)" - {
+
+        val errorResponse =
+          """{
+            |  "origin": "HIP",
+            |  "response": {
+            |   "failures": [
+            |    {
+            |      "type": "Type of Failure",
+            |      "reason": "Reason for Failure"
+            |    },
+            |    {
+            |      "type": "Type of ';'",
+            |      "reason": "Reason for Failure"
+            |    }
+            |  ]
+            | }
+            |}""".stripMargin
+
+        "should map to Service unavailable result" in {
+          server.stubFor(
+            post(urlEqualTo(testPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withBody(errorResponse)
+              )
+          )
+
+          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            FailureResult(
+              ApiName.NiContributionAndCredits,
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
             )
           )
         }

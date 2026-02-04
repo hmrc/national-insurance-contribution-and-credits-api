@@ -22,16 +22,3 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 
 trait NpsSuccessfulApiResponse extends NpsApiResponse
-
-object NpsSuccessfulApiResponse {
-
-  implicit val npsSuccessfulApiResponseWrites: Writes[NpsSuccessfulApiResponse] = Writes {
-    case r: Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse =>
-      Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse.getClass2MAReceiptsResponseWrites.writes(r)
-    case m: MarriageDetailsSuccessResponse =>
-      MarriageDetailsSuccessResponse.marriageDetailsSuccessResponseFormat.writes(m)
-    case l: LiabilitySummaryDetailsSuccessResponse =>
-      LiabilitySummaryDetailsSuccessResponse.liabilitySummaryDetailsSuccessResponseWrites.writes(l)
-  }
-
-}

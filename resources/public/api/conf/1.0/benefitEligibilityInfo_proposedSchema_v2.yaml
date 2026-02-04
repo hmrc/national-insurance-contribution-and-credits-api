@@ -170,37 +170,46 @@ paths:
                     correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
                     benefitType: "BSP"
                     nationalInsuranceNumber: "AB123456C"
-                    marriageDetails: []
-                    niContributionsAndCredits:
+                    marriageDetailsResult:
+                      marriageDetails:
+                        activeMarriage: false
+                        marriageDetailsList: [ ]
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: []
-                      class2ContributionAndCredits: []
+                      class1ContributionAndCredits: [ ]
+                      class2ContributionAndCredits: [ ]
+
                 BSP_maximal_success:
                   summary: BSP - Maximal response
                   value:
                     correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
                     benefitType: "BSP"
                     nationalInsuranceNumber: "AB123456C"
-                    marriageDetails:
-                      - status: "MARRIED"
-                        startDate: "1985-06-15"
-                        startDateStatus: "VERIFIED"
-                        endDate: "2010-03-20"
-                        endDateStatus: "VERIFIED"
-                        spouseIdentifier: "CD789012E"
-                        spouseForename: "Jane"
-                        spouseSurname: "Smith"
-                      - status: "DIVORCED"
-                        startDate: "2012-03-10"
-                        startDateStatus: "VERIFIED"
-                        endDate: "2018-07-25"
-                        endDateStatus: "VERIFIED"
-                        spouseIdentifier: "EF456789G"
-                        spouseForename: "Michael"
-                        spouseSurname: "Johnson"
-                        separationDate: "2017-01-15"
-                        reconciliationDate: "2017-06-20"
-                    niContributionsAndCredits:
+                    marriageDetailsResult:
+                      marriageDetails:
+                        activeMarriage: false
+                        marriageDetailsList:
+                          - sequenceNumber: 1
+                            status: "MARRIED"
+                            startDate: "1985-06-15"
+                            startDateStatus: "VERIFIED"
+                            endDate: "2010-03-20"
+                            endDateStatus: "VERIFIED"
+                            spouseIdentifier: "CD789012E"
+                            spouseForename: "Jane"
+                            spouseSurname: "Smith"
+                            separationDate: "2009-01-15"
+                            reconciliationDate: "2009-06-20"
+                          - sequenceNumber: 2
+                            status: "DIVORCED"
+                            startDate: "2012-03-10"
+                            startDateStatus: "VERIFIED"
+                            endDate: "2018-07-25"
+                            endDateStatus: "VERIFIED"
+                            spouseIdentifier: "EF456789G"
+                            spouseForename: "Michael"
+                            spouseSurname: "Johnson"
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 9.5
                       class1ContributionAndCredits:
                         - taxYear: 2020
@@ -242,69 +251,80 @@ paths:
                           class2Or3CreditStatus: "VALID"
                           creditSource: "QUARTERLY BILLING"
                           latePaymentPeriod: "L"
+
                 GYSP_minimal_success:
                   summary: GYSP - Minimal response
                   value:
                     correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
                     benefitType: "GYSP"
                     nationalInsuranceNumber: "GH567890J"
-                    benefitSchemeDetails: []
-                    marriageDetails: []
-                    longTermBenefitNotes: []
-                    schemeMembershipDetails:
-                      schemeMembershipDetailsSummaryList: []
-                    statePensionData: []
-                    niContributionsAndCredits: []
+                    benefitSchemeDetailsResult: [ ]
+                    marriageDetailsResult:
+                      marriageDetails:
+                        activeMarriage: false
+                        marriageDetailsList: [ ]
+                    longTermBenefitNotesResult:
+                      longTermBenefitNotes: [ ]
+                    schemeMembershipDetailsResult:
+                      schemeMembershipDetailsSummaryList: [ ]
+                    individualStatePensionInfoResult:
+                      identifier: "GH567890J"
+                      numberOfQualifyingYears: 0
+                      contributionsByTaxYear: [ ]
+                    niContributionsAndCreditsResult: [ ]
+
                 GYSP_maximal_success:
                   summary: GYSP - Maximal response
                   value:
                     correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
                     benefitType: "GYSP"
                     nationalInsuranceNumber: "GH567890J"
-                    benefitSchemeDetails:
-                      - benefitSchemeName: "Graduated Retirement Benefit Scheme"
-                        totalGraduatedPensionUnits: 15.5
-                        benefitCalculationDetails:
-                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 1500.00
-                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 2000.00
-                            contractedOutDeductionsPre1988: 800.00
-                            contractedOutDeductionsPost1988: 1200.00
-                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 750.00
-                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 950.00
-                            contractedOutDeductionsPre1988: 400.00
-                            contractedOutDeductionsPost1988: 600.00
-                      - benefitSchemeName: "Graduated Retirement Benefit Scheme 2"
-                        totalGraduatedPensionUnits: 15.5
-                        benefitCalculationDetails:
-                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 1500.00
-                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 2000.00
-                            contractedOutDeductionsPre1988: 800.00
-                            contractedOutDeductionsPost1988: 1200.00
-                          - guaranteedMinimumPensionContractedOutDeductionsPre1988: 750.00
-                            guaranteedMinimumPensionContractedOutDeductionsPost1988: 950.00
-                            contractedOutDeductionsPre1988: 400.00
-                            contractedOutDeductionsPost1988: 600.00
-                    marriageDetails:
-                      - startDate: "1980-08-12"
-                        startDateStatus: "VERIFIED"
-                        endDate: "2005-11-30"
-                        endDateStatus: "VERIFIED"
-                        spouseIdentifier: "EF345678G"
-                        spouseForename: "Robert"
-                        spouseSurname: "Johnson"
-                        separationDate: "2004-03-15"
-                        reconciliationDate: "2004-09-20"
-                      - startDate: "2007-06-22"
-                        startDateStatus: "VERIFIED"
-                        spouseIdentifier: "HI678901K"
-                        spouseForename: "Sarah"
-                        spouseSurname: "Williams"
-                    longTermBenefitNotes:
-                      - "Pension credit awarded for caring responsibilities"
-                      - "Additional credit for unemployment period"
-                      - "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025"
-                      - "Widow's Benefit Award WIDOWED recorded on this account between 07/04/2018 and 07/04/2020"
-                    schemeMembershipDetails:
+                    benefitSchemeDetailsResult:
+                      - benefitSchemeDetails:
+                          schemeName: "Graduated Retirement Benefit Scheme"
+                          schemeStartDate: "1990-04-06"
+                          schemeContractedOutNumberDetails: "S2123456B"
+                          schemeInhibitionStatus: "Non-Stakeholder Pension"
+                          currentOptimisticLock: 1
+                        schemeAddressDetailsList:
+                          - schemeAddressSequenceNumber: 1
+                            schemeContractedOutNumberDetails: "S2123456B"
+                            schemeAddressType: "GENERAL CORRESPONDENCE"
+                            benefitSchemeAddressDetails:
+                              schemeAddressLine1: "22 Church Mews"
+                              schemeAddressLine2: "East Benton Rise"
+                              schemeAddressLocality: "Gosforth"
+                              schemeAddressPostalTown: "Newcastle"
+                              schemePostcode: "NE7 7DN"
+                    marriageDetailsResult:
+                      marriageDetails:
+                        activeMarriage: true
+                        marriageDetailsList:
+                          - sequenceNumber: 1
+                            status: "MARRIED"
+                            startDate: "1980-08-12"
+                            startDateStatus: "VERIFIED"
+                            endDate: "2005-11-30"
+                            endDateStatus: "VERIFIED"
+                            spouseIdentifier: "EF345678G"
+                            spouseForename: "Robert"
+                            spouseSurname: "Johnson"
+                            separationDate: "2004-03-15"
+                            reconciliationDate: "2004-09-20"
+                          - sequenceNumber: 2
+                            status: "MARRIED"
+                            startDate: "2007-06-22"
+                            startDateStatus: "VERIFIED"
+                            spouseIdentifier: "HI678901K"
+                            spouseForename: "Sarah"
+                            spouseSurname: "Williams"
+                    longTermBenefitNotesResult:
+                      longTermBenefitNotes:
+                        - "Pension credit awarded for caring responsibilities"
+                        - "Additional credit for unemployment period"
+                        - "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025"
+                        - "Widow's Benefit Award WIDOWED recorded on this account between 07/04/2018 and 07/04/2020"
+                    schemeMembershipDetailsResult:
                       schemeMembershipDetailsSummaryList:
                         - stakeholderPensionSchemeType: "Non-Stakeholder Pension"
                           schemeMembershipDetails:
@@ -383,12 +403,32 @@ paths:
                             schemeTerminatingContractedOutNumberDetails: "S4200091P"
                       callback:
                         callbackURL: "/benefit-scheme/GH567890/scheme-membership-details?seqNo=1&occurrenceNo=4&transferSeqNo=2"
-                    statePensionData:
-                      - numberOfQualifyingYears: 35
-                        qualifyingTaxYear: true
-                      - numberOfQualifyingYears: 40
-                        qualifyingTaxYear: false
-                    niContributionsAndCredits:
+                    individualStatePensionInfoResult:
+                      identifier: "GH567890J"
+                      numberOfQualifyingYears: 35
+                      contributionsByTaxYear:
+                        - taxYear: 2020
+                          qualifyingTaxYear: true
+                          payableAccepted: true
+                          amountNeeded: 0.0
+                          classThreePayable: 0.0
+                          classThreePayableBy: "2022-04-05"
+                          classTwoPayable: 0.0
+                          classTwoPayableBy: "2022-04-05"
+                          totalPrimaryContributions: 3000.0
+                          niEarnings: 25000.0
+                          primaryPaidEarnings: 25000.0
+                        - taxYear: 2021
+                          qualifyingTaxYear: false
+                          payableAccepted: false
+                          amountNeeded: 500.0
+                          classThreePayable: 150.0
+                          classThreePayableBy: "2023-04-05"
+                          classTwoPayable: 0.0
+                          totalPrimaryContributions: 1500.0
+                          niEarnings: 12000.0
+                          primaryPaidEarnings: 12000.0
+                    niContributionsAndCreditsResult:
                       - totalGraduatedPensionUnits: 15.5
                         class1ContributionAndCredits:
                           - taxYear: 2019
@@ -430,64 +470,25 @@ paths:
                             class2Or3CreditStatus: "VALID"
                             creditSource: "QUARTERLY BILLING"
                             latePaymentPeriod: "ZZ"
-                      - totalGraduatedPensionUnits: 15.5
-                        class1ContributionAndCredits:
-                          - taxYear: 2019
-                            numberOfContributionsAndCredits: 52
-                            contributionCategoryLetter: "A"
-                            contributionCategory: "STANDARD RATE"
-                            contributionCreditType: "C1"
-                            primaryContribution: 2850.0
-                            class1ContributionStatus: "VALID"
-                            primaryPaidEarnings: 32000.0
-                            creditSource: "EMPLOYMENT SERVICES"
-                            employerName: "ACME"
-                            latePaymentPeriod: "L"
-                          - taxYear: 2020
-                            numberOfContributionsAndCredits: 52
-                            contributionCategoryLetter: "A"
-                            contributionCategory: "STANDARD RATE"
-                            contributionCreditType: "C1"
-                            primaryContribution: 2700.0
-                            class1ContributionStatus: "VALID"
-                            primaryPaidEarnings: 30000.0
-                            creditSource: "EMPLOYMENT SERVICES"
-                            employerName: "Global"
-                            latePaymentPeriod: "L"
-                        class2ContributionAndCredits:
-                          - taxYear: 2019
-                            numberOfContributionsAndCredits: 26
-                            contributionCreditType: "C2"
-                            class2Or3EarningsFactor: 3250.0
-                            class2NIContributonAmount: 81.9
-                            class2Or3CreditStatus: "VALID"
-                            creditSource: "DIRECT DEBIT"
-                            latePaymentPeriod: "L"
-                          - taxYear: 2021
-                            numberOfContributionsAndCredits: 40
-                            contributionCreditType: "C2"
-                            class2Or3EarningsFactor: 4000.0
-                            class2NIContributonAmount: 100.0
-                            class2Or3CreditStatus: "VALID"
-                            creditSource: "QUARTERLY BILLING"
-                            latePaymentPeriod: "ZZ"
+
                 ESA_minimal_success:
                   summary: ESA - Minimal response
                   value:
                     correlationId: "22222222-3333-4444-5555-666666666666"
                     benefitType: "ESA"
                     nationalInsuranceNumber: "QR456789S"
-                    niContributionsAndCredits:
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: []
-                      class2ContributionAndCredits: []
+                      class1ContributionAndCredits: [ ]
+                      class2ContributionAndCredits: [ ]
+
                 ESA_maximal_success:
                   summary: ESA - Maximal response
                   value:
                     correlationId: "22222222-3333-4444-5555-666666666666"
                     benefitType: "ESA"
                     nationalInsuranceNumber: "QR456789S"
-                    niContributionsAndCredits:
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 2.5
                       class1ContributionAndCredits:
                         - taxYear: 2021
@@ -540,23 +541,25 @@ paths:
                           class2Or3CreditStatus: "VALID"
                           creditSource: "EMPLOYMENT AND SUPPORT"
                           latePaymentPeriod: "L"
+
                 JSA_minimal_success:
                   summary: JSA - Minimal response
                   value:
                     correlationId: "44444444-5555-6666-7777-888888888888"
                     benefitType: "JSA"
                     nationalInsuranceNumber: "AB234567C"
-                    niContributionsAndCredits:
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: []
-                      class2ContributionAndCredits: []
+                      class1ContributionAndCredits: [ ]
+                      class2ContributionAndCredits: [ ]
+
                 JSA_maximal_success:
                   summary: JSA - Maximal response
                   value:
                     correlationId: "44444444-5555-6666-7777-888888888888"
                     benefitType: "JSA"
                     nationalInsuranceNumber: "AB234567C"
-                    niContributionsAndCredits:
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 1.2
                       class1ContributionAndCredits:
                         - taxYear: 2019
@@ -609,28 +612,30 @@ paths:
                           class2Or3CreditStatus: "VALID"
                           creditSource: "JSA PAPER INPUT"
                           latePaymentPeriod: "L"
+
                 MA_minimal_success:
                   summary: MA - Minimal response
                   value:
                     correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
                     benefitType: "MA"
                     nationalInsuranceNumber: "KL890123M"
-                    class2MAReceipts:
+                    class2MAReceiptsResult:
                       identifier: "KL890123M"
-                      class2MAReceiptDetails: []
-                    liabilitySummaryDetails:
-                      liabilityDetailsList: []
-                    niContributionsAndCredits:
+                      class2MAReceiptDetails: [ ]
+                    liabilitySummaryDetailsResult:
+                      liabilityDetailsList: [ ]
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: []
-                      class2ContributionAndCredits: []
+                      class1ContributionAndCredits: [ ]
+                      class2ContributionAndCredits: [ ]
+
                 MA_maximal_success:
                   summary: MA - Maximal response
                   value:
                     correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
                     benefitType: "MA"
                     nationalInsuranceNumber: "KL890123M"
-                    class2MAReceipts:
+                    class2MAReceiptsResult:
                       identifier: "KL890123M"
                       class2MAReceiptDetails:
                         - initials: "KL"
@@ -669,7 +674,7 @@ paths:
                           billScheduleNumber: 1999
                           isClosedRecord: true
                           weeksPaid: 13
-                    liabilitySummaryDetails:
+                    liabilitySummaryDetailsResult:
                       liabilityDetailsList:
                         - identifier: "KL890123M"
                           type: "CLASS 2 MATERNITY ALLOWANCE"
@@ -710,7 +715,7 @@ paths:
                           resourceGroupIdentifier: 789
                       callback:
                         callbackURL: "/liability-summary/KL890123M/details?occurrenceNo=3"
-                    niContributionsAndCredits:
+                    niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 3.8
                       class1ContributionAndCredits:
                         - taxYear: 2021
@@ -763,16 +768,17 @@ paths:
                           class2Or3CreditStatus: "VALID"
                           creditSource: "DIRECT DEBIT"
                           latePaymentPeriod: "L"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-        '502':
-          $ref: '#/components/responses/PartialFailure'
+
+                      '400':
+                        $ref: '#/components/responses/BadRequest'
+                      '403':
+                        $ref: '#/components/responses/Forbidden'
+                      '422':
+                        $ref: '#/components/responses/UnprocessableEntity'
+                      '500':
+                        $ref: '#/components/responses/InternalServerError'
+                      '502':
+                        $ref: '#/components/responses/PartialFailure'
 
 components:
   parameters:
@@ -1133,8 +1139,8 @@ components:
         - correlationId
         - benefitType
         - nationalInsuranceNumber
-        - marriageDetails
-        - niContributionsAndCredits
+        - marriageDetailsResult
+        - niContributionsAndCreditsResult
       properties:
         correlationId:
           type: string
@@ -1144,9 +1150,9 @@ components:
           enum: [ BSP ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        marriageDetails:
-          $ref: '#/components/schemas/MarriageDetails'
-        niContributionsAndCredits:
+        marriageDetailsResult:
+          $ref: '#/components/schemas/RetrieveMarriageDetailsResponse'
+        niContributionsAndCreditsResult:
           $ref: '#/components/schemas/PostNIContCredResponse'
 
     GYSPSuccessResponse:
@@ -1155,12 +1161,12 @@ components:
         - correlationId
         - benefitType
         - nationalInsuranceNumber
-        - benefitSchemeDetails
-        - marriageDetails
-        - longTermBenefitNotes
-        - schemeMembershipDetails
-        - statePensionData
-        - niContributionsAndCredits
+        - benefitSchemeDetailsResult
+        - marriageDetailsResult
+        - longTermBenefitNotesResult
+        - schemeMembershipDetailsResult
+        - individualStatePensionInfoResult
+        - niContributionsAndCreditsResult
       properties:
         correlationId:
           type: string
@@ -1170,19 +1176,19 @@ components:
           enum: [ GYSP ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        benefitSchemeDetails:
+        benefitSchemeDetailsResult:
           type: array
           items:
             $ref: '#/components/schemas/GetBenefitSchemeDetailsResponse'
-        marriageDetails:
+        marriageDetailsResult:
           $ref: '#/components/schemas/RetrieveMarriageDetailsResponse'
-        longTermBenefitNotes:
+        longTermBenefitNotesResult:
           $ref: '#/components/schemas/LongTermBenefitNotesResponse'
-        statePensionData:
+        individualStatePensionInfoResult:
           $ref: '#/components/schemas/GetNIRecordResponse'
-        schemeMembershipDetails:
+        schemeMembershipDetailsResult:
           $ref: '#/components/schemas/GetSchemeMembershipDetailsResponse'
-        niContributionsAndCredits:
+        niContributionsAndCreditsResult:
           type: array
           items:
             $ref: '#/components/schemas/PostNIContCredResponse'
@@ -1193,7 +1199,7 @@ components:
         - correlationId
         - benefitType
         - nationalInsuranceNumber
-        - niContributionsAndCredits
+        - niContributionsAndCreditsResult
       properties:
         correlationId:
           type: string
@@ -1203,7 +1209,7 @@ components:
           enum: [ ESA ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        niContributionsAndCredits:
+        niContributionsAndCreditsResult:
           $ref: '#/components/schemas/PostNIContCredResponse'
 
     JSASuccessResponse:
@@ -1212,7 +1218,7 @@ components:
         - correlationId
         - benefitType
         - nationalInsuranceNumber
-        - niContributionsAndCredits
+        - niContributionsAndCreditsResult
       properties:
         correlationId:
           type: string
@@ -1222,7 +1228,7 @@ components:
           enum: [ JSA ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        niContributionsAndCredits:
+        niContributionsAndCreditsResult:
           $ref: '#/components/schemas/PostNIContCredResponse'
 
     MASuccessResponse:
@@ -1231,9 +1237,9 @@ components:
         - correlationId
         - benefitType
         - nationalInsuranceNumber
-        - class2MAReceipts
-        - liabilitySummaryDetails
-        - niContributionsAndCredits
+        - class2MAReceiptsResult
+        - liabilitySummaryDetailsResult
+        - niContributionsAndCreditsResult
       properties:
         correlationId:
           type: string
@@ -1243,11 +1249,11 @@ components:
           enum: [ MA ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        class2MAReceipts:
+        class2MAReceiptsResult:
           $ref: '#/components/schemas/GetClass2MAReceiptsResponse'
-        liabilitySummaryDetails:
+        liabilitySummaryDetailsResult:
           $ref: '#/components/schemas/GetLiabilitySummaryResponseHIP'
-        niContributionsAndCredits:
+        niContributionsAndCreditsResult:
           $ref: '#/components/schemas/PostNIContCredResponse'
 
     # Scheme Membership Details - Copied from the provided NPS schema
