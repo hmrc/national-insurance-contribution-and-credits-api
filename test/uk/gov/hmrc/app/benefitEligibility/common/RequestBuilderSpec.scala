@@ -57,10 +57,6 @@ class RequestBuilderSpec extends AnyFreeSpec {
 
       "should successfully build a path when partial options are provided" in {
 
-        val optionBoolean: Option[Boolean]                 = Some(true)
-        val optionInt: Option[Int]                         = Some(1)
-        val optionEnum: Option[MaternityAllowanceSortType] = None
-
         val optionsList: List[RequestOption] = List(
           RequestOption("optionBoolean", optionBoolean.map(s => s.toString)),
           RequestOption("optionInt", optionInt.map(s => s.toString)),

@@ -26,14 +26,14 @@ object RequestBuilder {
     val newPath: String                    = basePath.concat("?")
     val optionsStrings: ListBuffer[String] = ListBuffer.empty
     options
-      .filter(ro => ro.optionValue.isDefined)
-      .foreach(option => optionsStrings.addOne(s"${option.optionName}=${option.optionValue.get}&"))
+      .filter(ro => ro.value.isDefined)
+      .foreach(option => optionsStrings.addOne(s"${option.name}=${option.value.get}&"))
     newPath.concat(optionsStrings.mkString).dropRight(1)
   }
 
 }
 
-case class RequestOption(optionName: String, optionValue: Option[String])
+case class RequestOption(name: String, value: Option[String])
 
 object RequestOption {
   implicit val requestOptionFormat: Format[RequestOption] = Json.format[RequestOption]
