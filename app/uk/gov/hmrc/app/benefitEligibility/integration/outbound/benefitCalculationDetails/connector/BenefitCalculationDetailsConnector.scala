@@ -56,18 +56,18 @@ class BenefitCalculationDetailsConnector @Inject() (
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, BenefitCalculationDetailsResult] = {
 
-    def seqNo: Option[String]             = sequenceNumber.map(s => s"seqNo=${s.value}&")
-    def typeFilter: Option[String]        = longTermBenefitType.map(t => s"type=${t.entryName}&")
-    def pensionProcessing: Option[String] = pensionProcessingArea.map(p => s"pensionProcessingArea=${p.entryName}&")
+    def seqNo: Option[String]             = sequenceNumber.map(s => s.value.toString)
+    def typeFilter: Option[String]        = longTermBenefitType.map(t => t.entryName)
+    def pensionProcessing: Option[String] = pensionProcessingArea.map(p => p.entryName)
 
-    val options = seqNo
-      .combine(typeFilter)
-      .combine(pensionProcessing)
-      .getOrElse("")
+    val options = List(
+      RequestOption("seqNo", seqNo),
+      RequestOption("type", typeFilter),
+      RequestOption("pensionProcessingArea", pensionProcessing)
+    )
 
     val path =
-      s"${appConfig.hipBaseUrl}/long-term-benefits/${identifier.value}/calculation?$options"
-        .dropRight(1)
+      RequestBuilder.buildPath(s"${appConfig.hipBaseUrl}/long-term-benefits/${identifier.value}/calculation", options)
 
     npsClient
       .get(path)

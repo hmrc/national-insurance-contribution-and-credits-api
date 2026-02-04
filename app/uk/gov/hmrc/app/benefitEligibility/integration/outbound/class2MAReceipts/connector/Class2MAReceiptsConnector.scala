@@ -75,13 +75,20 @@ class Class2MAReceiptsConnector @Inject() (
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] = {
 
-    def latestFilter: Option[String]      = archived.map(l => s"latest=$l&")
-    def receiptDateFilter: Option[String] = receiptDate.map(r => s"receiptDate=${r.value}&")
-    def typeFilter: Option[String]        = sortType.map(t => s"type=$t&")
+    def latestFilter: Option[String]      = archived.map(l => l.toString)
+    def receiptDateFilter: Option[String] = receiptDate.map(r => r.value.toString)
+    def typeFilter: Option[String]        = sortType.map(t => t.entryName)
 
-    val options = latestFilter.combine(receiptDateFilter).combine(typeFilter).getOrElse("")
+    val options = List(
+      RequestOption("latest", latestFilter),
+      RequestOption("receiptDate", receiptDateFilter),
+      RequestOption("type", typeFilter)
+    )
     val path =
-      s"${appConfig.hipBaseUrl}/ni/class-2/${identifier.value}/maternity-allowance/receipts?$options".dropRight(1)
+      RequestBuilder.buildPath(
+        s"${appConfig.hipBaseUrl}/ni/class-2/${identifier.value}/maternity-allowance/receipts",
+        options
+      )
 
     npsClient
       .get(path)

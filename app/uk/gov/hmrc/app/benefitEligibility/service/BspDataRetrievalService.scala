@@ -24,7 +24,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.BSPEligibi
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
@@ -36,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class BspDataRetrievalService @Inject() (
     marriageDetailsConnector: MarriageDetailsConnector,
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
-    marriageDetailsRequestHelper: MarriageDetailsRequestHelper,
     appConfig: AppConfig
 )(implicit ec: ExecutionContext) {
 
@@ -55,8 +53,12 @@ class BspDataRetrievalService @Inject() (
         )
       ),
       marriageDetailsConnector.fetchMarriageDetails(
-        BenefitType.BSP,
-        marriageDetailsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
+        eligibilityCheckDataRequest.benefitType,
+        eligibilityCheckDataRequest.nationalInsuranceNumber,
+        eligibilityCheckDataRequest.marriageDetails.searchStartYear,
+        eligibilityCheckDataRequest.marriageDetails.searchEndYear,
+        eligibilityCheckDataRequest.marriageDetails.latest,
+        eligibilityCheckDataRequest.marriageDetails.sequence
       )
     ).parTupled.map { case (contributionsAndCreditResult, marriageDetailsResult) =>
       EligibilityCheckDataResultBSP(

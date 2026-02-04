@@ -19,7 +19,14 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 import cats.data.EitherT
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
-import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, BenefitEligibilityError, BenefitType}
+import uk.gov.hmrc.app.benefitEligibility.common.{
+  ApiName,
+  BenefitEligibilityError,
+  BenefitType,
+  Identifier,
+  RequestBuilder,
+  RequestOption
+}
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -46,13 +53,15 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{MarriageDetailsResult, NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class MarriageDetailsConnector @Inject() (
-    npsClient: NpsClient
+    npsClient: NpsClient,
+    appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends NpsResponseHandler {
 
@@ -62,8 +71,30 @@ class MarriageDetailsConnector @Inject() (
 
   def fetchMarriageDetails(
       benefitType: BenefitType,
-      path: String
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] =
+      identifier: Identifier,
+      startYear: Option[Int],
+      endYear: Option[Int],
+      latestFilter: Option[Boolean],
+      seq: Option[Int]
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
+
+    def searchStartYear: Option[String] = startYear.map(sY => sY.toString)
+    def searchEndYear: Option[String]   = endYear.map(eY => eY.toString)
+    def latest: Option[String]          = latestFilter.map(l => l.toString)
+    def sequence: Option[String]        = seq.map(s => s.toString)
+
+    val options = List(
+      RequestOption("searchStartYear", searchStartYear),
+      RequestOption("searchEndYear", searchEndYear),
+      RequestOption("latest", latest),
+      RequestOption("sequence", sequence)
+    )
+
+    val path = RequestBuilder.buildPath(
+      s"${appConfig.hipBaseUrl}/ni/individual/${identifier.value}/marriage-cp",
+      options
+    )
+
     npsClient
       .get(path)
       .flatMap { response =>
@@ -117,5 +148,6 @@ class MarriageDetailsConnector @Inject() (
         logger.error(s"call to downstream service failed: ${error.toString}")
         error
       }
+  }
 
 }

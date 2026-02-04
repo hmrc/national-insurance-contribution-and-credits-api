@@ -36,7 +36,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsRequestHelper
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
@@ -56,7 +55,6 @@ class GetYourStatePensionDataRetrievalService @Inject() (
     longTermBenefitNotesConnector: LongTermBenefitNotesConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
     statePensionInformationConnector: IndividualStatePensionInformationConnector,
-    marriageDetailsRequestHelper: MarriageDetailsRequestHelper,
     appConfig: AppConfig
 )(implicit ec: ExecutionContext) {
 
@@ -84,8 +82,12 @@ class GetYourStatePensionDataRetrievalService @Inject() (
         )
       }.sequence,
       marriageDetailsConnector.fetchMarriageDetails(
-        benefitType,
-        marriageDetailsRequestHelper.buildRequestPath(appConfig.hipBaseUrl, eligibilityCheckDataRequest)
+        eligibilityCheckDataRequest.benefitType,
+        eligibilityCheckDataRequest.nationalInsuranceNumber,
+        eligibilityCheckDataRequest.marriageDetails.searchStartYear,
+        eligibilityCheckDataRequest.marriageDetails.searchEndYear,
+        eligibilityCheckDataRequest.marriageDetails.latest,
+        eligibilityCheckDataRequest.marriageDetails.sequence
       ),
       getSchemeMembershipAndDetails(eligibilityCheckDataRequest),
       longTermBenefitNotesConnector.fetchLongTermBenefitNotes(

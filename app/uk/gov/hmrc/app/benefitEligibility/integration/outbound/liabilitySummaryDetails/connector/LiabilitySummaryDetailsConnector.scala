@@ -83,21 +83,25 @@ class LiabilitySummaryDetailsConnector @Inject() (
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, LiabilityResult] = {
 
-    def occurrenceNumber: Option[String]   = liabilityOccurrenceNumber.map(o => s"occurrenceNumber=${o.toString}&")
-    def typeFilter: Option[String]         = liabilityType.map(t => s"type=$t&")
-    def earliestStartDate: Option[String]  = earliestLiabilityStartDate.map(d => s"earliestStartDate=${d.toString}&")
-    def liabilityStartDate: Option[String] = startDate.map(d => s"liabilityStartDate=$d&")
-    def liabilityEndDate: Option[String]   = endDate.map(d => s"liabilityEndDate=$d&")
+    def occurrenceNumber: Option[String]   = liabilityOccurrenceNumber.map(o => o.toString)
+    def typeFilter: Option[String]         = liabilityType.map(t => t.entryName)
+    def earliestStartDate: Option[String]  = earliestLiabilityStartDate.map(d => d.toString)
+    def liabilityStartDate: Option[String] = startDate.map(d => d.toString)
+    def liabilityEndDate: Option[String]   = endDate.map(d => d.toString)
 
-    val options = occurrenceNumber
-      .combine(typeFilter)
-      .combine(earliestStartDate)
-      .combine(liabilityStartDate)
-      .combine(liabilityEndDate)
-      .getOrElse("")
+    val options = List(
+      RequestOption("occurrenceNumber", occurrenceNumber),
+      RequestOption("type", typeFilter),
+      RequestOption("earliestStartDate", earliestStartDate),
+      RequestOption("liabilityStartDate", liabilityStartDate),
+      RequestOption("liabilityEndDate", liabilityEndDate)
+    )
+
     val path =
-      s"${appConfig.hipBaseUrl}/person/${identifier.value}/liability-summary/${liabilitySearchCategoryHyphenated.entryName}?$options"
-        .dropRight(1)
+      RequestBuilder.buildPath(
+        s"${appConfig.hipBaseUrl}/person/${identifier.value}/liability-summary/${liabilitySearchCategoryHyphenated.entryName}",
+        options
+      )
 
     npsClient
       .get(path)
