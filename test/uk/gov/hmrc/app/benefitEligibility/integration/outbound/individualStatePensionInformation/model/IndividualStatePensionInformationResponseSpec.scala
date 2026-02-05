@@ -29,8 +29,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
-  ContributionCreditType,
-  CreditSourceType
+  CreditSourceType,
+  IndividualStatePensionContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.IndividualStatePensionInformation._
@@ -79,25 +79,25 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
               totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("3456.78"))),
               niEarnings = Some(NiEarnings(BigDecimal("45000.00"))),
               coClassOnePaid = Some(CoClassOnePaid(BigDecimal("1234.56"))),
-              totalPrimaryEarnings = Some(TotalPrimaryEarnings(BigDecimal("52000.00"))),
+              coPrimaryPaidEarnings = Some(CoPrimaryPaidEarnings(BigDecimal("52000.00"))),
               niEarningsSelfEmployed = Some(NiEarningsSelfEmployed(25)),
               niEarningsVoluntary = Some(NiEarningsVoluntary(8)),
               underInvestigationFlag = Some(UnderInvestigationFlag(true)),
-              primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("48500.75"))),
+              totalPrimaryPaidEarnings = Some(TotalPrimaryPaidEarnings(BigDecimal("48500.75"))),
               otherCredits = Some(
                 List(
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                     creditSourceType = Some(CreditSourceType.JsaTapeInput),
                     contributionCreditCount = Some(ContributionCreditCount(15))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class3Credit),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3Credit),
                     creditSourceType = Some(CreditSourceType.CarersCredit),
                     contributionCreditCount = Some(ContributionCreditCount(52))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class2NormalRate),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class2NormalRate),
                     creditSourceType = Some(CreditSourceType.ChildBenefit),
                     contributionCreditCount = Some(ContributionCreditCount(-5))
                   )
@@ -119,30 +119,31 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
               totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("2987.45"))),
               niEarnings = Some(NiEarnings(BigDecimal("38500.25"))),
               coClassOnePaid = Some(CoClassOnePaid(BigDecimal("987.65"))),
-              totalPrimaryEarnings = Some(TotalPrimaryEarnings(BigDecimal("41250.80"))),
+              coPrimaryPaidEarnings = Some(CoPrimaryPaidEarnings(BigDecimal("41250.80"))),
               niEarningsSelfEmployed = Some(NiEarningsSelfEmployed(42)),
               niEarningsVoluntary = Some(NiEarningsVoluntary(15)),
               underInvestigationFlag = Some(UnderInvestigationFlag(false)),
-              primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("39875.90"))),
+              totalPrimaryPaidEarnings = Some(TotalPrimaryPaidEarnings(BigDecimal("39875.90"))),
               otherCredits = Some(
                 List(
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                     creditSourceType = Some(CreditSourceType.UniversalCredit),
                     contributionCreditCount = Some(ContributionCreditCount(26))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
+                    contributionCreditType =
+                      Some(IndividualStatePensionContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
                     creditSourceType = Some(CreditSourceType.StatutoryMaternityPayCredit),
                     contributionCreditCount = Some(ContributionCreditCount(12))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class3RateC),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3RateC),
                     creditSourceType = Some(CreditSourceType.ModSpouseCivilPartnersCredits),
                     contributionCreditCount = Some(ContributionCreditCount(39))
                   ),
                   OtherCredits(
-                    contributionCreditType = Some(ContributionCreditType.Class1EmployeeOnly),
+                    contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1EmployeeOnly),
                     creditSourceType = Some(CreditSourceType.SharedParentalPay),
                     contributionCreditCount = Some(ContributionCreditCount(-3))
                   )
@@ -178,11 +179,11 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
           |      "totalPrimaryContributions": 3456.78,
           |      "niEarnings": 45000.00,
           |      "coClassOnePaid": 1234.56,
-          |      "totalPrimaryEarnings": 52000.00,
+          |      "coPrimaryPaidEarnings": 52000.00,
           |      "niEarningsSelfEmployed": 25,
           |      "niEarningsVoluntary": 8,
           |      "underInvestigationFlag": true,
-          |      "primaryPaidEarnings": 48500.75,
+          |      "totalPrimaryPaidEarnings": 48500.75,
           |      "otherCredits": [
           |        {
           |          "contributionCreditType": "CLASS 1 CREDIT",
@@ -216,11 +217,11 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
           |      "totalPrimaryContributions": 2987.45,
           |      "niEarnings": 38500.25,
           |      "coClassOnePaid": 987.65,
-          |      "totalPrimaryEarnings": 41250.80,
+          |      "coPrimaryPaidEarnings": 41250.80,
           |      "niEarningsSelfEmployed": 42,
           |      "niEarningsVoluntary": 15,
           |      "underInvestigationFlag": false,
-          |      "primaryPaidEarnings": 39875.90,
+          |      "totalPrimaryPaidEarnings": 39875.90,
           |      "otherCredits": [
           |        {
           |          "contributionCreditType": "CLASS 1 CREDIT",
@@ -275,25 +276,25 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
                 totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("3456.78"))),
                 niEarnings = Some(NiEarnings(BigDecimal("45000.00"))),
                 coClassOnePaid = Some(CoClassOnePaid(BigDecimal("1234.56"))),
-                totalPrimaryEarnings = Some(TotalPrimaryEarnings(BigDecimal("52000.00"))),
+                coPrimaryPaidEarnings = Some(CoPrimaryPaidEarnings(BigDecimal("52000.00"))),
                 niEarningsSelfEmployed = Some(NiEarningsSelfEmployed(25)),
                 niEarningsVoluntary = Some(NiEarningsVoluntary(8)),
                 underInvestigationFlag = Some(UnderInvestigationFlag(true)),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("485009999999999.75"))),
+                totalPrimaryPaidEarnings = Some(TotalPrimaryPaidEarnings(BigDecimal("485009999999999.75"))),
                 otherCredits = Some(
                   List(
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                       creditSourceType = Some(CreditSourceType.JsaTapeInput),
                       contributionCreditCount = Some(ContributionCreditCount(15))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class3Credit),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3Credit),
                       creditSourceType = Some(CreditSourceType.CarersCredit),
                       contributionCreditCount = Some(ContributionCreditCount(52))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class2NormalRate),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class2NormalRate),
                       creditSourceType = Some(CreditSourceType.ChildBenefit),
                       contributionCreditCount = Some(ContributionCreditCount(-5))
                     )
@@ -315,30 +316,31 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
                 totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("2987.45"))),
                 niEarnings = Some(NiEarnings(BigDecimal("38500.25"))),
                 coClassOnePaid = Some(CoClassOnePaid(BigDecimal("987.65"))),
-                totalPrimaryEarnings = Some(TotalPrimaryEarnings(BigDecimal("41250.80"))),
+                coPrimaryPaidEarnings = Some(CoPrimaryPaidEarnings(BigDecimal("41250.80"))),
                 niEarningsSelfEmployed = Some(NiEarningsSelfEmployed(42)),
                 niEarningsVoluntary = Some(NiEarningsVoluntary(15)),
                 underInvestigationFlag = Some(UnderInvestigationFlag(false)),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("39875.90"))),
+                totalPrimaryPaidEarnings = Some(TotalPrimaryPaidEarnings(BigDecimal("39875.90"))),
                 otherCredits = Some(
                   List(
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class1Credit),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1Credit),
                       creditSourceType = Some(CreditSourceType.UniversalCredit),
                       contributionCreditCount = Some(ContributionCreditCount(26))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
+                      contributionCreditType =
+                        Some(IndividualStatePensionContributionCreditType.Class2VoluntaryDevelopmentWorkerRateA),
                       creditSourceType = Some(CreditSourceType.StatutoryMaternityPayCredit),
                       contributionCreditCount = Some(ContributionCreditCount(12))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class3RateC),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class3RateC),
                       creditSourceType = Some(CreditSourceType.ModSpouseCivilPartnersCredits),
                       contributionCreditCount = Some(ContributionCreditCount(39))
                     ),
                     OtherCredits(
-                      contributionCreditType = Some(ContributionCreditType.Class1EmployeeOnly),
+                      contributionCreditType = Some(IndividualStatePensionContributionCreditType.Class1EmployeeOnly),
                       creditSourceType = Some(CreditSourceType.SharedParentalPay),
                       contributionCreditCount = Some(ContributionCreditCount(-3))
                     )
@@ -355,7 +357,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
         ) shouldBe Validated.Invalid(
           NonEmptyList.of(
             """NumberOfQualifyingYears value exceeds the maximum allowed limit of 100""",
-            """PrimaryPaidEarnings value exceeds the maximum allowed limit of 99999999999999.98"""
+            """TotalPrimaryPaidEarnings value exceeds the maximum allowed limit of 99999999999999.98"""
           )
         )
 
@@ -363,7 +365,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
           Json.toJson(invalidResponse)
         ) shouldBe
           List(
-            """$.contributionsByTaxYear[0].primaryPaidEarnings: must have a maximum value of 9.999999999999998E13""",
+            """$.contributionsByTaxYear[0].totalPrimaryPaidEarnings: must have a maximum value of 9.999999999999998E13""",
             """$.numberOfQualifyingYears: must have a maximum value of 100"""
           )
       }

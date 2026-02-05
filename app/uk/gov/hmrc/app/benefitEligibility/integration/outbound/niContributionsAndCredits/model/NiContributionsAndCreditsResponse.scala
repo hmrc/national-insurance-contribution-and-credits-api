@@ -30,9 +30,9 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
   Class1ContributionStatus,
   Class2Or3CreditStatus,
   ContributionCategory,
-  ContributionCreditType,
   CreditSource,
-  LatePaymentPeriod
+  LatePaymentPeriod,
+  NiContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -40,59 +40,6 @@ import java.time.LocalDate
 import scala.collection.immutable
 
 sealed trait NiContributionsAndCreditsResponse extends NpsApiResponse
-
-object NiContributionsAndCreditsError {
-
-  case class NiContributionsAndCredits400(reason: NpsErrorReason, code: NpsErrorCode400)
-
-  object NiContributionsAndCredits400 {
-
-    implicit val npsErrorResponse400Format: Format[NiContributionsAndCredits400] =
-      Json.format[NiContributionsAndCredits400]
-
-  }
-
-  case class NiContributionsAndCreditsResponse400(failures: List[NiContributionsAndCredits400])
-      extends NiContributionsAndCreditsResponse
-
-  object NiContributionsAndCreditsResponse400 {
-
-    implicit val npsFailureResponse400Format: Format[NiContributionsAndCreditsResponse400] =
-      Json.format[NiContributionsAndCreditsResponse400]
-
-  }
-
-  case class NiContributionsAndCreditsResponse403(reason: NpsErrorReason403, code: NpsErrorCode403)
-      extends NiContributionsAndCreditsResponse
-      with NpsApiResponse
-
-  object NiContributionsAndCreditsResponse403 {
-
-    implicit val npsFailureResponse403Reads: Format[NiContributionsAndCreditsResponse403] =
-      Json.format[NiContributionsAndCreditsResponse403]
-
-  }
-
-  case class NiContributionsAndCredits422(reason: NpsErrorReason, code: ErrorCode422)
-
-  object NiContributionsAndCredits422 {
-
-    implicit val NpsErrorResponse422Reads: Format[NiContributionsAndCredits422] =
-      Json.format[NiContributionsAndCredits422]
-
-  }
-
-  case class NiContributionsAndCreditsResponse422(failures: List[NiContributionsAndCredits422])
-      extends NiContributionsAndCreditsResponse
-
-  object NiContributionsAndCreditsResponse422 {
-
-    implicit val npsFailureResponse422Format: Format[NiContributionsAndCreditsResponse422] =
-      Json.format[NiContributionsAndCreditsResponse422]
-
-  }
-
-}
 
 object NiContributionsAndCreditsSuccess {
 
@@ -206,7 +153,7 @@ object NiContributionsAndCreditsSuccess {
       numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions],
       contributionCategoryLetter: Option[ContributionCategoryLetter],
       contributionCategory: Option[ContributionCategory],
-      contributionCreditType: Option[ContributionCreditType],
+      contributionCreditType: Option[NiContributionCreditType],
       primaryContribution: Option[PrimaryContribution],
       class1ContributionStatus: Option[Class1ContributionStatus],
       primaryPaidEarnings: Option[PrimaryPaidEarnings],
@@ -222,7 +169,7 @@ object NiContributionsAndCreditsSuccess {
   case class Class2ContributionAndCredits(
       taxYear: Option[TaxYear],
       numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions],
-      contributionCreditType: Option[ContributionCreditType],
+      contributionCreditType: Option[NiContributionCreditType],
       class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
       class2NIContributionAmount: Option[Class2NIContributionAmount],
       class2Or3CreditStatus: Option[Class2Or3CreditStatus],

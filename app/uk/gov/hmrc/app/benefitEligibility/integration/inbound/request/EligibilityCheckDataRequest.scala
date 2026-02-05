@@ -44,9 +44,6 @@ object EligibilityCheckDataRequest {
 sealed trait EligibilityCheckDataRequest {
   def benefitType: BenefitType
   def nationalInsuranceNumber: Identifier
-//  def dateOfBirth: DateOfBirth
-//  def startTaxYear: StartTaxYear
-//  def endTaxYear: EndTaxYear
 }
 
 case class Liabilities(
@@ -78,8 +75,8 @@ object Class2MaReceipts {
 
 }
 
-case class MAEligibilityCheckDataRequest(
-    benefitType: BenefitType = MA,
+final case class MAEligibilityCheckDataRequest private (
+    benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     contributionsAndCredits: ContributionsAndCredits,
     liabilities: Liabilities,
@@ -88,36 +85,26 @@ case class MAEligibilityCheckDataRequest(
 
 object MAEligibilityCheckDataRequest {
 
+  def apply(
+      nationalInsuranceNumber: Identifier,
+      contributionsAndCredits: ContributionsAndCredits,
+      liabilities: Liabilities,
+      class2MaReceipts: Class2MaReceipts
+  ) = new MAEligibilityCheckDataRequest(
+    MA,
+    nationalInsuranceNumber,
+    contributionsAndCredits,
+    liabilities,
+    class2MaReceipts
+  )
+
   implicit val maEligibilityCheckDataRequestReads: Reads[MAEligibilityCheckDataRequest] =
     Json.reads[MAEligibilityCheckDataRequest]
 
 }
 
-//case class MAEligibilityCheckDataRequest(
-//    nationalInsuranceNumber: Identifier, // contribution credit api, maybe trn or nino (required by both the liability and ma receipt api)
-//    dateOfBirth: DateOfBirth,                                             // contribution credit api
-//    startTaxYear: StartTaxYear,                                           // contribution credit api
-//    endTaxYear: EndTaxYear,                                               // contribution credit api
-//    liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated, // liability api
-//    liabilityOccurrenceNumber: Option[OccurrenceNumber],                  // liability api
-//    liabilityType: Option[LiabilitySearchCategoryHyphenated],             // liability api
-//    earliestLiabilityStartDate: Option[LocalDate],                        // liability api
-//    liabilityStart: Option[LocalDate],                                    // liability api
-//    liabilityEnd: Option[LocalDate],                                      // liability api
-//    archived: Option[Boolean],                                            // ma receipts api
-//    receiptDate: Option[ReceiptDate],                                     // ma receipts api
-//    sortBy: Option[MaternityAllowanceSortType]                            // ma receipts api
-//) extends EligibilityCheckDataRequest {
-//  val `type`: BenefitType = MA
-//}
-//
-//object MAEligibilityCheckDataRequest {
-//  implicit val reads: Reads[MAEligibilityCheckDataRequest]   = Json.reads[MAEligibilityCheckDataRequest]
-//  implicit val writes: Reads[MAEligibilityCheckDataRequest] = Json.reads[MAEligibilityCheckDataRequest]
-//}
-
-case class ESAEligibilityCheckDataRequest(
-    benefitType: BenefitType = ESA,
+final case class ESAEligibilityCheckDataRequest private (
+    benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     contributionsAndCredits: ContributionsAndCredits
 ) extends EligibilityCheckDataRequest
@@ -127,10 +114,15 @@ object ESAEligibilityCheckDataRequest {
   implicit val esaEligibilityCheckDataRequestReads: Reads[ESAEligibilityCheckDataRequest] =
     Json.reads[ESAEligibilityCheckDataRequest]
 
+  def apply(
+      nationalInsuranceNumber: Identifier,
+      contributionsAndCredits: ContributionsAndCredits
+  ) = new ESAEligibilityCheckDataRequest(ESA, nationalInsuranceNumber, contributionsAndCredits)
+
 }
 
-case class JSAEligibilityCheckDataRequest(
-    benefitType: BenefitType = JSA,
+final case class JSAEligibilityCheckDataRequest private (
+    benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     contributionsAndCredits: ContributionsAndCredits
 ) extends EligibilityCheckDataRequest
@@ -139,6 +131,11 @@ object JSAEligibilityCheckDataRequest {
 
   implicit val jsaEligibilityCheckDataRequestReads: Reads[JSAEligibilityCheckDataRequest] =
     Json.reads[JSAEligibilityCheckDataRequest]
+
+  def apply(
+      nationalInsuranceNumber: Identifier,
+      contributionsAndCredits: ContributionsAndCredits
+  ) = new JSAEligibilityCheckDataRequest(ESA, nationalInsuranceNumber, contributionsAndCredits)
 
 }
 
@@ -218,8 +215,8 @@ object SchemeMembershipDetails {
 
 }
 
-case class GYSPEligibilityCheckDataRequest(
-    benefitType: BenefitType = GYSP,
+final case class GYSPEligibilityCheckDataRequest private (
+    benefitType: BenefitType,
     nationalInsuranceNumber: Identifier, // contribution credit api
     contributionsAndCredits: ContributionsAndCredits,
     benefitCalculation: BenefitCalculation,
@@ -233,10 +230,27 @@ object GYSPEligibilityCheckDataRequest {
   implicit val gyspEligibilityCheckDataRequestReads: Reads[GYSPEligibilityCheckDataRequest] =
     Json.reads[GYSPEligibilityCheckDataRequest]
 
+  def apply(
+      nationalInsuranceNumber: Identifier, // contribution credit api
+      contributionsAndCredits: ContributionsAndCredits,
+      benefitCalculation: BenefitCalculation,
+      benefitCalculationNotes: BenefitCalculationNotes,
+      marriageDetails: MarriageDetails,
+      schemeMembershipDetails: SchemeMembershipDetails
+  ) = new GYSPEligibilityCheckDataRequest(
+    GYSP,
+    nationalInsuranceNumber,
+    contributionsAndCredits,
+    benefitCalculation,
+    benefitCalculationNotes,
+    marriageDetails,
+    schemeMembershipDetails
+  )
+
 }
 
-case class BSPEligibilityCheckDataRequest(
-    benefitType: BenefitType = BSP,
+final case class BSPEligibilityCheckDataRequest private (
+    benefitType: BenefitType,
     nationalInsuranceNumber: Identifier, // contribution credit api
     contributionsAndCredits: ContributionsAndCredits,
     marriageDetails: MarriageDetails
@@ -246,6 +260,12 @@ object BSPEligibilityCheckDataRequest {
 
   implicit val bspEligibilityCheckDataRequestReads: Reads[BSPEligibilityCheckDataRequest] =
     Json.reads[BSPEligibilityCheckDataRequest]
+
+  def apply(
+      nationalInsuranceNumber: Identifier, // contribution credit api
+      contributionsAndCredits: ContributionsAndCredits,
+      marriageDetails: MarriageDetails
+  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, contributionsAndCredits, marriageDetails)
 
 }
 

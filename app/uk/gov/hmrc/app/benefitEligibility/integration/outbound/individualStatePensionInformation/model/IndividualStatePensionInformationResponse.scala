@@ -20,8 +20,8 @@ import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
-  ContributionCreditType,
-  CreditSourceType
+  CreditSourceType,
+  IndividualStatePensionContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
@@ -234,10 +234,10 @@ object IndividualStatePensionInformationSuccess {
     implicit val reads: Format[CoClassOnePaid] = Json.valueFormat[CoClassOnePaid]
   }
 
-  case class TotalPrimaryEarnings(value: BigDecimal) extends AnyVal
+  case class CoPrimaryPaidEarnings(value: BigDecimal) extends AnyVal
 
-  object TotalPrimaryEarnings {
-    implicit val reads: Format[TotalPrimaryEarnings] = Json.valueFormat[TotalPrimaryEarnings]
+  object CoPrimaryPaidEarnings {
+    implicit val reads: Format[CoPrimaryPaidEarnings] = Json.valueFormat[CoPrimaryPaidEarnings]
   }
 
   case class NiEarningsSelfEmployed(value: Int) extends AnyVal
@@ -258,10 +258,10 @@ object IndividualStatePensionInformationSuccess {
     implicit val reads: Format[UnderInvestigationFlag] = Json.valueFormat[UnderInvestigationFlag]
   }
 
-  case class PrimaryPaidEarnings(value: BigDecimal) extends AnyVal
+  case class TotalPrimaryPaidEarnings(value: BigDecimal) extends AnyVal
 
-  object PrimaryPaidEarnings {
-    implicit val reads: Format[PrimaryPaidEarnings] = Json.valueFormat[PrimaryPaidEarnings]
+  object TotalPrimaryPaidEarnings {
+    implicit val reads: Format[TotalPrimaryPaidEarnings] = Json.valueFormat[TotalPrimaryPaidEarnings]
   }
 
   case class ContributionCreditCount(value: Int) extends AnyVal
@@ -271,7 +271,7 @@ object IndividualStatePensionInformationSuccess {
   }
 
   case class OtherCredits(
-      contributionCreditType: Option[ContributionCreditType],
+      contributionCreditType: Option[IndividualStatePensionContributionCreditType],
       creditSourceType: Option[CreditSourceType],
       contributionCreditCount: Option[ContributionCreditCount]
   )
@@ -295,11 +295,11 @@ object IndividualStatePensionInformationSuccess {
       totalPrimaryContributions: Option[TotalPrimaryContributions],
       niEarnings: Option[NiEarnings],
       coClassOnePaid: Option[CoClassOnePaid],
-      totalPrimaryEarnings: Option[TotalPrimaryEarnings],
+      coPrimaryPaidEarnings: Option[CoPrimaryPaidEarnings],
       niEarningsSelfEmployed: Option[NiEarningsSelfEmployed],
       niEarningsVoluntary: Option[NiEarningsVoluntary],
       underInvestigationFlag: Option[UnderInvestigationFlag],
-      primaryPaidEarnings: Option[PrimaryPaidEarnings],
+      totalPrimaryPaidEarnings: Option[TotalPrimaryPaidEarnings],
       otherCredits: Option[List[OtherCredits]]
   )
 

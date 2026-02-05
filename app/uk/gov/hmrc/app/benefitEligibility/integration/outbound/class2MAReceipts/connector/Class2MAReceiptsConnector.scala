@@ -21,7 +21,7 @@ import cats.implicits.*
 import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -31,20 +31,12 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   UnexpectedStatus,
   UnprocessableEntity
 }
-import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorResponse400,
   NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsError.{
-  Class2MAReceiptsErrorResponse400,
-  Class2MAReceiptsErrorResponse403,
-  Class2MAReceiptsErrorResponse422
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{Class2MaReceiptsResult, NpsClient, NpsResponseHandler}

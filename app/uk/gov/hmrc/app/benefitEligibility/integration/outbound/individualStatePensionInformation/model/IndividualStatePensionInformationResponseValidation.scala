@@ -31,7 +31,7 @@ object IndividualStatePensionInformationResponseValidation {
           case Some(contributionsByTaxYear) =>
             contributionsByTaxYear.flatMap { el =>
               List(
-                el.primaryPaidEarnings.map(p =>
+                el.totalPrimaryPaidEarnings.map(p =>
                   MoneyValidation.validate(p, MoneyValidation.Defaults.signedMin, 2, BigDecimal("0.01"))
                 )
               ).flatten

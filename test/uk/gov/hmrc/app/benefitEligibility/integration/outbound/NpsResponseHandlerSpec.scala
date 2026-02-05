@@ -45,9 +45,11 @@ class NpsResponseHandlerSpec extends AnyFreeSpec with MockFactory {
   val standardErrorResponse400 = NpsStandardErrorResponse400(
     origin = HipOrigin.Hip,
     response = NpsMultiErrorResponse(
-      failures = List(
-        NpsSingleErrorResponse(reason = NpsErrorReason("reason_1"), code = NpsErrorCode("some error")),
-        NpsSingleErrorResponse(reason = NpsErrorReason("reason_2"), code = NpsErrorCode("some error"))
+      failures = Some(
+        List(
+          NpsSingleErrorResponse(reason = NpsErrorReason("reason_1"), code = NpsErrorCode("some error")),
+          NpsSingleErrorResponse(reason = NpsErrorReason("reason_2"), code = NpsErrorCode("some error"))
+        )
       )
     )
   )
@@ -57,9 +59,11 @@ class NpsResponseHandlerSpec extends AnyFreeSpec with MockFactory {
 
   val npsMultiErrorResponse =
     NpsMultiErrorResponse(
-      List(
-        NpsSingleErrorResponse(code = NpsErrorCode("some code 1"), reason = NpsErrorReason("some reason 2")),
-        NpsSingleErrorResponse(code = NpsErrorCode("some code 2"), reason = NpsErrorReason("some reason 2"))
+      Some(
+        List(
+          NpsSingleErrorResponse(code = NpsErrorCode("some code 1"), reason = NpsErrorReason("some reason 2")),
+          NpsSingleErrorResponse(code = NpsErrorCode("some code 2"), reason = NpsErrorReason("some reason 2"))
+        )
       )
     )
 

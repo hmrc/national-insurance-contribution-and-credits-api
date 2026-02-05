@@ -16,15 +16,21 @@
 
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
-import play.api.libs.json.{Format, Json, Reads, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorResponseHipOrigin}
+import play.api.libs.json.{Format, Json, OWrites, Reads, Writes}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+  ErrorCode422,
+  HipFailureResponse,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{
   BenefitSchemeAddressDetails,
   BenefitSchemeDetails,
   BenefitSchemeDetailsSuccessResponse,
   SchemeAddressDetails
 }
-import play.api.libs.json.{Format, Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsError.{
   BenefitCalculationDetailsError400,
   BenefitCalculationDetailsError422,
@@ -44,12 +50,22 @@ import IndividualStatePensionInformationError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
 
 object TestFormat {
+
+  implicit val npsSingleErrorResponseWrites: Writes[NpsSingleErrorResponse] = Json.writes[NpsSingleErrorResponse]
+  implicit val npsMultiErrorResponseWrites: OWrites[NpsMultiErrorResponse]  = Json.writes[NpsMultiErrorResponse]
+
+  implicit val npsStandardErrorResponse400Writes: Writes[NpsStandardErrorResponse400] =
+    Json.writes[NpsStandardErrorResponse400]
+
+  implicit val hipFailureResponseWrites: Writes[HipFailureResponse] = Json.writes[HipFailureResponse]
+
+  implicit val npsErrorResponseHipOriginResponseWrites: Writes[NpsErrorResponseHipOrigin] =
+    Json.writes[NpsErrorResponseHipOrigin]
 
   object CommonFormats {
     implicit val errorCode422: Writes[ErrorCode422] = Json.valueWrites[ErrorCode422]
@@ -96,21 +112,6 @@ object TestFormat {
 
     implicit val niContributionsAndCreditsSuccessResponseFormat: Format[NiContributionsAndCreditsSuccessResponse] =
       Json.format[NiContributionsAndCreditsSuccessResponse]
-
-    implicit val niContributionsAndCreditsError400Writes: Writes[NiContributionsAndCredits400] =
-      Json.writes[NiContributionsAndCredits400]
-
-    implicit val niContributionsAndCreditsResponse400Writes: Writes[NiContributionsAndCreditsResponse400] =
-      Json.writes[NiContributionsAndCreditsResponse400]
-
-    implicit val niContributionsAndCreditsError403Writes: Writes[NiContributionsAndCreditsResponse403] =
-      Json.writes[NiContributionsAndCreditsResponse403]
-
-    implicit val niContributionsAndCredits422Writes: Writes[NiContributionsAndCredits422] =
-      Json.writes[NiContributionsAndCredits422]
-
-    implicit val niContributionsAndCreditsErrorResponse422Writes: Writes[NiContributionsAndCreditsResponse422] =
-      Json.writes[NiContributionsAndCreditsResponse422]
 
   }
 

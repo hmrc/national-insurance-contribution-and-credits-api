@@ -22,7 +22,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.CorrelationId
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{
   BenefitEligibilityInfoErrorResponse,
-  BenefitEligibilityInfoRequestKey,
   BenefitEligibilityInfoResponse
 }
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
@@ -49,28 +48,25 @@ class BenefitEligibilityDataController @Inject() (
       case Some(data) =>
         data.validate[EligibilityCheckDataRequest] match {
           case JsSuccess(request, _) =>
-            BenefitEligibilityInfoRequestKey(request)
             benefitEligibilityDataRetrievalService
               .getEligibilityData(request)(
                 headerCarrier.withExtraHeaders("correlationId" -> correlationId.value.toString),
                 ec
               )
-              .leftMap { result =>
-                InternalServerError(
-                  Json.toJson(new Response(Seq(new Failure("There was a problem processing the request", "400"))))
-                )
-                  .withHeaders("correlationId" -> correlationId.value.toString)
-              }
               .map(result =>
-                BenefitEligibilityInfoResponse.from(result, correlationId, BenefitEligibilityInfoRequestKey(request))
+                BenefitEligibilityInfoResponse.from(result, correlationId, request.nationalInsuranceNumber)
               )
               .value
               .map {
-                case Left(apiResponse) => apiResponse
-                case Right(benefitEligibilityInfoErrorResponse) =>
-                  benefitEligibilityInfoErrorResponse match {
-                    case response: BenefitEligibilityInfoErrorResponse => BadGateway(Json.toJson(response))
-                    case response                                      => Ok(Json.toJson(response))
+                case Left(serviceError) =>
+                  InternalServerError(
+                    Json.toJson(new Response(Seq(new Failure("There was a problem processing the request", "500"))))
+                  ).withHeaders("correlationId" -> correlationId.value.toString)
+
+                case Right(benefitEligibilityInfoResponse) =>
+                  benefitEligibilityInfoResponse match {
+                    case Left(errorResponse)    => BadGateway(Json.toJson(errorResponse))
+                    case Right(successResponse) => Ok(Json.toJson(successResponse))
                   }
               }
 

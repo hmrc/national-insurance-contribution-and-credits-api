@@ -66,8 +66,6 @@ object NpsApiResult {
 
   final case class ErrorReport(normalizedError: NpsNormalizedError, npsError: Option[NpsError])
 
-  final case class SuccessReport(apiName: ApiName, successResponse: NpsSuccessfulApiResponse)
-
   final case class FailureResult[+A <: ErrorReport, +B](
       apiName: ApiName,
       result: A
@@ -78,7 +76,7 @@ object NpsApiResult {
     override def getFailure: Option[A] = Some(result)
   }
 
-  final case class SuccessResult[+A, +B](apiName: ApiName, result: B) extends NpsApiResult[Nothing, B] {
+  final case class SuccessResult[+A <: ErrorReport, +B](apiName: ApiName, result: B) extends NpsApiResult[Nothing, B] {
     val isSuccess = true
     val isFailure = false
 

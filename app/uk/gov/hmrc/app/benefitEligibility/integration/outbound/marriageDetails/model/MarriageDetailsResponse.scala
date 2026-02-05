@@ -101,7 +101,7 @@ object MarriageDetailsSuccess {
 
   // region Marriage Details List
 
-  final case class SequenceNumber private (value: Int) extends AnyVal
+  final case class SequenceNumber(value: Int) extends AnyVal
 
   object SequenceNumber {
     implicit val sequenceNumberFormat: Format[SequenceNumber] = Json.valueFormat[SequenceNumber]
@@ -200,21 +200,21 @@ object MarriageDetailsSuccess {
 
   // region Marriage Details Success Response
 
-  case class MarriageDetailsDetails(
+  case class MarriageDetails(
       activeMarriage: ActiveMarriage,
       marriageDetailsList: Option[MarriageDetailsList],
       _links: Option[Links]
   )
 
-  object MarriageDetailsDetails {
+  object MarriageDetails {
 
-    implicit val marriageDetailsFormat: Format[MarriageDetailsDetails] =
-      Json.format[MarriageDetailsDetails]
+    implicit val marriageDetailsFormat: Format[MarriageDetails] =
+      Json.format[MarriageDetails]
 
   }
 
   case class MarriageDetailsSuccessResponse(
-      marriageDetails: MarriageDetailsDetails
+      marriageDetails: MarriageDetails
   ) extends MarriageDetailsResponse
       with NpsSuccessfulApiResponse
 

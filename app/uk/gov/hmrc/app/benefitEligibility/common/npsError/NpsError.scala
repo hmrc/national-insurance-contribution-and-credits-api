@@ -30,7 +30,7 @@ object NpsSingleErrorResponse {
   implicit val npsErrorResponseV1Reads: Reads[NpsSingleErrorResponse] = Json.reads[NpsSingleErrorResponse]
 }
 
-case class NpsMultiErrorResponse(failures: List[NpsSingleErrorResponse]) extends NpsError
+case class NpsMultiErrorResponse(failures: Option[List[NpsSingleErrorResponse]]) extends NpsError
 
 object NpsMultiErrorResponse {
   implicit val npsErrorResponseV2Reads: Reads[NpsMultiErrorResponse] = Json.reads[NpsMultiErrorResponse]
