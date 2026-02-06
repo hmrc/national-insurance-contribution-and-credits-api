@@ -63,13 +63,13 @@ class LongTermBenefitNotesConnector @Inject() (
       benefitType: BenefitType,
       identifier: Identifier,
       longTermBenefitType: LongTermBenefitType,
-      seqNo: Int
+      seqNo: AssociatedCalculationSequenceNumber
   )(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, LongTermBenefitNotesResult] = {
 
     val path =
-      s"${appConfig.hipBaseUrl}/long-term-benefits/${identifier.value}/calculation/${longTermBenefitType.entryName}/notes/$seqNo"
+      s"${appConfig.hipBaseUrl}/long-term-benefits/${identifier.value}/calculation/${longTermBenefitType.entryName}/notes/${seqNo.value}"
 
     npsClient
       .get(path)

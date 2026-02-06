@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
@@ -961,17 +961,18 @@ object BenefitCalculationDetailsSuccess {
 
   }
 
-  case class BenefitCalculationDetailsSuccessResponse(
+  case class LongTermBenefitCalculationDetailsSuccessResponse(
       statePensionAgeBefore2010TaxYear: Option[StatePensionAgeBefore2010TaxYear],
       statePensionAgeAfter2016TaxYear: Option[StatePensionAgeAfter2016TaxYear],
       benefitCalculationDetailsList: Option[List[BenefitCalculationDetailsList]]
   ) extends BenefitCalculationDetailsResponse
       with NpsSuccessfulApiResponse
 
-  object BenefitCalculationDetailsSuccessResponse {
+  object LongTermBenefitCalculationDetailsSuccessResponse {
 
-    implicit val benefitCalculationDetailsSuccessResponseFormat: Format[BenefitCalculationDetailsSuccessResponse] =
-      Json.format[BenefitCalculationDetailsSuccessResponse]
+    implicit val benefitCalculationDetailsSuccessResponseFormat
+        : Format[LongTermBenefitCalculationDetailsSuccessResponse] =
+      Json.format[LongTermBenefitCalculationDetailsSuccessResponse]
 
   }
 

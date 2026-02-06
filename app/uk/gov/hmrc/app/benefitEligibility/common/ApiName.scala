@@ -25,13 +25,13 @@ sealed abstract class ApiName(override val entryName: String) extends EnumEntry
 object ApiName extends Enum[ApiName] with PlayJsonEnum[ApiName] {
   val values: immutable.IndexedSeq[ApiName] = findValues
 
-  case object Class2MAReceipts          extends ApiName("Class2 MA Receipts")
-  case object Liabilities               extends ApiName("Liabilities")
-  case object NiContributionAndCredits  extends ApiName("NI Contributions and credits")
-  case object MarriageDetails           extends ApiName("Marriage Details")
-  case object SchemeMembershipDetails   extends ApiName("Scheme Membership Details")
-  case object IndividualStatePension    extends ApiName("Individual State Pension Information")
-  case object LongTermBenefitNotes      extends ApiName("Long Term Benefit Notes")
-  case object BenefitSchemeDetails      extends ApiName("Benefit Scheme Details")
-  case object BenefitCalculationDetails extends ApiName("Benefit Calculation Details")
+  case object Class2MAReceipts                  extends ApiName("Class2 MA Receipts")
+  case object Liabilities                       extends ApiName("Liabilities")
+  case object NiContributionAndCredits          extends ApiName("NI Contributions and credits")
+  case object MarriageDetails                   extends ApiName("Marriage Details")
+  case object SchemeMembershipDetails           extends ApiName("Scheme Membership Details")
+  case object IndividualStatePension            extends ApiName("Individual State Pension Information")
+  case object LongTermBenefitNotes              extends ApiName("Long Term Benefit Notes")
+  case object BenefitSchemeDetails              extends ApiName("Benefit Scheme Details")
+  case object LongTermBenefitCalculationDetails extends ApiName("Long Term Benefit Calculation Details")
 }

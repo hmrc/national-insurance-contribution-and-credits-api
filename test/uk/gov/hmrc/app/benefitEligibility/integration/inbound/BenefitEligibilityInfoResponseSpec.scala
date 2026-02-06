@@ -17,6 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.inbound
 
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.EitherValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.shouldBe
@@ -28,6 +29,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   Class2MAReceipts,
   IndividualStatePension,
   Liabilities,
+  LongTermBenefitCalculationDetails,
   LongTermBenefitNotes,
   MarriageDetails,
   NiContributionAndCredits
@@ -43,7 +45,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataSuccessResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
@@ -79,11 +80,16 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipD
 import java.time.LocalDate
 import java.util.UUID
 import scala.util.Random
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
+  CalculationSource,
+  CalculationStatus,
+  Payday
+}
 
-class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with MockFactory {
+class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with MockFactory with EitherValues {
 
   private val nationalInsuranceNumber: Identifier = Identifier("AB123456C")
-  private val correlationId: CorrelationId = CorrelationId(UUID.fromString("160cd446-d354-4b95-8446-fd4a011a57d1"))
 
   val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
     Identifier("AA000001A"),
@@ -139,7 +145,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
       )
     ),
-    Some(LiabilitySummaryDetailsSuccess.Callback("Callback"))
+    Some(Callback(Some(CallbackUrl("/some/url"))))
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -283,9 +289,9 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       )
     ),
     callback = Some(
-      SchemeMembershipDetailsSuccess.Callback(
+      Callback(
         callbackURL = Some(
-          CallbackURL(
+          CallbackUrl(
             "some-url"
           )
         )
@@ -448,6 +454,121 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     )
   )
 
+  val longTermBenefitCalculationDetailsSuccessResponse = LongTermBenefitCalculationDetailsSuccessResponse(
+    statePensionAgeBefore2010TaxYear = Some(StatePensionAgeBefore2010TaxYear(true)),
+    statePensionAgeAfter2016TaxYear = Some(StatePensionAgeAfter2016TaxYear(true)),
+    benefitCalculationDetailsList = Some(
+      List(
+        BenefitCalculationDetailsList(
+          additionalPensionAmountPre1997 = Some(AdditionalPensionAmountPre1997(10.56)),
+          additionalPensionAmountPost1997 = Some(AdditionalPensionAmountPost1997(10.56)),
+          pre97AgeRelatedAdditionalPension = Some(Pre97AgeRelatedAdditionalPension(10.56)),
+          post97AgeRelatedAdditionalPension = Some(Post97AgeRelatedAdditionalPension(10.56)),
+          basicPensionIncrementsCashValue = Some(BasicPensionIncrementsCashValue(10.56)),
+          additionalPensionIncrementsCashValue = Some(AdditionalPensionIncrementsCashValue(10.56)),
+          graduatedRetirementBenefitCashValue = Some(GraduatedRetirementBenefitCashValue(10.56)),
+          totalGuaranteedMinimumPension = Some(TotalGuaranteedMinimumPension(10.56)),
+          totalNonGuaranteedMinimumPension = Some(TotalNonGuaranteedMinimumPension(10.56)),
+          longTermBenefitsIncrementalCashValue = Some(LongTermBenefitsIncrementalCashValue(10.56)),
+          greatBritainPaymentAmount = Some(GreatBritainPaymentAmount(10.56)),
+          dateOfBirth = Some(DateOfBirth(LocalDate.parse("2022-06-27"))),
+          notionalPost1997AdditionalPension = Some(NotionalPost1997AdditionalPension(10.56)),
+          notionalPre1997AdditionalPension = Some(NotionalPre1997AdditionalPension(10.56)),
+          inheritableNotionalAdditionalPensionIncrements = Some(InheritableNotionalAdditionalPensionIncrements(10.56)),
+          conditionOneSatisfied = Some(ConditionOneSatisfied("H")),
+          reasonForFormIssue = Some(ReasonForFormIssue("REQUESTED BENEFIT CALCULATION")),
+          longTermBenefitsCategoryACashValue = Some(LongTermBenefitsCategoryACashValue(10.56)),
+          longTermBenefitsCategoryBLCashValue = Some(LongTermBenefitsCategoryBLCashValue(10.56)),
+          longTermBenefitsUnitValue = Some(LongTermBenefitsUnitValue(10.56)),
+          additionalNotionalPensionAmountPost2002 = Some(AdditionalNotionalPensionAmountPost2002(10.56)),
+          additionalPensionAmountPost2002 = Some(AdditionalPensionAmountPost2002(10.56)),
+          additionalNotionalPensionIncrementsInheritedPost2002 =
+            Some(AdditionalNotionalPensionIncrementsInheritedPost2002(10.56)),
+          additionalPensionIncrementsInheritedPost2002 = Some(AdditionalPensionIncrementsInheritedPost2002(10.56)),
+          post02AgeRelatedAdditionalPension = Some(Post02AgeRelatedAdditionalPension(10.56)),
+          pre1975ShortTermBenefits = Some(Pre1975ShortTermBenefits(2)),
+          survivingSpouseAge = Some(SurvivingSpouseAge(45)),
+          operativeBenefitStartDate = Some(OperativeBenefitStartDate(LocalDate.parse("2022-06-27"))),
+          sicknessBenefitStatusForReports = Some(SicknessBenefitStatusForReports("Y")),
+          benefitCalculationDetail = Some(
+            BenefitCalculationDetail(
+              nationalInsuranceNumber = Identifier("AA123456"),
+              benefitType = LongTermBenefitType.All,
+              associatedCalculationSequenceNumber = AssociatedCalculationSequenceNumber(86),
+              calculationStatus = Some(CalculationStatus.Definitive),
+              substitutionMethod1 = Some(SubstitutionMethod1(235)),
+              substitutionMethod2 = Some(SubstitutionMethod2(235)),
+              calculationDate = Some(CalculationDate(LocalDate.parse("2022-06-27"))),
+              guaranteedMinimumPensionContractedOutDeductionsPre1988 =
+                Some(GuaranteedMinimumPensionContractedOutDeductionsPre1988(10.56)),
+              guaranteedMinimumPensionContractedOutDeductionsPost1988 =
+                Some(GuaranteedMinimumPensionContractedOutDeductionsPost1988(10.56)),
+              contractedOutDeductionsPre1988 = Some(ContractedOutDeductionsPre1988(10.56)),
+              contractedOutDeductionsPost1988 = Some(ContractedOutDeductionsPost1988(10.56)),
+              additionalPensionPercentage = Some(AdditionalPensionPercentage(10.56)),
+              basicPensionPercentage = Some(BasicPensionPercentage(86)),
+              survivorsBenefitAgeRelatedPensionPercentage = Some(SurvivorsBenefitAgeRelatedPensionPercentage(10.56)),
+              additionalAgeRelatedPensionPercentage = Some(AdditionalAgeRelatedPensionPercentage(10.56)),
+              inheritedBasicPensionPercentage = Some(InheritedBasicPensionPercentage(10.56)),
+              inheritedAdditionalPensionPercentage = Some(InheritedAdditionalPensionPercentage(10.56)),
+              inheritedGraduatedPensionPercentage = Some(InheritedGraduatedPensionPercentage(10.56)),
+              inheritedGraduatedBenefit = Some(InheritedGraduatedBenefit(10.56)),
+              calculationSource = Some(CalculationSource.ApComponentSuspectAprilMayCalc),
+              payday = Some(Payday.Friday),
+              dateOfBirth = Some(DateOfBirth(LocalDate.parse("2022-06-27"))),
+              husbandDateOfDeath = Some(HusbandDateOfDeath(LocalDate.parse("2022-06-27"))),
+              additionalPost1997PensionPercentage = Some(AdditionalPost1997PensionPercentage(10.56)),
+              additionalPost1997AgeRelatedPensionPercentage =
+                Some(AdditionalPost1997AgeRelatedPensionPercentage(10.56)),
+              additionalPensionNotionalPercentage = Some(AdditionalPensionNotionalPercentage(10.56)),
+              additionalPost1997PensionNotionalPercentage = Some(AdditionalPost1997PensionNotionalPercentage(10.56)),
+              inheritedAdditionalPensionNotionalPercentage = Some(InheritedAdditionalPensionNotionalPercentage(10.56)),
+              inheritableAdditionalPensionPercentage = Some(InheritableAdditionalPensionPercentage(90)),
+              additionalPost2002PensionNotionalPercentage = Some(AdditionalPost2002PensionNotionalPercentage(10.56)),
+              additionalPost2002PensionPercentage = Some(AdditionalPost2002PensionPercentage(10.56)),
+              inheritedAdditionalPost2002PensionNotionalPercentage =
+                Some(InheritedAdditionalPost2002PensionNotionalPercentage(10.56)),
+              inheritedAdditionalPost2002PensionPercentage = Some(InheritedAdditionalPost2002PensionPercentage(10.56)),
+              additionalPost2002AgeRelatedPensionPercentage =
+                Some(AdditionalPost2002AgeRelatedPensionPercentage(10.56)),
+              singleContributionConditionRulesApply = Some(SingleContributionConditionRulesApply(true)),
+              officeDetails = Some(
+                OfficeDetails(
+                  officeLocationDecode = Some(OfficeLocationDecode(1)),
+                  officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
+                  officeIdentifier = Some(EnumOffidtp.None)
+                )
+              ),
+              newStatePensionCalculationDetails = Some(
+                NewStatePensionCalculationDetails(
+                  netAdditionalPensionPre1997 = Some(NetAdditionalPensionPre1997(10.56)),
+                  oldRulesStatePensionEntitlement = Some(OldRulesStatePensionEntitlement(10.56)),
+                  netRulesAmount = Some(NetRulesAmount(10.56)),
+                  derivedRebateAmount = Some(DerivedRebateAmount(10.56)),
+                  initialStatePensionAmount = Some(InitialStatePensionAmount(10.56)),
+                  protectedPayment2016 = Some(ProtectedPayment2016(10.56)),
+                  minimumQualifyingPeriodMet = Some(MinimumQualifyingPeriodMet(true)),
+                  qualifyingYearsAfter2016 = Some(QualifyingYearsAfter2016(3)),
+                  newStatePensionQualifyingYears = Some(NewStatePensionQualifyingYears(20)),
+                  newStatePensionRequisiteYears = Some(NewStatePensionRequisiteYears(35)),
+                  newStatePensionEntitlement = Some(NewStatePensionEntitlement(10.56)),
+                  protectedPayment = Some(ProtectedPayment(10.56)),
+                  pensionSharingOrderContractedOutEmploymentsGroup =
+                    Some(PensionSharingOrderContractedOutEmploymentsGroup(true)),
+                  pensionSharingOrderStateEarningsRelatedPensionScheme =
+                    Some(PensionSharingOrderStateEarningsRelatedPensionScheme(true)),
+                  considerReducedRateElection = Some(ConsiderReducedRateElection(true)),
+                  weeklyBudgetingLoanAmount = Some(WeeklyBudgetingLoanAmount(10.56)),
+                  calculationDate = Some(CalculationDate(LocalDate.parse("2022-06-27")))
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+
   val longTermBenefitNotesSuccessResponse = LongTermBenefitNotesSuccessResponse(
     List(
       Note("Invalid Note Type Encountered."),
@@ -468,120 +589,117 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should convert to a BenefitEligibilityInfoSuccessResponseMa" in {
 
         val result = BenefitEligibilityInfoSuccessResponseMa.from(
-          correlationId,
           nationalInsuranceNumber,
-          EligibilityCheckDataSuccessResultMa(
-            class2MAReceiptsSuccessResponse,
-            liabilitySummaryDetailsSuccessResponse,
-            niContributionsAndCreditsSuccessResponse
+          EligibilityCheckDataResultMA(
+            NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse),
+            NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
           )
         )
 
         val expected = BenefitEligibilityInfoSuccessResponseMa(
-          correlationId,
           nationalInsuranceNumber,
           class2MAReceiptsSuccessResponse,
           liabilitySummaryDetailsSuccessResponse,
           niContributionsAndCreditsSuccessResponse
         )
 
-        result shouldBe expected
+        result.value shouldBe expected
 
       }
       "should serialize to json correctly" in {
 
         val benefitEligibilityInfoSuccessResponseMa = BenefitEligibilityInfoSuccessResponseMa(
-          correlationId,
           nationalInsuranceNumber,
           class2MAReceiptsSuccessResponse,
           liabilitySummaryDetailsSuccessResponse,
           niContributionsAndCreditsSuccessResponse
         )
 
-        val expectedJson = """{
-                             |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
-                             |   "benefitType":"MA",
-                             |   "nationalInsuranceNumber":"AB123456C",
-                             |   "class2MAReceiptsResult":{
-                             |      "identifier":"AA000001A",
-                             |      "class2MAReceiptDetails":[
-                             |         {
-                             |            "initials":"JP",
-                             |            "surname":"van Cholmondley-warner",
-                             |            "receivablePeriodStartDate":"2025-12-10",
-                             |            "receivablePeriodEndDate":"2025-12-10",
-                             |            "receivablePayment":10.56,
-                             |            "receiptDate":"2025-12-10",
-                             |            "liabilityStartDate":"2025-12-10",
-                             |            "liabilityEndDate":"2025-12-10",
-                             |            "billAmount":9999.98,
-                             |            "billScheduleNumber":100,
-                             |            "isClosedRecord":true,
-                             |            "weeksPaid":2
-                             |         }
-                             |      ]
-                             |   },
-                             |   "liabilitySummaryDetailsResult":{
-                             |      "liabilityDetailsList":[
-                             |         {
-                             |            "identifier":"RN000001A",
-                             |            "type":"ABROAD",
-                             |            "occurrenceNumber":1,
-                             |            "startDateStatus":"START DATE HELD",
-                             |            "endDateStatus":"END DATE HELD",
-                             |            "startDate":"2026-01-01",
-                             |            "endDate":"2026-01-01",
-                             |            "country":"GREAT BRITAIN",
-                             |            "trainingCreditApprovalStatus":"NO CREDIT FOR APPROVED TRAINING",
-                             |            "casepaperReferenceNumber":"SCH/123/4",
-                             |            "homeResponsibilitiesProtectionBenefitReference":"12345678AB",
-                             |            "homeResponsibilitiesProtectionRate":10.56,
-                             |            "lostCardNotificationReason":"NOT APPLICABLE",
-                             |            "lostCardRulingReason":"NOT APPLICABLE",
-                             |            "homeResponsibilityProtectionCalculationYear":2022,
-                             |            "awardAmount":10.56,
-                             |            "resourceGroupIdentifier":789,
-                             |            "homeResponsibilitiesProtectionIndicator":"(NONE)",
-                             |            "officeDetails":{
-                             |               "officeLocationDecode":1,
-                             |               "officeLocationValue":"HQ STATIONARY STORE",
-                             |               "officeIdentifier":"(NONE)"
-                             |            }
-                             |         }
-                             |      ],
-                             |      "callback":"Callback"
-                             |   },
-                             |   "niContributionsAndCreditsResult":{
-                             |      "totalGraduatedPensionUnits":53,
-                             |      "class1ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCategoryLetter":"U",
-                             |            "contributionCategory":"(NONE)",
-                             |            "contributionCreditType":"C1",
-                             |            "primaryContribution":99999999999999.98,
-                             |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
-                             |            "primaryPaidEarnings":99999999999999.98,
-                             |            "creditSource":"NOT KNOWN",
-                             |            "employerName":"ipOpMs",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ],
-                             |      "class2ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCreditType":"C1",
-                             |            "class2Or3EarningsFactor":99999999999999.98,
-                             |            "class2NIContributionAmount":99999999999999.98,
-                             |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
-                             |            "creditSource":"NOT KNOWN",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ]
-                             |   }
-                             |}""".stripMargin
+        val expectedJson =
+          """{
+            |   "benefitType":"MA",
+            |   "nationalInsuranceNumber":"AB123456C",
+            |   "class2MAReceiptsResult":{
+            |      "identifier":"AA000001A",
+            |      "class2MAReceiptDetails":[
+            |         {
+            |            "initials":"JP",
+            |            "surname":"van Cholmondley-warner",
+            |            "receivablePeriodStartDate":"2025-12-10",
+            |            "receivablePeriodEndDate":"2025-12-10",
+            |            "receivablePayment":10.56,
+            |            "receiptDate":"2025-12-10",
+            |            "liabilityStartDate":"2025-12-10",
+            |            "liabilityEndDate":"2025-12-10",
+            |            "billAmount":9999.98,
+            |            "billScheduleNumber":100,
+            |            "isClosedRecord":true,
+            |            "weeksPaid":2
+            |         }
+            |      ]
+            |   },
+            |   "liabilitySummaryDetailsResult":{
+            |      "liabilityDetailsList":[
+            |         {
+            |            "identifier":"RN000001A",
+            |            "type":"ABROAD",
+            |            "occurrenceNumber":1,
+            |            "startDateStatus":"START DATE HELD",
+            |            "endDateStatus":"END DATE HELD",
+            |            "startDate":"2026-01-01",
+            |            "endDate":"2026-01-01",
+            |            "country":"GREAT BRITAIN",
+            |            "trainingCreditApprovalStatus":"NO CREDIT FOR APPROVED TRAINING",
+            |            "casepaperReferenceNumber":"SCH/123/4",
+            |            "homeResponsibilitiesProtectionBenefitReference":"12345678AB",
+            |            "homeResponsibilitiesProtectionRate":10.56,
+            |            "lostCardNotificationReason":"NOT APPLICABLE",
+            |            "lostCardRulingReason":"NOT APPLICABLE",
+            |            "homeResponsibilityProtectionCalculationYear":2022,
+            |            "awardAmount":10.56,
+            |            "resourceGroupIdentifier":789,
+            |            "homeResponsibilitiesProtectionIndicator":"(NONE)",
+            |            "officeDetails":{
+            |               "officeLocationDecode":1,
+            |               "officeLocationValue":"HQ STATIONARY STORE",
+            |               "officeIdentifier":"(NONE)"
+            |            }
+            |         }
+            |      ],
+            |      "callback":{"callbackURL":"/some/url"}
+            |   },
+            |   "niContributionsAndCreditsResult":{
+            |      "totalGraduatedPensionUnits":53,
+            |      "class1ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCategoryLetter":"U",
+            |            "contributionCategory":"(NONE)",
+            |            "contributionCreditType":"C1",
+            |            "primaryContribution":99999999999999.98,
+            |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+            |            "primaryPaidEarnings":99999999999999.98,
+            |            "creditSource":"NOT KNOWN",
+            |            "employerName":"ipOpMs",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ],
+            |      "class2ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCreditType":"C1",
+            |            "class2Or3EarningsFactor":99999999999999.98,
+            |            "class2NIContributionAmount":99999999999999.98,
+            |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+            |            "creditSource":"NOT KNOWN",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ]
+            |   }
+            |}""".stripMargin
 
         Json.toJson(benefitEligibilityInfoSuccessResponseMa) shouldBe Json.parse(expectedJson)
       }
@@ -593,83 +711,80 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should convert to a BenefitEligibilityInfoSuccessResponseBsp" in {
 
         val result = BenefitEligibilityInfoSuccessResponseBsp.from(
-          correlationId,
           nationalInsuranceNumber,
-          EligibilityCheckDataSuccessResultBsp(
-            marriageDetailsSuccessResponse,
-            niContributionsAndCreditsSuccessResponse
+          EligibilityCheckDataResultBSP(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse),
+            NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)
           )
         )
 
         val expected = BenefitEligibilityInfoSuccessResponseBsp(
-          correlationId,
           nationalInsuranceNumber,
           marriageDetailsSuccessResponse,
           niContributionsAndCreditsSuccessResponse
         )
 
-        result shouldBe expected
+        result.value shouldBe expected
 
       }
       "should serialize to json correctly" in {
 
         val benefitEligibilityInfoSuccessResponseBsp = BenefitEligibilityInfoSuccessResponseBsp(
-          correlationId,
           nationalInsuranceNumber,
           marriageDetailsSuccessResponse,
           niContributionsAndCreditsSuccessResponse
         )
 
-        val expectedJson = """{
-                             |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
-                             |   "benefitType":"BSP",
-                             |   "nationalInsuranceNumber":"AB123456C",
-                             |   "marriageDetailsResult":{
-                             |      "marriageDetails":{
-                             |         "activeMarriage":true,
-                             |         "marriageDetailsList":{
-                             |            "sequenceNumber":2,
-                             |            "status":"CIVIL PARTNER"
-                             |         },
-                             |         "_links":{
-                             |            "self":{
-                             |               "href":"",
-                             |               "methods":"get"
-                             |            }
-                             |         }
-                             |      }
-                             |   },
-                             |   "niContributionsAndCreditsResult":{
-                             |      "totalGraduatedPensionUnits":53,
-                             |      "class1ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCategoryLetter":"U",
-                             |            "contributionCategory":"(NONE)",
-                             |            "contributionCreditType":"C1",
-                             |            "primaryContribution":99999999999999.98,
-                             |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
-                             |            "primaryPaidEarnings":99999999999999.98,
-                             |            "creditSource":"NOT KNOWN",
-                             |            "employerName":"ipOpMs",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ],
-                             |      "class2ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCreditType":"C1",
-                             |            "class2Or3EarningsFactor":99999999999999.98,
-                             |            "class2NIContributionAmount":99999999999999.98,
-                             |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
-                             |            "creditSource":"NOT KNOWN",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ]
-                             |   }
-                             |}""".stripMargin
+        val expectedJson =
+          """{
+            |   "benefitType":"BSP",
+            |   "nationalInsuranceNumber":"AB123456C",
+            |   "marriageDetailsResult":{
+            |      "marriageDetails":{
+            |         "activeMarriage":true,
+            |         "marriageDetailsList":{
+            |            "sequenceNumber":2,
+            |            "status":"CIVIL PARTNER"
+            |         },
+            |         "_links":{
+            |            "self":{
+            |               "href":"",
+            |               "methods":"get"
+            |            }
+            |         }
+            |      }
+            |   },
+            |   "niContributionsAndCreditsResult":{
+            |      "totalGraduatedPensionUnits":53,
+            |      "class1ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCategoryLetter":"U",
+            |            "contributionCategory":"(NONE)",
+            |            "contributionCreditType":"C1",
+            |            "primaryContribution":99999999999999.98,
+            |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+            |            "primaryPaidEarnings":99999999999999.98,
+            |            "creditSource":"NOT KNOWN",
+            |            "employerName":"ipOpMs",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ],
+            |      "class2ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCreditType":"C1",
+            |            "class2Or3EarningsFactor":99999999999999.98,
+            |            "class2NIContributionAmount":99999999999999.98,
+            |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+            |            "creditSource":"NOT KNOWN",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ]
+            |   }
+            |}""".stripMargin
 
         Json.toJson(benefitEligibilityInfoSuccessResponseBsp) shouldBe Json.parse(expectedJson)
       }
@@ -681,37 +796,37 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should convert to a BenefitEligibilityInfoSuccessResponseGysp" in {
 
         val result = BenefitEligibilityInfoSuccessResponseGysp.from(
-          correlationId,
           nationalInsuranceNumber,
-          EligibilityCheckDataSuccessResultGysp(
-            List(niContributionsAndCreditsSuccessResponse),
-            schemeMembershipDetailsSuccessResponse,
-            List(benefitSchemeDetailsSuccessResponse),
-            marriageDetailsSuccessResponse,
-            longTermBenefitNotesSuccessResponse,
-            individualStatePensionInformationSuccessResponse
+          EligibilityCheckDataResultGYSP(
+            List(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
+            NpsApiResult.SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse),
+            List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse)),
+            NpsApiResult
+              .SuccessResult(LongTermBenefitCalculationDetails, longTermBenefitCalculationDetailsSuccessResponse),
+            List(NpsApiResult.SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse)),
+            NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse),
+            NpsApiResult.SuccessResult(IndividualStatePension, individualStatePensionInformationSuccessResponse)
           )
         )
 
         val expected = BenefitEligibilityInfoSuccessResponseGysp(
-          correlationId,
           nationalInsuranceNumber,
           List(benefitSchemeDetailsSuccessResponse),
           marriageDetailsSuccessResponse,
+          longTermBenefitCalculationDetailsSuccessResponse,
           longTermBenefitNotesSuccessResponse,
           schemeMembershipDetailsSuccessResponse,
           individualStatePensionInformationSuccessResponse,
           List(niContributionsAndCreditsSuccessResponse)
         )
 
-        result shouldBe expected
+        result.value shouldBe expected
 
       }
       "should serialize to json correctly" in {
         val json =
           """{
             |   "benefitType":"GYSP",
-            |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
             |   "nationalInsuranceNumber":"AB123456C",
             |   "benefitSchemeDetailsResult":[
             |      {
@@ -779,6 +894,104 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            }
             |         }
             |      }
+            |   },
+            |   "longTermBenefitCalculationDetailsResult":{
+            |      "statePensionAgeBefore2010TaxYear":true,
+            |      "statePensionAgeAfter2016TaxYear":true,
+            |      "benefitCalculationDetailsList":[
+            |         {
+            |            "additionalPensionAmountPre1997":10.56,
+            |            "additionalPensionAmountPost1997":10.56,
+            |            "pre97AgeRelatedAdditionalPension":10.56,
+            |            "post97AgeRelatedAdditionalPension":10.56,
+            |            "basicPensionIncrementsCashValue":10.56,
+            |            "additionalPensionIncrementsCashValue":10.56,
+            |            "graduatedRetirementBenefitCashValue":10.56,
+            |            "totalGuaranteedMinimumPension":10.56,
+            |            "totalNonGuaranteedMinimumPension":10.56,
+            |            "longTermBenefitsIncrementalCashValue":10.56,
+            |            "greatBritainPaymentAmount":10.56,
+            |            "dateOfBirth":"2022-06-27",
+            |            "notionalPost1997AdditionalPension":10.56,
+            |            "notionalPre1997AdditionalPension":10.56,
+            |            "inheritableNotionalAdditionalPensionIncrements":10.56,
+            |            "conditionOneSatisfied":"H",
+            |            "reasonForFormIssue":"REQUESTED BENEFIT CALCULATION",
+            |            "longTermBenefitsCategoryACashValue":10.56,
+            |            "longTermBenefitsCategoryBLCashValue":10.56,
+            |            "longTermBenefitsUnitValue":10.56,
+            |            "additionalPensionAmountPost2002":10.56,
+            |            "additionalNotionalPensionAmountPost2002":10.56,
+            |            "additionalNotionalPensionIncrementsInheritedPost2002":10.56,
+            |            "additionalPensionIncrementsInheritedPost2002":10.56,
+            |            "post02AgeRelatedAdditionalPension":10.56,
+            |            "pre1975ShortTermBenefits":2,
+            |            "survivingSpouseAge":45,
+            |            "operativeBenefitStartDate":"2022-06-27",
+            |            "sicknessBenefitStatusForReports":"Y",
+            |            "benefitCalculationDetail":{
+            |               "nationalInsuranceNumber":"AA123456",
+            |               "benefitType":"ALL",
+            |               "associatedCalculationSequenceNumber":86,
+            |               "calculationStatus":"DEFINITIVE",
+            |               "substitutionMethod1":235,
+            |               "substitutionMethod2":235,
+            |               "calculationDate":"2022-06-27",
+            |               "guaranteedMinimumPensionContractedOutDeductionsPre1988":10.56,
+            |               "guaranteedMinimumPensionContractedOutDeductionsPost1988":10.56,
+            |               "contractedOutDeductionsPre1988":10.56,
+            |               "contractedOutDeductionsPost1988":10.56,
+            |               "additionalPensionPercentage":10.56,
+            |               "basicPensionPercentage":86,
+            |               "survivorsBenefitAgeRelatedPensionPercentage":10.56,
+            |               "additionalAgeRelatedPensionPercentage":10.56,
+            |               "inheritedBasicPensionPercentage":10.56,
+            |               "inheritedAdditionalPensionPercentage":10.56,
+            |               "inheritedGraduatedPensionPercentage":10.56,
+            |               "inheritedGraduatedBenefit":10.56,
+            |               "calculationSource":"AP COMPONENT SUSPECT (APRIL - MAY CALC)",
+            |               "payday":"FRIDAY",
+            |               "dateOfBirth":"2022-06-27",
+            |               "husbandDateOfDeath":"2022-06-27",
+            |               "additionalPost1997PensionPercentage":10.56,
+            |               "additionalPost1997AgeRelatedPensionPercentage":10.56,
+            |               "additionalPensionNotionalPercentage":10.56,
+            |               "additionalPost1997PensionNotionalPercentage":10.56,
+            |               "inheritedAdditionalPensionNotionalPercentage":10.56,
+            |               "inheritableAdditionalPensionPercentage":90,
+            |               "additionalPost2002PensionNotionalPercentage":10.56,
+            |               "additionalPost2002PensionPercentage":10.56,
+            |               "inheritedAdditionalPost2002PensionNotionalPercentage":10.56,
+            |               "inheritedAdditionalPost2002PensionPercentage":10.56,
+            |               "additionalPost2002AgeRelatedPensionPercentage":10.56,
+            |               "singleContributionConditionRulesApply":true,
+            |               "officeDetails":{
+            |                  "officeLocationDecode":1,
+            |                  "officeLocationValue":"HQ STATIONARY STORE",
+            |                  "officeIdentifier":"(NONE)"
+            |               },
+            |               "newStatePensionCalculationDetails":{
+            |                  "netAdditionalPensionPre1997":10.56,
+            |                  "oldRulesStatePensionEntitlement":10.56,
+            |                  "netRulesAmount":10.56,
+            |                  "derivedRebateAmount":10.56,
+            |                  "initialStatePensionAmount":10.56,
+            |                  "protectedPayment2016":10.56,
+            |                  "minimumQualifyingPeriodMet":true,
+            |                  "qualifyingYearsAfter2016":3,
+            |                  "newStatePensionQualifyingYears":20,
+            |                  "newStatePensionRequisiteYears":35,
+            |                  "newStatePensionEntitlement":10.56,
+            |                  "protectedPayment":10.56,
+            |                  "pensionSharingOrderContractedOutEmploymentsGroup":true,
+            |                  "pensionSharingOrderStateEarningsRelatedPensionScheme":true,
+            |                  "considerReducedRateElection":true,
+            |                  "weeklyBudgetingLoanAmount":10.56,
+            |                  "calculationDate":"2022-06-27"
+            |               }
+            |            }
+            |         }
+            |      ]
             |   },
             |   "longTermBenefitNotesResult":{
             |      "longTermBenefitNotes":[
@@ -982,11 +1195,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |      }
             |   ]
             |}""".stripMargin
+
         val benefitEligibilityInfoSuccessResponseGysp = BenefitEligibilityInfoSuccessResponseGysp(
-          correlationId,
           nationalInsuranceNumber,
           List(benefitSchemeDetailsSuccessResponse),
           marriageDetailsSuccessResponse,
+          longTermBenefitCalculationDetailsSuccessResponse,
           longTermBenefitNotesSuccessResponse,
           schemeMembershipDetailsSuccessResponse,
           individualStatePensionInformationSuccessResponse,
@@ -1003,65 +1217,62 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should convert to a BenefitEligibilityInfoSuccessResponseEsa" in {
 
         val result = BenefitEligibilityInfoSuccessResponseEsa.from(
-          correlationId,
           nationalInsuranceNumber,
-          EligibilityCheckDataSuccessResultEsa(
-            niContributionsAndCreditsSuccessResponse
+          EligibilityCheckDataResultESA(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
           )
         )
 
         val expected = BenefitEligibilityInfoSuccessResponseEsa(
-          correlationId,
           nationalInsuranceNumber,
           niContributionsAndCreditsSuccessResponse
         )
 
-        result shouldBe expected
+        result.value shouldBe expected
 
       }
       "should serialize to json correctly" in {
 
         val benefitEligibilityInfoSuccessResponseEsa = BenefitEligibilityInfoSuccessResponseEsa(
-          correlationId,
           nationalInsuranceNumber,
           niContributionsAndCreditsSuccessResponse
         )
 
-        val expectedJson = """{
-                             |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
-                             |   "benefitType":"ESA",
-                             |   "nationalInsuranceNumber":"AB123456C",
-                             |   "niContributionsAndCreditsResult":{
-                             |      "totalGraduatedPensionUnits":53,
-                             |      "class1ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCategoryLetter":"U",
-                             |            "contributionCategory":"(NONE)",
-                             |            "contributionCreditType":"C1",
-                             |            "primaryContribution":99999999999999.98,
-                             |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
-                             |            "primaryPaidEarnings":99999999999999.98,
-                             |            "creditSource":"NOT KNOWN",
-                             |            "employerName":"ipOpMs",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ],
-                             |      "class2ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCreditType":"C1",
-                             |            "class2Or3EarningsFactor":99999999999999.98,
-                             |            "class2NIContributionAmount":99999999999999.98,
-                             |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
-                             |            "creditSource":"NOT KNOWN",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ]
-                             |   }
-                             |}""".stripMargin
+        val expectedJson =
+          """{
+            |   "benefitType":"ESA",
+            |   "nationalInsuranceNumber":"AB123456C",
+            |   "niContributionsAndCreditsResult":{
+            |      "totalGraduatedPensionUnits":53,
+            |      "class1ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCategoryLetter":"U",
+            |            "contributionCategory":"(NONE)",
+            |            "contributionCreditType":"C1",
+            |            "primaryContribution":99999999999999.98,
+            |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+            |            "primaryPaidEarnings":99999999999999.98,
+            |            "creditSource":"NOT KNOWN",
+            |            "employerName":"ipOpMs",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ],
+            |      "class2ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCreditType":"C1",
+            |            "class2Or3EarningsFactor":99999999999999.98,
+            |            "class2NIContributionAmount":99999999999999.98,
+            |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+            |            "creditSource":"NOT KNOWN",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ]
+            |   }
+            |}""".stripMargin
 
         Json.toJson(benefitEligibilityInfoSuccessResponseEsa) shouldBe Json.parse(expectedJson)
       }
@@ -1073,65 +1284,62 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should convert to a BenefitEligibilityInfoSuccessResponseJsa" in {
 
         val result = BenefitEligibilityInfoSuccessResponseJsa.from(
-          correlationId,
           nationalInsuranceNumber,
-          EligibilityCheckDataSuccessResultJsa(
-            niContributionsAndCreditsSuccessResponse
+          EligibilityCheckDataResultJSA(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
           )
         )
 
         val expected = BenefitEligibilityInfoSuccessResponseJsa(
-          correlationId,
           nationalInsuranceNumber,
           niContributionsAndCreditsSuccessResponse
         )
 
-        result shouldBe expected
+        result.value shouldBe expected
 
       }
       "should serialize to json correctly" in {
 
         val benefitEligibilityInfoSuccessResponseJsa = BenefitEligibilityInfoSuccessResponseJsa(
-          correlationId,
           nationalInsuranceNumber,
           niContributionsAndCreditsSuccessResponse
         )
 
-        val expectedJson = """{
-                             |   "correlationId":"160cd446-d354-4b95-8446-fd4a011a57d1",
-                             |   "benefitType":"JSA",
-                             |   "nationalInsuranceNumber":"AB123456C",
-                             |   "niContributionsAndCreditsResult":{
-                             |      "totalGraduatedPensionUnits":53,
-                             |      "class1ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCategoryLetter":"U",
-                             |            "contributionCategory":"(NONE)",
-                             |            "contributionCreditType":"C1",
-                             |            "primaryContribution":99999999999999.98,
-                             |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
-                             |            "primaryPaidEarnings":99999999999999.98,
-                             |            "creditSource":"NOT KNOWN",
-                             |            "employerName":"ipOpMs",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ],
-                             |      "class2ContributionAndCredits":[
-                             |         {
-                             |            "taxYear":2022,
-                             |            "numberOfContributionsAndCredits":53,
-                             |            "contributionCreditType":"C1",
-                             |            "class2Or3EarningsFactor":99999999999999.98,
-                             |            "class2NIContributionAmount":99999999999999.98,
-                             |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
-                             |            "creditSource":"NOT KNOWN",
-                             |            "latePaymentPeriod":"L"
-                             |         }
-                             |      ]
-                             |   }
-                             |}""".stripMargin
+        val expectedJson =
+          """{
+            |   "benefitType":"JSA",
+            |   "nationalInsuranceNumber":"AB123456C",
+            |   "niContributionsAndCreditsResult":{
+            |      "totalGraduatedPensionUnits":53,
+            |      "class1ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCategoryLetter":"U",
+            |            "contributionCategory":"(NONE)",
+            |            "contributionCreditType":"C1",
+            |            "primaryContribution":99999999999999.98,
+            |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+            |            "primaryPaidEarnings":99999999999999.98,
+            |            "creditSource":"NOT KNOWN",
+            |            "employerName":"ipOpMs",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ],
+            |      "class2ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCreditType":"C1",
+            |            "class2Or3EarningsFactor":99999999999999.98,
+            |            "class2NIContributionAmount":99999999999999.98,
+            |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+            |            "creditSource":"NOT KNOWN",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ]
+            |   }
+            |}""".stripMargin
 
         Json.toJson(benefitEligibilityInfoSuccessResponseJsa) shouldBe Json.parse(expectedJson)
       }
@@ -1158,12 +1366,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           (() => mockEligibilityCheckDataResult.benefitType).expects().returning(benefitType)
           (() => mockEligibilityCheckDataResult.allResults).expects().returning(allSuccessResults)
           BenefitEligibilityInfoErrorResponse.from(
-            mockEligibilityCheckDataResult,
-            correlationId,
-            nationalInsuranceNumber
+            nationalInsuranceNumber,
+            mockEligibilityCheckDataResult
           ) shouldBe BenefitEligibilityInfoErrorResponse(
             overallResultStatus = Success,
-            correlationId = correlationId,
             nationalInsuranceNumber = nationalInsuranceNumber,
             benefitType = benefitType,
             summary = OverallResultSummary(totalCalls = 3, successful = 3, failed = 0),
@@ -1200,13 +1406,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           (() => mockEligibilityCheckDataResult.benefitType).expects().returning(benefitType)
           (() => mockEligibilityCheckDataResult.allResults).expects().returning(mixedResults)
           BenefitEligibilityInfoErrorResponse.from(
-            mockEligibilityCheckDataResult,
-            correlationId,
-            nationalInsuranceNumber
+            nationalInsuranceNumber,
+            mockEligibilityCheckDataResult
           ) shouldBe
             BenefitEligibilityInfoErrorResponse(
               overallResultStatus = Partial,
-              correlationId = correlationId,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1282,12 +1486,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           (() => mockEligibilityCheckDataResult.benefitType).expects().returning(benefitType)
           (() => mockEligibilityCheckDataResult.allResults).expects().returning(allFailureResults)
           BenefitEligibilityInfoErrorResponse.from(
-            mockEligibilityCheckDataResult,
-            correlationId,
-            nationalInsuranceNumber
+            nationalInsuranceNumber,
+            mockEligibilityCheckDataResult
           ) shouldBe BenefitEligibilityInfoErrorResponse(
             overallResultStatus = Failure,
-            correlationId = correlationId,
             nationalInsuranceNumber = nationalInsuranceNumber,
             benefitType = benefitType,
             summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3),
@@ -1321,7 +1523,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         case class DummySuccessResponse(i: Int) extends NpsSuccessfulApiResponse
         val dummySuccessResponse: DummySuccessResponse = DummySuccessResponse(2)
         val randomApiName: ApiName                     = Random.shuffle(ApiName.values.toList).head
-        val benefitTypes                               = Table("benefitTypes", BenefitType.values.toList: _*)
 
         val mixedResults: List[ApiResult] = List(
           NpsApiResult.SuccessResult[ErrorReport, DummySuccessResponse](randomApiName, dummySuccessResponse),
@@ -1335,18 +1536,43 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.SuccessResult[ErrorReport, DummySuccessResponse](randomApiName, dummySuccessResponse)
         )
 
-        val mockEligibilityCheckDataResult = mock[EligibilityCheckDataResult]
-        forAll(benefitTypes) { benefitType =>
-          (() => mockEligibilityCheckDataResult.benefitType).expects().returning(benefitType)
-          (() => mockEligibilityCheckDataResult.allResults).expects().returning(mixedResults).twice()
+        val mockEligibilityCheckDataResultMa   = mock[EligibilityCheckDataResultMA]
+        val mockEligibilityCheckDataResultEsa  = mock[EligibilityCheckDataResultESA]
+        val mockEligibilityCheckDataResultJsa  = mock[EligibilityCheckDataResultJSA]
+        val mockEligibilityCheckDataResultGysp = mock[EligibilityCheckDataResultGYSP]
+        val mockEligibilityCheckDataResultBsp  = mock[EligibilityCheckDataResultBSP]
+        val mockEligibilityCheckDataResult     = mock[EligibilityCheckDataResult]
+
+        (() => mockEligibilityCheckDataResultMa.benefitType).expects().returning(BenefitType.MA)
+        (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(mixedResults)
+
+        (() => mockEligibilityCheckDataResultEsa.benefitType).expects().returning(BenefitType.ESA)
+        (() => mockEligibilityCheckDataResultEsa.allResults).expects().returning(mixedResults)
+
+        (() => mockEligibilityCheckDataResultJsa.benefitType).expects().returning(BenefitType.JSA)
+        (() => mockEligibilityCheckDataResultJsa.allResults).expects().returning(mixedResults)
+
+        (() => mockEligibilityCheckDataResultGysp.benefitType).expects().returning(BenefitType.GYSP)
+        (() => mockEligibilityCheckDataResultGysp.allResults).expects().returning(mixedResults)
+
+        (() => mockEligibilityCheckDataResultBsp.benefitType).expects().returning(BenefitType.BSP)
+        (() => mockEligibilityCheckDataResultBsp.allResults).expects().returning(mixedResults)
+
+        val testParams = Map(
+          BenefitType.MA   -> mockEligibilityCheckDataResultMa,
+          BenefitType.ESA  -> mockEligibilityCheckDataResultEsa,
+          BenefitType.JSA  -> mockEligibilityCheckDataResultJsa,
+          BenefitType.GYSP -> mockEligibilityCheckDataResultGysp,
+          BenefitType.BSP  -> mockEligibilityCheckDataResultBsp
+        )
+
+        testParams.foreach { case (benefitType, mockResult) =>
           BenefitEligibilityInfoResponse.from(
-            mockEligibilityCheckDataResult,
-            correlationId,
-            nationalInsuranceNumber
+            nationalInsuranceNumber,
+            mockResult
           ) shouldBe Left(
             BenefitEligibilityInfoErrorResponse(
               overallResultStatus = Partial,
-              correlationId = correlationId,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1416,18 +1642,43 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             )
           )
         )
-        val mockEligibilityCheckDataResult = mock[EligibilityCheckDataResult]
-        forAll(benefitTypes) { benefitType =>
-          (() => mockEligibilityCheckDataResult.benefitType).expects().returning(benefitType)
-          (() => mockEligibilityCheckDataResult.allResults).expects().returning(allFailureResults).twice()
+
+        val mockEligibilityCheckDataResultMa   = mock[EligibilityCheckDataResultMA]
+        val mockEligibilityCheckDataResultEsa  = mock[EligibilityCheckDataResultESA]
+        val mockEligibilityCheckDataResultJsa  = mock[EligibilityCheckDataResultJSA]
+        val mockEligibilityCheckDataResultGysp = mock[EligibilityCheckDataResultGYSP]
+        val mockEligibilityCheckDataResultBsp  = mock[EligibilityCheckDataResultBSP]
+
+        (() => mockEligibilityCheckDataResultMa.benefitType).expects().returning(BenefitType.MA)
+        (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(allFailureResults)
+
+        (() => mockEligibilityCheckDataResultEsa.benefitType).expects().returning(BenefitType.ESA)
+        (() => mockEligibilityCheckDataResultEsa.allResults).expects().returning(allFailureResults)
+
+        (() => mockEligibilityCheckDataResultJsa.benefitType).expects().returning(BenefitType.JSA)
+        (() => mockEligibilityCheckDataResultJsa.allResults).expects().returning(allFailureResults)
+
+        (() => mockEligibilityCheckDataResultGysp.benefitType).expects().returning(BenefitType.GYSP)
+        (() => mockEligibilityCheckDataResultGysp.allResults).expects().returning(allFailureResults)
+
+        (() => mockEligibilityCheckDataResultBsp.benefitType).expects().returning(BenefitType.BSP)
+        (() => mockEligibilityCheckDataResultBsp.allResults).expects().returning(allFailureResults)
+
+        val testParams = Map(
+          BenefitType.MA   -> mockEligibilityCheckDataResultMa,
+          BenefitType.ESA  -> mockEligibilityCheckDataResultEsa,
+          BenefitType.JSA  -> mockEligibilityCheckDataResultJsa,
+          BenefitType.GYSP -> mockEligibilityCheckDataResultGysp,
+          BenefitType.BSP  -> mockEligibilityCheckDataResultBsp
+        )
+
+        testParams.foreach { (benefitType, mockResult) =>
           BenefitEligibilityInfoResponse.from(
-            mockEligibilityCheckDataResult,
-            correlationId,
-            nationalInsuranceNumber
+            nationalInsuranceNumber,
+            mockResult
           ) shouldBe Left(
             BenefitEligibilityInfoErrorResponse(
               overallResultStatus = Failure,
-              correlationId = correlationId,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3),
@@ -1470,13 +1721,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
 
         BenefitEligibilityInfoResponse.from(
-          eligibilityCheckDataResultMA,
-          correlationId,
-          nationalInsuranceNumber
+          nationalInsuranceNumber,
+          eligibilityCheckDataResultMA
         ) shouldBe
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
-              correlationId,
               nationalInsuranceNumber,
               class2MAReceiptsSuccessResponse,
               liabilitySummaryDetailsSuccessResponse,
@@ -1495,13 +1744,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
 
         BenefitEligibilityInfoResponse.from(
-          eligibilityCheckDataResultJSA,
-          correlationId,
-          nationalInsuranceNumber
+          nationalInsuranceNumber,
+          eligibilityCheckDataResultJSA
         ) shouldBe
           Right(
             BenefitEligibilityInfoSuccessResponseJsa(
-              correlationId,
               nationalInsuranceNumber,
               niContributionsAndCreditsSuccessResponse
             )
@@ -1518,13 +1765,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
 
         BenefitEligibilityInfoResponse.from(
-          eligibilityCheckDataResultESA,
-          correlationId,
-          nationalInsuranceNumber
+          nationalInsuranceNumber,
+          eligibilityCheckDataResultESA
         ) shouldBe
           Right(
             BenefitEligibilityInfoSuccessResponseEsa(
-              correlationId,
               nationalInsuranceNumber,
               niContributionsAndCreditsSuccessResponse
             )
@@ -1545,13 +1790,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
 
         BenefitEligibilityInfoResponse.from(
-          eligibilityCheckDataResultBSP,
-          correlationId,
-          nationalInsuranceNumber
+          nationalInsuranceNumber,
+          eligibilityCheckDataResultBSP
         ) shouldBe
           Right(
             BenefitEligibilityInfoSuccessResponseBsp(
-              correlationId,
               nationalInsuranceNumber,
               marriageDetailsSuccessResponse,
               niContributionsAndCreditsSuccessResponse
@@ -1578,13 +1821,19 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               benefitSchemeDetailsSuccessResponse
             )
           ),
+          NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitCalculationDetailsSuccessResponse](
+            LongTermBenefitCalculationDetails,
+            longTermBenefitCalculationDetailsSuccessResponse
+          ),
+          List(
+            NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitNotesSuccessResponse](
+              LongTermBenefitNotes,
+              longTermBenefitNotesSuccessResponse
+            )
+          ),
           NpsApiResult.SuccessResult[ErrorReport, MarriageDetailsSuccessResponse](
             MarriageDetails,
             marriageDetailsSuccessResponse
-          ),
-          NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitNotesSuccessResponse](
-            LongTermBenefitNotes,
-            longTermBenefitNotesSuccessResponse
           ),
           NpsApiResult.SuccessResult[ErrorReport, IndividualStatePensionInformationSuccessResponse](
             IndividualStatePension,
@@ -1593,16 +1842,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
 
         BenefitEligibilityInfoResponse.from(
-          eligibilityCheckDataResultGYSP,
-          correlationId,
-          nationalInsuranceNumber
+          nationalInsuranceNumber,
+          eligibilityCheckDataResultGYSP
         ) shouldBe
           Right(
             BenefitEligibilityInfoSuccessResponseGysp(
-              correlationId,
               nationalInsuranceNumber,
               List(benefitSchemeDetailsSuccessResponse),
               marriageDetailsSuccessResponse,
+              longTermBenefitCalculationDetailsSuccessResponse,
               longTermBenefitNotesSuccessResponse,
               schemeMembershipDetailsSuccessResponse,
               individualStatePensionInformationSuccessResponse,
