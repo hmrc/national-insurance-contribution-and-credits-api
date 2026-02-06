@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.connector
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.connector
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
@@ -36,13 +36,13 @@ import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
   OfficeDetails,
   OfficeLocationDecode,
@@ -55,7 +55,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
-class BenefitCalculationDetailsConnectorItSpec
+class LongTermBenefitCalculationDetailsConnectorItSpec
     extends AnyFreeSpec
     with EitherValues
     with GuiceOneAppPerSuite
@@ -78,8 +78,8 @@ class BenefitCalculationDetailsConnectorItSpec
       )
       .build()
 
-  private lazy val connector: BenefitCalculationDetailsConnector =
-    inject[BenefitCalculationDetailsConnector]
+  private lazy val connector: LongTermBenefitCalculationDetailsConnector =
+    inject[LongTermBenefitCalculationDetailsConnector]
 
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
 
@@ -89,13 +89,13 @@ class BenefitCalculationDetailsConnectorItSpec
 
       val testPath                                             = "/long-term-benefits/AB123456C/calculation"
       val identifier: Identifier                               = Identifier("AB123456C")
-      val seqNo: Option[SequenceNumber]                        = None
+      val seqNo: Option[AssociatedCalculationSequenceNumber]   = None
       val longTermBenefitType: Option[LongTermBenefitType]     = None
       val pensionProcessingArea: Option[PensionProcessingArea] = None
 
       "when the BenefitCalculationDetails endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
-          val benefitCalculationDetailsSuccessResponse = BenefitCalculationDetailsSuccessResponse(
+          val benefitCalculationDetailsSuccessResponse = LongTermBenefitCalculationDetailsSuccessResponse(
             statePensionAgeBefore2010TaxYear = Some(StatePensionAgeBefore2010TaxYear(true)),
             statePensionAgeAfter2016TaxYear = Some(StatePensionAgeAfter2016TaxYear(true)),
             benefitCalculationDetailsList = Some(
@@ -336,7 +336,7 @@ class BenefitCalculationDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(
-            SuccessResult(ApiName.BenefitCalculationDetails, benefitCalculationDetailsSuccessResponse)
+            SuccessResult(ApiName.LongTermBenefitCalculationDetails, benefitCalculationDetailsSuccessResponse)
           )
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
@@ -388,7 +388,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.BadRequest, Some(response))
             )
           )
@@ -442,7 +442,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.BadRequest, Some(response))
             )
           )
@@ -484,7 +484,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
             )
           )
@@ -525,7 +525,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.NotFound, Some(response))
             )
           )
@@ -570,7 +570,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
             )
           )
@@ -628,7 +628,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
             )
           )
@@ -683,7 +683,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
           result shouldBe Right(
             FailureResult(
-              ApiName.BenefitCalculationDetails,
+              ApiName.LongTermBenefitCalculationDetails,
               ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
             )
           )
@@ -713,7 +713,7 @@ class BenefitCalculationDetailsConnectorItSpec
 
             result shouldBe Right(
               FailureResult(
-                ApiName.BenefitCalculationDetails,
+                ApiName.LongTermBenefitCalculationDetails,
                 ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
               )
             )

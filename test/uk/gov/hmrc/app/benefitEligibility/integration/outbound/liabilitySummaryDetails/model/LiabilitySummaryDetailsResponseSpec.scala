@@ -25,7 +25,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
-import uk.gov.hmrc.app.benefitEligibility.common.{Country, Identifier, NpsErrorReason}
+import uk.gov.hmrc.app.benefitEligibility.common.{Callback, CallbackUrl, Country, Identifier, NpsErrorReason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.{
   LiabilitySummaryDetailsErrorResponse400,
@@ -100,7 +100,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
           )
         )
       ),
-      Some(Callback("Callback"))
+      Some(Callback(Some(CallbackUrl("/some/url"))))
     )
 
     val jsonString =
@@ -131,7 +131,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         |     }
         |   }
         | ],
-        | "callback":"Callback"
+        | "callback":{"callbackURL":"/some/url"}
         }""".stripMargin
 
     "deserialises and serialises successfully" in {

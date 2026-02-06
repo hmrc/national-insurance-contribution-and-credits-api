@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model
 
 import cats.data.Validated.Valid
 import com.networknt.schema.SpecVersion
@@ -23,9 +23,9 @@ import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.common._
 import uk.gov.hmrc.app.benefitEligibility.common.npsError._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsError._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsError._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
@@ -41,7 +41,7 @@ import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.BenefitCalculatio
 
 import java.time.LocalDate
 
-class BenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Matchers {
+class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Matchers {
 
   val benefitCalculationDetailsOpenApiSpec =
     "test/resources/schemas/api/longTermBenefitCalculation/longTermBenefitCalculation.yaml"
@@ -56,9 +56,9 @@ class BenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Matchers {
 
   "BenefitCalculationDetailsResponse" - {
 
-    val jsonFormat = implicitly[Format[BenefitCalculationDetailsSuccessResponse]]
+    val jsonFormat = implicitly[Format[LongTermBenefitCalculationDetailsSuccessResponse]]
 
-    val benefitCalculationDetailsSuccessResponse = BenefitCalculationDetailsSuccessResponse(
+    val benefitCalculationDetailsSuccessResponse = LongTermBenefitCalculationDetailsSuccessResponse(
       statePensionAgeBefore2010TaxYear = Some(StatePensionAgeBefore2010TaxYear(true)),
       statePensionAgeAfter2016TaxYear = Some(StatePensionAgeAfter2016TaxYear(true)),
       benefitCalculationDetailsList = Some(
@@ -287,12 +287,12 @@ class BenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Matchers {
     }
 
     "deserialises to the model class" in {
-      val _: BenefitCalculationDetailsSuccessResponse = jsonFormat.reads(Json.parse(jsonString)).get
+      val _: LongTermBenefitCalculationDetailsSuccessResponse = jsonFormat.reads(Json.parse(jsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
       val jValue: JsValue = Json.parse(jsonString)
-      val benefitCalculationDetailsSuccessResponse: BenefitCalculationDetailsSuccessResponse =
+      val benefitCalculationDetailsSuccessResponse: LongTermBenefitCalculationDetailsSuccessResponse =
         jsonFormat.reads(jValue).get
       val writtenJson: JsValue = jsonFormat.writes(benefitCalculationDetailsSuccessResponse)
 

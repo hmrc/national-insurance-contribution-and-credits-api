@@ -80,10 +80,10 @@ class LongTermBenefitNotesConnectorItSpec
 
     ".fetchLongTermBenefitNotes" - {
 
-      val testPath                                 = "/long-term-benefits/AB123456C/calculation/ALL/notes/1123232"
-      val identifier: Identifier                   = Identifier("AB123456C")
-      val longTermBenefitType: LongTermBenefitType = LongTermBenefitType.All
-      val seqNo: Int                               = 1123232
+      val testPath                                   = "/long-term-benefits/AB123456C/calculation/ALL/notes/1123232"
+      val identifier: Identifier                     = Identifier("AB123456C")
+      val longTermBenefitType: LongTermBenefitType   = LongTermBenefitType.All
+      val seqNo: AssociatedCalculationSequenceNumber = AssociatedCalculationSequenceNumber(1123232)
 
       "when the LongTermBenefitNotes endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {

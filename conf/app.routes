@@ -1,3 +1,4 @@
 # microservice specific routes
 
 POST        /contribution-and-credits           uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.NICCController.postContributionsAndCredits
+POST        /benefit-eligibility-info           uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.fetchBenefitEligibilityData

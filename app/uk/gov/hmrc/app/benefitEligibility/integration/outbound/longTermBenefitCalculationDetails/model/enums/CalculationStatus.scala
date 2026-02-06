@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.enums
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 

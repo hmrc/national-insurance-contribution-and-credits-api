@@ -73,19 +73,16 @@ class MarriageDetailsConnector @Inject() (
       benefitType: BenefitType,
       identifier: Identifier,
       startYear: Option[Int],
-      endYear: Option[Int],
       latestFilter: Option[Boolean],
       seq: Option[Int]
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
     def searchStartYear: Option[String] = startYear.map(sY => sY.toString)
-    def searchEndYear: Option[String]   = endYear.map(eY => eY.toString)
     def latest: Option[String]          = latestFilter.map(l => l.toString)
     def sequence: Option[String]        = seq.map(s => s.toString)
 
     val options = List(
       RequestOption("searchStartYear", searchStartYear),
-      RequestOption("searchEndYear", searchEndYear),
       RequestOption("latest", latest),
       RequestOption("sequence", sequence)
     )

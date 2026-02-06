@@ -31,7 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDeta
   BenefitSchemeDetailsSuccessResponse,
   SchemeAddressDetails
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsError.{
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsError.{
   BenefitCalculationDetailsError400,
   BenefitCalculationDetailsError422,
   BenefitCalculationDetailsErrorItem400,
@@ -43,10 +43,11 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculatio
   BenefitCalculationDetailsHipFailureResponse503,
   BenefitCalculationDetailsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError
 import IndividualStatePensionInformationError.*
+import uk.gov.hmrc.app.benefitEligibility.common.Callback
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.*

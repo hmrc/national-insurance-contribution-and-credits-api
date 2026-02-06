@@ -47,18 +47,17 @@ class BspDataRetrievalService @Inject() (
         eligibilityCheckDataRequest.benefitType,
         NiContributionsAndCreditsRequest(
           eligibilityCheckDataRequest.nationalInsuranceNumber,
-          eligibilityCheckDataRequest.contributionsAndCredits.dateOfBirth,
-          eligibilityCheckDataRequest.contributionsAndCredits.startTaxYear,
-          eligibilityCheckDataRequest.contributionsAndCredits.endTaxYear
+          eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
+          eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
+          eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
         )
       ),
       marriageDetailsConnector.fetchMarriageDetails(
         eligibilityCheckDataRequest.benefitType,
         eligibilityCheckDataRequest.nationalInsuranceNumber,
         eligibilityCheckDataRequest.marriageDetails.searchStartYear,
-        eligibilityCheckDataRequest.marriageDetails.searchEndYear,
         eligibilityCheckDataRequest.marriageDetails.latest,
-        eligibilityCheckDataRequest.marriageDetails.sequence
+        None
       )
     ).parTupled.map { case (contributionsAndCreditResult, marriageDetailsResult) =>
       EligibilityCheckDataResultBSP(

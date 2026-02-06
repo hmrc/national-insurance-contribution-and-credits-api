@@ -43,10 +43,15 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsStandardErrorResponse400
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
-  Callback,
+  LiabilityDetailsList,
   LiabilitySummaryDetailsSuccessResponse,
   OccurrenceNumber
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.EnumLiabtp.{
+  EsaS2p,
+  FullTimeEducation
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
@@ -99,25 +104,109 @@ class LiabilitySummaryDetailsConnectorItSpec
       "when the LiabilitySummaryDetails endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
           val successResponse = LiabilitySummaryDetailsSuccessResponse(
-            liabilityDetailsList = Some(List()),
-            callback = Some(Callback(""))
+            liabilityDetailsList = Some(
+              List(
+                LiabilityDetailsList(
+                  identifier = Identifier("AB123456C"),
+                  `type` = EsaS2p,
+                  occurrenceNumber = OccurrenceNumber(2),
+                  startDate = LiabilitySummaryDetailsSuccess.StartDate(LocalDate.parse("2020-10-01")),
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
+                ),
+                LiabilityDetailsList(
+                  identifier = Identifier("AB123456C"),
+                  `type` = FullTimeEducation,
+                  occurrenceNumber = OccurrenceNumber(3),
+                  startDate = LiabilitySummaryDetailsSuccess.StartDate(LocalDate.parse("2021-11-03")),
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
+                )
+              )
+            ),
+            callback = None
           )
 
-          val successResponseJson = """{
-                                      |"liabilityDetailsList": [],
-                                      |"liabilityEmploymentDetailsList":[],
-                                      |"callback": ""
-                                      |}""".stripMargin
+          val successResponseJsonWithCallback =
+            s"""{
+               |"liabilityDetailsList": [
+               | {
+               |   "identifier": "AB123456C",
+               |   "type": "ESA (S2P)",
+               |   "occurrenceNumber": 2,
+               |   "startDate": "2020-10-01"
+               | }
+               |],
+               |"callback": {"callbackURL": "http://localhost:${server.port}/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"}
+               |}""".stripMargin
 
-          val responseBody = Json.parse(successResponseJson).toString()
+          val successResponseJsonWithoutCallback =
+            """{
+              |"liabilityDetailsList": [
+              | {
+              |   "identifier": "AB123456C",
+              |   "type": "FULL TIME EDUCATION",
+              |   "occurrenceNumber": 3,
+              |   "startDate": "2021-11-03"
+              | }
+              |]
+              |}""".stripMargin
+
+          val responseBodyWithCallback = Json.parse(successResponseJsonWithCallback).toString()
+
+          val responseBodyWithoutCallback = Json.parse(successResponseJsonWithoutCallback).toString()
+
+          val testPath1 = "/person/AB123456C/liability-summary/ABROAD"
+          val testPath2 = "/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"
 
           server.stubFor(
-            get(urlEqualTo(testPath))
+            get(urlEqualTo(testPath1))
+              .inScenario("Pagination")
+              .whenScenarioStateIs("Started")
+              .willSetStateTo("PAGINATION_COMPLETE")
               .willReturn(
                 aResponse()
                   .withStatus(OK)
                   .withHeader("Content-Type", "application/json")
-                  .withBody(responseBody)
+                  .withBody(responseBodyWithCallback)
+              )
+          )
+
+          server.stubFor(
+            get(urlEqualTo(testPath2))
+              .inScenario("Pagination")
+              .whenScenarioStateIs("PAGINATION_COMPLETE")
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBodyWithoutCallback)
               )
           )
 
@@ -137,8 +226,13 @@ class LiabilitySummaryDetailsConnectorItSpec
               .futureValue
 
           result shouldBe Right(SuccessResult(Liabilities, successResponse))
+
           server.verify(
-            getRequestedFor(urlEqualTo(testPath))
+            getRequestedFor(urlEqualTo(testPath1))
+          )
+
+          server.verify(
+            getRequestedFor(urlEqualTo(testPath2))
           )
 
         }
