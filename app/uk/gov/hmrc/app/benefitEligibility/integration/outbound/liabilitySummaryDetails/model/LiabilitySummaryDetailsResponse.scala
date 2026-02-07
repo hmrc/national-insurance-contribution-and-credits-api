@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummary
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
-import uk.gov.hmrc.app.benefitEligibility.common.{Country, Identifier, NpsErrorReason}
+import uk.gov.hmrc.app.benefitEligibility.common.{Callback, Country, Identifier, NpsErrorReason}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.{
   EnumAtcredfg,
   EnumHrpIndicator,
@@ -31,6 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryD
   ErrorCode403,
   ErrorReason403
 }
+
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 import java.time.LocalDate
@@ -208,9 +209,9 @@ object LiabilitySummaryDetailsSuccess {
       identifier: Identifier,
       `type`: EnumLiabtp,
       occurrenceNumber: OccurrenceNumber,
+      startDate: StartDate,
       startDateStatus: Option[EnumLtpsdttp],
       endDateStatus: Option[EnumLtpedttp],
-      startDate: StartDate,
       endDate: Option[EndDate],
       country: Option[Country],
       trainingCreditApprovalStatus: Option[EnumAtcredfg],
@@ -256,16 +257,6 @@ object LiabilitySummaryDetailsSuccess {
   object LiabilityDetails {
     implicit val liabilityDetailsFormats: Format[LiabilityDetails] = Json.format[LiabilityDetails]
   }
-
-  // region Callback
-
-  case class Callback(value: String) extends AnyVal
-
-  object Callback {
-    implicit val callbackReads: Format[Callback] = Json.valueFormat[Callback]
-  }
-
-  // endregion Callback
 
   // region Success Response
 

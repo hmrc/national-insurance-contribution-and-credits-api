@@ -20,7 +20,7 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsError
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
@@ -42,16 +42,18 @@ object NpsApiResponseStatus extends Enum[NpsApiResponseStatus] with PlayJsonEnum
   case object Failure extends NpsApiResponseStatus("FAILURE")
 }
 
-type ApiResult                       = NpsApiResult[ErrorReport, NpsSuccessfulApiResponse]
-type Class2MaReceiptsResult          = NpsApiResult[ErrorReport, Class2MAReceiptsSuccessResponse]
-type ContributionCreditResult        = NpsApiResult[ErrorReport, NiContributionsAndCreditsSuccessResponse]
-type SchemeMembershipDetailsResult   = NpsApiResult[ErrorReport, SchemeMembershipDetailsSuccessResponse]
-type MarriageDetailsResult           = NpsApiResult[ErrorReport, MarriageDetailsSuccessResponse]
-type LiabilityResult                 = NpsApiResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse]
-type IndividualStatePensionResult    = NpsApiResult[ErrorReport, IndividualStatePensionInformationSuccessResponse]
-type LongTermBenefitNotesResult      = NpsApiResult[ErrorReport, LongTermBenefitNotesSuccessResponse]
-type BenefitSchemeDetailsResult      = NpsApiResult[ErrorReport, BenefitSchemeDetailsSuccessResponse]
-type BenefitCalculationDetailsResult = NpsApiResult[ErrorReport, BenefitCalculationDetailsSuccessResponse]
+type ApiResult                     = NpsApiResult[ErrorReport, NpsSuccessfulApiResponse]
+type Class2MaReceiptsResult        = NpsApiResult[ErrorReport, Class2MAReceiptsSuccessResponse]
+type ContributionCreditResult      = NpsApiResult[ErrorReport, NiContributionsAndCreditsSuccessResponse]
+type SchemeMembershipDetailsResult = NpsApiResult[ErrorReport, SchemeMembershipDetailsSuccessResponse]
+type MarriageDetailsResult         = NpsApiResult[ErrorReport, MarriageDetailsSuccessResponse]
+type LiabilityResult               = NpsApiResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse]
+type IndividualStatePensionResult  = NpsApiResult[ErrorReport, IndividualStatePensionInformationSuccessResponse]
+type LongTermBenefitNotesResult    = NpsApiResult[ErrorReport, LongTermBenefitNotesSuccessResponse]
+type BenefitSchemeDetailsResult    = NpsApiResult[ErrorReport, BenefitSchemeDetailsSuccessResponse]
+
+type LongTermBenefitCalculationDetailsResult =
+  NpsApiResult[ErrorReport, LongTermBenefitCalculationDetailsSuccessResponse]
 
 //TODO - change type constraints to NpsApiResult[+A <: ErrorReport, +B <: NpsSuccessfulApiResponse] after we move all connectors to extend NpsResponseMapperV2
 sealed trait NpsApiResult[+A <: ErrorReport, +B] {

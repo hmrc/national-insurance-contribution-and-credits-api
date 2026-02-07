@@ -40,13 +40,12 @@ class BenefitEligibilityDataRetrievalService @Inject() (
     jobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService,
     getYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService,
     bspDataRetrievalService: BspDataRetrievalService
-) {
+)(implicit ec: ExecutionContext) {
 
   def getEligibilityData(
       request: EligibilityCheckDataRequest
   )(
-      implicit hc: HeaderCarrier,
-      ec: ExecutionContext
+      implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult] =
     request match {
       case request: MAEligibilityCheckDataRequest =>
