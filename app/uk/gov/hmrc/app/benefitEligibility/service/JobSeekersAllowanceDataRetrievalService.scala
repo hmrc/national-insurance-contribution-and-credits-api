@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.instances.future.*
+import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   ESAEligibilityCheckDataRequest,
@@ -34,7 +35,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class JobSeekersAllowanceDataRetrievalService(niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector)(
+class JobSeekersAllowanceDataRetrievalService @Inject() (
+    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector
+)(
     implicit ec: ExecutionContext
 ) {
 

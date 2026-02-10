@@ -135,7 +135,7 @@ object JSAEligibilityCheckDataRequest {
   def apply(
       nationalInsuranceNumber: Identifier,
       contributionsAndCredits: ContributionsAndCredits
-  ) = new JSAEligibilityCheckDataRequest(ESA, nationalInsuranceNumber, contributionsAndCredits)
+  ) = new JSAEligibilityCheckDataRequest(JSA, nationalInsuranceNumber, contributionsAndCredits)
 
 }
 
