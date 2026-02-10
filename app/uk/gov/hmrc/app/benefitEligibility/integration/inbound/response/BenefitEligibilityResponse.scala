@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.inbound.response
 
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.findValues
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
-import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.Success
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataSuccessResult.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
@@ -33,9 +35,11 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   ApiResult,
   EligibilityCheckDataResult,
-  EligibilityCheckDataSuccessResult,
-  NpsApiResponseStatus
+  NpsApiResponseStatus,
+  NpsApiResult
 }
+
+import scala.collection.immutable
 
 trait BenefitEligibilityInfoSuccessResponse
 
@@ -58,48 +62,43 @@ object BenefitEligibilityInfoSuccessResponse {
 
 sealed trait BenefitEligibilityInfoResponse { self =>
   def benefitType: BenefitType
-  def correlationId: CorrelationId
   def nationalInsuranceNumber: Identifier
 }
 
 object BenefitEligibilityInfoResponse {
 
   def from(
-      result: EligibilityCheckDataResult,
-      correlationId: CorrelationId,
-      nationalInsuranceNumber: Identifier
+      nationalInsuranceNumber: Identifier,
+      result: EligibilityCheckDataResult
   ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponse] =
-    if (OverallResultStatus.fromApiResults(result.allResults) == Success) {
-      Right(toSuccessResponse(result.asSuccess.get, correlationId, nationalInsuranceNumber))
-    } else
-      Left(BenefitEligibilityInfoErrorResponse.from(result, correlationId, nationalInsuranceNumber))
-
-  private def toSuccessResponse(
-      successResult: EligibilityCheckDataSuccessResult,
-      correlationId: CorrelationId,
-      nationalInsuranceNumber: Identifier
-  ): BenefitEligibilityInfoSuccessResponse =
-    successResult match {
-      case result: EligibilityCheckDataSuccessResult.EligibilityCheckDataSuccessResultMa =>
-        BenefitEligibilityInfoSuccessResponseMa.from(correlationId, nationalInsuranceNumber, result)
-
-      case result: EligibilityCheckDataSuccessResult.EligibilityCheckDataSuccessResultEsa =>
-        BenefitEligibilityInfoSuccessResponseEsa.from(correlationId, nationalInsuranceNumber, result)
-
-      case result: EligibilityCheckDataSuccessResult.EligibilityCheckDataSuccessResultJsa =>
-        BenefitEligibilityInfoSuccessResponseJsa.from(correlationId, nationalInsuranceNumber, result)
-
-      case result: EligibilityCheckDataSuccessResult.EligibilityCheckDataSuccessResultGysp =>
-        BenefitEligibilityInfoSuccessResponseGysp.from(correlationId, nationalInsuranceNumber, result)
-
-      case result: EligibilityCheckDataSuccessResult.EligibilityCheckDataSuccessResultBsp =>
-        BenefitEligibilityInfoSuccessResponseBsp.from(correlationId, nationalInsuranceNumber, result)
+    result match {
+      case r: EligibilityCheckDataResultMA => BenefitEligibilityInfoSuccessResponseMa.from(nationalInsuranceNumber, r)
+      case r: EligibilityCheckDataResult.EligibilityCheckDataResultESA =>
+        BenefitEligibilityInfoSuccessResponseEsa.from(nationalInsuranceNumber, r)
+      case r: EligibilityCheckDataResult.EligibilityCheckDataResultJSA =>
+        BenefitEligibilityInfoSuccessResponseJsa.from(nationalInsuranceNumber, r)
+      case r: EligibilityCheckDataResult.EligibilityCheckDataResultGYSP =>
+        BenefitEligibilityInfoSuccessResponseGysp.from(nationalInsuranceNumber, r)
+      case r: EligibilityCheckDataResult.EligibilityCheckDataResultBSP =>
+        BenefitEligibilityInfoSuccessResponseBsp.from(nationalInsuranceNumber, r)
     }
 
 }
 
+sealed abstract class PaginationStatus(override val entryName: String) extends EnumEntry
+
+object PaginationStatus extends Enum[PaginationStatus] with PlayJsonEnum[PaginationStatus] {
+  val values: immutable.IndexedSeq[PaginationStatus] = findValues
+
+  case object Running  extends PaginationStatus("RUNNING")
+  case object Complete extends PaginationStatus("COMPLETE")
+}
+
+case class PaginationCursor(value: java.util.UUID)
+case class Source(apiName: ApiName, status: PaginationStatus, url: String)
+case class Pagination(cursor: PaginationCursor, sources: List[Source])
+
 final case class BenefitEligibilityInfoSuccessResponseMa private (
-    correlationId: CorrelationId,
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     class2MAReceiptsResult: Class2MAReceiptsSuccessResponse,
@@ -114,13 +113,11 @@ object BenefitEligibilityInfoSuccessResponseMa {
     Json.writes[BenefitEligibilityInfoSuccessResponseMa]
 
   def apply(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
       class2MAReceiptsResult: Class2MAReceiptsSuccessResponse,
       liabilitySummaryDetailsResult: LiabilitySummaryDetailsSuccessResponse,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) = new BenefitEligibilityInfoSuccessResponseMa(
-    correlationId,
     MA,
     nationalInsuranceNumber,
     class2MAReceiptsResult,
@@ -129,22 +126,26 @@ object BenefitEligibilityInfoSuccessResponseMa {
   )
 
   def from(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataSuccessResultMa
-  ) =
-    BenefitEligibilityInfoSuccessResponseMa(
-      correlationId = correlationId,
-      nationalInsuranceNumber = nationalInsuranceNumber,
-      niContributionsAndCreditsResult = result.niContributionsAndCreditsSuccessResponse,
-      class2MAReceiptsResult = result.class2MAReceiptsSuccessResponse,
-      liabilitySummaryDetailsResult = result.liabilitySummaryDetailsSuccessResponse
-    )
+      result: EligibilityCheckDataResultMA
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseMa] =
+
+    (result.liabilityResult, result.class2MaReceiptsResult, result.contributionCreditResult) match {
+      case (NpsApiResult.SuccessResult(_, l), NpsApiResult.SuccessResult(_, c2), NpsApiResult.SuccessResult(_, co)) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseMa(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            niContributionsAndCreditsResult = co,
+            class2MAReceiptsResult = c2,
+            liabilitySummaryDetailsResult = l
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    }
 
 }
 
 final case class BenefitEligibilityInfoSuccessResponseBsp private (
-    correlationId: CorrelationId,
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     marriageDetailsResult: MarriageDetailsSuccessResponse,
@@ -158,12 +159,10 @@ object BenefitEligibilityInfoSuccessResponseBsp {
     Json.writes[BenefitEligibilityInfoSuccessResponseBsp]
 
   def apply(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
       marriageDetailsResult: MarriageDetailsSuccessResponse,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) = new BenefitEligibilityInfoSuccessResponseBsp(
-    correlationId,
     BSP,
     nationalInsuranceNumber,
     marriageDetailsResult,
@@ -171,21 +170,28 @@ object BenefitEligibilityInfoSuccessResponseBsp {
   )
 
   def from(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataSuccessResultBsp
-  ) =
-    BenefitEligibilityInfoSuccessResponseBsp(
-      correlationId = correlationId,
-      nationalInsuranceNumber = nationalInsuranceNumber,
-      marriageDetailsResult = result.marriageDetailsSuccessResponse,
-      niContributionsAndCreditsResult = result.niContributionsAndCreditsSuccessResponse
-    )
+      result: EligibilityCheckDataResultBSP
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseBsp] =
+
+    (result.marriageDetailsResult, result.contributionCreditResult) match {
+      case (
+            NpsApiResult.SuccessResult(_, marriageDetailsSuccessResponse),
+            NpsApiResult.SuccessResult(_, contributionsAndCreditsSuccessResponse)
+          ) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseBsp(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            marriageDetailsResult = marriageDetailsSuccessResponse,
+            niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    }
 
 }
 
 final case class BenefitEligibilityInfoSuccessResponseEsa private (
-    correlationId: CorrelationId,
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
@@ -198,32 +204,34 @@ object BenefitEligibilityInfoSuccessResponseEsa {
     Json.writes[BenefitEligibilityInfoSuccessResponseEsa]
 
   def apply(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) =
     new BenefitEligibilityInfoSuccessResponseEsa(
-      correlationId,
       ESA,
       nationalInsuranceNumber,
       niContributionsAndCreditsResult
     )
 
   def from(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataSuccessResultEsa
-  ): BenefitEligibilityInfoSuccessResponseEsa =
-    BenefitEligibilityInfoSuccessResponseEsa(
-      correlationId = correlationId,
-      nationalInsuranceNumber = nationalInsuranceNumber,
-      niContributionsAndCreditsResult = result.niContributionsAndCreditsSuccessResponse
-    )
+      result: EligibilityCheckDataResultESA
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseEsa] =
+
+    result.contributionCreditResult match {
+      case NpsApiResult.SuccessResult(_, niContributionsAndCreditsSuccessResponse) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseEsa(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    }
 
 }
 
 final case class BenefitEligibilityInfoSuccessResponseJsa private (
-    correlationId: CorrelationId,
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
@@ -236,36 +244,39 @@ object BenefitEligibilityInfoSuccessResponseJsa {
     Json.writes[BenefitEligibilityInfoSuccessResponseJsa]
 
   def apply(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) =
     new BenefitEligibilityInfoSuccessResponseJsa(
-      correlationId,
       JSA,
       nationalInsuranceNumber,
       niContributionsAndCreditsResult
     )
 
   def from(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataSuccessResultJsa
-  ) =
-    BenefitEligibilityInfoSuccessResponseJsa(
-      correlationId = correlationId,
-      nationalInsuranceNumber = nationalInsuranceNumber,
-      niContributionsAndCreditsResult = result.niContributionsAndCreditsSuccessResponse
-    )
+      result: EligibilityCheckDataResultJSA
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseJsa] =
+
+    result.contributionCreditResult match {
+      case NpsApiResult.SuccessResult(_, niContributionsAndCreditsSuccessResponse) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseJsa(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    }
 
 }
 
 final case class BenefitEligibilityInfoSuccessResponseGysp private (
     benefitType: BenefitType,
-    correlationId: CorrelationId,
     nationalInsuranceNumber: Identifier,
     benefitSchemeDetailsResult: List[BenefitSchemeDetailsSuccessResponse],
     marriageDetailsResult: MarriageDetailsSuccessResponse,
+    longTermBenefitCalculationDetailsResult: LongTermBenefitCalculationDetailsSuccessResponse,
     longTermBenefitNotesResult: LongTermBenefitNotesSuccessResponse,
     schemeMembershipDetailsResult: SchemeMembershipDetailsSuccessResponse,
     individualStatePensionInfoResult: IndividualStatePensionInformationSuccessResponse,
@@ -275,45 +286,63 @@ final case class BenefitEligibilityInfoSuccessResponseGysp private (
 
 object BenefitEligibilityInfoSuccessResponseGysp {
 
+  implicit val benefitEligibilityInfoResponseGyspWrites: Writes[BenefitEligibilityInfoSuccessResponseGysp] =
+    Json.writes[BenefitEligibilityInfoSuccessResponseGysp]
+
   def apply(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
       benefitSchemeDetailsResult: List[BenefitSchemeDetailsSuccessResponse],
       marriageDetailsResult: MarriageDetailsSuccessResponse,
+      longTermBenefitCalculationDetailsResult: LongTermBenefitCalculationDetailsSuccessResponse,
       longTermBenefitNotesResult: LongTermBenefitNotesSuccessResponse,
       schemeMembershipDetailsResult: SchemeMembershipDetailsSuccessResponse,
       individualStatePensionInfoResult: IndividualStatePensionInformationSuccessResponse,
       niContributionsAndCreditsResult: List[NiContributionsAndCreditsSuccessResponse]
   ) = new BenefitEligibilityInfoSuccessResponseGysp(
     GYSP,
-    correlationId,
     nationalInsuranceNumber,
     benefitSchemeDetailsResult,
     marriageDetailsResult,
+    longTermBenefitCalculationDetailsResult,
     longTermBenefitNotesResult,
     schemeMembershipDetailsResult,
     individualStatePensionInfoResult,
     niContributionsAndCreditsResult
   )
 
-  implicit val benefitEligibilityInfoResponseGyspWrites: Writes[BenefitEligibilityInfoSuccessResponseGysp] =
-    Json.writes[BenefitEligibilityInfoSuccessResponseGysp]
-
   def from(
-      correlationId: CorrelationId,
       nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataSuccessResultGysp
-  ) =
-    BenefitEligibilityInfoSuccessResponseGysp(
-      correlationId = correlationId,
-      nationalInsuranceNumber = nationalInsuranceNumber,
-      benefitSchemeDetailsResult = result.benefitSchemeDetails,
-      marriageDetailsResult = result.marriageDetails,
-      longTermBenefitNotesResult = result.longTermBenefitNotes,
-      schemeMembershipDetailsResult = result.schemeMembershipDetails,
-      individualStatePensionInfoResult = result.statePensionData,
-      niContributionsAndCreditsResult = result.contributionCredit
-    )
+      result: EligibilityCheckDataResultGYSP
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseGysp] =
+
+    (
+      result.schemeMembershipDetails,
+      result.marriageDetailsResult,
+      result.longTermBenefitCalculationDetailsResult,
+      result.statePensionData
+    ) match {
+      case (
+            NpsApiResult.SuccessResult(_, schemeMembership),
+            NpsApiResult.SuccessResult(_, marriageDetails),
+            NpsApiResult.SuccessResult(_, longTermBenefitCalculationDetails),
+            NpsApiResult.SuccessResult(_, statePension)
+          ) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseGysp(
+            nationalInsuranceNumber,
+            result.benefitSchemeDetails.flatMap(_.getSuccess),
+            marriageDetails,
+            longTermBenefitCalculationDetails,
+            result.longTermBenefitNotes.flatMap(_.getSuccess).reduce { case (resp1, resp2) =>
+              LongTermBenefitNotesSuccessResponse(resp1.longTermBenefitNotes ++ resp2.longTermBenefitNotes)
+            },
+            schemeMembership,
+            statePension,
+            result.contributionCreditResult.flatMap(_.getSuccess)
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    }
 
 }
 
@@ -342,7 +371,6 @@ object SanitizedApiResult {
 
 case class BenefitEligibilityInfoErrorResponse(
     overallResultStatus: OverallResultStatus,
-    correlationId: CorrelationId,
     nationalInsuranceNumber: Identifier,
     benefitType: BenefitType,
     summary: OverallResultSummary,
@@ -355,9 +383,8 @@ object BenefitEligibilityInfoErrorResponse {
     Json.writes[BenefitEligibilityInfoErrorResponse]
 
   def from(
-      eligibilityCheckDataResult: EligibilityCheckDataResult,
-      correlationId: CorrelationId,
-      nationalInsuranceNumber: Identifier
+      nationalInsuranceNumber: Identifier,
+      eligibilityCheckDataResult: EligibilityCheckDataResult
   ): BenefitEligibilityInfoErrorResponse = {
 
     val allResults = eligibilityCheckDataResult.allResults
@@ -365,7 +392,6 @@ object BenefitEligibilityInfoErrorResponse {
     eligibilityCheckDataResult
       .into[BenefitEligibilityInfoErrorResponse]
       .withFieldComputed(_.overallResultStatus, _ => OverallResultStatus.fromApiResults(allResults))
-      .withFieldConst(_.correlationId, correlationId)
       .withFieldConst(_.nationalInsuranceNumber, nationalInsuranceNumber)
       .withFieldComputed(_.benefitType, _.benefitType)
       .withFieldComputed(_.summary, _ => OverallResultSummary.from(allResults))

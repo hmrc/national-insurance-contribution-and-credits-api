@@ -29,12 +29,12 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorCode403,
   NpsErrorReason403
 }
-import uk.gov.hmrc.app.benefitEligibility.common.{Identifier, NpsErrorReason}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums._
+import uk.gov.hmrc.app.benefitEligibility.common.{Callback, CallbackUrl, Identifier, NpsErrorReason}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.SchemeMembership._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.SchemeMembership.*
 
 class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
 
@@ -134,7 +134,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
         callback = Some(
           Callback(
             callbackURL = Some(
-              CallbackURL(
+              CallbackUrl(
                 "some-url"
               )
             )
@@ -290,7 +290,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
           callback = Some(
             Callback(
               callbackURL = Some(
-                CallbackURL(
+                CallbackUrl(
                   "some-url"
                 )
               )

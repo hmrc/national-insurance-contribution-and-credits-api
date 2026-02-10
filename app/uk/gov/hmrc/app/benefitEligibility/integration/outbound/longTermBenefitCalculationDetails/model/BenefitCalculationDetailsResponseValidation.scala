@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model
 
 import cats.data.Validated
 import cats.implicits.*
-import BenefitCalculationDetailsSuccess.BenefitCalculationDetailsSuccessResponse
+import BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.util.validation.MoneyValidation
 import uk.gov.hmrc.app.benefitEligibility.util.{NpsResponseValidator, SuccessfulResult}
 
 object BenefitCalculationDetailsResponseValidation {
 
   implicit val benefitCalculationDetailsSuccessResponseValidator
-      : NpsResponseValidator[BenefitCalculationDetailsSuccessResponse] =
-    (_, response: BenefitCalculationDetailsSuccessResponse) =>
+      : NpsResponseValidator[LongTermBenefitCalculationDetailsSuccessResponse] =
+    (_, response: LongTermBenefitCalculationDetailsSuccessResponse) =>
       response.benefitCalculationDetailsList
         .map { bCDLList =>
           bCDLList

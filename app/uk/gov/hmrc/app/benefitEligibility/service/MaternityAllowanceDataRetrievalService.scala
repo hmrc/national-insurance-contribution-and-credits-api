@@ -58,15 +58,15 @@ class MaternityAllowanceDataRetrievalService @Inject() (
         eligibilityCheckDataRequest.benefitType,
         NiContributionsAndCreditsRequest(
           eligibilityCheckDataRequest.nationalInsuranceNumber,
-          eligibilityCheckDataRequest.contributionsAndCredits.dateOfBirth,
-          eligibilityCheckDataRequest.contributionsAndCredits.startTaxYear,
-          eligibilityCheckDataRequest.contributionsAndCredits.endTaxYear
+          eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
+          eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
+          eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
         )
       ),
       liabilitySummaryDetailsConnector.fetchLiabilitySummaryDetails(
         eligibilityCheckDataRequest.benefitType,
         eligibilityCheckDataRequest.nationalInsuranceNumber,
-        eligibilityCheckDataRequest.liabilities.liabilitySearchCategoryHyphenated,
+        eligibilityCheckDataRequest.liabilities.searchCategory,
         eligibilityCheckDataRequest.liabilities.liabilityOccurrenceNumber,
         eligibilityCheckDataRequest.liabilities.liabilityType,
         eligibilityCheckDataRequest.liabilities.earliestLiabilityStartDate,

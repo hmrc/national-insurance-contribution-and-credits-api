@@ -80,7 +80,7 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   private val eligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),
-    contributionsAndCredits = ContributionsAndCredits(
+    niContributionsAndCredits = ContributionsAndCredits(
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)

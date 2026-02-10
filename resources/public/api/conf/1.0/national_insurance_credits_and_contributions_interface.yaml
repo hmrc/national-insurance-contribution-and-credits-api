@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: Benefit Eligibility Info API
+  title: National Insurance Contribution and Credits Interface
   description: |-
     API for retrieving data for a given benefit type that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 0.0.2 Draft
+  version: 0.0.3 Draft
   contact: {}
 servers:
   - url: https://test-api.service.hmrc.gov.uk
@@ -42,7 +42,7 @@ paths:
                 value:
                   benefitType: "BSP"
                   nationalInsuranceNumber: "AB123456C"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1960-01-15"
                     startTaxYear: 2020
                     endTaxYear: 2023
@@ -51,20 +51,19 @@ paths:
                 value:
                   benefitType: "BSP"
                   nationalInsuranceNumber: "CD789012E"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1958-03-22"
                     startTaxYear: 2018
                     endTaxYear: 2024
                   marriageDetails:
                     searchStartYear: 2018
-                    latest: true
-                    sequence: 1
+                    latest: false
               GYSP_minimal_request:
                 summary: GYSP request - Minimal required fields
                 value:
                   benefitType: "GYSP"
                   nationalInsuranceNumber: "GH567890J"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1955-06-20"
                     startTaxYear: 2018
                     endTaxYear: 2023
@@ -76,29 +75,22 @@ paths:
                 value:
                   benefitType: "GYSP"
                   nationalInsuranceNumber: "JK901234L"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1952-11-08"
                     startTaxYear: 2015
                     endTaxYear: 2023
                   benefitCalculation:
                     benefitType: "STATE_PENSION"
                     pensionProcessingArea: "NORTH"
-                  benefitCalculationNotes:
-                    benefitType: "STATE_PENSION"
                   marriageDetails:
                     searchStartYear: 2015
                     latest: false
-                    sequence: 3
-                  schemeMembershipDetails:
-                    schemeMembershipSequenceNumber: 101
-                    schemeMembershipTransferSequenceNumber: 201
-                    schemeMembershipOccurrenceNumber: 301
               ESA_request:
                 summary: ESA request
                 value:
                   benefitType: "ESA"
                   nationalInsuranceNumber: "QR456789S"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1975-09-14"
                     startTaxYear: 2020
                     endTaxYear: 2023
@@ -107,7 +99,7 @@ paths:
                 value:
                   benefitType: "JSA"
                   nationalInsuranceNumber: "AB234567C"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1982-12-03"
                     startTaxYear: 2021
                     endTaxYear: 2023
@@ -116,7 +108,7 @@ paths:
                 value:
                   benefitType: "MA"
                   nationalInsuranceNumber: "KL890123M"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1985-04-18"
                     startTaxYear: 2022
                     endTaxYear: 2023
@@ -127,7 +119,7 @@ paths:
                 value:
                   benefitType: "MA"
                   nationalInsuranceNumber: "NP012345Q"
-                  contributionsAndCredits:
+                  niContributionsAndCredits:
                     dateOfBirth: "1988-07-25"
                     startTaxYear: 2021
                     endTaxYear: 2023
@@ -145,964 +137,17 @@ paths:
 
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/BSPSuccessResponse'
-                  - $ref: '#/components/schemas/GYSPSuccessResponse'
-                  - $ref: '#/components/schemas/ESASuccessResponse'
-                  - $ref: '#/components/schemas/JSASuccessResponse'
-                  - $ref: '#/components/schemas/MASuccessResponse'
-                discriminator:
-                  propertyName: benefitType
-                  mapping:
-                    BSP: '#/components/schemas/BSPSuccessResponse'
-                    GYSP: '#/components/schemas/GYSPSuccessResponse'
-                    ESA: '#/components/schemas/ESASuccessResponse'
-                    JSA: '#/components/schemas/JSASuccessResponse'
-                    MA: '#/components/schemas/MASuccessResponse'
-              examples:
-                BSP_minimal_success:
-                  summary: BSP - Minimal response
-                  value:
-                    correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                    benefitType: "BSP"
-                    nationalInsuranceNumber: "AB123456C"
-                    marriageDetailsResult:
-                      marriageDetails:
-                        activeMarriage: false
-                        marriageDetailsList: [ ]
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: [ ]
-                      class2ContributionAndCredits: [ ]
-
-                BSP_maximal_success:
-                  summary: BSP - Maximal response
-                  value:
-                    correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                    benefitType: "BSP"
-                    nationalInsuranceNumber: "AB123456C"
-                    marriageDetailsResult:
-                      marriageDetails:
-                        activeMarriage: false
-                        marriageDetailsList:
-                          - sequenceNumber: 1
-                            status: "MARRIED"
-                            startDate: "1985-06-15"
-                            startDateStatus: "VERIFIED"
-                            endDate: "2010-03-20"
-                            endDateStatus: "VERIFIED"
-                            spouseIdentifier: "CD789012E"
-                            spouseForename: "Jane"
-                            spouseSurname: "Smith"
-                            separationDate: "2009-01-15"
-                            reconciliationDate: "2009-06-20"
-                          - sequenceNumber: 2
-                            status: "DIVORCED"
-                            startDate: "2012-03-10"
-                            startDateStatus: "VERIFIED"
-                            endDate: "2018-07-25"
-                            endDateStatus: "VERIFIED"
-                            spouseIdentifier: "EF456789G"
-                            spouseForename: "Michael"
-                            spouseSurname: "Johnson"
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 9.5
-                      class1ContributionAndCredits:
-                        - taxYear: 2020
-                          numberOfContributionsAndCredits: 52
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "C1"
-                          primaryContribution: 3000.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 25000.0
-                          creditSource: "EMPLOYMENT SERVICES"
-                          employerName: "ACME"
-                          latePaymentPeriod: "L"
-                        - taxYear: 2021
-                          numberOfContributionsAndCredits: 48
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "C1"
-                          primaryContribution: 2880.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 24000.0
-                          creditSource: "EMPLOYMENT SERVICES"
-                          employerName: "CORP"
-                          latePaymentPeriod: "ZZ"
-                      class2ContributionAndCredits:
-                        - taxYear: 2020
-                          numberOfContributionsAndCredits: 52
-                          contributionCreditType: "C2"
-                          class2Or3EarningsFactor: 1.5
-                          class2NIContributonAmount: 150.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "DIRECT DEBIT"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2022
-                          numberOfContributionsAndCredits: 30
-                          contributionCreditType: "C2"
-                          class2Or3EarningsFactor: 2.1
-                          class2NIContributonAmount: 120.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "QUARTERLY BILLING"
-                          latePaymentPeriod: "L"
-
-                GYSP_minimal_success:
-                  summary: GYSP - Minimal response
-                  value:
-                    correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
-                    benefitType: "GYSP"
-                    nationalInsuranceNumber: "GH567890J"
-                    benefitSchemeDetailsResult: [ ]
-                    marriageDetailsResult:
-                      marriageDetails:
-                        activeMarriage: false
-                        marriageDetailsList: [ ]
-                    longTermBenefitNotesResult:
-                      longTermBenefitNotes: [ ]
-                    schemeMembershipDetailsResult:
-                      schemeMembershipDetailsSummaryList: [ ]
-                    individualStatePensionInfoResult:
-                      identifier: "GH567890J"
-                      numberOfQualifyingYears: 0
-                      contributionsByTaxYear: [ ]
-                    niContributionsAndCreditsResult: [ ]
-
-                GYSP_maximal_success:
-                  summary: GYSP - Maximal response
-                  value:
-                    correlationId: "fedcba98-7654-3210-fedc-ba9876543210"
-                    benefitType: "GYSP"
-                    nationalInsuranceNumber: "GH567890J"
-                    benefitSchemeDetailsResult:
-                      - benefitSchemeDetails:
-                          schemeName: "Graduated Retirement Benefit Scheme"
-                          schemeStartDate: "1990-04-06"
-                          schemeContractedOutNumberDetails: "S2123456B"
-                          schemeInhibitionStatus: "Non-Stakeholder Pension"
-                          currentOptimisticLock: 1
-                        schemeAddressDetailsList:
-                          - schemeAddressSequenceNumber: 1
-                            schemeContractedOutNumberDetails: "S2123456B"
-                            schemeAddressType: "GENERAL CORRESPONDENCE"
-                            benefitSchemeAddressDetails:
-                              schemeAddressLine1: "22 Church Mews"
-                              schemeAddressLine2: "East Benton Rise"
-                              schemeAddressLocality: "Gosforth"
-                              schemeAddressPostalTown: "Newcastle"
-                              schemePostcode: "NE7 7DN"
-                    marriageDetailsResult:
-                      marriageDetails:
-                        activeMarriage: true
-                        marriageDetailsList:
-                          - sequenceNumber: 1
-                            status: "MARRIED"
-                            startDate: "1980-08-12"
-                            startDateStatus: "VERIFIED"
-                            endDate: "2005-11-30"
-                            endDateStatus: "VERIFIED"
-                            spouseIdentifier: "EF345678G"
-                            spouseForename: "Robert"
-                            spouseSurname: "Johnson"
-                            separationDate: "2004-03-15"
-                            reconciliationDate: "2004-09-20"
-                          - sequenceNumber: 2
-                            status: "MARRIED"
-                            startDate: "2007-06-22"
-                            startDateStatus: "VERIFIED"
-                            spouseIdentifier: "HI678901K"
-                            spouseForename: "Sarah"
-                            spouseSurname: "Williams"
-                    longTermBenefitNotesResult:
-                      longTermBenefitNotes:
-                        - "Pension credit awarded for caring responsibilities"
-                        - "Additional credit for unemployment period"
-                        - "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025"
-                        - "Widow's Benefit Award WIDOWED recorded on this account between 07/04/2018 and 07/04/2020"
-                    schemeMembershipDetailsResult:
-                      schemeMembershipDetailsSummaryList:
-                        - stakeholderPensionSchemeType: "Non-Stakeholder Pension"
-                          schemeMembershipDetails:
-                            nationalInsuranceNumber: "GH567890"
-                            schemeMembershipSequenceNumber: 1
-                            schemeMembershipStartDate: "1990-04-06"
-                            schemeMembershipEndDate: "2010-04-05"
-                            methodOfPreservationType: "TRANSFER FROM COSR TO COSR (3)"
-                            totalLinkedGuaranteedMinimumPensionContractedOutDeductions: 156.0
-                            accruedPensionContractedOutDeductionsValue: 156.0
-                            totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988: 156.0
-                            accruedPensionContractedOutDeductionsValuePost1988: 156.0
-                            revaluationRate: "LIMITED"
-                            guaranteedMinimumPensionReconciliationStatus: "RECONCILIATION ACTION NOT TAKEN"
-                            employeesReference: "EMP/123/ABC"
-                            finalYearEarnings: 1733.0
-                            penultimateYearEarnings: 1650.0
-                            retrospectiveEarnings: 0.0
-                            furtherPaymentsConfirmation: "FURTHER PAYMENT ALLOWED"
-                            survivorStatus: "NOT APPLICABLE"
-                            transferPremiumElectionDate: "2010-03-15"
-                            revaluationApplied: false
-                            stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
-                            stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
-                            apparentUnnotifiedTerminationStatus: "No Apparent Unnotified Termination"
-                            terminationMicrofilmNumber: 44012399
-                            debitVoucherMicrofilmNumber: 40599123
-                            creationMicrofilmNumber: 40599124
-                            inhibitSchemeProcessing: false
-                            extensionDate: "2011-04-05"
-                            guaranteedMinimumPensionContractedOutDeductionsRevalued: 165.0
-                            clericalCalculationInvolved: "NO CLERICAL CALCULATION INVOLVED"
-                            clericallyControlledTotal: 0.0
-                            clericallyControlledTotalPost1988: 0.0
-                            certifiedAmount: 50.0
-                            enforcementStatus: "NOT ENFORCED"
-                            stateSchemePremiumDeemed: "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED"
-                            transferTakeUpDate: "1990-04-06"
-                            schemeMembershipOccurrenceNumber: 4
-                            schemeMembershipTransferSequenceNumber: 2
-                            contributionCategoryFinalYear: "A"
-                            contributionCategoryPenultimateYear: "A"
-                            contributionCategoryRetrospectiveYear: "B"
-                            protectedRightsStartDate: "1988-04-06"
-                            schemeMembershipDebitReason: "NOT APPLICABLE"
-                            technicalAmount: 25.0
-                            minimumFundTransferAmount: 100.0
-                            actualTransferValue: 1500.0
-                            schemeSuspensionType: "NO SUSPENSION"
-                            guaranteedMinimumPensionConversionApplied: true
-                            employersContractedOutNumberDetails: "E3022666E"
-                            schemeCreatingContractedOutNumberDetails: "A7123456Q"
-                            schemeTerminatingContractedOutNumberDetails: "S4002629K"
-                            importingAppropriateSchemeNumberDetails: "S4200091P"
-                            apparentUnnotifiedTerminationDestinationDetails: "S2123456B"
-                        - stakeholderPensionSchemeType: "Stakeholder Pension"
-                          schemeMembershipDetails:
-                            nationalInsuranceNumber: "GH567890"
-                            schemeMembershipSequenceNumber: 2
-                            schemeMembershipStartDate: "2010-04-06"
-                            furtherPaymentsConfirmation: "FURTHER PAYMENT ALLOWED"
-                            survivorStatus: "NOT APPLICABLE"
-                            revaluationApplied: false
-                            stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
-                            stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
-                            apparentUnnotifiedTerminationStatus: "No Apparent Unnotified Termination"
-                            inhibitSchemeProcessing: false
-                            clericalCalculationInvolved: "NO CLERICAL CALCULATION INVOLVED"
-                            clericallyControlledTotal: 0.0
-                            clericallyControlledTotalPost1988: 0.0
-                            enforcementStatus: "NOT ENFORCED"
-                            stateSchemePremiumDeemed: "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED"
-                            schemeMembershipOccurrenceNumber: 9
-                            schemeMembershipTransferSequenceNumber: 2
-                            employersContractedOutNumberDetails: "E3900000M"
-                            schemeTerminatingContractedOutNumberDetails: "S4200091P"
-                      callback:
-                        callbackURL: "/benefit-scheme/GH567890/scheme-membership-details?seqNo=1&occurrenceNo=4&transferSeqNo=2"
-                    individualStatePensionInfoResult:
-                      identifier: AA000001A
-                      numberOfQualifyingYears: 50
-                      nonQualifyingYears: 0
-                      yearsToFinalRelevantYear: 0
-                      nonQualifyingYearsPayable: 0
-                      pre1975CCCount: 0
-                      dateOfEntry: 1975-07-18
-                      contributionsByTaxYear:
-                        - taxYear: 1975
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 19.26
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 350.91
-                          otherCredits:
-                            - contributionCreditType: CLASS 3 CREDIT
-                              creditSourceType: NOT KNOWN
-                              contributionCreditCount: 50
-                        - taxYear: 1976
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 79.16
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 1377.39
-                          otherCredits:
-                            - contributionCreditType: CLASS 3 CREDIT
-                              creditSourceType: NOT KNOWN
-                              contributionCreditCount: 50
-                        - taxYear: 1977
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 153.21
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 2666.09
-                        - taxYear: 1978
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 299.4
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 4606.15
-                        - taxYear: 1979
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 249.92
-                          coClassOnePaid: 186.46
-                          coPrimaryPaidEarnings: 4665.0
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 5641.93
-                        - taxYear: 1980
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 246.18
-                          coClassOnePaid: 165.42
-                          coPrimaryPaidEarnings: 3894.12
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 5091.15
-                        - taxYear: 1981
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 85.57
-                          coClassOnePaid: 56.27
-                          coPrimaryPaidEarnings: 1072.38
-                          niEarningsSelfEmployed: 40
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 1450.44
-                        - taxYear: 1982
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 536.4
-                          coClassOnePaid: 415.14
-                          coPrimaryPaidEarnings: 6643.2
-                          niEarningsSelfEmployed: 4
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 8029.49
-                        - taxYear: 1983
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 685.3
-                          coClassOnePaid: 539.66
-                          coPrimaryPaidEarnings: 7880.29
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 9499.18
-                        - taxYear: 1984
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 836.68
-                          coClassOnePaid: 677.56
-                          coPrimaryPaidEarnings: 9891.97
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 11660.86
-                        - taxYear: 1985
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 701.43
-                          coClassOnePaid: 535.35
-                          coPrimaryPaidEarnings: 7815.33
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 9979.85
-                        - taxYear: 1986
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 872.97
-                          coClassOnePaid: 335.92
-                          coPrimaryPaidEarnings: 4903.94
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 12426.81
-                        - taxYear: 1987
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1301.4
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 14459.0
-                        - taxYear: 1988
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1213.15
-                          coClassOnePaid: 377.94
-                          coPrimaryPaidEarnings: 5399.0
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 14678.0
-                        - taxYear: 1989
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1106.22
-                          coClassOnePaid: 981.09
-                          coPrimaryPaidEarnings: 14015.0
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 16208.0
-                        - taxYear: 1990
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1128.91
-                          coClassOnePaid: 994.87
-                          coPrimaryPaidEarnings: 14212.0
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 17603.0
-                        - taxYear: 1991
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1460.16
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 18304.0
-                        - taxYear: 1992
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1452.88
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 18304.0
-                        - taxYear: 1993
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1445.6
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 18304.0
-                        - taxYear: 1994
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1595.88
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 18304.0
-                        - taxYear: 1995
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1800.83
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 20441.0
-                        - taxYear: 1996
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1821.99
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 20757.0
-                        - taxYear: 1997
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2160.08
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 24180.0
-                        - taxYear: 1998
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2255.76
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 25220.0
-                        - taxYear: 1999
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2256.8
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 26000.0
-                        - taxYear: 2000
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1798.0
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 21000.0
-                        - taxYear: 2001
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1097.35
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 15385.0
-                        - taxYear: 2002
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1237.05
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 16973.0
-                        - taxYear: 2003
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1226.6
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 14700.0
-                        - taxYear: 2004
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1504.36
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 18392.0
-                        - taxYear: 2005
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 937.55
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 12758.0
-                          otherCredits:
-                            - contributionCreditType: CLASS 1 CREDIT
-                              creditSourceType: JSA TAPE INPUT
-                              contributionCreditCount: 3
-                        - taxYear: 2006
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 655.26
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 9619.0
-                          otherCredits:
-                            - contributionCreditType: CLASS 1 CREDIT
-                              creditSourceType: JSA TAPE INPUT
-                              contributionCreditCount: 11
-                        - taxYear: 2007
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 830.72
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 12315.0
-                        - taxYear: 2008
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1229.8
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 16592.0
-                        - taxYear: 2009
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1078.88
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 15496.0
-                        - taxYear: 2010
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1478.4
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 19128.0
-                        - taxYear: 2011
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 369.98
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 6754.0
-                        - taxYear: 2012
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1488.88
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 19994.0
-                        - taxYear: 2013
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1927.74
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 23825.57
-                        - taxYear: 2014
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2056.97
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 25097.58
-                        - taxYear: 2015
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 3581.9
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 37668.89
-                        - taxYear: 2016
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 3366.29
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 36065.92
-                        - taxYear: 2017
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 4082.54
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 41810.62
-                        - taxYear: 2018
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2568.29
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 29826.46
-                        - taxYear: 2019
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1322.33
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 19442.84
-                        - taxYear: 2020
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2631.95
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 31592.0
-                        - taxYear: 2021
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2710.82
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 32042.0
-                        - taxYear: 2022
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2812.48
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 34249.0
-                        - taxYear: 2023
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 2688.36
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 35787.0
-                        - taxYear: 2024
-                          qualifyingTaxYear: true
-                          payableAccepted: false
-                          totalPrimaryContributions: 1947.32
-                          underInvestigationFlag: false
-                          totalPrimaryPaidEarnings: 36888.0
-                    niContributionsAndCreditsResult:
-                      - totalGraduatedPensionUnits: 15.5
-                        class1ContributionAndCredits:
-                          - taxYear: 2019
-                            numberOfContributionsAndCredits: 52
-                            contributionCategoryLetter: "A"
-                            contributionCategory: "STANDARD RATE"
-                            contributionCreditType: "C1"
-                            primaryContribution: 2850.0
-                            class1ContributionStatus: "VALID"
-                            primaryPaidEarnings: 32000.0
-                            creditSource: "EMPLOYMENT SERVICES"
-                            employerName: "ACME"
-                            latePaymentPeriod: "L"
-                          - taxYear: 2020
-                            numberOfContributionsAndCredits: 52
-                            contributionCategoryLetter: "A"
-                            contributionCategory: "STANDARD RATE"
-                            contributionCreditType: "C1"
-                            primaryContribution: 2700.0
-                            class1ContributionStatus: "VALID"
-                            primaryPaidEarnings: 30000.0
-                            creditSource: "EMPLOYMENT SERVICES"
-                            employerName: "Global"
-                            latePaymentPeriod: "L"
-                        class2ContributionAndCredits:
-                          - taxYear: 2019
-                            numberOfContributionsAndCredits: 26
-                            contributionCreditType: "C2"
-                            class2Or3EarningsFactor: 3250.0
-                            class2NIContributonAmount: 81.9
-                            class2Or3CreditStatus: "VALID"
-                            creditSource: "DIRECT DEBIT"
-                            latePaymentPeriod: "L"
-                          - taxYear: 2021
-                            numberOfContributionsAndCredits: 40
-                            contributionCreditType: "C2"
-                            class2Or3EarningsFactor: 4000.0
-                            class2NIContributonAmount: 100.0
-                            class2Or3CreditStatus: "VALID"
-                            creditSource: "QUARTERLY BILLING"
-                            latePaymentPeriod: "ZZ"
-
-                ESA_minimal_success:
-                  summary: ESA - Minimal response
-                  value:
-                    correlationId: "22222222-3333-4444-5555-666666666666"
-                    benefitType: "ESA"
-                    nationalInsuranceNumber: "QR456789S"
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: [ ]
-                      class2ContributionAndCredits: [ ]
-
-                ESA_maximal_success:
-                  summary: ESA - Maximal response
-                  value:
-                    correlationId: "22222222-3333-4444-5555-666666666666"
-                    benefitType: "ESA"
-                    nationalInsuranceNumber: "QR456789S"
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 2.5
-                      class1ContributionAndCredits:
-                        - taxYear: 2021
-                          numberOfContributionsAndCredits: 39
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "2A"
-                          primaryContribution: 1800.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 15000.0
-                          creditSource: "EMPLOYMENT AND SUPPORT"
-                          employerName: "Widget"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2022
-                          numberOfContributionsAndCredits: 26
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "2A"
-                          primaryContribution: 2160.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 18000.0
-                          creditSource: "EMPLOYMENT AND SUPPORT"
-                          employerName: "Widget"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2020
-                          numberOfContributionsAndCredits: 20
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "CR1"
-                          primaryContribution: 0.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 0.0
-                          creditSource: "EMPLOYMENT AND SUPPORT"
-                          employerName: ""
-                          latePaymentPeriod: "ZZ"
-                      class2ContributionAndCredits:
-                        - taxYear: 2023
-                          numberOfContributionsAndCredits: 20
-                          contributionCreditType: "2A"
-                          class2Or3EarningsFactor: 1.3
-                          class2NIContributonAmount: 52.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "EMPLOYMENT AND SUPPORT"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2021
-                          numberOfContributionsAndCredits: 15
-                          contributionCreditType: "2A"
-                          class2Or3EarningsFactor: 0.8
-                          class2NIContributonAmount: 30.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "EMPLOYMENT AND SUPPORT"
-                          latePaymentPeriod: "L"
-
-                JSA_minimal_success:
-                  summary: JSA - Minimal response
-                  value:
-                    correlationId: "44444444-5555-6666-7777-888888888888"
-                    benefitType: "JSA"
-                    nationalInsuranceNumber: "AB234567C"
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: [ ]
-                      class2ContributionAndCredits: [ ]
-
-                JSA_maximal_success:
-                  summary: JSA - Maximal response
-                  value:
-                    correlationId: "44444444-5555-6666-7777-888888888888"
-                    benefitType: "JSA"
-                    nationalInsuranceNumber: "AB234567C"
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 1.2
-                      class1ContributionAndCredits:
-                        - taxYear: 2019
-                          numberOfContributionsAndCredits: 15
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "2B"
-                          primaryContribution: 1200.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 10000.0
-                          creditSource: "JSA TAPE INPUT"
-                          employerName: "Temp"
-                          latePaymentPeriod: "L"
-                        - taxYear: 2021
-                          numberOfContributionsAndCredits: 20
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "2B"
-                          primaryContribution: 1440.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 12000.0
-                          creditSource: "JSA TAPE INPUT"
-                          employerName: "Temp"
-                          latePaymentPeriod: "L"
-                        - taxYear: 2020
-                          numberOfContributionsAndCredits: 30
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "CR1"
-                          primaryContribution: 0.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 0.0
-                          creditSource: "JSA TAPE INPUT"
-                          employerName: ""
-                          latePaymentPeriod: "ZZ"
-                      class2ContributionAndCredits:
-                        - taxYear: 2022
-                          numberOfContributionsAndCredits: 30
-                          contributionCreditType: "2B"
-                          class2Or3EarningsFactor: 1.1
-                          class2NIContributonAmount: 44.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "JSA TAPE INPUT"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2023
-                          numberOfContributionsAndCredits: 25
-                          contributionCreditType: "2B"
-                          class2Or3EarningsFactor: 0.9
-                          class2NIContributonAmount: 36.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "JSA PAPER INPUT"
-                          latePaymentPeriod: "L"
-
-                MA_minimal_success:
-                  summary: MA - Minimal response
-                  value:
-                    correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
-                    benefitType: "MA"
-                    nationalInsuranceNumber: "KL890123M"
-                    class2MAReceiptsResult:
-                      identifier: "KL890123M"
-                      class2MAReceiptDetails: [ ]
-                    liabilitySummaryDetailsResult:
-                      liabilityDetailsList: [ ]
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 0
-                      class1ContributionAndCredits: [ ]
-                      class2ContributionAndCredits: [ ]
-
-                MA_maximal_success:
-                  summary: MA - Maximal response
-                  value:
-                    correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
-                    benefitType: "MA"
-                    nationalInsuranceNumber: "KL890123M"
-                    class2MAReceiptsResult:
-                      identifier: "KL890123M"
-                      class2MAReceiptDetails:
-                        - initials: "KL"
-                          surname: "Smith"
-                          receivablePeriodStartDate: "2022-04-06"
-                          receivablePeriodEndDate: "2022-07-05"
-                          receivablePayment: 156.0
-                          receiptDate: "2022-07-05"
-                          liabilityStartDate: "2022-04-06"
-                          liabilityEndDate: "2022-07-05"
-                          billAmount: 156.0
-                          billScheduleNumber: 2001
-                          isClosedRecord: true
-                          weeksPaid: 13
-                        - initials: "KL"
-                          surname: "Smith"
-                          receivablePeriodStartDate: "2023-01-01"
-                          receivablePeriodEndDate: "2023-03-31"
-                          receivablePayment: 145.0
-                          receiptDate: "2023-03-31"
-                          liabilityStartDate: "2023-01-01"
-                          liabilityEndDate: "2023-03-31"
-                          billAmount: 145.0
-                          billScheduleNumber: 2002
-                          isClosedRecord: false
-                          weeksPaid: 13
-                        - initials: "KL"
-                          surname: "Smith"
-                          receivablePeriodStartDate: "2021-10-01"
-                          receivablePeriodEndDate: "2021-12-31"
-                          receivablePayment: 130.0
-                          receiptDate: "2021-12-31"
-                          liabilityStartDate: "2021-10-01"
-                          liabilityEndDate: "2021-12-31"
-                          billAmount: 130.0
-                          billScheduleNumber: 1999
-                          isClosedRecord: true
-                          weeksPaid: 13
-                    liabilitySummaryDetailsResult:
-                      liabilityDetailsList:
-                        - identifier: "KL890123M"
-                          type: "CLASS 2 MATERNITY ALLOWANCE"
-                          occurrenceNumber: 1
-                          startDateStatus: "START DATE HELD"
-                          endDateStatus: "END DATE HELD"
-                          startDate: "2021-01-01"
-                          endDate: "2021-12-31"
-                          country: "ENGLAND"
-                          trainingCreditApprovalStatus: "NO CREDIT FOR APPROVED TRAINING"
-                          casepaperReferenceNumber: "SCH/123/4"
-                          homeResponsibilitiesProtectionBenefitReference: "12345678AB"
-                          homeResponsibilitiesProtectionRate: 10.56
-                          lostCardNotificationReason: "NOT APPLICABLE"
-                          lostCardRulingReason: "NOT APPLICABLE"
-                          homeResponsibilityProtectionCalculationYear: 2022
-                          awardAmount: 150.0
-                          resourceGroupIdentifier: 789
-                          homeResponsibilitiesProtectionIndicator: "(NONE)"
-                          officeDetails:
-                            officeLocationDecode: 1
-                            officeLocationValue: "HQ STATIONARY STORE"
-                            officeIdentifier: "NOT APPLICABLE"
-                        - identifier: "KL890123M"
-                          type: "CLASS 2 MATERNITY ALLOWANCE"
-                          occurrenceNumber: 2
-                          startDateStatus: "START DATE HELD"
-                          endDateStatus: "END DATE HELD"
-                          startDate: "2022-01-01"
-                          endDate: "2022-12-31"
-                          resourceGroupIdentifier: 789
-                        - identifier: "KL890123M"
-                          type: "CLASS 2 MATERNITY ALLOWANCE"
-                          occurrenceNumber: 3
-                          startDateStatus: "START DATE HELD"
-                          endDateStatus: "END DATE NOT HELD"
-                          startDate: "2023-01-01"
-                          resourceGroupIdentifier: 789
-                      callback:
-                        callbackURL: "/liability-summary/KL890123M/details?occurrenceNo=3"
-                    niContributionsAndCreditsResult:
-                      totalGraduatedPensionUnits: 3.8
-                      class1ContributionAndCredits:
-                        - taxYear: 2021
-                          numberOfContributionsAndCredits: 39
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "MAR"
-                          primaryContribution: 2400.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 20000.0
-                          creditSource: "STATUTORY MATERNITY PAY CREDIT"
-                          employerName: "Corp"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2022
-                          numberOfContributionsAndCredits: 39
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "MAR"
-                          primaryContribution: 2640.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 22000.0
-                          creditSource: "STATUTORY MATERNITY PAY CREDIT"
-                          employerName: "Corp"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2020
-                          numberOfContributionsAndCredits: 30
-                          contributionCategoryLetter: "A"
-                          contributionCategory: "STANDARD RATE"
-                          contributionCreditType: "C1"
-                          primaryContribution: 2100.0
-                          class1ContributionStatus: "VALID"
-                          primaryPaidEarnings: 17500.0
-                          creditSource: "EMPLOYMENT SERVICES"
-                          employerName: "Global"
-                          latePaymentPeriod: "L"
-                      class2ContributionAndCredits:
-                        - taxYear: 2023
-                          numberOfContributionsAndCredits: 26
-                          contributionCreditType: "MAR"
-                          class2Or3EarningsFactor: 1040.0
-                          class2NIContributonAmount: 104.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "STATUTORY MATERNITY PAY CREDIT"
-                          latePaymentPeriod: "ZZ"
-                        - taxYear: 2021
-                          numberOfContributionsAndCredits: 20
-                          contributionCreditType: "C2"
-                          class2Or3EarningsFactor: 800.0
-                          class2NIContributonAmount: 80.0
-                          class2Or3CreditStatus: "VALID"
-                          creditSource: "DIRECT DEBIT"
-                          latePaymentPeriod: "L"
-
-                      '400':
-                        $ref: '#/components/responses/BadRequest'
-                      '403':
-                        $ref: '#/components/responses/Forbidden'
-                      '422':
-                        $ref: '#/components/responses/UnprocessableEntity'
-                      '500':
-                        $ref: '#/components/responses/InternalServerError'
-                      '502':
-                        $ref: '#/components/responses/PartialFailure'
+          $ref: '#/components/responses/BenefitEligibilityInfoSuccessResponse'      
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/DownstreamFailure'
 
 components:
   parameters:
@@ -1130,8 +175,949 @@ components:
       schema:
         $ref: "#/components/schemas/Accept"
   responses:
+    BenefitEligibilityInfoSuccessResponse:
+      description: Successful response
+      headers:
+        correlationId:
+          $ref: "#/components/schemas/correlationId"
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/BSPSuccessResponse'
+              - $ref: '#/components/schemas/GYSPSuccessResponse'
+              - $ref: '#/components/schemas/ESASuccessResponse'
+              - $ref: '#/components/schemas/JSASuccessResponse'
+              - $ref: '#/components/schemas/MASuccessResponse'
+            discriminator:
+              propertyName: benefitType
+              mapping:
+                BSP: '#/components/schemas/BSPSuccessResponse'
+                GYSP: '#/components/schemas/GYSPSuccessResponse'
+                ESA: '#/components/schemas/ESASuccessResponse'
+                JSA: '#/components/schemas/JSASuccessResponse'
+                MA: '#/components/schemas/MASuccessResponse'
+          examples:
+            BSP_minimal_success:
+              summary: BSP - Minimal response
+              value:
+                benefitType: "BSP"
+                nationalInsuranceNumber: "AB123456C"
+                marriageDetailsResult:
+                  marriageDetails:
+                    activeMarriage: false
+                    marriageDetailsList: [ ]
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 0
+                  class1ContributionAndCredits: [ ]
+                  class2ContributionAndCredits: [ ]
+
+            BSP_maximal_success:
+              summary: BSP - Maximal response
+              value:
+                benefitType: "BSP"
+                nationalInsuranceNumber: "AB123456C"
+                marriageDetailsResult:
+                  marriageDetails:
+                    activeMarriage: false
+                    marriageDetailsList:
+                      - sequenceNumber: 1
+                        status: "MARRIED"
+                        startDate: "1985-06-15"
+                        startDateStatus: "VERIFIED"
+                        endDate: "2010-03-20"
+                        endDateStatus: "VERIFIED"
+                        spouseIdentifier: "CD789012E"
+                        spouseForename: "Jane"
+                        spouseSurname: "Smith"
+                        separationDate: "2009-01-15"
+                        reconciliationDate: "2009-06-20"
+                      - sequenceNumber: 2
+                        status: "DIVORCED"
+                        startDate: "2012-03-10"
+                        startDateStatus: "VERIFIED"
+                        endDate: "2018-07-25"
+                        endDateStatus: "VERIFIED"
+                        spouseIdentifier: "EF456789G"
+                        spouseForename: "Michael"
+                        spouseSurname: "Johnson"
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 9.5
+                  class1ContributionAndCredits:
+                    - taxYear: 2020
+                      numberOfContributionsAndCredits: 52
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "C1"
+                      primaryContribution: 3000.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 25000.0
+                      creditSource: "EMPLOYMENT SERVICES"
+                      employerName: "ACME"
+                      latePaymentPeriod: "L"
+                    - taxYear: 2021
+                      numberOfContributionsAndCredits: 48
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "C1"
+                      primaryContribution: 2880.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 24000.0
+                      creditSource: "EMPLOYMENT SERVICES"
+                      employerName: "CORP"
+                      latePaymentPeriod: "ZZ"
+                  class2ContributionAndCredits:
+                    - taxYear: 2020
+                      numberOfContributionsAndCredits: 52
+                      contributionCreditType: "C2"
+                      class2Or3EarningsFactor: 1.5
+                      class2NIContributonAmount: 150.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "DIRECT DEBIT"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2022
+                      numberOfContributionsAndCredits: 30
+                      contributionCreditType: "C2"
+                      class2Or3EarningsFactor: 2.1
+                      class2NIContributonAmount: 120.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "QUARTERLY BILLING"
+                      latePaymentPeriod: "L"
+
+            GYSP_minimal_success:
+              summary: GYSP - Minimal response
+              value:
+                benefitType: "GYSP"
+                nationalInsuranceNumber: "GH567890J"
+                benefitSchemeDetailsResult: [ ]
+                marriageDetailsResult:
+                  marriageDetails:
+                    activeMarriage: false
+                    marriageDetailsList: [ ]
+                longTermBenefitNotesResult:
+                  longTermBenefitNotes: [ ]
+                schemeMembershipDetailsResult:
+                  schemeMembershipDetailsSummaryList: [ ]
+                individualStatePensionInfoResult:
+                  identifier: "GH567890J"
+                  numberOfQualifyingYears: 0
+                  contributionsByTaxYear: [ ]
+                niContributionsAndCreditsResult: [ ]
+
+            GYSP_maximal_success:
+              summary: GYSP - Maximal response
+              value:
+                benefitType: "GYSP"
+                nationalInsuranceNumber: "GH567890J"
+                benefitSchemeDetailsResult:
+                  - benefitSchemeDetails:
+                      schemeName: "Graduated Retirement Benefit Scheme"
+                      schemeStartDate: "1990-04-06"
+                      schemeContractedOutNumberDetails: "S2123456B"
+                      schemeInhibitionStatus: "Non-Stakeholder Pension"
+                      currentOptimisticLock: 1
+                    schemeAddressDetailsList:
+                      - schemeAddressSequenceNumber: 1
+                        schemeContractedOutNumberDetails: "S2123456B"
+                        schemeAddressType: "GENERAL CORRESPONDENCE"
+                        benefitSchemeAddressDetails:
+                          schemeAddressLine1: "22 Church Mews"
+                          schemeAddressLine2: "East Benton Rise"
+                          schemeAddressLocality: "Gosforth"
+                          schemeAddressPostalTown: "Newcastle"
+                          schemePostcode: "NE7 7DN"
+                marriageDetailsResult:
+                  marriageDetails:
+                    activeMarriage: true
+                    marriageDetailsList:
+                      - sequenceNumber: 1
+                        status: "MARRIED"
+                        startDate: "1980-08-12"
+                        startDateStatus: "VERIFIED"
+                        endDate: "2005-11-30"
+                        endDateStatus: "VERIFIED"
+                        spouseIdentifier: "EF345678G"
+                        spouseForename: "Robert"
+                        spouseSurname: "Johnson"
+                        separationDate: "2004-03-15"
+                        reconciliationDate: "2004-09-20"
+                      - sequenceNumber: 2
+                        status: "MARRIED"
+                        startDate: "2007-06-22"
+                        startDateStatus: "VERIFIED"
+                        spouseIdentifier: "HI678901K"
+                        spouseForename: "Sarah"
+                        spouseSurname: "Williams"
+                longTermBenefitNotesResult:
+                  longTermBenefitNotes:
+                    - "Pension credit awarded for caring responsibilities"
+                    - "Additional credit for unemployment period"
+                    - "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025"
+                    - "Widow's Benefit Award WIDOWED recorded on this account between 07/04/2018 and 07/04/2020"
+                schemeMembershipDetailsResult:
+                  schemeMembershipDetailsSummaryList:
+                    - stakeholderPensionSchemeType: "Non-Stakeholder Pension"
+                      schemeMembershipDetails:
+                        nationalInsuranceNumber: "GH567890"
+                        schemeMembershipSequenceNumber: 1
+                        schemeMembershipStartDate: "1990-04-06"
+                        schemeMembershipEndDate: "2010-04-05"
+                        methodOfPreservationType: "TRANSFER FROM COSR TO COSR (3)"
+                        totalLinkedGuaranteedMinimumPensionContractedOutDeductions: 156.0
+                        accruedPensionContractedOutDeductionsValue: 156.0
+                        totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988: 156.0
+                        accruedPensionContractedOutDeductionsValuePost1988: 156.0
+                        revaluationRate: "LIMITED"
+                        guaranteedMinimumPensionReconciliationStatus: "RECONCILIATION ACTION NOT TAKEN"
+                        employeesReference: "EMP/123/ABC"
+                        finalYearEarnings: 1733.0
+                        penultimateYearEarnings: 1650.0
+                        retrospectiveEarnings: 0.0
+                        furtherPaymentsConfirmation: "FURTHER PAYMENT ALLOWED"
+                        survivorStatus: "NOT APPLICABLE"
+                        transferPremiumElectionDate: "2010-03-15"
+                        revaluationApplied: false
+                        stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
+                        stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
+                        apparentUnnotifiedTerminationStatus: "No Apparent Unnotified Termination"
+                        terminationMicrofilmNumber: 44012399
+                        debitVoucherMicrofilmNumber: 40599123
+                        creationMicrofilmNumber: 40599124
+                        inhibitSchemeProcessing: false
+                        extensionDate: "2011-04-05"
+                        guaranteedMinimumPensionContractedOutDeductionsRevalued: 165.0
+                        clericalCalculationInvolved: "NO CLERICAL CALCULATION INVOLVED"
+                        clericallyControlledTotal: 0.0
+                        clericallyControlledTotalPost1988: 0.0
+                        certifiedAmount: 50.0
+                        enforcementStatus: "NOT ENFORCED"
+                        stateSchemePremiumDeemed: "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED"
+                        transferTakeUpDate: "1990-04-06"
+                        schemeMembershipOccurrenceNumber: 4
+                        schemeMembershipTransferSequenceNumber: 2
+                        contributionCategoryFinalYear: "A"
+                        contributionCategoryPenultimateYear: "A"
+                        contributionCategoryRetrospectiveYear: "B"
+                        protectedRightsStartDate: "1988-04-06"
+                        schemeMembershipDebitReason: "NOT APPLICABLE"
+                        technicalAmount: 25.0
+                        minimumFundTransferAmount: 100.0
+                        actualTransferValue: 1500.0
+                        schemeSuspensionType: "NO SUSPENSION"
+                        guaranteedMinimumPensionConversionApplied: true
+                        employersContractedOutNumberDetails: "E3022666E"
+                        schemeCreatingContractedOutNumberDetails: "A7123456Q"
+                        schemeTerminatingContractedOutNumberDetails: "S4002629K"
+                        importingAppropriateSchemeNumberDetails: "S4200091P"
+                        apparentUnnotifiedTerminationDestinationDetails: "S2123456B"
+                    - stakeholderPensionSchemeType: "Stakeholder Pension"
+                      schemeMembershipDetails:
+                        nationalInsuranceNumber: "GH567890"
+                        schemeMembershipSequenceNumber: 2
+                        schemeMembershipStartDate: "2010-04-06"
+                        furtherPaymentsConfirmation: "FURTHER PAYMENT ALLOWED"
+                        survivorStatus: "NOT APPLICABLE"
+                        revaluationApplied: false
+                        stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
+                        stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
+                        apparentUnnotifiedTerminationStatus: "No Apparent Unnotified Termination"
+                        inhibitSchemeProcessing: false
+                        clericalCalculationInvolved: "NO CLERICAL CALCULATION INVOLVED"
+                        clericallyControlledTotal: 0.0
+                        clericallyControlledTotalPost1988: 0.0
+                        enforcementStatus: "NOT ENFORCED"
+                        stateSchemePremiumDeemed: "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED"
+                        schemeMembershipOccurrenceNumber: 9
+                        schemeMembershipTransferSequenceNumber: 2
+                        employersContractedOutNumberDetails: "E3900000M"
+                        schemeTerminatingContractedOutNumberDetails: "S4200091P"
+                individualStatePensionInfoResult:
+                  identifier: AA000001A
+                  numberOfQualifyingYears: 50
+                  nonQualifyingYears: 0
+                  yearsToFinalRelevantYear: 0
+                  nonQualifyingYearsPayable: 0
+                  pre1975CCCount: 0
+                  dateOfEntry: 1975-07-18
+                  contributionsByTaxYear:
+                    - taxYear: 1975
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 19.26
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 350.91
+                      otherCredits:
+                        - contributionCreditType: CLASS 3 CREDIT
+                          creditSourceType: NOT KNOWN
+                          contributionCreditCount: 50
+                    - taxYear: 1976
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 79.16
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 1377.39
+                      otherCredits:
+                        - contributionCreditType: CLASS 3 CREDIT
+                          creditSourceType: NOT KNOWN
+                          contributionCreditCount: 50
+                    - taxYear: 1977
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 153.21
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 2666.09
+                    - taxYear: 1978
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 299.4
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 4606.15
+                    - taxYear: 1979
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 249.92
+                      coClassOnePaid: 186.46
+                      coPrimaryPaidEarnings: 4665.0
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 5641.93
+                    - taxYear: 1980
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 246.18
+                      coClassOnePaid: 165.42
+                      coPrimaryPaidEarnings: 3894.12
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 5091.15
+                    - taxYear: 1981
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 85.57
+                      coClassOnePaid: 56.27
+                      coPrimaryPaidEarnings: 1072.38
+                      niEarningsSelfEmployed: 40
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 1450.44
+                    - taxYear: 1982
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 536.4
+                      coClassOnePaid: 415.14
+                      coPrimaryPaidEarnings: 6643.2
+                      niEarningsSelfEmployed: 4
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 8029.49
+                    - taxYear: 1983
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 685.3
+                      coClassOnePaid: 539.66
+                      coPrimaryPaidEarnings: 7880.29
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 9499.18
+                    - taxYear: 1984
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 836.68
+                      coClassOnePaid: 677.56
+                      coPrimaryPaidEarnings: 9891.97
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 11660.86
+                    - taxYear: 1985
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 701.43
+                      coClassOnePaid: 535.35
+                      coPrimaryPaidEarnings: 7815.33
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 9979.85
+                    - taxYear: 1986
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 872.97
+                      coClassOnePaid: 335.92
+                      coPrimaryPaidEarnings: 4903.94
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 12426.81
+                    - taxYear: 1987
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1301.4
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 14459.0
+                    - taxYear: 1988
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1213.15
+                      coClassOnePaid: 377.94
+                      coPrimaryPaidEarnings: 5399.0
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 14678.0
+                    - taxYear: 1989
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1106.22
+                      coClassOnePaid: 981.09
+                      coPrimaryPaidEarnings: 14015.0
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 16208.0
+                    - taxYear: 1990
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1128.91
+                      coClassOnePaid: 994.87
+                      coPrimaryPaidEarnings: 14212.0
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 17603.0
+                    - taxYear: 1991
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1460.16
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 18304.0
+                    - taxYear: 1992
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1452.88
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 18304.0
+                    - taxYear: 1993
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1445.6
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 18304.0
+                    - taxYear: 1994
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1595.88
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 18304.0
+                    - taxYear: 1995
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1800.83
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 20441.0
+                    - taxYear: 1996
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1821.99
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 20757.0
+                    - taxYear: 1997
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2160.08
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 24180.0
+                    - taxYear: 1998
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2255.76
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 25220.0
+                    - taxYear: 1999
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2256.8
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 26000.0
+                    - taxYear: 2000
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1798.0
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 21000.0
+                    - taxYear: 2001
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1097.35
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 15385.0
+                    - taxYear: 2002
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1237.05
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 16973.0
+                    - taxYear: 2003
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1226.6
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 14700.0
+                    - taxYear: 2004
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1504.36
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 18392.0
+                    - taxYear: 2005
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 937.55
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 12758.0
+                      otherCredits:
+                        - contributionCreditType: CLASS 1 CREDIT
+                          creditSourceType: JSA TAPE INPUT
+                          contributionCreditCount: 3
+                    - taxYear: 2006
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 655.26
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 9619.0
+                      otherCredits:
+                        - contributionCreditType: CLASS 1 CREDIT
+                          creditSourceType: JSA TAPE INPUT
+                          contributionCreditCount: 11
+                    - taxYear: 2007
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 830.72
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 12315.0
+                    - taxYear: 2008
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1229.8
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 16592.0
+                    - taxYear: 2009
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1078.88
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 15496.0
+                    - taxYear: 2010
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1478.4
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 19128.0
+                    - taxYear: 2011
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 369.98
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 6754.0
+                    - taxYear: 2012
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1488.88
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 19994.0
+                    - taxYear: 2013
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1927.74
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 23825.57
+                    - taxYear: 2014
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2056.97
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 25097.58
+                    - taxYear: 2015
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 3581.9
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 37668.89
+                    - taxYear: 2016
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 3366.29
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 36065.92
+                    - taxYear: 2017
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 4082.54
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 41810.62
+                    - taxYear: 2018
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2568.29
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 29826.46
+                    - taxYear: 2019
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1322.33
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 19442.84
+                    - taxYear: 2020
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2631.95
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 31592.0
+                    - taxYear: 2021
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2710.82
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 32042.0
+                    - taxYear: 2022
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2812.48
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 34249.0
+                    - taxYear: 2023
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 2688.36
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 35787.0
+                    - taxYear: 2024
+                      qualifyingTaxYear: true
+                      payableAccepted: false
+                      totalPrimaryContributions: 1947.32
+                      underInvestigationFlag: false
+                      totalPrimaryPaidEarnings: 36888.0
+                niContributionsAndCreditsResult:
+                  - totalGraduatedPensionUnits: 15.5
+                    class1ContributionAndCredits:
+                      - taxYear: 2019
+                        numberOfContributionsAndCredits: 52
+                        contributionCategoryLetter: "A"
+                        contributionCategory: "STANDARD RATE"
+                        contributionCreditType: "C1"
+                        primaryContribution: 2850.0
+                        class1ContributionStatus: "VALID"
+                        primaryPaidEarnings: 32000.0
+                        creditSource: "EMPLOYMENT SERVICES"
+                        employerName: "ACME"
+                        latePaymentPeriod: "L"
+                      - taxYear: 2020
+                        numberOfContributionsAndCredits: 52
+                        contributionCategoryLetter: "A"
+                        contributionCategory: "STANDARD RATE"
+                        contributionCreditType: "C1"
+                        primaryContribution: 2700.0
+                        class1ContributionStatus: "VALID"
+                        primaryPaidEarnings: 30000.0
+                        creditSource: "EMPLOYMENT SERVICES"
+                        employerName: "Global"
+                        latePaymentPeriod: "L"
+                    class2ContributionAndCredits:
+                      - taxYear: 2019
+                        numberOfContributionsAndCredits: 26
+                        contributionCreditType: "C2"
+                        class2Or3EarningsFactor: 3250.0
+                        class2NIContributonAmount: 81.9
+                        class2Or3CreditStatus: "VALID"
+                        creditSource: "DIRECT DEBIT"
+                        latePaymentPeriod: "L"
+                      - taxYear: 2021
+                        numberOfContributionsAndCredits: 40
+                        contributionCreditType: "C2"
+                        class2Or3EarningsFactor: 4000.0
+                        class2NIContributonAmount: 100.0
+                        class2Or3CreditStatus: "VALID"
+                        creditSource: "QUARTERLY BILLING"
+                        latePaymentPeriod: "ZZ"
+
+            ESA_minimal_success:
+              summary: ESA - Minimal response
+              value:
+                benefitType: "ESA"
+                nationalInsuranceNumber: "QR456789S"
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 0
+                  class1ContributionAndCredits: [ ]
+                  class2ContributionAndCredits: [ ]
+
+            ESA_maximal_success:
+              summary: ESA - Maximal response
+              value:
+                benefitType: "ESA"
+                nationalInsuranceNumber: "QR456789S"
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 2.5
+                  class1ContributionAndCredits:
+                    - taxYear: 2021
+                      numberOfContributionsAndCredits: 39
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "2A"
+                      primaryContribution: 1800.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 15000.0
+                      creditSource: "EMPLOYMENT AND SUPPORT"
+                      employerName: "Widget"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2022
+                      numberOfContributionsAndCredits: 26
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "2A"
+                      primaryContribution: 2160.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 18000.0
+                      creditSource: "EMPLOYMENT AND SUPPORT"
+                      employerName: "Widget"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2020
+                      numberOfContributionsAndCredits: 20
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "CR1"
+                      primaryContribution: 0.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 0.0
+                      creditSource: "EMPLOYMENT AND SUPPORT"
+                      employerName: ""
+                      latePaymentPeriod: "ZZ"
+                  class2ContributionAndCredits:
+                    - taxYear: 2023
+                      numberOfContributionsAndCredits: 20
+                      contributionCreditType: "2A"
+                      class2Or3EarningsFactor: 1.3
+                      class2NIContributonAmount: 52.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "EMPLOYMENT AND SUPPORT"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2021
+                      numberOfContributionsAndCredits: 15
+                      contributionCreditType: "2A"
+                      class2Or3EarningsFactor: 0.8
+                      class2NIContributonAmount: 30.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "EMPLOYMENT AND SUPPORT"
+                      latePaymentPeriod: "L"
+
+            JSA_minimal_success:
+              summary: JSA - Minimal response
+              value:
+                benefitType: "JSA"
+                nationalInsuranceNumber: "AB234567C"
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 0
+                  class1ContributionAndCredits: [ ]
+                  class2ContributionAndCredits: [ ]
+
+            JSA_maximal_success:
+              summary: JSA - Maximal response
+              value:
+                benefitType: "JSA"
+                nationalInsuranceNumber: "AB234567C"
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 1.2
+                  class1ContributionAndCredits:
+                    - taxYear: 2019
+                      numberOfContributionsAndCredits: 15
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "2B"
+                      primaryContribution: 1200.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 10000.0
+                      creditSource: "JSA TAPE INPUT"
+                      employerName: "Temp"
+                      latePaymentPeriod: "L"
+                    - taxYear: 2021
+                      numberOfContributionsAndCredits: 20
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "2B"
+                      primaryContribution: 1440.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 12000.0
+                      creditSource: "JSA TAPE INPUT"
+                      employerName: "Temp"
+                      latePaymentPeriod: "L"
+                    - taxYear: 2020
+                      numberOfContributionsAndCredits: 30
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "CR1"
+                      primaryContribution: 0.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 0.0
+                      creditSource: "JSA TAPE INPUT"
+                      employerName: ""
+                      latePaymentPeriod: "ZZ"
+                  class2ContributionAndCredits:
+                    - taxYear: 2022
+                      numberOfContributionsAndCredits: 30
+                      contributionCreditType: "2B"
+                      class2Or3EarningsFactor: 1.1
+                      class2NIContributonAmount: 44.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "JSA TAPE INPUT"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2023
+                      numberOfContributionsAndCredits: 25
+                      contributionCreditType: "2B"
+                      class2Or3EarningsFactor: 0.9
+                      class2NIContributonAmount: 36.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "JSA PAPER INPUT"
+                      latePaymentPeriod: "L"
+
+            MA_minimal_success:
+              summary: MA - Minimal response
+              value:
+                benefitType: "MA"
+                nationalInsuranceNumber: "KL890123M"
+                class2MAReceiptsResult:
+                  identifier: "KL890123M"
+                  class2MAReceiptDetails: [ ]
+                liabilitySummaryDetailsResult:
+                  liabilityDetailsList: [ ]
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 0
+                  class1ContributionAndCredits: [ ]
+                  class2ContributionAndCredits: [ ]
+
+            MA_maximal_success:
+              summary: MA - Maximal response
+              value:
+                benefitType: "MA"
+                nationalInsuranceNumber: "KL890123M"
+                class2MAReceiptsResult:
+                  identifier: "KL890123M"
+                  class2MAReceiptDetails:
+                    - initials: "KL"
+                      surname: "Smith"
+                      receivablePeriodStartDate: "2022-04-06"
+                      receivablePeriodEndDate: "2022-07-05"
+                      receivablePayment: 156.0
+                      receiptDate: "2022-07-05"
+                      liabilityStartDate: "2022-04-06"
+                      liabilityEndDate: "2022-07-05"
+                      billAmount: 156.0
+                      billScheduleNumber: 2001
+                      isClosedRecord: true
+                      weeksPaid: 13
+                    - initials: "KL"
+                      surname: "Smith"
+                      receivablePeriodStartDate: "2023-01-01"
+                      receivablePeriodEndDate: "2023-03-31"
+                      receivablePayment: 145.0
+                      receiptDate: "2023-03-31"
+                      liabilityStartDate: "2023-01-01"
+                      liabilityEndDate: "2023-03-31"
+                      billAmount: 145.0
+                      billScheduleNumber: 2002
+                      isClosedRecord: false
+                      weeksPaid: 13
+                    - initials: "KL"
+                      surname: "Smith"
+                      receivablePeriodStartDate: "2021-10-01"
+                      receivablePeriodEndDate: "2021-12-31"
+                      receivablePayment: 130.0
+                      receiptDate: "2021-12-31"
+                      liabilityStartDate: "2021-10-01"
+                      liabilityEndDate: "2021-12-31"
+                      billAmount: 130.0
+                      billScheduleNumber: 1999
+                      isClosedRecord: true
+                      weeksPaid: 13
+                liabilitySummaryDetailsResult:
+                  liabilityDetailsList:
+                    - identifier: "KL890123M"
+                      type: "CLASS 2 MATERNITY ALLOWANCE"
+                      occurrenceNumber: 1
+                      startDateStatus: "START DATE HELD"
+                      endDateStatus: "END DATE HELD"
+                      startDate: "2021-01-01"
+                      endDate: "2021-12-31"
+                      country: "ENGLAND"
+                      trainingCreditApprovalStatus: "NO CREDIT FOR APPROVED TRAINING"
+                      casepaperReferenceNumber: "SCH/123/4"
+                      homeResponsibilitiesProtectionBenefitReference: "12345678AB"
+                      homeResponsibilitiesProtectionRate: 10.56
+                      lostCardNotificationReason: "NOT APPLICABLE"
+                      lostCardRulingReason: "NOT APPLICABLE"
+                      homeResponsibilityProtectionCalculationYear: 2022
+                      awardAmount: 150.0
+                      resourceGroupIdentifier: 789
+                      homeResponsibilitiesProtectionIndicator: "(NONE)"
+                      officeDetails:
+                        officeLocationDecode: 1
+                        officeLocationValue: "HQ STATIONARY STORE"
+                        officeIdentifier: "NOT APPLICABLE"
+                    - identifier: "KL890123M"
+                      type: "CLASS 2 MATERNITY ALLOWANCE"
+                      occurrenceNumber: 2
+                      startDateStatus: "START DATE HELD"
+                      endDateStatus: "END DATE HELD"
+                      startDate: "2022-01-01"
+                      endDate: "2022-12-31"
+                      resourceGroupIdentifier: 789
+                    - identifier: "KL890123M"
+                      type: "CLASS 2 MATERNITY ALLOWANCE"
+                      occurrenceNumber: 3
+                      startDateStatus: "START DATE HELD"
+                      endDateStatus: "END DATE NOT HELD"
+                      startDate: "2023-01-01"
+                      resourceGroupIdentifier: 789
+                niContributionsAndCreditsResult:
+                  totalGraduatedPensionUnits: 3.8
+                  class1ContributionAndCredits:
+                    - taxYear: 2021
+                      numberOfContributionsAndCredits: 39
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "MAR"
+                      primaryContribution: 2400.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 20000.0
+                      creditSource: "STATUTORY MATERNITY PAY CREDIT"
+                      employerName: "Corp"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2022
+                      numberOfContributionsAndCredits: 39
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "MAR"
+                      primaryContribution: 2640.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 22000.0
+                      creditSource: "STATUTORY MATERNITY PAY CREDIT"
+                      employerName: "Corp"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2020
+                      numberOfContributionsAndCredits: 30
+                      contributionCategoryLetter: "A"
+                      contributionCategory: "STANDARD RATE"
+                      contributionCreditType: "C1"
+                      primaryContribution: 2100.0
+                      class1ContributionStatus: "VALID"
+                      primaryPaidEarnings: 17500.0
+                      creditSource: "EMPLOYMENT SERVICES"
+                      employerName: "Global"
+                      latePaymentPeriod: "L"
+                  class2ContributionAndCredits:
+                    - taxYear: 2023
+                      numberOfContributionsAndCredits: 26
+                      contributionCreditType: "MAR"
+                      class2Or3EarningsFactor: 1040.0
+                      class2NIContributonAmount: 104.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "STATUTORY MATERNITY PAY CREDIT"
+                      latePaymentPeriod: "ZZ"
+                    - taxYear: 2021
+                      numberOfContributionsAndCredits: 20
+                      contributionCreditType: "C2"
+                      class2Or3EarningsFactor: 800.0
+                      class2NIContributonAmount: 80.0
+                      class2Or3CreditStatus: "VALID"
+                      creditSource: "DIRECT DEBIT"
+                      latePaymentPeriod: "L"
+                      
     BadRequest:
       description: Bad Request
+      headers:
+        correlationId:
+          $ref: "#/components/schemas/correlationId"
       content:
         application/json:
           schema:
@@ -1145,6 +1131,9 @@ components:
 
     Forbidden:
       description: Forbidden
+      headers:
+        correlationId:
+          $ref: "#/components/schemas/correlationId"
       content:
         application/json:
           schema:
@@ -1163,6 +1152,9 @@ components:
 
     UnprocessableEntity:
       description: Unprocessable Entity
+      headers:
+        correlationId:
+          $ref: "#/components/schemas/correlationId"
       content:
         application/json:
           schema:
@@ -1211,8 +1203,11 @@ components:
                 code: "INTERNAL_SERVER_ERROR"
                 reason: "an unexpected error occurred while processing the request"
 
-    PartialFailure:
+    DownstreamFailure:
       description: Partial or complete failure from downstream services
+      headers:
+        correlationId:
+          $ref: "#/components/schemas/correlationId"
       content:
         application/json:
           schema:
@@ -1222,7 +1217,6 @@ components:
               summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
               value:
                 status: "PARTIAL_FAILURE"
-                correlationId: "55555555-6666-7777-8888-999999999999"
                 benefitType: "MA"
                 nationalInsuranceNumber: "KL890123M"
                 summary:
@@ -1244,7 +1238,6 @@ components:
               summary: Complete failure - every downstream called for a given benefit responds with a failure
               value:
                 status: "FAILURE"
-                correlationId: "66666666-7777-8888-9999-aaaaaaaaaaaa"
                 benefitType: "MA"
                 nationalInsuranceNumber: "NP012345Q"
                 summary:
@@ -1270,8 +1263,14 @@ components:
                       code: "BAD_REQUEST"
                       message: "invalid liability calculation parameters"
                       downstreamStatus: 400
-
   schemas:
+
+    correlationId:
+      description: used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+      format: uuid
+      type: string
+
     Authorization:
       description: Authorization token used to contact api
       type: string
@@ -1283,7 +1282,7 @@ components:
       pattern: application/vnd.hmrc.[version]+[content-type]
       example: application/vnd.hmrc.1.0+json
 
-    ContributionsAndCredits:
+    NiContributionsAndCredits:
       type: object
       required:
         - dateOfBirth
@@ -1309,11 +1308,6 @@ components:
             \ - if not present will default to false."
           type: boolean
           example: true
-        sequence:
-          description: Marriage Sequence Number - used for paging
-          type: integer
-          example: 5
-
 
     LongTermBenefitCalculation:
       type: object
@@ -1325,44 +1319,6 @@ components:
         pensionProcessingArea:
           $ref: '#/components/schemas/EnumEeppflg'
 
-    LongTermBenefitCalculationNotes:
-      type: object
-      required:
-        - benefitType
-      properties:
-        benefitType:
-          $ref: '#/components/schemas/EnumBenType'
-
-
-
-    SchemeMembershipDetails:
-      type: object
-      properties:
-        schemeMembershipSequenceNumber:
-          description: Unique sequence number representing the position in the scheme
-            membership history (i.e. row) of the scheme membership details entry for this
-            individual - this would only be populated if the previous call did not transfer
-            all of the data i.e. there are more rows marked to be collected still.
-          maximum: 65534
-          minimum: 1
-          type: integer
-          example: 123
-        schemeMembershipTransferSequenceNumber:
-          description: Unique sequence number representing the position in the scheme
-            membership transfer history (i.e. row) of the scheme membership transfer details
-            entry for this individual - this would only be populated if the previous call
-            did not transfer all of the data i.e. there are more rows marked to be collected
-            still.
-          maximum: 65534
-          minimum: 1
-          type: integer
-          example: 123
-        schemeMembershipOccurrenceNumber:
-          description: Denotes the occurrence number for the Scheme Membership.
-          maximum: 32766
-          minimum: 0
-          type: integer
-          example: 1
 
     Liabilities:
       type: object
@@ -1404,47 +1360,6 @@ components:
         sortBy:
           $ref: '#/components/schemas/EnumSortMAReceiptBy'
 
-    BSPRequest:
-      type: object
-      required:
-        - benefitType
-        - nationalInsuranceNumber
-        - contributionsAndCredits
-      properties:
-        benefitType:
-          type: string
-          enum: [ BSP ]
-        nationalInsuranceNumber:
-          $ref: '#/components/schemas/nationalInsuranceNumber'
-        contributionsAndCredits:
-          $ref: '#/components/schemas/ContributionsAndCredits'
-        marriageDetails:
-          $ref: '#/components/schemas/MarriageDetailsRequestSchema'
-
-    GYSPRequest:
-      type: object
-      required:
-        - benefitType
-        - nationalInsuranceNumber
-        - contributionsAndCredits
-        - benefitCalculation
-      properties:
-        benefitType:
-          type: string
-          enum: [ GYSP ]
-        nationalInsuranceNumber:
-          $ref: '#/components/schemas/nationalInsuranceNumber'
-        contributionsAndCredits:
-          $ref: '#/components/schemas/ContributionsAndCredits'
-        longTermBenefitCalculation:
-          $ref: '#/components/schemas/LongTermBenefitCalculation'
-        longTermBenefitCalculationNotes:
-          $ref: '#/components/schemas/LongTermBenefitCalculationNotes'
-        marriageDetails:
-          $ref: '#/components/schemas/MarriageDetailsRequestSchema'
-        schemeMembershipDetails:
-          $ref: '#/components/schemas/SchemeMembershipDetails'
-
     ESARequest:
       type: object
       required:
@@ -1457,8 +1372,8 @@ components:
           enum: [ ESA ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        contributionsAndCredits:
-          $ref: '#/components/schemas/ContributionsAndCredits'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/NiContributionsAndCredits'
 
     JSARequest:
       type: object
@@ -1472,8 +1387,26 @@ components:
           enum: [ JSA ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        contributionsAndCredits:
-          $ref: '#/components/schemas/ContributionsAndCredits'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/NiContributionsAndCredits'
+
+    BSPRequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+      properties:
+        benefitType:
+          type: string
+          enum: [ BSP ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/NiContributionsAndCredits'
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetailsRequestSchema'
+
 
     MARequest:
       type: object
@@ -1488,27 +1421,43 @@ components:
           enum: [ MA ]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        contributionsAndCredits:
-          $ref: '#/components/schemas/ContributionsAndCredits'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/NiContributionsAndCredits'
         liabilities:
           $ref: '#/components/schemas/Liabilities'
         class2MaReceipts:
           $ref: '#/components/schemas/Class2MaReceipts'
 
-    # Success Response Schemas
 
+    GYSPRequest:
+      type: object
+      required:
+        - benefitType
+        - nationalInsuranceNumber
+        - contributionsAndCredits
+        - longTermBenefitCalculation
+      properties:
+        benefitType:
+          type: string
+          enum: [ GYSP ]
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumber'
+        niContributionsAndCredits:
+          $ref: '#/components/schemas/NiContributionsAndCredits'
+        longTermBenefitCalculation:
+          $ref: '#/components/schemas/LongTermBenefitCalculation'
+        marriageDetails:
+          $ref: '#/components/schemas/MarriageDetailsRequestSchema'
+
+    # Success Response Schemas
     BSPSuccessResponse:
       type: object
       required:
-        - correlationId
         - benefitType
         - nationalInsuranceNumber
         - marriageDetailsResult
         - niContributionsAndCreditsResult
       properties:
-        correlationId:
-          type: string
-          format: uuid
         benefitType:
           type: string
           enum: [ BSP ]
@@ -1522,19 +1471,16 @@ components:
     GYSPSuccessResponse:
       type: object
       required:
-        - correlationId
         - benefitType
         - nationalInsuranceNumber
         - benefitSchemeDetailsResult
         - marriageDetailsResult
+        - longTermBenefitCalculationDetailsResult
         - longTermBenefitNotesResult
         - schemeMembershipDetailsResult
         - individualStatePensionInfoResult
         - niContributionsAndCreditsResult
       properties:
-        correlationId:
-          type: string
-          format: uuid
         benefitType:
           type: string
           enum: [ GYSP ]
@@ -1546,12 +1492,14 @@ components:
             $ref: '#/components/schemas/GetBenefitSchemeDetailsResponse'
         marriageDetailsResult:
           $ref: '#/components/schemas/RetrieveMarriageDetailsResponse'
+        longTermBenefitCalculationDetailsResult:
+          $ref: '#/components/schemas/GetLongTermBenefitCalculationDetailsResponse'
         longTermBenefitNotesResult:
           $ref: '#/components/schemas/LongTermBenefitNotesResponse'
-        individualStatePensionInfoResult:
-          $ref: '#/components/schemas/GetNIRecordResponse'
         schemeMembershipDetailsResult:
           $ref: '#/components/schemas/GetSchemeMembershipDetailsResponse'
+        individualStatePensionInfoResult:
+          $ref: '#/components/schemas/GetNIRecordResponse'
         niContributionsAndCreditsResult:
           type: array
           items:
@@ -1560,14 +1508,10 @@ components:
     ESASuccessResponse:
       type: object
       required:
-        - correlationId
         - benefitType
         - nationalInsuranceNumber
         - niContributionsAndCreditsResult
       properties:
-        correlationId:
-          type: string
-          format: uuid
         benefitType:
           type: string
           enum: [ ESA ]
@@ -1579,14 +1523,10 @@ components:
     JSASuccessResponse:
       type: object
       required:
-        - correlationId
         - benefitType
         - nationalInsuranceNumber
         - niContributionsAndCreditsResult
       properties:
-        correlationId:
-          type: string
-          format: uuid
         benefitType:
           type: string
           enum: [ JSA ]
@@ -1598,16 +1538,12 @@ components:
     MASuccessResponse:
       type: object
       required:
-        - correlationId
         - benefitType
         - nationalInsuranceNumber
         - class2MAReceiptsResult
         - liabilitySummaryDetailsResult
         - niContributionsAndCreditsResult
       properties:
-        correlationId:
-          type: string
-          format: uuid
         benefitType:
           type: string
           enum: [ MA ]
@@ -1620,7 +1556,7 @@ components:
         niContributionsAndCreditsResult:
           $ref: '#/components/schemas/PostNIContCredResponse'
 
-    # Scheme Membership Details - Copied from the provided NPS schema
+    # Scheme Membership Details - Copied from the provided NPS schema minus the callback as this service will facilitate all the required calls to retrieve all paginated data sets
     GetSchemeMembershipDetailsResponse:
       description: Success response payload for this API.
       type: object
@@ -1629,8 +1565,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SchemeMembershipDetailsSummary'
-        callback:
-          $ref: '#/components/schemas/schemeCallback'
 
     SchemeMembershipDetailsSummary:
       description: "Contains scheme membership details for an individual, including their stakeholder pension status."
@@ -1659,6 +1593,7 @@ components:
           pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$"
           type: string
           example: AA123456
+          #        TODO - we may never send this back as it's a pagination field
         schemeMembershipSequenceNumber:
           description: Unique sequence number representing the position in the scheme membership history (i.e. row) of the scheme membership details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.
           maximum: 65534
@@ -1844,6 +1779,7 @@ components:
           minimum: 0
           type: integer
           example: 1
+#        TODO - we may never send this back as it's a pagination field
         schemeMembershipTransferSequenceNumber:
           description: Unique sequence number representing the position in the scheme membership transfer history (i.e. row) of the scheme membership transfer details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.
           maximum: 65534
@@ -1925,13 +1861,6 @@ components:
           pattern: "^([S]{0,1}\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
           type: string
           example: S2123456B
-
-    schemeCallback:
-      properties:
-        callbackURL:
-          description: A URL in the response body that redirects the user to call the next set of data based on the prepared URL. This will only be populated if the call has not returned all the relevant data and another call is required.
-          type: string
-          example: /benefit-scheme/AA123456/scheme-membership-details?seqNo=123&occurrenceNo=1&transferSeqNo=123
 
     # Scheme Membership Details Enums - Copied from the provided NPS schema
 
@@ -2295,6 +2224,649 @@ components:
         - Job Centre+ Electronic Enabled Pension Processing
         - Standard Electronic Enabled Pension Processing
       type: string
+    
+    GetLongTermBenefitCalculationDetailsResponse:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        statePensionAgeBefore2010TaxYear:
+          description: Denotes whether or not the State Pension Age (SPA) for the
+            individual falls before the date 06/04/2010.
+          type: boolean
+          example: true
+        statePensionAgeAfter2016TaxYear:
+          description: Denotes whether or not the State Pension Age (SPA) for the
+            individual falls after the date 05/04/2016.
+          type: boolean
+          example: true
+        benefitCalculationDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/BenefitCalculationDetails'
+    
+    BenefitCalculationDetails:
+      description: Contains benefit calculation details for an individual.
+      type: object
+      properties:
+        additionalPensionAmountPre1997:
+          description: Denotes the cash value of the individual's additional pension
+            from tax years prior to 1997.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionAmountPost1997:
+          description: Denotes the cash value of the individual's additional pension
+            from tax years after 1997.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        pre97AgeRelatedAdditionalPension:
+          description: Denotes the Widow(er)'s Benefit Pre-Year 1997 Age Related Additional
+            Pension Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        post97AgeRelatedAdditionalPension:
+          description: Denotes the Widow(er)'s Benefit Post Year 1997 Age Related
+            Additional Pension Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        basicPensionIncrementsCashValue:
+          description: Denotes the incremental basic pension cash value amount inherited
+            from a former spouse.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionIncrementsCashValue:
+          description: Denotes the incremental additional pension cash value amount
+            inherited from a former spouse.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        graduatedRetirementBenefitCashValue:
+          description: Denotes the entitlement amount for a national state pension
+            when payments from earnings related pensions are added on top as part
+            of the Graduated Retirement Benefit Scheme.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        totalGuaranteedMinimumPension:
+          description: Denotes the total Guaranteed Minimum Pension (GMP) amount that
+            an individual can receive.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        totalNonGuaranteedMinimumPension:
+          description: Denotes the total Non-Guaranteed Minimum Pension (GMP) amount
+            that an individual can receive.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: 0
+          type: number
+          example: 10.56
+        longTermBenefitsIncrementalCashValue:
+          description: Denotes the incremental cash value amount for Graduated Retirement
+            Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        greatBritainPaymentAmount:
+          description: Denotes the Widow(er)'s Benefit Great Britain Payment Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        dateOfBirth:
+          format: date
+          description: The date of birth of the individual.
+          type: string
+          example: 2022-06-27
+        notionalPost1997AdditionalPension:
+          description: Denotes the cash value of the notional post 1997 additional
+            pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        notionalPre1997AdditionalPension:
+          description: Denotes the cash value of the notional pre 1997 additional
+            pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        inheritableNotionalAdditionalPensionIncrements:
+          description: Denotes the cash value of the notional additional pension increments
+            inherited from a former spouse.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        conditionOneSatisfied:
+          description: Denotes the status around whether or not condition one for
+            Basic Pensions has been satisfied.
+          maxLength: 10
+          minLength: 1
+          pattern: "^[A-Za-z0-9\\/ -]+$"
+          type: string
+          example: H
+        reasonForFormIssue:
+          description: Denotes the reason that the form was issued.
+          maxLength: 30
+          minLength: 1
+          pattern: "^[A-Za-z0-9 -]+$"
+          type: string
+          example: REQUESTED BENEFIT CALCULATION
+        longTermBenefitsCategoryACashValue:
+          description: Denotes the total cash value for Category A Long Term Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        longTermBenefitsCategoryBLCashValue:
+          description: Denotes the total cash value for Category BL Long Term Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        longTermBenefitsUnitValue:
+          description: Denotes the unit value amount for Graduated Retirement Benefits.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalNotionalPensionAmountPost2002:
+          description: Denotes the notional cash value of the individual's additional
+            pension from tax years after 2002.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionAmountPost2002:
+          description: Denotes the cash value of the individual's additional pension
+            from tax years after 2002.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalNotionalPensionIncrementsInheritedPost2002:
+          description: Denotes the notional cash value of additional pension increments
+            inherited from a former spouse after April 2002 under the State Second
+            Pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionIncrementsInheritedPost2002:
+          description: Denotes the cash value of additional pension increments inherited
+            from a former spouse after April 2002 under the State Second Pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        post02AgeRelatedAdditionalPension:
+          description: Denotes the Widow(er)'s Benefit Post Year 2002 Age Related
+            Additional Pension Amount.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        pre1975ShortTermBenefits:
+          description: Denotes the number of pre-1975 short term benefits held.
+          maximum: 26
+          minimum: 0
+          type: integer
+          example: 2
+        survivingSpouseAge:
+          description: Denotes the Surviving Spouse's Age.
+          maximum: 125
+          minimum: 18
+          type: integer
+          example: 45
+        operativeBenefitStartDate:
+          format: date
+          description: Denotes the start date reported for the operative benefit.
+          type: string
+          example: 2022-06-27
+        sicknessBenefitStatusForReports:
+          description: Denotes the sickness benefit status for reporting.
+          maxLength: 1
+          minLength: 1
+          pattern: "^[A-Z0-9]$"
+          type: string
+          example: "Y"
+        benefitCalculationDetail:
+          $ref: '#/components/schemas/BenefitCalculationDetail'
+    BenefitCalculationDetail:
+      description: Contains benefit calculation details for an individual.
+      required:
+        - nationalInsuranceNumber
+        - benefitType
+      type: object
+      properties:
+        nationalInsuranceNumber:
+          description: National Insurance Number - unique for an individual - note
+            not all individuals qualify to be issued with one.
+          maxLength: 8
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}$"
+          type: string
+          example: AA123456
+        benefitType:
+          $ref: '#/components/schemas/EnumBenType'
+          maximum: 126
+          minimum: 1
+          type: integer
+          example: 86
+        calculationStatus:
+          $ref: '#/components/schemas/EnumCalsttp'
+        substitutionMethod1:
+          description: Denotes the first substitution method applicable for the Long
+            Term Benefit (LTB) calculation.
+          maximum: 254
+          minimum: 0
+          type: integer
+          example: 235
+        substitutionMethod2:
+          description: Denotes the second substitution method applicable for the Long
+            Term Benefit (LTB) calculation.
+          maximum: 254
+          minimum: 0
+          type: integer
+          example: 235
+        calculationDate:
+          format: date
+          description: The date on which the benefit calculation was performed as
+            part of the benefit calculation details.
+          type: string
+          example: 2022-06-27
+        guaranteedMinimumPensionContractedOutDeductionsPre1988:
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) pre 1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        guaranteedMinimumPensionContractedOutDeductionsPost1988:
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+            Contracted-Out Deductions (COD) post 1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        contractedOutDeductionsPre1988:
+          description: Denotes the value of the Contracted-Out Deductions (COD) pre
+            1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        contractedOutDeductionsPost1988:
+          description: Denotes the value of the Contracted-Out Deductions (COD) post
+            1988
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        additionalPensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage. Value precision\
+            \ allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678,\
+            \ 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        basicPensionPercentage:
+          description: Denotes the percentage of a basic pension that the individual
+            is currently eligible for.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 86
+        survivorsBenefitAgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related pension percentage for a widow/widower\
+            \ or surviving civil partner. Value precision allows for up to 6 decimal\
+            \ places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890\
+            \ are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalAgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related additional pension percentage. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedBasicPensionPercentage:
+          format: float
+          description: "Denotes the basic pension percentage that a widow/widower\
+            \ or surviving civil partner may inherit from their partner's additional\
+            \ state pension. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage that a widow/widower\
+            \ or surviving civil partner may inherit from their partner's additional\
+            \ state pension. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedGraduatedPensionPercentage:
+          format: float
+          description: "Denotes the graduated pension percentage that a widow/widower\
+            \ or surviving civil partner may inherit from their partner's additional\
+            \ state pension. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedGraduatedBenefit:
+          description: The value of the inherited graduated benefit by a surviving
+            spouse or civil partner of a person with entitlement to that benefit.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        calculationSource:
+          $ref: '#/components/schemas/EnumCalcsrce'
+        payday:
+          $ref: '#/components/schemas/EnumPayday'
+        dateOfBirth:
+          format: date
+          description: The date of birth of the individual.
+          type: string
+          example: 2022-06-27
+        husbandDateOfDeath:
+          format: date
+          description: The date on which the individual's husband deceased.
+          type: string
+          example: 2022-06-27
+        additionalPost1997PensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage from 1997. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost1997AgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related additional pension percentage from\
+            \ 1997. Value precision allows for up to 6 decimal places - i.e. 10, 10.5,\
+            \ 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost1997PensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage from 1997.\
+            \ Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage that a\
+            \ widow/widower or surviving civil partner may inherit from their partner's\
+            \ additional state pension. Value precision allows for up to 6 decimal\
+            \ places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890\
+            \ are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritableAdditionalPensionPercentage:
+          description: Denotes the percentage of an additional pension that can be
+            inherited.
+          maximum: 100
+          minimum: 0
+          type: integer
+          example: 90
+        additionalPost2002PensionNotionalPercentage:
+          format: float
+          description: "Denotes the notional additional pension percentage from 2002.\
+            \ Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost2002PensionPercentage:
+          format: float
+          description: "Denotes the additional pension percentage from 2002. Value\
+            \ precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56,\
+            \ 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPost2002PensionNotionalPercentage:
+          format: float
+          description: "Denotes the post-2002 notional additional pension percentage\
+            \ that a widow/widower or surviving civil partner may inherit from their\
+            \ partner's additional state pension. Value precision allows for up to\
+            \ 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789,\
+            \ 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        inheritedAdditionalPost2002PensionPercentage:
+          format: float
+          description: "Denotes the post-2002 additional pension percentage that a\
+            \ widow/widower or surviving civil partner may inherit from their partner's\
+            \ additional state pension. Value precision allows for up to 6 decimal\
+            \ places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890\
+            \ are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        additionalPost2002AgeRelatedPensionPercentage:
+          format: float
+          description: "Denotes the age related additional pension percentage from\
+            \ 2002. Value precision allows for up to 6 decimal places - i.e. 10, 10.5,\
+            \ 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10.56
+        singleContributionConditionRulesApply:
+          description: Denotes whether or not single contribution condition rules
+            apply.
+          type: boolean
+          example: true
+        officeDetails:
+          $ref: '#/components/schemas/DecodedOfficeDetailsResponse'
+        newStatePensionCalculationDetails:
+          $ref: '#/components/schemas/NewStatePensionCalculationDetails'
+    NewStatePensionCalculationDetails:
+      description: Contains details related to a new state pension calculation.
+      type: object
+      properties:
+        netAdditionalPensionPre1997:
+          description: Denotes the net amount of additional pension after subtracting
+            an individual's Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions
+            (COD) for tax years post 1997.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        oldRulesStatePensionEntitlement:
+          description: Denotes the State Pension entitlement accrued up to 2016 under
+            the old rules.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        netRulesAmount:
+          description: Denotes the net rules amount for New State Pension (NSP) calculations
+            from 06/04/2016.
+          multipleOf: 0.01
+          maximum: 300
+          minimum: 0
+          type: number
+          example: 10.56
+        derivedRebateAmount:
+          description: Denotes the derived rebate amount to use when adjusting the
+            gross new rules amount to take account of the periods of contracting-out.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        initialStatePensionAmount:
+          description: The initial value of the person's state pension.
+          multipleOf: 0.01
+          maximum: 99999999999999.98
+          minimum: -99999999999999.98
+          type: number
+          example: 10.56
+        protectedPayment2016:
+          description: Denotes the protected payment amount for the insured person
+            at or before 2016.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        minimumQualifyingPeriodMet:
+          description: Denotes whether or not the minimum qualifying period for a
+            New State Pension has been met.
+          type: boolean
+          example: true
+        qualifyingYearsAfter2016:
+          description: Denotes the number of qualifying years from 2016/2017 onwards.
+          maximum: 50
+          minimum: 0
+          type: integer
+          example: 3
+        newStatePensionQualifyingYears:
+          description: Denotes the number of qualifying years that the individual
+            has towards their New State Pension (NSP).
+          maximum: 50
+          minimum: 0
+          type: integer
+          example: 20
+        newStatePensionRequisiteYears:
+          description: Denotes the number of requisite years that the individual has
+            towards their New State Pension (NSP).
+          maximum: 35
+          minimum: 35
+          type: integer
+          example: 35
+        newStatePensionEntitlement:
+          description: Denotes the New State Pension entitlement for an individual.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        protectedPayment:
+          description: Denotes the protected payment amount for the insured person.
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: 0
+          type: number
+          example: 10.56
+        pensionSharingOrderContractedOutEmploymentsGroup:
+          description: Denotes whether or not a pension sharing order applies to a
+            Contracted-Out Employments Group (COEG).
+          type: boolean
+          example: true
+        pensionSharingOrderStateEarningsRelatedPensionScheme:
+          description: Denotes whether or not a pension sharing order applies to a
+            State Earnings Related Pension Scheme (SERPS).
+          type: boolean
+          example: true
+        considerReducedRateElection:
+          description: Denotes whether or not a reduced rate of election should be
+            considered.
+          type: boolean
+          example: true
+        weeklyBudgetingLoanAmount:
+          description: "Denotes the weekly budgeting loan amount for a given tax year,\
+            \ based on the number of qualifying years - weekly amounts come from Reference\
+            \ Data Classes CATBLRT1 for qualifying years 0-15 and CATBLRT2 for qualifying\
+            \ years 16+."
+          multipleOf: 0.01
+          maximum: 85
+          minimum: 0
+          type: number
+          example: 10.56
+        calculationDate:
+          format: date
+          description: The date on which the benefit calculation was performed as
+            part of the benefit calculation details.
+          type: string
+          example: 2022-06-27
     # Long term benefit notes response - Copied from the provided NPS schema
     LongTermBenefitNotesResponse:
       description: Response containing concatenated Long Term Benefit notes.
@@ -2706,8 +3278,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ResponseLiabilityDetailsHIP'
-        callback:
-          $ref: '#/components/schemas/callback'
 
     ResponseLiabilityDetailsHIP:
       description: Contains liability details associated with an individual.
@@ -2798,11 +3368,6 @@ components:
         officeDetails:
           $ref: '#/components/schemas/DecodedOfficeDetailsResponse'
 
-    callback:
-      properties:
-        callbackURL:
-          description: A URL in the response body that redirects the user to call the next set of data based on the prepared URL. This will only be populated if the call has not returned all the relevant data and another call is required.
-          type: string
 
     DecodedOfficeDetailsResponse:
       description: Contains office related details.
@@ -3129,6 +3694,53 @@ components:
         - CANCELLED
         - NOT APPLICABLE
         - REFUSED
+      type: string
+
+    EnumCalsttp:
+      enum:
+        - DEFINITIVE
+        - DELETED
+        - FINAL
+        - INITIAL
+        - NOT APPLICABLE
+      type: string
+
+    EnumPayday:
+      enum:
+        - FRIDAY
+        - MONDAY
+        - "NULL"
+        - THURSDAY
+        - TUESDAY
+        - WEDNESDAY
+      type: string
+
+    EnumCalcsrce:
+      enum:
+        - AP COMPONENT SUSPECT (APRIL - MAY CALC)
+        - AWARD RECONCILED
+        - AWARD RECONCILIATION - REVISED UPWARDS
+        - INTERIM WB CALCULATION
+        - IVB UPRATING
+        - NOT KNOWN
+        - RECONCILIATION FAILED - AWARD REVISED DOWNWARDS
+        - REQUESTED BENEFIT CALCULATION
+        - RP CALCULATION - CLAIMANT REACHED DPA
+        - RP CALCULATION - CLAIMANT REACHED MPA
+        - RP/WB/BB CALCULATION - FEDBACK DETAILS RECEIVED
+        - SCHEME RECONCILIATION SERVICE ACCOUNT
+        - SRB ISSUED - CHANGE TO FLAT RATE RECORD (<1948)
+        - SRB ISSUED - CHANGE TO GRB RECORD
+        - SRB ISSUED - CONTRIBUTION/CREDIT CHANGE IN FRY TAX YEAR
+        - SRB ISSUED - CONTRIBUTION/CREDIT CHANGE IN PRE-FRY TAX YEAR
+        - SRB ISSUED - DATE OF BIRTH CHANGE (WIDOW)
+        - SRB ISSUED - HRP INVOLVEMENT
+        - SRB ISSUED - PERSONAL DETAILS CHANGE (ACCOUNT HOLDER)
+        - SRB ISSUED - RETROSPECTIVE PP OPTION RECEIVED
+        - SRB ISSUED - S2P ENTITLEMENT CHANGE
+        - SRB ISSUED - SSP RECEIVED
+        - SRB ISSUED - SUBSTITUTION/INHERITANCE DETAILS REVISED
+        - SRB ISSUED - TERMINATION DEBIT RECEIVED
       type: string
 
     EnumLiabtp:
@@ -5378,7 +5990,6 @@ components:
       type: object
       required:
         - status
-        - correlationId
         - benefitType
         - nationalInsuranceNumber
         - summary
@@ -5387,9 +5998,6 @@ components:
         status:
           type: string
           enum: [PARTIAL_FAILURE, FAILURE]
-        correlationId:
-          type: string
-          format: uuid
         benefitType:
           type: string
           enum: [BSP, GYSP, ESA, JSA, MA]
@@ -5466,11 +6074,14 @@ components:
           type: string
 
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-security:
-  - bearerAuth: []
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes:
+            write:protect-connect: protect-connect
 

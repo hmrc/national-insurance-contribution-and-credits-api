@@ -47,12 +47,12 @@ sealed trait EligibilityCheckDataRequest {
 }
 
 case class Liabilities(
-    liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated, // liability api
-    liabilityOccurrenceNumber: Option[LiabilitiesOccurrenceNumber],       // liability api
-    liabilityType: Option[LiabilitySearchCategoryHyphenated],             // liability api
-    earliestLiabilityStartDate: Option[LocalDate],                        // liability api
-    liabilityStart: Option[LocalDate],                                    // liability api
-    liabilityEnd: Option[LocalDate]                                       // liability api
+    searchCategory: LiabilitySearchCategoryHyphenated,              // liability api
+    liabilityOccurrenceNumber: Option[LiabilitiesOccurrenceNumber], // liability api
+    liabilityType: Option[LiabilitySearchCategoryHyphenated],       // liability api
+    earliestLiabilityStartDate: Option[LocalDate],                  // liability api
+    liabilityStart: Option[LocalDate],                              // liability api
+    liabilityEnd: Option[LocalDate]                                 // liability api
 )
 
 object Liabilities {
@@ -78,9 +78,9 @@ object Class2MaReceipts {
 final case class MAEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    contributionsAndCredits: ContributionsAndCredits,
-    liabilities: Liabilities,
-    class2MaReceipts: Class2MaReceipts
+    niContributionsAndCredits: ContributionsAndCredits, // no callback
+    liabilities: Liabilities,                           // has callbackUrl
+    class2MaReceipts: Class2MaReceipts                  // no callback
 ) extends EligibilityCheckDataRequest
 
 object MAEligibilityCheckDataRequest {
@@ -106,7 +106,7 @@ object MAEligibilityCheckDataRequest {
 final case class ESAEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    contributionsAndCredits: ContributionsAndCredits
+    niContributionsAndCredits: ContributionsAndCredits
 ) extends EligibilityCheckDataRequest
 
 object ESAEligibilityCheckDataRequest {
@@ -116,15 +116,15 @@ object ESAEligibilityCheckDataRequest {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      contributionsAndCredits: ContributionsAndCredits
-  ) = new ESAEligibilityCheckDataRequest(ESA, nationalInsuranceNumber, contributionsAndCredits)
+      niContributionsAndCredits: ContributionsAndCredits
+  ) = new ESAEligibilityCheckDataRequest(ESA, nationalInsuranceNumber, niContributionsAndCredits)
 
 }
 
 final case class JSAEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    contributionsAndCredits: ContributionsAndCredits
+    niContributionsAndCredits: ContributionsAndCredits
 ) extends EligibilityCheckDataRequest
 
 object JSAEligibilityCheckDataRequest {
@@ -134,8 +134,8 @@ object JSAEligibilityCheckDataRequest {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      contributionsAndCredits: ContributionsAndCredits
-  ) = new JSAEligibilityCheckDataRequest(JSA, nationalInsuranceNumber, contributionsAndCredits)
+      niContributionsAndCredits: ContributionsAndCredits
+  ) = new JSAEligibilityCheckDataRequest(JSA, nationalInsuranceNumber, niContributionsAndCredits)
 
 }
 
@@ -152,36 +152,21 @@ object ContributionsAndCredits {
 
 }
 
-case class BenefitCalculation(
-    benefitType: LongTermBenefitType,         // benefit calculation API + benefit calculation notes API
-    associatedCalculationSequenceNumber: Int, // benefit calculation API + benefit calculation notes API
-    pensionProcessingArea: Option[String]     // benefit calculation API
+case class LongTermBenefitCalculation(
+    longTermBenefitType: Option[LongTermBenefitType],    // benefit calculation API + benefit calculation notes API
+    pensionProcessingArea: Option[PensionProcessingArea] // benefit calculation API
 )
 
-object BenefitCalculation {
+object LongTermBenefitCalculation {
 
-  implicit val BenefitCalculation: Reads[BenefitCalculation] =
-    Json.reads[BenefitCalculation]
-
-}
-
-case class BenefitCalculationNotes(
-    benefitType: LongTermBenefitType,        // benefit calculation API + benefit calculation notes API
-    associatedCalculationSequenceNumber: Int // benefit calculation API + benefit calculation notes API
-)
-
-object BenefitCalculationNotes {
-
-  implicit val BenefitCalculationNotes: Reads[BenefitCalculationNotes] =
-    Json.reads[BenefitCalculationNotes]
+  implicit val BenefitCalculation: Reads[LongTermBenefitCalculation] =
+    Json.reads[LongTermBenefitCalculation]
 
 }
 
 case class MarriageDetails(
     searchStartYear: Option[Int], // Marriage Details API
-    searchEndYear: Option[Int],   // Marriage Details API
-    latest: Option[Boolean],      // Marriage Details API
-    sequence: Option[Int]         // Marriage Details API
+    latest: Option[Boolean]       // Marriage Details API
 )
 
 object MarriageDetails {
@@ -218,11 +203,9 @@ object SchemeMembershipDetails {
 final case class GYSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier, // contribution credit api
-    contributionsAndCredits: ContributionsAndCredits,
-    benefitCalculation: BenefitCalculation,
-    benefitCalculationNotes: BenefitCalculationNotes,
-    marriageDetails: MarriageDetails,
-    schemeMembershipDetails: SchemeMembershipDetails
+    niContributionsAndCredits: ContributionsAndCredits,
+    longTermBenefitCalculation: LongTermBenefitCalculation,
+    marriageDetails: MarriageDetails
 ) extends EligibilityCheckDataRequest
 
 object GYSPEligibilityCheckDataRequest {
@@ -232,19 +215,15 @@ object GYSPEligibilityCheckDataRequest {
 
   def apply(
       nationalInsuranceNumber: Identifier, // contribution credit api
-      contributionsAndCredits: ContributionsAndCredits,
-      benefitCalculation: BenefitCalculation,
-      benefitCalculationNotes: BenefitCalculationNotes,
-      marriageDetails: MarriageDetails,
-      schemeMembershipDetails: SchemeMembershipDetails
+      niContributionsAndCredits: ContributionsAndCredits,
+      longTermBenefitCalculation: LongTermBenefitCalculation,
+      marriageDetails: MarriageDetails
   ) = new GYSPEligibilityCheckDataRequest(
     GYSP,
     nationalInsuranceNumber,
-    contributionsAndCredits,
-    benefitCalculation,
-    benefitCalculationNotes,
-    marriageDetails,
-    schemeMembershipDetails
+    niContributionsAndCredits,
+    longTermBenefitCalculation,
+    marriageDetails
   )
 
 }
@@ -252,7 +231,7 @@ object GYSPEligibilityCheckDataRequest {
 final case class BSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier, // contribution credit api
-    contributionsAndCredits: ContributionsAndCredits,
+    niContributionsAndCredits: ContributionsAndCredits,
     marriageDetails: MarriageDetails
 ) extends EligibilityCheckDataRequest
 
@@ -263,9 +242,9 @@ object BSPEligibilityCheckDataRequest {
 
   def apply(
       nationalInsuranceNumber: Identifier, // contribution credit api
-      contributionsAndCredits: ContributionsAndCredits,
+      niContributionsAndCredits: ContributionsAndCredits,
       marriageDetails: MarriageDetails
-  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, contributionsAndCredits, marriageDetails)
+  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, niContributionsAndCredits, marriageDetails)
 
 }
 

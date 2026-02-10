@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.connector
+package uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.connector
 
 import cats.data.EitherT
 import cats.implicits.*
@@ -22,13 +22,13 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.BenefitCalculationDetails
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.LongTermBenefitCalculationDetails
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsResponseValidation.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsResponseValidation.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -36,25 +36,25 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BenefitCalculationDetailsConnector @Inject() (
+class LongTermBenefitCalculationDetailsConnector @Inject() (
     npsClient: NpsClient,
     appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends NpsResponseHandler {
 
-  val apiName: ApiName = ApiName.BenefitCalculationDetails
+  val apiName: ApiName = ApiName.LongTermBenefitCalculationDetails
 
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchBenefitCalculationDetails(
       benefitType: BenefitType,
       identifier: Identifier,
-      sequenceNumber: Option[SequenceNumber],
+      sequenceNumber: Option[AssociatedCalculationSequenceNumber],
       longTermBenefitType: Option[LongTermBenefitType],
       pensionProcessingArea: Option[PensionProcessingArea]
   )(
       implicit hc: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, BenefitCalculationDetailsResult] = {
+  ): EitherT[Future, BenefitEligibilityError, LongTermBenefitCalculationDetailsResult] = {
 
     def seqNo: Option[String]             = sequenceNumber.map(s => s.value.toString)
     def typeFilter: Option[String]        = longTermBenefitType.map(t => t.entryName)
@@ -75,7 +75,9 @@ class BenefitCalculationDetailsConnector @Inject() (
         val benefitCalculationDetailsResult =
           response.status match {
             case OK =>
-              attemptStrictParse[BenefitCalculationDetailsSuccessResponse](benefitType, response).map(toSuccessResult)
+              attemptStrictParse[LongTermBenefitCalculationDetailsSuccessResponse](benefitType, response).map(
+                toSuccessResult
+              )
             case BAD_REQUEST =>
               attemptParse[NpsErrorResponse400](response).map { resp =>
                 logger.warn(s"Benefit Calculation Details returned a 400: $resp")

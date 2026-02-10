@@ -150,12 +150,6 @@ object SchemeMembershipDetailsSuccess {
     implicit val reads: Format[CreationMicrofilmNumber] = Json.valueFormat[CreationMicrofilmNumber]
   }
 
-  case class CallbackURL(value: String) extends AnyVal
-
-  object CallbackURL {
-    implicit val reads: Format[CallbackURL] = Json.valueFormat[CallbackURL]
-  }
-
   case class ErrorResourceObj400(
       reason: String,
       code: String
@@ -206,15 +200,6 @@ object SchemeMembershipDetailsSuccess {
 
   object ErrorResponse422 {
     implicit val reads: Reads[ErrorResponse422] = Json.reads[ErrorResponse422]
-  }
-
-  // Main data case classes
-  case class Callback(
-      callbackURL: Option[CallbackURL]
-  )
-
-  object Callback {
-    implicit val reads: Format[Callback] = Json.format[Callback]
   }
 
   case class SchemeMembershipStartDate(value: LocalDate) extends AnyVal
