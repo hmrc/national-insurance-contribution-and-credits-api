@@ -91,131 +91,129 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   "JobSeekersAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
-      "should retrieve data successfully" - {
-        "Class1" in {
+      "should retrieve class 1 data successfully" in {
 
-          val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-            totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
-            class1ContributionAndCredits = Some(
-              List(
-                Class1ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-                  contributionCategory = Some(ContributionCategory.None),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                  creditSource = Some(CreditSource.NotKnown),
-                  employerName = Some(EmployerName("ipOpMs")),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L)
-                )
-              )
-            ),
-            class2ContributionAndCredits = None
-          )
-
-          (mockNiContributionsAndCreditsConnector
-            .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-            .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
-            .returning(
-              EitherT.rightT(
-                SuccessResult(
-                  ApiName.NiContributionAndCredits,
-                  niContributionsAndCreditsSuccessResponse
-                )
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
+          class1ContributionAndCredits = Some(
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
               )
             )
+          ),
+          class2ContributionAndCredits = None
+        )
 
-          underTest
-            .fetchEligibilityData(eligibilityCheckDataRequest)
-            .value
-            .futureValue shouldBe Right(
-            EligibilityCheckDataResultJSA(
-              NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
-            )
-          )
-
-        }
-
-        "Class2" in {
-
-          val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-            Some(TotalGraduatedPensionUnits(53)),
-            class1ContributionAndCredits = None,
-            class2ContributionAndCredits = Some(
-              List(
-                Class2ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                  class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                  creditSource = Some(CreditSource.NotKnown),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L)
-                )
+        (mockNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
+          .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
+          .returning(
+            EitherT.rightT(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                niContributionsAndCreditsSuccessResponse
               )
             )
           )
 
-          (mockNiContributionsAndCreditsConnector
-            .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-            .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
-            .returning(
-              EitherT.rightT(
-                SuccessResult(
-                  ApiName.NiContributionAndCredits,
-                  niContributionsAndCreditsSuccessResponse
-                )
-              )
-            )
-
-          underTest
-            .fetchEligibilityData(eligibilityCheckDataRequest)
-            .value
-            .futureValue shouldBe Right(
-            EligibilityCheckDataResultJSA(
-              NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
-            )
+        underTest
+          .fetchEligibilityData(eligibilityCheckDataRequest)
+          .value
+          .futureValue shouldBe Right(
+          EligibilityCheckDataResultJSA(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
           )
+        )
 
-        }
-
-        "Empty" in {
-
-          val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-            totalGraduatedPensionUnits = None,
-            class1ContributionAndCredits = None,
-            class2ContributionAndCredits = None
-          )
-
-          (mockNiContributionsAndCreditsConnector
-            .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-            .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
-            .returning(
-              EitherT.rightT(
-                SuccessResult(
-                  ApiName.NiContributionAndCredits,
-                  niContributionsAndCreditsSuccessResponse
-                )
-              )
-            )
-
-          underTest
-            .fetchEligibilityData(eligibilityCheckDataRequest)
-            .value
-            .futureValue shouldBe Right(
-            EligibilityCheckDataResultJSA(
-              NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
-            )
-          )
-
-        }
       }
 
-      "should retrieve ValidationError" in {
+      "should retrieve class 2 data successfully" in {
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          Some(TotalGraduatedPensionUnits(53)),
+          class1ContributionAndCredits = None,
+          class2ContributionAndCredits = Some(
+            List(
+              Class2ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        (mockNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
+          .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
+          .returning(
+            EitherT.rightT(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                niContributionsAndCreditsSuccessResponse
+              )
+            )
+          )
+
+        underTest
+          .fetchEligibilityData(eligibilityCheckDataRequest)
+          .value
+          .futureValue shouldBe Right(
+          EligibilityCheckDataResultJSA(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
+          )
+        )
+
+      }
+
+      "should retrieve empty data successfully" in {
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          totalGraduatedPensionUnits = None,
+          class1ContributionAndCredits = None,
+          class2ContributionAndCredits = None
+        )
+
+        (mockNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
+          .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
+          .returning(
+            EitherT.rightT(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                niContributionsAndCreditsSuccessResponse
+              )
+            )
+          )
+
+        underTest
+          .fetchEligibilityData(eligibilityCheckDataRequest)
+          .value
+          .futureValue shouldBe Right(
+          EligibilityCheckDataResultJSA(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
+          )
+        )
+
+      }
+
+      "should propagate the error returned from the connector (ValidationError)" in {
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
@@ -231,7 +229,7 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         )
       }
 
-      "should retrieve ParsingError" in {
+      "should propagate the error returned from the connector (ParsingError)" in {
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
@@ -247,7 +245,7 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         )
       }
 
-      "should retrieve NpsClientError" in {
+      "should propagate the error returned from the connector (NpsClientError)" in {
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)

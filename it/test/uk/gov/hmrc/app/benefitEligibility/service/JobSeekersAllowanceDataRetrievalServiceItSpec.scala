@@ -96,10 +96,10 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val testPath = "/national-insurance/contributions-and-credits"
+      val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
 
       val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
-        Identifier(""),
+        Identifier("GD379251T"),
         ContributionsAndCredits(
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
@@ -179,7 +179,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           val responseBody = Json.parse(successResponseJson).toString()
 
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -200,7 +200,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            postRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
           )
 
         }
@@ -229,7 +229,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_REQUEST)
@@ -254,7 +254,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            postRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
           )
         }
       }
@@ -282,7 +282,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_REQUEST)
@@ -307,7 +307,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            postRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
           )
         }
       }
@@ -324,7 +324,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(FORBIDDEN)
@@ -349,7 +349,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            postRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
           )
         }
       }
@@ -358,7 +358,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
         "should parse error response and map to result" in {
 
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(NOT_FOUND)
@@ -379,7 +379,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            postRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
           )
         }
       }
@@ -400,7 +400,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           val responseBody = Json.parse(errorResponse).toString()
 
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(UNPROCESSABLE_ENTITY)
@@ -425,7 +425,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            postRequestedFor(urlEqualTo(testPath))
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
           )
         }
       }
@@ -433,7 +433,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
       "when the NiContributionsAndCredits endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
         "should map to InternalServerError result" in {
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(INTERNAL_SERVER_ERROR)
@@ -476,7 +476,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
 
         "should map to Service unavailable result" in {
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(SERVICE_UNAVAILABLE)
@@ -509,7 +509,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
 
           forAll(statusCodes) { statusCode =>
             server.stubFor(
-              post(urlEqualTo(testPath))
+              post(urlEqualTo(npsCreditsAndContributionsPath))
                 .willReturn(
                   aResponse()
                     .withStatus(statusCode)
@@ -535,7 +535,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
       "when the NiContributionsAndCredits endpoint returns malformed JSON" - {
         "should return parsing error" in {
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -555,7 +555,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
       "when the request to the downstream fails unexpectedly" - {
         "should return downstream error" in {
           server.stubFor(
-            post(urlEqualTo(testPath))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
