@@ -72,12 +72,17 @@ class MaternityAllowanceDataRetrievalService @Inject() (
         eligibilityCheckDataRequest.liabilities.liabilityStart,
         eligibilityCheckDataRequest.liabilities.liabilityEnd
       )
-    ).parTupled.map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
-      EligibilityCheckDataResultMA(
-        class2MaReceiptsResult,
-        liabilityResult,
-        contributionsAndCreditResult
-      )
-    }
+    ).parTupled
+      .map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
+        EligibilityCheckDataResultMA(
+          class2MaReceiptsResult,
+          liabilityResult,
+          contributionsAndCreditResult
+        )
+      }
+      .leftMap { error =>
+        // TODO ADD LOGGING
+        DataRetrievalServiceError()
+      }
 
 }

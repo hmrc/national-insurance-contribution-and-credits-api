@@ -78,7 +78,7 @@ class Class2MAReceiptsConnector @Inject() (
     )
     val path =
       RequestBuilder.buildPath(
-        s"${appConfig.hipBaseUrl}/ni/class-2/${identifier.value}/maternity-allowance/receipts",
+        s"${appConfig.hipBaseUrl}/class-2/${identifier.value}/maternity-allowance/receipts",
         options
       )
 
