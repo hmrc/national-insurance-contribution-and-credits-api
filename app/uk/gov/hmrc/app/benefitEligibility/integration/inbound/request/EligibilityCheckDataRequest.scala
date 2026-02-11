@@ -165,8 +165,8 @@ object LongTermBenefitCalculation {
 }
 
 case class MarriageDetails(
-    searchStartYear: Option[Int], // Marriage Details API
-    latest: Option[Boolean]       // Marriage Details API
+    searchStartYear: Option[StartYear], // Marriage Details API
+    latest: Option[FilterLatest]        // Marriage Details API
 )
 
 object MarriageDetails {
@@ -205,7 +205,7 @@ final case class GYSPEligibilityCheckDataRequest private (
     nationalInsuranceNumber: Identifier, // contribution credit api
     niContributionsAndCredits: ContributionsAndCredits,
     longTermBenefitCalculation: LongTermBenefitCalculation,
-    marriageDetails: MarriageDetails
+    marriageDetails: Option[MarriageDetails]
 ) extends EligibilityCheckDataRequest
 
 object GYSPEligibilityCheckDataRequest {
@@ -217,7 +217,7 @@ object GYSPEligibilityCheckDataRequest {
       nationalInsuranceNumber: Identifier, // contribution credit api
       niContributionsAndCredits: ContributionsAndCredits,
       longTermBenefitCalculation: LongTermBenefitCalculation,
-      marriageDetails: MarriageDetails
+      marriageDetails: Option[MarriageDetails]
   ) = new GYSPEligibilityCheckDataRequest(
     GYSP,
     nationalInsuranceNumber,
@@ -232,7 +232,7 @@ final case class BSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier, // contribution credit api
     niContributionsAndCredits: ContributionsAndCredits,
-    marriageDetails: MarriageDetails
+    marriageDetails: Option[MarriageDetails]
 ) extends EligibilityCheckDataRequest
 
 object BSPEligibilityCheckDataRequest {
@@ -243,7 +243,7 @@ object BSPEligibilityCheckDataRequest {
   def apply(
       nationalInsuranceNumber: Identifier, // contribution credit api
       niContributionsAndCredits: ContributionsAndCredits,
-      marriageDetails: MarriageDetails
+      marriageDetails: Option[MarriageDetails]
   ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, niContributionsAndCredits, marriageDetails)
 
 }

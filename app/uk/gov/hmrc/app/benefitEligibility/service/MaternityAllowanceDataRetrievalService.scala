@@ -20,7 +20,8 @@ import cats.Semigroup
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, DataRetrievalServiceError}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
@@ -29,8 +30,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -79,15 +78,6 @@ class MaternityAllowanceDataRetrievalService @Inject() (
         liabilityResult,
         contributionsAndCreditResult
       )
-    }
-
-}
-
-object Test {
-
-  implicit val benefitEligibilityErrorSemiGroup: Semigroup[BenefitEligibilityError] =
-    new Semigroup[BenefitEligibilityError] {
-      override def combine(x: BenefitEligibilityError, y: BenefitEligibilityError): BenefitEligibilityError = x
     }
 
 }

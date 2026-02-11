@@ -19,23 +19,21 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.catsSyntaxTuple2Parallel
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, BenefitType}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, DataRetrievalServiceError}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.BSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BspDataRetrievalService @Inject() (
-    marriageDetailsConnector: MarriageDetailsConnector,
+class BereavementSupportPaymentDataRetrievalService @Inject() (
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
-    appConfig: AppConfig
+    marriageDetailsConnector: MarriageDetailsConnector
 )(implicit ec: ExecutionContext) {
 
   def fetchEligibilityData(
@@ -55,16 +53,21 @@ class BspDataRetrievalService @Inject() (
       marriageDetailsConnector.fetchMarriageDetails(
         eligibilityCheckDataRequest.benefitType,
         eligibilityCheckDataRequest.nationalInsuranceNumber,
-        eligibilityCheckDataRequest.marriageDetails.searchStartYear,
-        eligibilityCheckDataRequest.marriageDetails.latest,
+        eligibilityCheckDataRequest.marriageDetails.flatMap(_.searchStartYear),
+        eligibilityCheckDataRequest.marriageDetails.flatMap(_.latest),
         None
       )
-    ).parTupled.map { case (contributionsAndCreditResult, marriageDetailsResult) =>
-      EligibilityCheckDataResultBSP(
-        contributionsAndCreditResult,
-        marriageDetailsResult
-      )
+    ).parTupled
+      .map { case (contributionsAndCreditResult, marriageDetailsResult) =>
+        EligibilityCheckDataResultBSP(
+          contributionsAndCreditResult,
+          marriageDetailsResult
+        )
 
-    }
+      }
+      .leftMap {
+        // TODO add logging
+        error => DataRetrievalServiceError()
+      }
 
 }

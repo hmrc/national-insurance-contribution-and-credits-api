@@ -23,9 +23,11 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   ApiName,
   BenefitEligibilityError,
   BenefitType,
+  FilterLatest,
   Identifier,
   RequestBuilder,
-  RequestOption
+  RequestOption,
+  StartYear
 }
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
@@ -72,13 +74,13 @@ class MarriageDetailsConnector @Inject() (
   def fetchMarriageDetails(
       benefitType: BenefitType,
       identifier: Identifier,
-      startYear: Option[Int],
-      latestFilter: Option[Boolean],
+      startYear: Option[StartYear],
+      latestFilter: Option[FilterLatest],
       seq: Option[Int]
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
-    def searchStartYear: Option[String] = startYear.map(sY => sY.toString)
-    def latest: Option[String]          = latestFilter.map(l => l.toString)
+    def searchStartYear: Option[String] = startYear.map(sy => sy.value.toString)
+    def latest: Option[String]          = latestFilter.map(l => l.value.toString)
     def sequence: Option[String]        = seq.map(s => s.toString)
 
     val options = List(
@@ -88,7 +90,7 @@ class MarriageDetailsConnector @Inject() (
     )
 
     val path = RequestBuilder.buildPath(
-      s"${appConfig.hipBaseUrl}/ni/individual/${identifier.value}/marriage-cp",
+      s"${appConfig.hipBaseUrl}/individual/${identifier.value}/marriage-cp",
       options
     )
 
