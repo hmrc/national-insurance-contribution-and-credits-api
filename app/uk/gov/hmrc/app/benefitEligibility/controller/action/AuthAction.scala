@@ -18,9 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.controller.action
 
 import play.api.libs.json.Json
 import play.api.mvc.Results.{Forbidden, InternalServerError}
-import play.api.mvc._
+import play.api.mvc.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.error.{ErrorCode, ErrorReason, ErrorResponse}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.Failure
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -44,9 +45,19 @@ class AuthAction @Inject() (
       block(request)
     }.recover {
       case e: UnsupportedAuthProvider =>
-        Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
-      case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
-      case _                     => InternalServerError.withHeaders(generateResponseHeader())
+        Forbidden(
+          Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason("invalid or expired authentication token")))
+        )
+          .withHeaders(generateResponseHeader())
+      case e: BearerTokenExpired =>
+        Forbidden(
+          Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason("invalid or expired authentication token")))
+        )
+          .withHeaders(generateResponseHeader())
+      case e: MissingBearerToken =>
+        Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason("authentication token is required"))))
+          .withHeaders(generateResponseHeader())
+      case _ => InternalServerError.withHeaders(generateResponseHeader())
     }
   }
 
