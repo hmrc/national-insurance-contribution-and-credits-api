@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.common
 
+import cats.Semigroup
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, EligibilityCheckDataResult}
@@ -39,8 +40,28 @@ sealed trait ServiceError extends Exception with WithLoggableDebugString {
 
 sealed trait BenefitEligibilityError extends ServiceError { this: Product with Serializable => }
 
-case class ValidationError(errors: List[String]) extends BenefitEligibilityError //TODO - should return as a 500 to DWP
+object BenefitEligibilityError {
 
-case class ParsingError(throwable: Throwable) extends BenefitEligibilityError //TODO - should return as a 500 to DWP
+  implicit val benefitEligibilityErrorSemiGroup: Semigroup[BenefitEligibilityError] =
+    new Semigroup[BenefitEligibilityError] {
+      override def combine(x: BenefitEligibilityError, y: BenefitEligibilityError): BenefitEligibilityError =
+        (x, y) match {
+          case (_, _) => DataRetrievalServiceError()
+        }
+    }
 
-case class NpsClientError(throwable: Throwable) extends BenefitEligibilityError //TODO - should return as a 500 to DWP
+}
+
+case class ValidationError(errors: List[String]) extends BenefitEligibilityError {
+  override def getMessage: String = errors.mkString(",")
+} //TODO - should return as a 500 to DWP
+
+case class ParsingError(throwable: Throwable) extends BenefitEligibilityError {
+  override def getMessage: String = throwable.getMessage
+} //TODO - should return as a 500 to DWP
+
+case class NpsClientError(throwable: Throwable) extends BenefitEligibilityError {
+  override def getMessage: String = throwable.getMessage
+} //TODO - should return as a 500 to DWP
+
+case class DataRetrievalServiceError() extends BenefitEligibilityError

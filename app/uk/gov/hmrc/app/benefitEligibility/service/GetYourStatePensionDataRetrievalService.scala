@@ -26,6 +26,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   Identifier,
   LongTermBenefitType
 }
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   ContributionsAndCredits,
   GYSPEligibilityCheckDataRequest,
@@ -52,7 +53,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   NpsApiResult,
   SchemeMembershipDetailsResult
 }
-import uk.gov.hmrc.app.benefitEligibility.service.Test.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
@@ -138,13 +138,13 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   }
 
   private[service] def fetchMarriageDetailsData(
-      marriageDetails: MarriageDetails
+      marriageDetails: Option[MarriageDetails]
   )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
     marriageDetailsConnector.fetchMarriageDetails(
       requestKey.benefitType,
       requestKey.nationalInsuranceNumber,
-      marriageDetails.searchStartYear,
-      marriageDetails.latest,
+      marriageDetails.flatMap(_.searchStartYear),
+      marriageDetails.flatMap(_.latest),
       None
     )
 

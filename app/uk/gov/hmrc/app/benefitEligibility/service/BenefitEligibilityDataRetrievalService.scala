@@ -39,7 +39,7 @@ class BenefitEligibilityDataRetrievalService @Inject() (
     employmentSupportAllowanceDataRetrievalService: EmploymentSupportAllowanceDataRetrievalService,
     jobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService,
     getYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService,
-    bspDataRetrievalService: BspDataRetrievalService
+    bspDataRetrievalService: BereavementSupportPaymentDataRetrievalService
 )(implicit ec: ExecutionContext) {
 
   def getEligibilityData(
