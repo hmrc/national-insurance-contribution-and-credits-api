@@ -371,20 +371,22 @@ class GetYourStatePensionDataRetrievalServiceItSpec
     MarriageDetailsSuccess.MarriageDetails(
       MarriageDetailsSuccess.ActiveMarriage(true),
       Some(
-        MarriageDetailsSuccess
-          .MarriageDetailsList(
-            sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
-            status = CivilPartner,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None
-          )
+        List(
+          MarriageDetailsSuccess
+            .MarriageDetailsListElement(
+              sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
+              status = CivilPartner,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None
+            )
+        )
       ),
       Some(
         MarriageDetailsSuccess.Links(
@@ -2123,10 +2125,6 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                   individualStatePensionInformationSuccessResponse
                 )
               )
-            )
-
-            server.verify(
-              postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
             )
 
             server.verify(

@@ -119,13 +119,13 @@ object MarriageDetailsSuccess {
     implicit val endDateReads: Format[MarriageEndDate] = Json.valueFormat[MarriageEndDate]
   }
 
-  final case class SpouseForename private (value: String) extends AnyVal
+  final case class SpouseForename(value: String) extends AnyVal
 
   object SpouseForename {
     implicit val spouseForenameFormat: Format[SpouseForename] = Json.valueFormat[SpouseForename]
   }
 
-  final case class SpouseSurname private (value: String) extends AnyVal
+  final case class SpouseSurname(value: String) extends AnyVal
 
   object SpouseSurname {
     implicit val spouseSurnameFormat: Format[SpouseSurname] = Json.valueFormat[SpouseSurname]
@@ -143,9 +143,9 @@ object MarriageDetailsSuccess {
     implicit val reconciliationDateReads: Format[ReconciliationDate] = Json.valueFormat[ReconciliationDate]
   }
 
-  case class MarriageDetailsList(
-      sequenceNumber: SequenceNumber, // TODO make required filed
-      status: MarriageStatus,         // TODO make required filed
+  case class MarriageDetailsListElement(
+      sequenceNumber: SequenceNumber,
+      status: MarriageStatus,
       startDate: Option[MarriageStartDate],
       startDateStatus: Option[MarriageStartDateStatus],
       endDate: Option[MarriageEndDate],
@@ -157,8 +157,11 @@ object MarriageDetailsSuccess {
       reconciliationDate: Option[ReconciliationDate]
   )
 
-  object MarriageDetailsList {
-    implicit val marriageDetailsListFormats: Format[MarriageDetailsList] = Json.format[MarriageDetailsList]
+  object MarriageDetailsListElement {
+
+    implicit val marriageDetailsListFormats: Format[MarriageDetailsListElement] =
+      Json.format[MarriageDetailsListElement]
+
   }
 
   // endregion MarriageDetailsList
@@ -202,7 +205,7 @@ object MarriageDetailsSuccess {
 
   case class MarriageDetails(
       activeMarriage: ActiveMarriage,
-      marriageDetailsList: Option[MarriageDetailsList],
+      marriageDetailsList: Option[List[MarriageDetailsListElement]],
       _links: Option[Links]
   )
 
