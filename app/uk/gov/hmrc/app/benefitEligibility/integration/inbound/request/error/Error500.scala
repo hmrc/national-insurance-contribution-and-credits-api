@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.common
+package uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.error
 
 import play.api.libs.json.{Format, Json}
 
-import java.time.LocalDate
+case class Error500(code: ErrorCode, reason: ErrorReason)
 
-case class DateOfBirth(value: LocalDate) extends AnyVal
-
-object DateOfBirth {
-  implicit val dateOfBirthFormat: Format[DateOfBirth] = Json.valueFormat[DateOfBirth]
+object Error500 {
+  implicit val error500Formats: Format[Error500] = Json.format[Error500]
 }
