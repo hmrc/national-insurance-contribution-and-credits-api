@@ -188,20 +188,22 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     MarriageDetailsSuccess.MarriageDetails(
       MarriageDetailsSuccess.ActiveMarriage(true),
       Some(
-        MarriageDetailsSuccess
-          .MarriageDetailsList(
-            sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
-            status = CivilPartner,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None
-          )
+        List(
+          MarriageDetailsSuccess
+            .MarriageDetailsListElement(
+              sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
+              status = CivilPartner,
+              startDate = None,
+              startDateStatus = None,
+              endDate = None,
+              endDateStatus = None,
+              spouseIdentifier = None,
+              spouseForename = None,
+              spouseSurname = None,
+              separationDate = None,
+              reconciliationDate = None
+            )
+        )
       ),
       Some(
         MarriageDetailsSuccess.Links(
@@ -742,10 +744,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |   "marriageDetailsResult":{
             |      "marriageDetails":{
             |         "activeMarriage":true,
-            |         "marriageDetailsList":{
+            |         "marriageDetailsList":[{
             |            "sequenceNumber":2,
             |            "status":"CIVIL PARTNER"
-            |         },
+            |         }],
             |         "_links":{
             |            "self":{
             |               "href":"",
@@ -883,10 +885,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |   "marriageDetailsResult":{
             |      "marriageDetails":{
             |         "activeMarriage":true,
-            |         "marriageDetailsList":{
+            |         "marriageDetailsList":[{
             |            "sequenceNumber":2,
             |            "status":"CIVIL PARTNER"
-            |         },
+            |         }],
             |         "_links":{
             |            "self":{
             |               "href":"",

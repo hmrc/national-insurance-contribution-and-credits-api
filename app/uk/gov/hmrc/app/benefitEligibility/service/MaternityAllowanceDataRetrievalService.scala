@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import cats.Semigroup
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, DataRetrievalServiceError}
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, DataRetrievalServiceError}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult

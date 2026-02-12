@@ -189,20 +189,22 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     MarriageDetailsSuccess.MarriageDetails(
       MarriageDetailsSuccess.ActiveMarriage(true),
       Some(
-        MarriageDetailsSuccess
-          .MarriageDetailsList(
-            sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
-            status = CivilPartner,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None
-          )
+        List(
+          MarriageDetailsSuccess
+            .MarriageDetailsListElement(
+              sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
+              status = CivilPartner,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None,
+              None
+            )
+        )
       ),
       Some(
         MarriageDetailsSuccess.Links(

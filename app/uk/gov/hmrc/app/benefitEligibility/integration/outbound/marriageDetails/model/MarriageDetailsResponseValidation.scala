@@ -29,16 +29,13 @@ object MarriageDetailsResponseValidation {
     (_, response: MarriageDetailsSuccessResponse) =>
       response.marriageDetails.marriageDetailsList
         .map { marriageDetailsList =>
-          List(
-            marriageDetailsList.spouseForename.map(forename =>
-              StringPatternValidation.validate(forename, "^([A-Za-z '-]{1,99})+$".r)
-            ),
-            marriageDetailsList.spouseSurname.map(surname =>
-              StringPatternValidation.validate(surname, "^([A-Za-z '-]{2,99})+$".r)
-            ),
-            Some(NumberValidation.validate(marriageDetailsList.sequenceNumber, minValue = 1, maxValue = 126))
-          ).flatten
-
+          marriageDetailsList.flatMap { el =>
+            List(
+              el.spouseSurname.map(forename => StringPatternValidation.validate(forename, "^([A-Za-z '-]{1,99})+$".r)),
+              el.spouseForename.map(forename => StringPatternValidation.validate(forename, "^([A-Za-z '-]{1,99})+$".r)),
+              Some(NumberValidation.validate(el.sequenceNumber, minValue = 1, maxValue = 126))
+            ).flatten
+          }
         }
         .map(_.sequence_.as(SuccessfulResult))
         .getOrElse(Validated.validNel[String, SuccessfulResult](SuccessfulResult))
