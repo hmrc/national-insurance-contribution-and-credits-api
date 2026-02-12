@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.app.benefitEligibility.common.CorrelationId
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.error.{Error500, ErrorCode, ErrorReason}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.error.{ErrorCode, ErrorReason, ErrorResponse}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{
   BenefitEligibilityInfoErrorResponse,
   BenefitEligibilityInfoResponse
@@ -61,7 +61,7 @@ class BenefitEligibilityDataController @Inject() (
                   logger.warn(s"Benefit Eligibility Data Retrieval Service returned a 500: $serviceError")
                   InternalServerError(
                     Json.toJson(
-                      new Error500(
+                      new ErrorResponse(
                         ErrorCode.InternalServerError,
                         ErrorReason("an unexpected error occurred while processing the request")
                       )
