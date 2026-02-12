@@ -23,6 +23,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
   AssociatedCalculationSequenceNumber,
   BenefitEligibilityError,
   BenefitType,
+  DataRetrievalServiceError,
   Identifier,
   LongTermBenefitType
 }
@@ -94,24 +95,32 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       fetchBenefitSchemeMembershipDetailsData(),
       fetchLongTermBenefitCalculationDetailsData(eligibilityCheckDataRequest.longTermBenefitCalculation),
       fetchIndividualStatePensionInformation()
-    ).parTupled.map {
-      case (
+    ).parTupled
+      .map {
+        case (
+              contributionsAndCreditResult,
+              marriageDetailsResult,
+              BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, benefitSchemeDetailsResults),
+              LongTermBenefitCalculationDetailsData(
+                longTermBenefitCalculationDetailsResult,
+                longTermBenefitNotesResults
+              ),
+              individualStatePensionResult
+            ) =>
+          EligibilityCheckDataResultGYSP(
             contributionsAndCreditResult,
+            schemeMembershipDetailsResult,
+            benefitSchemeDetailsResults,
+            longTermBenefitCalculationDetailsResult,
+            longTermBenefitNotesResults,
             marriageDetailsResult,
-            BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, benefitSchemeDetailsResults),
-            LongTermBenefitCalculationDetailsData(longTermBenefitCalculationDetailsResult, longTermBenefitNotesResults),
             individualStatePensionResult
-          ) =>
-        EligibilityCheckDataResultGYSP(
-          contributionsAndCreditResult,
-          schemeMembershipDetailsResult,
-          benefitSchemeDetailsResults,
-          longTermBenefitCalculationDetailsResult,
-          longTermBenefitNotesResults,
-          marriageDetailsResult,
-          individualStatePensionResult
-        )
-    }
+          )
+      }
+      .leftMap { error =>
+        // TODO add logging
+        DataRetrievalServiceError()
+      }
 
   }
 
