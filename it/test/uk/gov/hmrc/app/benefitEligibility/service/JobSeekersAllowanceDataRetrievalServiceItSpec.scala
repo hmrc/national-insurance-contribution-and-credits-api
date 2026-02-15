@@ -51,7 +51,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   JSAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
@@ -100,7 +100,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
 
       val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
         Identifier("GD379251T"),
-        ContributionsAndCredits(
+        ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)

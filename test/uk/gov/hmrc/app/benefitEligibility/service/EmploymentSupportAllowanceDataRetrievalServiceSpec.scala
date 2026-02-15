@@ -25,7 +25,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   ESAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultESA
@@ -81,7 +81,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
 
   private val eligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),
-    niContributionsAndCredits = ContributionsAndCredits(
+    niContributionsAndCredits = ContributionsAndCreditsRequestParams(
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)

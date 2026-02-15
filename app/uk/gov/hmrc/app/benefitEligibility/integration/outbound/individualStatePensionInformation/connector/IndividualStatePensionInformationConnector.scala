@@ -22,7 +22,6 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.IndividualStatePension
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -35,13 +34,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorResponse400,
   NpsErrorResponseHipOrigin,
   NpsSingleErrorResponse
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError
-import IndividualStatePensionInformationError.{
-  IndividualStatePensionInformationErrorResponse400,
-  IndividualStatePensionInformationErrorResponse403,
-  IndividualStatePensionInformationErrorResponse503
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationResponseValidation.individualStatePensionInformationResponseValidator
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse

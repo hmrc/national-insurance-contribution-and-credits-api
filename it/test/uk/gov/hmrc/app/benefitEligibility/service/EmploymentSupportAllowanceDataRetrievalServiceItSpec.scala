@@ -51,7 +51,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsStandardErrorResponse400
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   ESAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultESA
@@ -101,7 +101,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
 
       val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
         Identifier("GD379251T"),
-        ContributionsAndCredits(
+        ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)

@@ -23,9 +23,8 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.shouldBe
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsResponseValidation
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
@@ -75,6 +74,41 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
       val niContributionsAndCreditsSuccessResponse2 = NiContributionsAndCreditsSuccessResponse(
         Some(TotalGraduatedPensionUnits(53)),
         class1ContributionAndCredits = None,
+        class2ContributionAndCredits = Some(
+          List(
+            Class2ContributionAndCredits(
+              taxYear = Some(TaxYear(2022)),
+              numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+              contributionCreditType = Some(NiContributionCreditType.C1),
+              class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+              class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+              class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+              creditSource = Some(CreditSource.NotKnown),
+              latePaymentPeriod = Some(LatePaymentPeriod.L)
+            )
+          )
+        )
+      )
+
+      val fullSuccessResponse: NiContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+        Some(TotalGraduatedPensionUnits(53)),
+        class1ContributionAndCredits = Some(
+          List(
+            Class1ContributionAndCredits(
+              taxYear = Some(TaxYear(2022)),
+              numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+              contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+              contributionCategory = Some(ContributionCategory.None),
+              contributionCreditType = Some(NiContributionCreditType.C1),
+              primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+              class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+              primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+              creditSource = Some(CreditSource.NotKnown),
+              employerName = Some(EmployerName("ipOpMs")),
+              latePaymentPeriod = Some(LatePaymentPeriod.L)
+            )
+          )
+        ),
         class2ContributionAndCredits = Some(
           List(
             Class2ContributionAndCredits(
@@ -241,6 +275,12 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
             """$.class2ContributionAndCredits[0].taxYear: must have a maximum value of 2099"""
           )
 
+      }
+
+      "should match the openapi schema for a full response" in {
+        niContributionsAndCreditsResponseSuccessResponseJsonSchema.validateAndGetErrors(
+          Json.toJson(fullSuccessResponse)
+        ) shouldBe Nil
       }
 
       "deserialises and serialises successfully" in {

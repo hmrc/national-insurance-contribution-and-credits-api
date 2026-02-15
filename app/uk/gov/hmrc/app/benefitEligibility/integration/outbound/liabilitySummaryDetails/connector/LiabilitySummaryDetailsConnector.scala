@@ -22,7 +22,6 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -38,20 +37,10 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorResponseHipOrigin,
   NpsSingleErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.{
-  LiabilitySummaryDetailsErrorResponse400,
-  LiabilitySummaryDetailsErrorResponse403,
-  LiabilitySummaryDetailsErrorResponse422
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsResponseValidator
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
-  LiabilitySummaryDetailsSuccessResponse,
-  OccurrenceNumber
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   LiabilityResult,
   NpsApiResult,
@@ -61,9 +50,10 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class LiabilitySummaryDetailsConnector @Inject() (
     npsClient: NpsClient,

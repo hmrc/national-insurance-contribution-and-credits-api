@@ -36,19 +36,18 @@ import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
   OfficeDetails,
   OfficeLocationDecode,
   OfficeLocationValue
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.EnumOffidtp
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
+  CalculationSource,
+  CalculationStatus,
+  Payday
+}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 

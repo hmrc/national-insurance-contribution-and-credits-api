@@ -18,17 +18,6 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.
 
 import cats.data.EitherT
 import play.api.http.Status.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.MarriageDetails
-import uk.gov.hmrc.app.benefitEligibility.common.{
-  ApiName,
-  BenefitEligibilityError,
-  BenefitType,
-  FilterLatest,
-  Identifier,
-  RequestBuilder,
-  RequestOption,
-  StartYear
-}
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -44,12 +33,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsMultiErrorResponse,
   NpsSingleErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsError.{
-  MarriageDetailsErrorResponse400,
-  MarriageDetailsErrorResponse403,
-  MarriageDetailsErrorResponse422
-}
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{MarriageDetailsResult, NpsClient, NpsResponseHandler}

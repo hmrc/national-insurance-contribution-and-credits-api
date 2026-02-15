@@ -26,7 +26,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredit
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   BSPEligibilityCheckDataRequest,
-  ContributionsAndCredits
+  ContributionsAndCreditsRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -93,7 +93,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
   private val eligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),
-    niContributionsAndCredits = ContributionsAndCredits(
+    niContributionsAndCredits = ContributionsAndCreditsRequestParams(
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)

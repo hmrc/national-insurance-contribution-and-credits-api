@@ -21,16 +21,12 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorCode404.ErrorCode404
-import uk.gov.hmrc.app.benefitEligibility.common.NpsErrorReason404.NotFound
-import uk.gov.hmrc.app.benefitEligibility.common._
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode403.NpsErrorCode403_2
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorReason403.Forbidden
-import uk.gov.hmrc.app.benefitEligibility.common.npsError._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesError._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess._
+import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.LongTermBenefitNotesFormats._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 
 class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
 
@@ -332,9 +328,9 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
 
   }
 
-  "StandardErrorResponse400" - {
+  "ErrorResponse400 (standard)" - {
 
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesStandardErrorResponse400]]
+    val jsonFormat = implicitly[Format[NpsStandardErrorResponse400]]
 
     def longTermBenefitNotes400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -344,66 +340,70 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val standardErrorResponse400 = LongTermBenefitNotesStandardErrorResponse400(
+    val npsStandardErrorResponse400 = NpsStandardErrorResponse400(
       HipOrigin.Hip,
-      LongTermBenefitNotesError.LongTermBenefitNotesError400(
-        List(
-          LongTermBenefitNotesErrorItem400(
-            NpsErrorReason("HTTP message not readable"),
-            NpsErrorCode400.NpsErrorCode400_2
-          ),
-          LongTermBenefitNotesErrorItem400(
-            NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-            NpsErrorCode400.NpsErrorCode400_1
+      NpsMultiErrorResponse(
+        Some(
+          List(
+            NpsSingleErrorResponse(
+              NpsErrorReason("HTTP message not readable"),
+              NpsErrorCode("")
+            ),
+            NpsSingleErrorResponse(
+              NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+              NpsErrorCode("")
+            )
           )
         )
       )
     )
 
-    val standardErrorResponse400JsonString =
+    val errorResponse400JsonString =
       """{
-        | "origin": "HIP",
-        | "response":
-        | {
-        |   "failures": [
-        |     {
-        |       "reason": "HTTP message not readable",
-        |       "code": "400.2"
-        |     },
-        |     {
-        |       "reason": "Constraint violation: Invalid/Missing input parameter: <parameter>",
-        |       "code": "400.1"
-        |     }
-        |   ]
-        | }
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "reason":"HTTP message not readable",
+        |            "code":""
+        |         },
+        |         {
+        |            "reason":"Constraint violation: Invalid/Missing input parameter: <parameter>",
+        |            "code":""
+        |         }
+        |      ]
+        |   }
         |}""".stripMargin
 
     "deserialises and serialises successfully" in {
-      Json.toJson(standardErrorResponse400) shouldBe Json.parse(
-        standardErrorResponse400JsonString
-      )
+      Json.toJson(npsStandardErrorResponse400) shouldBe Json.parse(errorResponse400JsonString)
     }
 
     "deserialises to the model class" in {
-      val _: LongTermBenefitNotesStandardErrorResponse400 =
-        jsonFormat.reads(Json.parse(standardErrorResponse400JsonString)).get
+      val _: NpsStandardErrorResponse400 =
+        jsonFormat.reads(Json.parse(errorResponse400JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(standardErrorResponse400JsonString)
-      val standardErrorResponse400Json: LongTermBenefitNotesStandardErrorResponse400 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(standardErrorResponse400Json)
+      val jValue: JsValue                                          = Json.parse(errorResponse400JsonString)
+      val npsStandardErrorResponse400: NpsStandardErrorResponse400 = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                                     = jsonFormat.writes(npsStandardErrorResponse400)
 
       writtenJson shouldBe jValue
     }
+
+    "should match the openapi schema" in {
+      longTermBenefitNotes400JsonSchema.validateAndGetErrors(
+        Json.toJson(npsStandardErrorResponse400)
+      ) shouldBe Nil
+    }
   }
 
-  "HipFailureResponse400" - {
+  "ErrorResponse400 (hipFailureResponse)" - {
 
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesHipFailureResponse400]]
+    val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]
 
-    def hipFailureResponse400JsonSchema: SimpleJsonSchema =
+    def longTermBenefitNotes400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
         SpecVersion.VersionFlag.V7,
@@ -411,131 +411,135 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val hipFailureResponse400 = LongTermBenefitNotesHipFailureResponse400(
-      HipOrigin.Hip,
+    val errorResponse400 = NpsErrorResponseHipOrigin(
+      Hip,
       HipFailureResponse(
         List(
           HipFailureItem(
-            FailureType(""),
-            NpsErrorReason("")
+            FailureType("t1"),
+            NpsErrorReason("r1")
           ),
           HipFailureItem(
-            FailureType(""),
-            NpsErrorReason("")
+            FailureType("t2"),
+            NpsErrorReason("r2")
           )
         )
       )
     )
 
-    val hipFailureResponse400JsonString =
+    val errorResponse400JsonString =
       """{
-        | "origin": "HIP",
-        | "response": {
-        |   "failures": [
-        |     {
-        |       "type": "",
-        |       "reason": ""
-        |     },
-        |     {
-        |       "type": "",
-        |       "reason": ""
-        |     }
-        |   ]
-        | }
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "type":"t1",
+        |            "reason":"r1"
+        |         },
+        |         {
+        |            "type":"t2",
+        |            "reason":"r2"
+        |         }
+        |      ]
+        |   }
         |}""".stripMargin
 
     "deserialises and serialises successfully" in {
-      Json.toJson(hipFailureResponse400) shouldBe Json.parse(
-        hipFailureResponse400JsonString
-      )
+      Json.toJson(errorResponse400) shouldBe Json.parse(errorResponse400JsonString)
     }
 
     "deserialises to the model class" in {
-      val _: LongTermBenefitNotesHipFailureResponse400 =
-        jsonFormat.reads(Json.parse(hipFailureResponse400JsonString)).get
+      val _: NpsErrorResponseHipOrigin =
+        jsonFormat.reads(Json.parse(errorResponse400JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(hipFailureResponse400JsonString)
-      val hipFailureResponse400Json: LongTermBenefitNotesHipFailureResponse400 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse400Json)
+      val jValue: JsValue                             = Json.parse(errorResponse400JsonString)
+      val errorResponse400: NpsErrorResponseHipOrigin = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                        = jsonFormat.writes(errorResponse400)
 
       writtenJson shouldBe jValue
     }
+
+    "should match the openapi schema" in {
+      longTermBenefitNotes400JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse400)
+      ) shouldBe Nil
+    }
   }
 
-  "LongTermBenefitNotesErrorResponse403" - {
+  "ErrorResponse403" - {
 
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesErrorResponse403]]
+    def longTermBenefitNotes403JsonSchema: SimpleJsonSchema =
+      SimpleJsonSchema(
+        longTermBenefitNotesOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("errorResponse_403"),
+        metaSchemaValidation = Some(Valid(()))
+      )
 
-    val longTermBenefitNotesErrorResponse403_2 =
-      LongTermBenefitNotesErrorResponse403(Forbidden, NpsErrorCode403_2)
+    val jsonFormat = implicitly[Format[NpsSingleErrorResponse]]
 
-    val longTermBenefitNotesErrorResponse403_2JsonString =
+    val errorResponse403_1 =
+      NpsSingleErrorResponse(NpsErrorReason("User Not Authorised"), NpsErrorCode("403.1"))
+
+    val errorResponse403_2 =
+      NpsSingleErrorResponse(NpsErrorReason("Forbidden"), NpsErrorCode("403.2"))
+
+    val errorResponse403_1JsonString =
+      """{
+        |  "reason": "User Not Authorised",
+        |  "code": "403.1"
+        |}""".stripMargin
+
+    val errorResponse403_2JsonString =
       """{
         |  "reason": "Forbidden",
         |  "code": "403.2"
         |}""".stripMargin
 
     "deserialises and serialises successfully" in {
-      Json.toJson(longTermBenefitNotesErrorResponse403_2) shouldBe Json.parse(
-        longTermBenefitNotesErrorResponse403_2JsonString
+      Json.toJson(errorResponse403_1) shouldBe Json.parse(
+        errorResponse403_1JsonString
+      )
+      Json.toJson(errorResponse403_2) shouldBe Json.parse(
+        errorResponse403_2JsonString
       )
     }
 
     "deserialises to the model class" in {
-      val _: LongTermBenefitNotesErrorResponse403 =
-        jsonFormat.reads(Json.parse(longTermBenefitNotesErrorResponse403_2JsonString)).get
+      val _: NpsSingleErrorResponse =
+        jsonFormat.reads(Json.parse(errorResponse403_1JsonString)).get
+
+      val _: NpsSingleErrorResponse =
+        jsonFormat.reads(Json.parse(errorResponse403_2JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
+      val jValue1: JsValue                           = Json.parse(errorResponse403_1JsonString)
+      val errorResponse403_1: NpsSingleErrorResponse = jsonFormat.reads(jValue1).get
+      val writtenJson1: JsValue                      = jsonFormat.writes(errorResponse403_1)
 
-      val jValue2: JsValue = Json.parse(longTermBenefitNotesErrorResponse403_2JsonString)
-      val longTermBenefitNotesErrorResponse403_2: LongTermBenefitNotesErrorResponse403 =
-        jsonFormat.reads(jValue2).get
-      val writtenJson2: JsValue = jsonFormat.writes(longTermBenefitNotesErrorResponse403_2)
+      val jValue2: JsValue                           = Json.parse(errorResponse403_2JsonString)
+      val errorResponse403_2: NpsSingleErrorResponse = jsonFormat.reads(jValue2).get
+      val writtenJson2: JsValue                      = jsonFormat.writes(errorResponse403_2)
 
+      writtenJson1 shouldBe jValue1
       writtenJson2 shouldBe jValue2
+    }
+
+    "should match the openapi schema" in {
+      longTermBenefitNotes403JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse403_1)
+      ) shouldBe Nil
+
+      longTermBenefitNotes403JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse403_2)
+      ) shouldBe Nil
     }
   }
 
-  "LongTermBenefitNotesErrorResponse404" - {
-
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesErrorResponse404]]
-
-    val longTermBenefitNotesErrorResponse404 =
-      LongTermBenefitNotesErrorResponse404(ErrorCode404, NotFound)
-
-    val longTermBenefitNotesErrorResponse404JsonString =
-      """{
-        |  "code": "404",
-        |  "reason": "Not Found"
-        |}""".stripMargin
-
-    "deserialises and serialises successfully" in {
-      Json.toJson(longTermBenefitNotesErrorResponse404) shouldBe Json.parse(
-        longTermBenefitNotesErrorResponse404JsonString
-      )
-    }
-
-    "deserialises to the model class" in {
-      val _: LongTermBenefitNotesErrorResponse404 =
-        jsonFormat.reads(Json.parse(longTermBenefitNotesErrorResponse404JsonString)).get
-    }
-
-    "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-
-      val jValue2: JsValue = Json.parse(longTermBenefitNotesErrorResponse404JsonString)
-      val longTermBenefitNotesErrorResponse404Json: LongTermBenefitNotesErrorResponse404 =
-        jsonFormat.reads(jValue2).get
-      val writtenJson2: JsValue = jsonFormat.writes(longTermBenefitNotesErrorResponse404Json)
-
-      writtenJson2 shouldBe jValue2
-    }
-  }
-
-  "LongTermBenefitNotesErrorResponse422" - {
+  "ErrorResponse422" - {
 
     def longTermBenefitNotes422JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -545,20 +549,20 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesErrorResponse422]]
+    val jsonFormat = implicitly[Format[NpsMultiErrorResponse]]
 
-    val longTermBenefitNotesErrorResponse422 = LongTermBenefitNotesErrorResponse422(
+    val errorResponse422 = NpsMultiErrorResponse(
       failures = Some(
         List(
-          LongTermBenefitNotesError.LongTermBenefitNotesError422(
+          NpsSingleErrorResponse(
             NpsErrorReason("HTTP message not readable"),
-            ErrorCode422("A589")
+            NpsErrorCode("A589")
           )
         )
       )
     )
 
-    val longTermBenefitNotesErrorResponse422JsonString =
+    val errorResponse422JsonString =
       """{
         |  "failures": [
         |    {
@@ -568,56 +572,36 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         |  ]
         |}""".stripMargin
 
+    "deserialises and serialises successfully" in {
+      Json.toJson(errorResponse422) shouldBe Json.parse(errorResponse422JsonString)
+    }
+
+    "deserialises to the model class" in {
+      val _: NpsMultiErrorResponse =
+        jsonFormat.reads(Json.parse(errorResponse422JsonString)).get
+    }
+
+    "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
+      val jValue: JsValue                         = Json.parse(errorResponse422JsonString)
+      val errorResponse422: NpsMultiErrorResponse = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                    = jsonFormat.writes(errorResponse422)
+
+      writtenJson shouldBe jValue
+    }
+
     "should match the openapi schema" in {
-
-      val invalidResponse = LongTermBenefitNotesErrorResponse422(
-        Some(
-          List(
-            LongTermBenefitNotesError.LongTermBenefitNotesError422(
-              NpsErrorReason(
-                "some reason with way too many letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters"
-              ),
-              ErrorCode422("")
-            )
-          )
-        )
-      )
-
       longTermBenefitNotes422JsonSchema.validateAndGetErrors(
-        Json.toJson(invalidResponse)
-      ) shouldBe
-        List(
-          """$.failures[0].code: must be at least 1 characters long""",
-          """$.failures[0].reason: must be at most 128 characters long"""
-        )
-
-    }
-    "deserialises and serialises successfully" in {
-      Json.toJson(longTermBenefitNotesErrorResponse422) shouldBe Json.parse(
-        longTermBenefitNotesErrorResponse422JsonString
-      )
+        Json.toJson(errorResponse422)
+      ) shouldBe Nil
     }
 
-    "deserialises to the model class" in {
-      val _: LongTermBenefitNotesErrorResponse422 =
-        jsonFormat.reads(Json.parse(longTermBenefitNotesErrorResponse422JsonString)).get
-    }
-
-    "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(longTermBenefitNotesErrorResponse422JsonString)
-      val longTermBenefitNotesErrorResponse422: LongTermBenefitNotesErrorResponse422 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(longTermBenefitNotesErrorResponse422)
-
-      writtenJson shouldBe jValue
-    }
   }
 
-  "HipFailureResponse500" - {
+  "ErrorResponse500" - {
 
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesHipFailureResponse500]]
+    val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]
 
-    def hipFailureResponse500JsonSchema: SimpleJsonSchema =
+    def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
         SpecVersion.VersionFlag.V7,
@@ -625,66 +609,68 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val hipFailureResponse500 = LongTermBenefitNotesHipFailureResponse500(
-      HipOrigin.Hip,
+    val errorResponse500 = NpsErrorResponseHipOrigin(
+      Hip,
       HipFailureResponse(
         List(
           HipFailureItem(
-            FailureType(""),
-            NpsErrorReason("")
+            FailureType("t1"),
+            NpsErrorReason("r1")
           ),
           HipFailureItem(
-            FailureType(""),
-            NpsErrorReason("")
+            FailureType("t2"),
+            NpsErrorReason("r2")
           )
         )
       )
     )
 
-    val hipFailureResponse500JsonString =
+    val errorResponse500JsonString =
       """{
-        | "origin": "HIP",
-        | "response":
-        | {
-        |   "failures": [
-        |     {
-        |       "type": "",
-        |       "reason": ""
-        |     },
-        |     {
-        |       "type": "",
-        |       "reason": ""
-        |     }
-        |   ]
-        | }
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "type":"t1",
+        |            "reason":"r1"
+        |         },
+        |         {
+        |            "type":"t2",
+        |            "reason":"r2"
+        |         }
+        |      ]
+        |   }
         |}""".stripMargin
 
     "deserialises and serialises successfully" in {
-      Json.toJson(hipFailureResponse500) shouldBe Json.parse(
-        hipFailureResponse500JsonString
-      )
+      Json.toJson(errorResponse500) shouldBe Json.parse(errorResponse500JsonString)
     }
 
     "deserialises to the model class" in {
-      val _: LongTermBenefitNotesHipFailureResponse500 =
-        jsonFormat.reads(Json.parse(hipFailureResponse500JsonString)).get
+      val _: NpsErrorResponseHipOrigin =
+        jsonFormat.reads(Json.parse(errorResponse500JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(hipFailureResponse500JsonString)
-      val hipFailureResponse500Json: LongTermBenefitNotesHipFailureResponse500 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse500Json)
+      val jValue: JsValue                             = Json.parse(errorResponse500JsonString)
+      val errorResponse500: NpsErrorResponseHipOrigin = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                        = jsonFormat.writes(errorResponse500)
 
       writtenJson shouldBe jValue
     }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails500JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse500)
+      ) shouldBe Nil
+    }
   }
 
-  "HipFailureResponse503" - {
+  "ErrorResponse503" - {
 
-    val jsonFormat = implicitly[Format[LongTermBenefitNotesHipFailureResponse503]]
+    val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]
 
-    def hipFailureResponse503JsonSchema: SimpleJsonSchema =
+    def longTermBenefitNotes503JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
         SpecVersion.VersionFlag.V7,
@@ -692,58 +678,60 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val hipFailureResponse503 = LongTermBenefitNotesHipFailureResponse503(
-      HipOrigin.Hip,
+    val errorResponse503 = NpsErrorResponseHipOrigin(
+      Hip,
       HipFailureResponse(
         List(
           HipFailureItem(
-            FailureType(""),
-            NpsErrorReason("")
+            FailureType("t1"),
+            NpsErrorReason("r1")
           ),
           HipFailureItem(
-            FailureType(""),
-            NpsErrorReason("")
+            FailureType("t2"),
+            NpsErrorReason("r2")
           )
         )
       )
     )
 
-    val hipFailureResponse503JsonString =
+    val errorResponse503JsonString =
       """{
-        | "origin": "HIP",
-        | "response":
-        | {
-        |   "failures": [
-        |     {
-        |       "type": "",
-        |       "reason": ""
-        |     },
-        |     {
-        |       "type": "",
-        |       "reason": ""
-        |     }
-        |   ]
-        | }
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "type":"t1",
+        |            "reason":"r1"
+        |         },
+        |         {
+        |            "type":"t2",
+        |            "reason":"r2"
+        |         }
+        |      ]
+        |   }
         |}""".stripMargin
 
     "deserialises and serialises successfully" in {
-      Json.toJson(hipFailureResponse503) shouldBe Json.parse(
-        hipFailureResponse503JsonString
-      )
+      Json.toJson(errorResponse503) shouldBe Json.parse(errorResponse503JsonString)
     }
 
     "deserialises to the model class" in {
-      val _: LongTermBenefitNotesHipFailureResponse503 =
-        jsonFormat.reads(Json.parse(hipFailureResponse503JsonString)).get
+      val _: NpsErrorResponseHipOrigin =
+        jsonFormat.reads(Json.parse(errorResponse503JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(hipFailureResponse503JsonString)
-      val hipFailureResponse503Json: LongTermBenefitNotesHipFailureResponse503 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(hipFailureResponse503Json)
+      val jValue: JsValue                             = Json.parse(errorResponse503JsonString)
+      val errorResponse503: NpsErrorResponseHipOrigin = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                        = jsonFormat.writes(errorResponse503)
 
       writtenJson shouldBe jValue
+    }
+
+    "should match the openapi schema" in {
+      longTermBenefitNotes503JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse503)
+      ) shouldBe Nil
     }
   }
 

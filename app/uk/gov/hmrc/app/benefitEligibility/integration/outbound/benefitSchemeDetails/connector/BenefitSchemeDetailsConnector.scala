@@ -22,7 +22,6 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.BenefitSchemeDetails
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -34,7 +33,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsResponseValidation.benefitSchemeDetailsResponseValidationValidator
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{
   BenefitSchemeDetailsSuccessResponse,

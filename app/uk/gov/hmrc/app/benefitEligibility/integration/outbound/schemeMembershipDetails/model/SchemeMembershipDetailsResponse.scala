@@ -25,7 +25,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorCode403,
   NpsErrorReason403
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{NpsApiResponse, NpsSuccessfulApiResponse}
 

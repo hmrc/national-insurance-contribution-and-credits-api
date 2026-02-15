@@ -19,19 +19,12 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.instances.future.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, BenefitEligibilityError}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ESAEligibilityCheckDataRequest,
-  JSAEligibilityCheckDataRequest
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.{
-  EligibilityCheckDataResultESA,
-  EligibilityCheckDataResultJSA
-}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.JSAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}

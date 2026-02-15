@@ -51,54 +51,18 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsStandardErrorResponse400
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  Class2MaReceipts,
-  ContributionsAndCredits,
+  Class2MaReceiptsRequestParams,
+  ContributionsAndCreditsRequestParams,
   MAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.{
-  BillAmount,
-  Class2MAReceiptDetails,
-  Class2MAReceiptsSuccessResponse,
-  Initials,
-  IsClosedRecord,
-  ReceivablePayment,
-  Surname,
-  WeeksPaid
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
-  AwardAmount,
-  CasepaperReferenceNumber,
-  EndDate,
-  HomeResponsibilitiesProtectionBenefitReference,
-  HomeResponsibilitiesProtectionRate,
-  HomeResponsibilityProtectionCalculationYear,
-  LiabilityDetailsList,
-  LiabilitySummaryDetailsSuccessResponse,
-  OccurrenceNumber,
-  OfficeDetails,
-  OfficeLocationDecode,
-  OfficeLocationValue,
-  ResourceGroupIdentifier,
-  StartDate
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
@@ -207,14 +171,14 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
       val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
         Identifier("GD379251T"),
-        ContributionsAndCredits(
+        ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
         uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
-          .Liabilities(Abroad, None, None, None, None, None),
-        Class2MaReceipts(None, None, None)
+          .LiabilitiesRequestParams(Abroad, None, None, None, None, None),
+        Class2MaReceiptsRequestParams(None, None, None)
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {
