@@ -44,6 +44,7 @@ object EligibilityCheckDataRequest {
 sealed trait EligibilityCheckDataRequest {
   def benefitType: BenefitType
   def nationalInsuranceNumber: Identifier
+  def niContributionsAndCredits: ContributionsAndCredits
 }
 
 case class Liabilities(

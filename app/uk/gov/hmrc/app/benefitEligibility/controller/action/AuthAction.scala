@@ -18,9 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.controller.action
 
 import play.api.libs.json.Json
 import play.api.mvc.Results.{Forbidden, InternalServerError}
-import play.api.mvc._
+import play.api.mvc.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{ErrorCode, ErrorReason, ErrorResponse}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.Failure
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -44,15 +45,12 @@ class AuthAction @Inject() (
       block(request)
     }.recover {
       case e: UnsupportedAuthProvider =>
-        Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
-      case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
-      case _                     => InternalServerError.withHeaders(generateResponseHeader())
+        Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
+      case e: BearerTokenExpired =>
+        Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
+      case e =>
+        InternalServerError(Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason(e.getMessage))))
     }
-  }
-
-  private def generateResponseHeader() = {
-    val correlationId: String = UUID.randomUUID().toString
-    "correlationId" -> correlationId
   }
 
 }
