@@ -41,6 +41,7 @@ object BenefitEligibilityRequestHandler {
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (request.headers.get("CorrelationId") match {
       case None =>
+        logger.error("Missing header CorrelationID")
         EitherT.rightT[Future, BenefitEligibilityError](
           BadRequest(
             Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("Missing Header CorrelationId")))
@@ -53,6 +54,7 @@ object BenefitEligibilityRequestHandler {
               case JsSuccess(request, _) =>
                 validateRequest(request) match {
                   case Left(validationError) =>
+                    logger.error(s"Validation Error: ${validationError.errors.mkString(",")}")
                     EitherT.rightT[Future, BenefitEligibilityError](
                       UnprocessableEntity(
                         Json.toJson(
@@ -72,6 +74,7 @@ object BenefitEligibilityRequestHandler {
                     }
                 }
               case JsError(errors) =>
+                logger.error(s"bad request ${errors.flatMap(_._2).mkString(",")}")
                 EitherT.rightT[Future, BenefitEligibilityError](
                   BadRequest(
                     Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason(errors.flatMap(_._2).mkString(","))))
@@ -79,6 +82,7 @@ object BenefitEligibilityRequestHandler {
                 )
             }
           case None =>
+            logger.error("invalid json")
             EitherT.rightT[Future, BenefitEligibilityError](
               BadRequest(
                 Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
@@ -87,6 +91,7 @@ object BenefitEligibilityRequestHandler {
         }
     }).value.map {
       case Left(value) =>
+        logger.error(s"Internal server error ${value.toStringSafeToLogInProd}")
         InternalServerError(
           Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason(value.toStringSafeToLogInProd)))
         )

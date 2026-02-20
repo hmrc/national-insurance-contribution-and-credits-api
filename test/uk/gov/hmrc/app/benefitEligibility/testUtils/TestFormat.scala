@@ -17,43 +17,23 @@
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
 import play.api.libs.json.{Format, Json, OWrites, Reads, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
-  ErrorCode422,
-  HipFailureResponse,
-  NpsErrorResponseHipOrigin,
-  NpsMultiErrorResponse,
-  NpsSingleErrorResponse,
-  NpsStandardErrorResponse400
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{
-  BenefitSchemeAddressDetails,
-  BenefitSchemeDetails,
-  BenefitSchemeDetailsSuccessResponse,
-  SchemeAddressDetails
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsError.{
-  BenefitCalculationDetailsError400,
-  BenefitCalculationDetailsError422,
-  BenefitCalculationDetailsErrorItem400,
-  BenefitCalculationDetailsErrorResponse403,
-  BenefitCalculationDetailsErrorResponse404,
-  BenefitCalculationDetailsErrorResponse422,
-  BenefitCalculationDetailsHipFailureResponse400,
-  BenefitCalculationDetailsHipFailureResponse500,
-  BenefitCalculationDetailsHipFailureResponse503,
-  BenefitCalculationDetailsStandardErrorResponse400
-}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, HipFailureResponse, NpsErrorResponseHipOrigin, NpsMultiErrorResponse, NpsSingleErrorResponse, NpsStandardErrorResponse400}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{BenefitSchemeAddressDetails, BenefitSchemeDetails, BenefitSchemeDetailsSuccessResponse, SchemeAddressDetails}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsError.{BenefitCalculationDetailsError400, BenefitCalculationDetailsError422, BenefitCalculationDetailsErrorItem400, BenefitCalculationDetailsErrorResponse403, BenefitCalculationDetailsErrorResponse404, BenefitCalculationDetailsErrorResponse422, BenefitCalculationDetailsHipFailureResponse400, BenefitCalculationDetailsHipFailureResponse500, BenefitCalculationDetailsHipFailureResponse503, BenefitCalculationDetailsStandardErrorResponse400}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationError
 import IndividualStatePensionInformationError.*
-import uk.gov.hmrc.app.benefitEligibility.common.Callback
+import uk.gov.hmrc.app.benefitEligibility.common.{Callback, MaternityAllowanceSortType, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{BSPEligibilityCheckDataRequest, Class2MaReceipts, ContributionsAndCredits, ESAEligibilityCheckDataRequest, GYSPEligibilityCheckDataRequest, JSAEligibilityCheckDataRequest, Liabilities, LongTermBenefitCalculation, MAEligibilityCheckDataRequest, MarriageDetails}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
+
+import java.time.LocalDate
 
 object TestFormat {
 
@@ -67,6 +47,19 @@ object TestFormat {
 
   implicit val npsErrorResponseHipOriginResponseWrites: Writes[NpsErrorResponseHipOrigin] =
     Json.writes[NpsErrorResponseHipOrigin]
+
+  implicit val contributionCreditWrites: Writes[ContributionsAndCredits] = Json.writes[ContributionsAndCredits]
+  implicit val liabilitiesWrites: Writes[Liabilities] = Json.writes[Liabilities]
+  implicit val maternityAllowanceSortTypeWrites: Writes[MaternityAllowanceSortType] = Json.writes[MaternityAllowanceSortType]
+  implicit val class2MaReceiptsWrites: Writes[Class2MaReceipts] = Json.writes[Class2MaReceipts]
+  implicit val marriageDetailsWrites: Writes[MarriageDetails] = Json.writes[MarriageDetails]
+  implicit val longTermBenefitCalculationWrites: Writes[LongTermBenefitCalculation] = Json.writes[LongTermBenefitCalculation]
+  
+  implicit val esaEligibilityCheckDataRequestWrites: Writes[ESAEligibilityCheckDataRequest] = Json.writes[ESAEligibilityCheckDataRequest]
+  implicit val maEligibilityCheckDataRequestWrites: Writes[MAEligibilityCheckDataRequest] = Json.writes[MAEligibilityCheckDataRequest]
+  implicit val jsaEligibilityCheckDataRequestWrites: Writes[JSAEligibilityCheckDataRequest] = Json.writes[JSAEligibilityCheckDataRequest]
+  implicit val bspEligibilityCheckDataRequestWrites: Writes[BSPEligibilityCheckDataRequest] = Json.writes[BSPEligibilityCheckDataRequest]
+  implicit val gypEligibilityCheckDataRequestWrites: Writes[GYSPEligibilityCheckDataRequest] = Json.writes[GYSPEligibilityCheckDataRequest]
 
   object CommonFormats {
     implicit val errorCode422: Writes[ErrorCode422] = Json.valueWrites[ErrorCode422]

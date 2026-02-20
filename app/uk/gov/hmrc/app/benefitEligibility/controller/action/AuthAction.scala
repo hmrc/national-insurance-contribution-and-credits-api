@@ -46,7 +46,8 @@ class AuthAction @Inject() (
       case e: UnsupportedAuthProvider =>
         Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
       case e: BearerTokenExpired => Forbidden(Json.toJson(Failure(e.msg, "403"))).withHeaders(generateResponseHeader())
-      case _                     => InternalServerError.withHeaders(generateResponseHeader())
+      case e                     => println(e.getMessage)
+        InternalServerError.withHeaders(generateResponseHeader())
     }
   }
 
