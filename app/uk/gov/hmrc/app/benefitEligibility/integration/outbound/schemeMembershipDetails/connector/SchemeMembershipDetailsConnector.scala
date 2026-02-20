@@ -17,12 +17,10 @@
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.connector
 
 import cats.data.EitherT
-import cats.implicits.catsSyntaxSemigroup
 import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.SchemeMembershipDetails
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -38,15 +36,9 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsMultiErrorResponse,
   NpsSingleErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsError.{
-  SchemeMembershipDetailsErrorResponse400,
-  SchemeMembershipDetailsErrorResponse403,
-  SchemeMembershipDetailsErrorResponse422
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
-
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   NpsApiResult,
   NpsClient,

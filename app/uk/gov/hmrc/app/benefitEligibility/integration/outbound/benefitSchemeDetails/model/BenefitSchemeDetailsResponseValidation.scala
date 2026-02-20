@@ -18,13 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDet
 
 import cats.implicits.{catsSyntaxNestedFoldable, toFunctorOps}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.util.validation.{
-  MoneyValidation,
-  NumberValidation,
-  StringLengthValidation,
-  StringPatternValidation
-}
+import uk.gov.hmrc.app.benefitEligibility.util.validation.{StringLengthValidation, StringPatternValidation}
 import uk.gov.hmrc.app.benefitEligibility.util.{NpsResponseValidator, SuccessfulResult}
 
 object BenefitSchemeDetailsResponseValidation {

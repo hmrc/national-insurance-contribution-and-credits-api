@@ -16,14 +16,6 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
-  AccessForbidden,
-  BadRequest,
-  InternalServerError,
-  NotFound,
-  ServiceUnavailable,
-  UnprocessableEntity
-}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}

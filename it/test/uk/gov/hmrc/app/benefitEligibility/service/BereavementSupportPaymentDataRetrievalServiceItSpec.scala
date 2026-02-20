@@ -16,14 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import com.github.tomakehurst.wiremock.client.WireMock.{
-  aResponse,
-  get,
-  getRequestedFor,
-  post,
-  postRequestedFor,
-  urlEqualTo
-}
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
@@ -59,7 +52,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   BSPEligibilityCheckDataRequest,
-  ContributionsAndCredits
+  ContributionsAndCreditsRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
@@ -146,7 +139,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
 
       val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
         Identifier("GD379251T"),
-        ContributionsAndCredits(
+        ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)

@@ -26,16 +26,15 @@ import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
-  NotFound,
   ServiceUnavailable,
   UnexpectedStatus,
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   GYSPEligibilityCheckDataRequest,
-  LongTermBenefitCalculation
+  LongTermBenefitCalculationRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
@@ -140,12 +139,12 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   private val eligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
     Identifier("GD379251T"),
-    ContributionsAndCredits(
+    ContributionsAndCreditsRequestParams(
       DateOfBirth(LocalDate.parse("2025-10-10")),
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    LongTermBenefitCalculation(None, None),
+    LongTermBenefitCalculationRequestParams(None, None),
     None
   )
 

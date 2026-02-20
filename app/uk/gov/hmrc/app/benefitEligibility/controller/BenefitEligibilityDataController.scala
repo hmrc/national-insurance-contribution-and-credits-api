@@ -27,7 +27,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}

@@ -16,37 +16,19 @@
 
 package uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model
 
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.LiabilitySummaryDetailsFormats.*
+import cats.data.Validated
 import cats.data.Validated.Valid
-import cats.data.{NonEmptyList, Validated}
 import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.NpsErrorCode400.{NpsErrorCode400_1, NpsErrorCode400_2}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{ErrorCode422, NpsErrorCode400}
-import uk.gov.hmrc.app.benefitEligibility.common.{Callback, CallbackUrl, Country, Identifier, NpsErrorReason}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsError.{
-  LiabilitySummaryDetailsErrorResponse400,
-  LiabilitySummaryDetailsErrorResponse403,
-  LiabilitySummaryDetailsErrorResponse422
-}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp,
-  ErrorCode403,
-  ErrorReason403
-}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 
 import java.time.LocalDate
 
@@ -150,11 +132,17 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
       writtenJson shouldBe jValue
     }
 
+    "should match the openapi schema for a full response" in {
+      liabilitySummaryDetailsOpenApi.validateAndGetErrors(
+        Json.toJson(liabilitySummaryDetailsSuccessResponse)
+      ) shouldBe Nil
+    }
+
   }
 
-  "LiabilitySummaryDetailsErrorResponse400" - {
+  "ErrorResponse400 (standard)" - {
 
-    val jsonFormat = implicitly[Format[LiabilitySummaryDetailsErrorResponse400]]
+    val jsonFormat = implicitly[Format[NpsStandardErrorResponse400]]
 
     def liabilitySummaryDetails400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -164,122 +152,183 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val liabilitySummaryDetailsErrorResponse400 = LiabilitySummaryDetailsErrorResponse400(
-      Some(
-        List(
-          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-            NpsErrorReason("HTTP message not readable"),
-            NpsErrorCode400.NpsErrorCode400_2
-          ),
-          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-            NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
-            NpsErrorCode400.NpsErrorCode400_1
+    val npsStandardErrorResponse400 = NpsStandardErrorResponse400(
+      HipOrigin.Hip,
+      NpsMultiErrorResponse(
+        Some(
+          List(
+            NpsSingleErrorResponse(
+              NpsErrorReason("HTTP message not readable"),
+              NpsErrorCode("")
+            ),
+            NpsSingleErrorResponse(
+              NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+              NpsErrorCode("")
+            )
           )
         )
       )
     )
 
-    val liabilitySummaryDetailsErrorResponse400JsonString =
+    val errorResponse400JsonString =
       """{
-        |  "failures": [
-        |    {
-        |      "reason": "HTTP message not readable",
-        |      "code": "400.2"
-        |    },
-        |    {
-        |      "reason": "Constraint violation: Invalid/Missing input parameter: <parameter>",
-        |      "code": "400.1"
-        |    }
-        |  ]
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "reason":"HTTP message not readable",
+        |            "code":""
+        |         },
+        |         {
+        |            "reason":"Constraint violation: Invalid/Missing input parameter: <parameter>",
+        |            "code":""
+        |         }
+        |      ]
+        |   }
         |}""".stripMargin
 
-    "should match the openapi schema" in {
-
-      val invalidResponse = LiabilitySummaryDetailsErrorResponse400(
-        Some(
-          List(
-            LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-              NpsErrorReason(
-                "some reason with way to many letters letters letters letters  letters letters  letters letters  letters letters  letters letters  letters letters  letters letters"
-              ),
-              NpsErrorCode400_2
-            ),
-            LiabilitySummaryDetailsError.LiabilitySummaryDetailsError400(
-              NpsErrorReason(
-                ""
-              ),
-              NpsErrorCode400_1
-            )
-          )
-        )
-      )
-
-      liabilitySummaryDetails400JsonSchema.validateAndGetErrors(
-        Json.toJson(invalidResponse)
-      ) shouldBe
-        List(
-          """$.failures[0].reason: must be at most 128 characters long""",
-          """$.failures[1].reason: must be at least 1 characters long"""
-        )
-
-    }
     "deserialises and serialises successfully" in {
-      Json.toJson(liabilitySummaryDetailsErrorResponse400) shouldBe Json.parse(
-        liabilitySummaryDetailsErrorResponse400JsonString
-      )
+      Json.toJson(npsStandardErrorResponse400) shouldBe Json.parse(errorResponse400JsonString)
     }
 
     "deserialises to the model class" in {
-      val _: LiabilitySummaryDetailsErrorResponse400 =
-        jsonFormat.reads(Json.parse(liabilitySummaryDetailsErrorResponse400JsonString)).get
+      val _: NpsStandardErrorResponse400 =
+        jsonFormat.reads(Json.parse(errorResponse400JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(liabilitySummaryDetailsErrorResponse400JsonString)
-      val liabilitySummaryDetailsErrorResponse400: LiabilitySummaryDetailsErrorResponse400 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(liabilitySummaryDetailsErrorResponse400)
+      val jValue: JsValue                                          = Json.parse(errorResponse400JsonString)
+      val npsStandardErrorResponse400: NpsStandardErrorResponse400 = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                                     = jsonFormat.writes(npsStandardErrorResponse400)
 
       writtenJson shouldBe jValue
     }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails400JsonSchema.validateAndGetErrors(
+        Json.toJson(npsStandardErrorResponse400)
+      ) shouldBe Nil
+    }
   }
 
-  "LiabilitySummaryDetailsErrorResponse403" - {
+  "ErrorResponse400 (hipFailureResponse)" - {
 
-    val jsonFormat = implicitly[Format[LiabilitySummaryDetailsErrorResponse403]]
+    val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]
 
-    val liabilitySummaryDetailsErrorResponse403_2 =
-      LiabilitySummaryDetailsErrorResponse403(ErrorReason403.Forbidden, ErrorCode403.ErrorCode403_2)
+    def liabilitySummaryDetails400JsonSchema: SimpleJsonSchema =
+      SimpleJsonSchema(
+        liabilitySummaryDetailsOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("HIP-originResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
 
-    val liabilitySummaryDetailsErrorResponse403_2JsonString =
+    val errorResponse400 = NpsErrorResponseHipOrigin(
+      Hip,
+      HipFailureResponse(
+        List(
+          HipFailureItem(
+            FailureType("t1"),
+            NpsErrorReason("r1")
+          ),
+          HipFailureItem(
+            FailureType("t2"),
+            NpsErrorReason("r2")
+          )
+        )
+      )
+    )
+
+    val errorResponse400JsonString =
+      """{
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "type":"t1",
+        |            "reason":"r1"
+        |         },
+        |         {
+        |            "type":"t2",
+        |            "reason":"r2"
+        |         }
+        |      ]
+        |   }
+        |}""".stripMargin
+
+    "deserialises and serialises successfully" in {
+      Json.toJson(errorResponse400) shouldBe Json.parse(errorResponse400JsonString)
+    }
+
+    "deserialises to the model class" in {
+      val _: NpsErrorResponseHipOrigin =
+        jsonFormat.reads(Json.parse(errorResponse400JsonString)).get
+    }
+
+    "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
+      val jValue: JsValue                             = Json.parse(errorResponse400JsonString)
+      val errorResponse400: NpsErrorResponseHipOrigin = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                        = jsonFormat.writes(errorResponse400)
+
+      writtenJson shouldBe jValue
+    }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails400JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse400)
+      ) shouldBe Nil
+    }
+  }
+
+  "ErrorResponse403" - {
+
+    def liabilitySummaryDetails403JsonSchema: SimpleJsonSchema =
+      SimpleJsonSchema(
+        liabilitySummaryDetailsOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("errorResponse_403_ForbiddenOnly"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+    val jsonFormat = implicitly[Format[NpsSingleErrorResponse]]
+
+    val errorResponse403_2 =
+      NpsSingleErrorResponse(NpsErrorReason("Forbidden"), NpsErrorCode("403.2"))
+
+    val errorResponse403_2JsonString =
       """{
         |  "reason": "Forbidden",
         |  "code": "403.2"
         |}""".stripMargin
 
     "deserialises and serialises successfully" in {
-      Json.toJson(liabilitySummaryDetailsErrorResponse403_2) shouldBe Json.parse(
-        liabilitySummaryDetailsErrorResponse403_2JsonString
+      Json.toJson(errorResponse403_2) shouldBe Json.parse(
+        errorResponse403_2JsonString
       )
     }
 
     "deserialises to the model class" in {
-      val _: LiabilitySummaryDetailsErrorResponse403 =
-        jsonFormat.reads(Json.parse(liabilitySummaryDetailsErrorResponse403_2JsonString)).get
+      val _: NpsSingleErrorResponse =
+        jsonFormat.reads(Json.parse(errorResponse403_2JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
 
-      val jValue2: JsValue = Json.parse(liabilitySummaryDetailsErrorResponse403_2JsonString)
-      val liabilitySummaryDetailsErrorResponse403_2: LiabilitySummaryDetailsErrorResponse403 =
-        jsonFormat.reads(jValue2).get
-      val writtenJson2: JsValue = jsonFormat.writes(liabilitySummaryDetailsErrorResponse403_2)
+      val jValue2: JsValue                           = Json.parse(errorResponse403_2JsonString)
+      val errorResponse403_2: NpsSingleErrorResponse = jsonFormat.reads(jValue2).get
+      val writtenJson2: JsValue                      = jsonFormat.writes(errorResponse403_2)
 
       writtenJson2 shouldBe jValue2
     }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails403JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse403_2)
+      ) shouldBe Nil
+    }
   }
 
-  "LiabilitySummaryDetailsErrorResponse422" - {
+  "ErrorResponse422" - {
 
     def liabilitySummaryDetails422JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
@@ -289,80 +338,197 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
         metaSchemaValidation = Some(Valid(()))
       )
 
-    val jsonFormat = implicitly[Format[LiabilitySummaryDetailsErrorResponse422]]
+    val jsonFormat = implicitly[Format[NpsErrorResponse422Special]]
 
-    val liabilitySummaryDetailsErrorResponse422 = LiabilitySummaryDetailsErrorResponse422(
+    val errorResponse422 = NpsErrorResponse422Special(
       failures = Some(
         List(
-          LiabilitySummaryDetailsError.LiabilitySummaryDetailsError422(
-            NpsErrorReason("HTTP message not readable"),
-            ErrorCode422("A589")
-          )
+          NpsSingleErrorResponse(code = NpsErrorCode("48003"), reason = NpsErrorReason("Invalid Nino entered")),
+          NpsSingleErrorResponse(code = NpsErrorCode("48004"), reason = NpsErrorReason("Invalid dob entered"))
         )
       ),
       askUser = Some(true),
-      fixRequired = Some(true),
+      fixRequired = Some(false),
       workItemRaised = Some(true)
     )
 
-    val liabilitySummaryDetailsErrorResponse422JsonString =
+    val errorResponse422JsonString =
       """{
         |  "failures": [
         |    {
-        |      "reason": "HTTP message not readable",
-        |      "code": "A589"
+        |      "reason": "Invalid Nino entered",
+        |      "code": "48003"
+        |    },
+        |    {
+        |      "reason": "Invalid dob entered",
+        |      "code": "48004"
         |    }
         |  ],
-        | "askUser": true,
-        | "fixRequired": true,
-        | "workItemRaised": true
+        |  "askUser": true,
+        |  "fixRequired": false,
+        |  "workItemRaised": true
         |}""".stripMargin
 
-    "should match the openapi schema" in {
-
-      val invalidResponse = LiabilitySummaryDetailsErrorResponse422(
-        Some(
-          List(
-            LiabilitySummaryDetailsError.LiabilitySummaryDetailsError422(
-              NpsErrorReason(
-                "some reason with way too many letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters letters"
-              ),
-              ErrorCode422("")
-            )
-          )
-        ),
-        askUser = Some(true),
-        fixRequired = Some(true),
-        workItemRaised = Some(true)
-      )
-
-      liabilitySummaryDetails422JsonSchema.validateAndGetErrors(
-        Json.toJson(invalidResponse)
-      ) shouldBe
-        List(
-          """$.failures[0].code: must be at least 1 characters long""",
-          """$.failures[0].reason: must be at most 128 characters long"""
-        )
-
-    }
     "deserialises and serialises successfully" in {
-      Json.toJson(liabilitySummaryDetailsErrorResponse422) shouldBe Json.parse(
-        liabilitySummaryDetailsErrorResponse422JsonString
-      )
+      Json.toJson(errorResponse422) shouldBe Json.parse(errorResponse422JsonString)
     }
 
     "deserialises to the model class" in {
-      val _: LiabilitySummaryDetailsErrorResponse422 =
-        jsonFormat.reads(Json.parse(liabilitySummaryDetailsErrorResponse422JsonString)).get
+      val _: NpsErrorResponse422Special =
+        jsonFormat.reads(Json.parse(errorResponse422JsonString)).get
     }
 
     "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
-      val jValue: JsValue = Json.parse(liabilitySummaryDetailsErrorResponse422JsonString)
-      val liabilitySummaryDetailsErrorResponse422: LiabilitySummaryDetailsErrorResponse422 =
-        jsonFormat.reads(jValue).get
-      val writtenJson: JsValue = jsonFormat.writes(liabilitySummaryDetailsErrorResponse422)
+      val jValue: JsValue                              = Json.parse(errorResponse422JsonString)
+      val errorResponse422: NpsErrorResponse422Special = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                         = jsonFormat.writes(errorResponse422)
 
       writtenJson shouldBe jValue
+    }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails422JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse422)
+      ) shouldBe Nil
+    }
+
+  }
+
+  "ErrorResponse500" - {
+
+    val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]
+
+    def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
+      SimpleJsonSchema(
+        liabilitySummaryDetailsOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("HIP-originResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+    val errorResponse500 = NpsErrorResponseHipOrigin(
+      Hip,
+      HipFailureResponse(
+        List(
+          HipFailureItem(
+            FailureType("t1"),
+            NpsErrorReason("r1")
+          ),
+          HipFailureItem(
+            FailureType("t2"),
+            NpsErrorReason("r2")
+          )
+        )
+      )
+    )
+
+    val errorResponse500JsonString =
+      """{
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "type":"t1",
+        |            "reason":"r1"
+        |         },
+        |         {
+        |            "type":"t2",
+        |            "reason":"r2"
+        |         }
+        |      ]
+        |   }
+        |}""".stripMargin
+
+    "deserialises and serialises successfully" in {
+      Json.toJson(errorResponse500) shouldBe Json.parse(errorResponse500JsonString)
+    }
+
+    "deserialises to the model class" in {
+      val _: NpsErrorResponseHipOrigin =
+        jsonFormat.reads(Json.parse(errorResponse500JsonString)).get
+    }
+
+    "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
+      val jValue: JsValue                             = Json.parse(errorResponse500JsonString)
+      val errorResponse500: NpsErrorResponseHipOrigin = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                        = jsonFormat.writes(errorResponse500)
+
+      writtenJson shouldBe jValue
+    }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails500JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse500)
+      ) shouldBe Nil
+    }
+  }
+
+  "ErrorResponse503" - {
+
+    val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]
+
+    def liabilitySummaryDetails503JsonSchema: SimpleJsonSchema =
+      SimpleJsonSchema(
+        liabilitySummaryDetailsOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("HIP-originResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+    val errorResponse503 = NpsErrorResponseHipOrigin(
+      Hip,
+      HipFailureResponse(
+        List(
+          HipFailureItem(
+            FailureType("t1"),
+            NpsErrorReason("r1")
+          ),
+          HipFailureItem(
+            FailureType("t2"),
+            NpsErrorReason("r2")
+          )
+        )
+      )
+    )
+
+    val errorResponse503JsonString =
+      """{
+        |   "origin":"HIP",
+        |   "response":{
+        |      "failures":[
+        |         {
+        |            "type":"t1",
+        |            "reason":"r1"
+        |         },
+        |         {
+        |            "type":"t2",
+        |            "reason":"r2"
+        |         }
+        |      ]
+        |   }
+        |}""".stripMargin
+
+    "deserialises and serialises successfully" in {
+      Json.toJson(errorResponse503) shouldBe Json.parse(errorResponse503JsonString)
+    }
+
+    "deserialises to the model class" in {
+      val _: NpsErrorResponseHipOrigin =
+        jsonFormat.reads(Json.parse(errorResponse503JsonString)).get
+    }
+
+    "deserialises and reserialises to the same thing (no JSON fields are ignored)" in {
+      val jValue: JsValue                             = Json.parse(errorResponse503JsonString)
+      val errorResponse503: NpsErrorResponseHipOrigin = jsonFormat.reads(jValue).get
+      val writtenJson: JsValue                        = jsonFormat.writes(errorResponse503)
+
+      writtenJson shouldBe jValue
+    }
+
+    "should match the openapi schema" in {
+      liabilitySummaryDetails503JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse503)
+      ) shouldBe Nil
     }
   }
 

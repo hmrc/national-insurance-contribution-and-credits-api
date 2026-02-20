@@ -29,11 +29,10 @@ import uk.gov.hmrc.app.benefitEligibility.common.{
 }
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   GYSPEligibilityCheckDataRequest,
-  LongTermBenefitCalculation,
-  MarriageDetails,
-  SchemeMembershipDetails
+  LongTermBenefitCalculationRequestParams,
+  MarriageDetailsRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.connector.BenefitSchemeDetailsConnector
@@ -125,7 +124,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   }
 
   private[service] def fetchNiContributionsAndCreditsData(
-      contributionsAndCredits: ContributionsAndCredits
+      contributionsAndCredits: ContributionsAndCreditsRequestParams
   )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) = {
 
     val taxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
@@ -147,7 +146,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   }
 
   private[service] def fetchMarriageDetailsData(
-      marriageDetails: Option[MarriageDetails]
+      marriageDetails: Option[MarriageDetailsRequestParams]
   )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
     marriageDetailsConnector.fetchMarriageDetails(
       requestKey.benefitType,
@@ -198,7 +197,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   } yield BenefitSchemeMembershipDetailsData(resultTuple._1, resultTuple._2)
 
   private[service] def fetchLongTermBenefitCalculationDetailsData(
-      longTermBenefitCalculation: LongTermBenefitCalculation
+      longTermBenefitCalculation: LongTermBenefitCalculationRequestParams
   )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey): EitherT[
     Future,
     BenefitEligibilityError,

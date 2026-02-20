@@ -43,9 +43,9 @@ import play.api.test.Helpers.{
   UNPROCESSABLE_ENTITY
 }
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{GYSP, MA}
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
@@ -55,14 +55,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 

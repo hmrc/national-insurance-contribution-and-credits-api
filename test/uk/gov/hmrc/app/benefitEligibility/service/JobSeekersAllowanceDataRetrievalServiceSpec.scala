@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   JSAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
@@ -80,7 +80,7 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   private val eligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),
-    niContributionsAndCredits = ContributionsAndCredits(
+    niContributionsAndCredits = ContributionsAndCreditsRequestParams(
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)

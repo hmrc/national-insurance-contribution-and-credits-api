@@ -24,8 +24,8 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnprocessableEntity
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  Class2MaReceipts,
-  ContributionsAndCredits,
+  Class2MaReceiptsRequestParams,
+  ContributionsAndCreditsRequestParams,
   MAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
@@ -79,14 +79,14 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   private val eligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
     Identifier("GD379251T"),
-    ContributionsAndCredits(
+    ContributionsAndCreditsRequestParams(
       DateOfBirth(LocalDate.parse("2025-10-10")),
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
     uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
-      .Liabilities(Abroad, None, None, None, None, None),
-    Class2MaReceipts(None, None, None)
+      .LiabilitiesRequestParams(Abroad, None, None, None, None, None),
+    Class2MaReceiptsRequestParams(None, None, None)
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(

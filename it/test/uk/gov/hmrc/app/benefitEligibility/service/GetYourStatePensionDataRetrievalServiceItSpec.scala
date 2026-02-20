@@ -51,179 +51,25 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsStandardErrorResponse400
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  Class2MaReceipts,
-  ContributionsAndCredits,
+  ContributionsAndCreditsRequestParams,
   GYSPEligibilityCheckDataRequest,
-  LongTermBenefitCalculation
+  LongTermBenefitCalculationRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{
-  AccruedGMPLiabilityServiceDate,
-  BenefitSchemeAddressDetails,
-  BenefitSchemeDetails,
-  BenefitSchemeDetailsSuccessResponse,
-  BenefitSchemeName,
-  CertificateCancellationDate,
-  ContractedOutDeductionExtinguishedDate,
-  CurrentOptimisticLock,
-  DateFormallyCertified,
-  IsleOfManInterest,
-  MagneticTapeNumber,
-  PaymentRestartDate,
-  PaymentSuspensionDate,
-  PrivatePensionSchemeSanctionDate,
-  ReconciliationDate,
-  RecoveriesRestartedDate,
-  RecoveriesSuspendedDate,
-  RevaluationRateSequenceNumber,
-  SchemeAddressDetails,
-  SchemeAddressEndDate,
-  SchemeAddressLine1,
-  SchemeAddressLine2,
-  SchemeAddressLocality,
-  SchemeAddressPostalTown,
-  SchemeAddressSequenceNumber,
-  SchemeAddressStartDate,
-  SchemeCessationDate,
-  SchemeContractedOutNumberDetails,
-  SchemeConversionDate,
-  SchemePostcode,
-  SchemeStartDate,
-  SchemeTelephoneNumber,
-  SchemeWindingUp,
-  SuspendedDate
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.{
-  AreaDiallingCode,
-  BenefitSchemeInstitutionType,
-  BenefitSchemeStatus,
-  RerouteToSchemeCessation,
-  SchemeAddressType,
-  SchemeInhibitionStatus,
-  StatementInhibitor
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.{
-  AmountNeeded,
-  ClassThreePayable,
-  ClassThreePayableBy,
-  ClassThreePayableByPenalty,
-  ClassTwoOutstandingWeeks,
-  ClassTwoPayable,
-  ClassTwoPayableBy,
-  ClassTwoPayableByPenalty,
-  CoClassOnePaid,
-  CoPrimaryPaidEarnings,
-  ContributionCreditCount,
-  ContributionsByTaxYear,
-  DateOfEntry,
-  IndividualStatePensionInformationSuccessResponse,
-  NiEarnings,
-  NiEarningsSelfEmployed,
-  NiEarningsVoluntary,
-  NonQualifyingYears,
-  NonQualifyingYearsPayable,
-  NumberOfQualifyingYears,
-  OtherCredits,
-  PayableAccepted,
-  Pre1975CCCount,
-  QualifyingTaxYear,
-  TotalPrimaryContributions,
-  UnderInvestigationFlag,
-  YearsToFinalRelevantYear
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.{
-  AdditionalAgeRelatedPensionPercentage,
-  AdditionalNotionalPensionAmountPost2002,
-  AdditionalNotionalPensionIncrementsInheritedPost2002,
-  AdditionalPensionAmountPost1997,
-  AdditionalPensionAmountPost2002,
-  AdditionalPensionAmountPre1997,
-  AdditionalPensionIncrementsCashValue,
-  AdditionalPensionIncrementsInheritedPost2002,
-  AdditionalPensionNotionalPercentage,
-  AdditionalPensionPercentage,
-  AdditionalPost1997AgeRelatedPensionPercentage,
-  AdditionalPost1997PensionNotionalPercentage,
-  AdditionalPost1997PensionPercentage,
-  AdditionalPost2002AgeRelatedPensionPercentage,
-  AdditionalPost2002PensionNotionalPercentage,
-  AdditionalPost2002PensionPercentage,
-  BasicPensionIncrementsCashValue,
-  BasicPensionPercentage,
-  BenefitCalculationDetail,
-  BenefitCalculationDetailsList,
-  CalculationDate,
-  ConditionOneSatisfied,
-  ConsiderReducedRateElection,
-  ContractedOutDeductionsPost1988,
-  ContractedOutDeductionsPre1988,
-  DerivedRebateAmount,
-  GraduatedRetirementBenefitCashValue,
-  GreatBritainPaymentAmount,
-  GuaranteedMinimumPensionContractedOutDeductionsPost1988,
-  GuaranteedMinimumPensionContractedOutDeductionsPre1988,
-  HusbandDateOfDeath,
-  InheritableAdditionalPensionPercentage,
-  InheritableNotionalAdditionalPensionIncrements,
-  InheritedAdditionalPensionNotionalPercentage,
-  InheritedAdditionalPensionPercentage,
-  InheritedAdditionalPost2002PensionNotionalPercentage,
-  InheritedAdditionalPost2002PensionPercentage,
-  InheritedBasicPensionPercentage,
-  InheritedGraduatedBenefit,
-  InheritedGraduatedPensionPercentage,
-  InitialStatePensionAmount,
-  LongTermBenefitCalculationDetailsSuccessResponse,
-  LongTermBenefitsCategoryACashValue,
-  LongTermBenefitsCategoryBLCashValue,
-  LongTermBenefitsIncrementalCashValue,
-  LongTermBenefitsUnitValue,
-  MinimumQualifyingPeriodMet,
-  NetAdditionalPensionPre1997,
-  NetRulesAmount,
-  NewStatePensionCalculationDetails,
-  NewStatePensionEntitlement,
-  NewStatePensionQualifyingYears,
-  NewStatePensionRequisiteYears,
-  NotionalPost1997AdditionalPension,
-  NotionalPre1997AdditionalPension,
-  OldRulesStatePensionEntitlement,
-  OperativeBenefitStartDate,
-  PensionSharingOrderContractedOutEmploymentsGroup,
-  PensionSharingOrderStateEarningsRelatedPensionScheme,
-  Post02AgeRelatedAdditionalPension,
-  Post97AgeRelatedAdditionalPension,
-  Pre1975ShortTermBenefits,
-  Pre97AgeRelatedAdditionalPension,
-  ProtectedPayment,
-  ProtectedPayment2016,
-  QualifyingYearsAfter2016,
-  ReasonForFormIssue,
-  SicknessBenefitStatusForReports,
-  SingleContributionConditionRulesApply,
-  StatePensionAgeAfter2016TaxYear,
-  StatePensionAgeBefore2010TaxYear,
-  SubstitutionMethod1,
-  SubstitutionMethod2,
-  SurvivingSpouseAge,
-  SurvivorsBenefitAgeRelatedPensionPercentage,
-  TotalGuaranteedMinimumPension,
-  TotalNonGuaranteedMinimumPension,
-  WeeklyBudgetingLoanAmount
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
   CalculationSource,
   CalculationStatus,
@@ -239,64 +85,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.{
-  AccruedPensionContractedOutDeductionsValue,
-  AccruedPensionContractedOutDeductionsValuePost1988,
-  ActualTransferValue,
-  ApparentUnnotifiedTerminationDestinationDetails,
-  CertifiedAmount,
-  ClericallyControlledTotal,
-  ClericallyControlledTotalPost1988,
-  ContractedOutEmployerIdentifier,
-  CreationMicrofilmNumber,
-  DebitVoucherMicrofilmNumber,
-  EmployeesReference,
-  EmployersContractedOutNumberDetails,
-  ExtensionDate,
-  FinalYearEarnings,
-  GuaranteedMinimumPensionContractedOutDeductionsRevalued,
-  GuaranteedMinimumPensionConversionApplied,
-  ImportingAppropriateSchemeNumberDetails,
-  InhibitSchemeProcessing,
-  MinimumFundTransferAmount,
-  PenultimateYearEarnings,
-  ProtectedRightsStartDate,
-  RetrospectiveEarnings,
-  RevaluationApplied,
-  SchemeCreatingContractedOutNumberDetails,
-  SchemeMembershipDetails,
-  SchemeMembershipDetailsSuccessResponse,
-  SchemeMembershipDetailsSummary,
-  SchemeMembershipEndDate,
-  SchemeMembershipOccurrenceNumber,
-  SchemeMembershipSequenceNumber,
-  SchemeMembershipStartDate,
-  SchemeMembershipTransferSequenceNumber,
-  SchemeTerminatingContractedOutNumberDetails,
-  StateEarningsRelatedPensionsSchemeNonRestorationValue,
-  StateEarningsRelatedPensionsSchemeValuePost1988,
-  TechnicalAmount,
-  TerminationMicrofilmNumber,
-  TotalLinkedGuaranteedMinimumPensionContractedOutDeductions,
-  TotalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988,
-  TransferPremiumElectionDate,
-  TransferTakeUpDate
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.{
-  ApparentUnnotifiedTerminationStatus,
-  Clercalc,
-  ContCatLetter,
-  Enfcment,
-  FurtherPaymentsConfirmation,
-  GuaranteedMinimumPensionReconciliationStatus,
-  MethodOfPreservation,
-  RevaluationRate,
-  SchemeMembershipDebitReason,
-  SchemeSuspensionType,
-  SspDeem,
-  StakeholderPensionSchemeType,
-  SurvivorStatus
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -792,12 +582,12 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
       val gyspEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
         Identifier("GD379251T"),
-        ContributionsAndCredits(
+        ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        LongTermBenefitCalculation(None, None),
+        LongTermBenefitCalculationRequestParams(None, None),
         None
       )
 

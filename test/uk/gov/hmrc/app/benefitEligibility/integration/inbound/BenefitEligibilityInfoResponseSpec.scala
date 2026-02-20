@@ -40,8 +40,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, Partial, Success}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
@@ -60,6 +60,12 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePe
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
+  CalculationSource,
+  CalculationStatus,
+  Payday
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.{
   LongTermBenefitNotesSuccessResponse,
   Note
@@ -78,14 +84,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 
 import java.time.LocalDate
-import java.util.UUID
 import scala.util.Random
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
 
 class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with MockFactory with EitherValues {
 
@@ -1543,7 +1542,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val mockEligibilityCheckDataResultJsa  = mock[EligibilityCheckDataResultJSA]
         val mockEligibilityCheckDataResultGysp = mock[EligibilityCheckDataResultGYSP]
         val mockEligibilityCheckDataResultBsp  = mock[EligibilityCheckDataResultBSP]
-        val mockEligibilityCheckDataResult     = mock[EligibilityCheckDataResult]
 
         (() => mockEligibilityCheckDataResultMa.benefitType).expects().returning(BenefitType.MA)
         (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(mixedResults)
@@ -1594,7 +1592,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should return an error response if all of the api results in the data result are failures" in {
         case class DummySuccessResponse(i: Int) extends NpsSuccessfulApiResponse
         val randomApiName: ApiName = Random.shuffle(ApiName.values.toList).head
-        val benefitTypes           = Table("benefitTypes", BenefitType.values.toList: _*)
 
         val allFailureResults: List[ApiResult] = List(
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](

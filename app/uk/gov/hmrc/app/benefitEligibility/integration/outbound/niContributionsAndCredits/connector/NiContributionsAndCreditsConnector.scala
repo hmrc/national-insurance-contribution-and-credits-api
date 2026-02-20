@@ -20,7 +20,6 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -37,12 +36,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse
 }
 import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, BenefitEligibilityError, BenefitType}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.FailureResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.{
-  NiContributionsAndCreditsRequest,
-  NiContributionsAndCreditsResponse
-}
-import NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient, NpsResponseHandler}

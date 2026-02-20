@@ -18,8 +18,6 @@ package uk.gov.hmrc.app.benefitEligibility.common
 
 import cats.Semigroup
 import io.scalaland.chimney.dsl.into
-import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ApiResult, EligibilityCheckDataResult}
 
 import scala.collection.immutable
 
