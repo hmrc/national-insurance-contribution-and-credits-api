@@ -1,31 +1,37 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.app.benefitEligibility.controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
-import com.github.tomakehurst.wiremock.http.Fault
 import org.scalatest.EitherValues
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks.forAll
-import org.scalatest.prop.TableFor1
-import org.scalatest.prop.Tables.Table
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContent, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{NpsErrorResponseHipOrigin, NpsMultiErrorResponse, NpsSingleErrorResponse, NpsStandardErrorResponse400}
 import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.{BenefitSchemeDetails, *}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
@@ -50,10 +56,9 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipD
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class BenefitEligibilityDataControllerItSpec extends AnyFreeSpec
   with EitherValues
@@ -182,7 +187,6 @@ class BenefitEligibilityDataControllerItSpec extends AnyFreeSpec
 
         status(result) shouldBe 200
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
-
       }
       "should fetch JSA Data correctly" in {
 
@@ -603,7 +607,7 @@ class BenefitEligibilityDataControllerItSpec extends AnyFreeSpec
         status(result) shouldBe 200
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
       }
-      "Should Fetch GYSP Correctly" in {
+      "Should Fetch GYP Correctly" in {
 
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
           totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
@@ -1122,7 +1126,7 @@ class BenefitEligibilityDataControllerItSpec extends AnyFreeSpec
             )
         )
 
-        val gyspEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+        val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
           Identifier("AB123456C"),
           ContributionsAndCredits(
             DateOfBirth(LocalDate.parse("2025-10-10")),
@@ -1134,7 +1138,7 @@ class BenefitEligibilityDataControllerItSpec extends AnyFreeSpec
         )
 
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(gyspEligibilityCheckDataRequest))
+          .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
           .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92")
 
@@ -1145,6 +1149,185 @@ class BenefitEligibilityDataControllerItSpec extends AnyFreeSpec
         status(result) shouldBe 200
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
 
+      }
+      "should fetch ESA Data and return error 400, CorrelationID Missing" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          Identifier("AB123456C"),
+          ContributionsAndCredits(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2025),
+            EndTaxYear(2026)
+          )
+        )
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+      }
+      "should fetch ESA Data and return error 422 Validation error" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          Identifier("AB123456aaaC"),
+          ContributionsAndCredits(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2025),
+            EndTaxYear(2026)
+          )
+        )
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 422
+      }
+      "should fetch ESA Data and return error 400, Bad Request, Cant validate Json" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson("{}"))
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+      }
+      "should fetch ESA Data and return error 500, Internal Server Error" in {
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson("{}"))
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 500
+      }
+      "should fetch ESA Data and return error 400, Invalid Json as no json is parsed" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+      }
+      "should fetch ESA Data and return error 502, Bad Gateway" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_GATEWAY)
+                .withHeader("Content-Type", "application/json")
+            )
+        )
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          Identifier("AB123456C"),
+          ContributionsAndCredits(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          )
+        )
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 502
       }
     }
   }
