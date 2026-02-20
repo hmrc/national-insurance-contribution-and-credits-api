@@ -663,30 +663,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                niContributionsAndCreditsSuccessResponse
+              ),
+              BenefitSchemeMembershipDetailsData(
                 SuccessResult(
-                  ApiName.NiContributionAndCredits,
-                  niContributionsAndCreditsSuccessResponse
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -827,30 +829,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -990,30 +994,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -1142,30 +1148,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -1282,30 +1290,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.NotFound, None)
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.NotFound, None)
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -1438,30 +1448,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -1575,30 +1587,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.InternalServerError, None)
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -1736,30 +1750,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
-              List(
-                FailureResult(
-                  ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              ),
+              BenefitSchemeMembershipDetailsData(
+                SuccessResult(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.BenefitSchemeDetails,
+                    benefitSchemeDetailsSuccessResponse
+                  )
                 )
               ),
-              SuccessResult(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsSuccessResponse
-              ),
-              List(
+              LongTermBenefitCalculationDetailsData(
                 SuccessResult(
-                  ApiName.BenefitSchemeDetails,
-                  benefitSchemeDetailsSuccessResponse
-                )
-              ),
-              SuccessResult(
-                ApiName.LongTermBenefitCalculationDetails,
-                longTermBenefitCalculationDetailsSuccessResponse
-              ),
-              List(
-                SuccessResult(
-                  ApiName.LongTermBenefitNotes,
-                  longTermBenefitNotesSuccessResponse
+                  ApiName.LongTermBenefitCalculationDetails,
+                  longTermBenefitCalculationDetailsSuccessResponse
+                ),
+                List(
+                  SuccessResult(
+                    ApiName.LongTermBenefitNotes,
+                    longTermBenefitNotesSuccessResponse
+                  )
                 )
               ),
               SuccessResult(
@@ -1880,30 +1896,32 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
             result shouldBe Right(
               EligibilityCheckDataResultGYSP(
-                List(
-                  FailureResult(
-                    ApiName.NiContributionAndCredits,
-                    ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                FailureResult(
+                  ApiName.NiContributionAndCredits,
+                  ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ),
+                BenefitSchemeMembershipDetailsData(
+                  SuccessResult(
+                    ApiName.SchemeMembershipDetails,
+                    schemeMembershipDetailsSuccessResponse
+                  ),
+                  List(
+                    SuccessResult(
+                      ApiName.BenefitSchemeDetails,
+                      benefitSchemeDetailsSuccessResponse
+                    )
                   )
                 ),
-                SuccessResult(
-                  ApiName.SchemeMembershipDetails,
-                  schemeMembershipDetailsSuccessResponse
-                ),
-                List(
+                LongTermBenefitCalculationDetailsData(
                   SuccessResult(
-                    ApiName.BenefitSchemeDetails,
-                    benefitSchemeDetailsSuccessResponse
-                  )
-                ),
-                SuccessResult(
-                  ApiName.LongTermBenefitCalculationDetails,
-                  longTermBenefitCalculationDetailsSuccessResponse
-                ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                    ApiName.LongTermBenefitCalculationDetails,
+                    longTermBenefitCalculationDetailsSuccessResponse
+                  ),
+                  List(
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 ),
                 SuccessResult(

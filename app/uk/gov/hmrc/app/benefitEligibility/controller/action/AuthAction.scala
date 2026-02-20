@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.{Forbidden, InternalServerError}
 import play.api.mvc.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{ErrorCode, ErrorReason, ErrorResponse}
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.Failure
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,6 +38,8 @@ class AuthAction @Inject() (
     with ActionFunction[Request, Request]
     with AuthorisedFunctions {
 
+  private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
+
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
@@ -45,10 +48,13 @@ class AuthAction @Inject() (
       block(request)
     }.recover {
       case e: UnsupportedAuthProvider =>
+        logger.error(e.msg)
         Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
       case e: BearerTokenExpired =>
+        logger.error(e.msg)
         Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
       case e =>
+        logger.error(e.getMessage)
         InternalServerError(Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason(e.getMessage))))
     }
   }

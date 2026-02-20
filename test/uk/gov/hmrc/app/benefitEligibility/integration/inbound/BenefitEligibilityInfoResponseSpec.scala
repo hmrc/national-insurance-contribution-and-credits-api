@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json
-import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common._
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   Class2MAReceipts,
   IndividualStatePension,
@@ -40,27 +40,28 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, Partial, Success}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.common.npsError._
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
   CalculationSource,
   CalculationStatus,
@@ -71,17 +72,32 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNo
   Note
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.{
+  MarriageDetailsSuccessResponse,
+  MarriageEndDate,
+  MarriageStartDate,
+  ReconciliationDate,
+  SeparationDate,
+  SpouseForename,
+  SpouseSurname
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageEndDateStatus.Verified
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStartDateStatus
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStartDateStatus.NotKnown
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums._
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.{
   NiContributionsAndCreditsSuccess,
   enums
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums._
+import uk.gov.hmrc.app.benefitEligibility.service.{
+  BenefitSchemeMembershipDetailsData,
+  LongTermBenefitCalculationDetailsData
+}
 
 import java.time.LocalDate
 import scala.util.Random
@@ -89,6 +105,87 @@ import scala.util.Random
 class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with MockFactory with EitherValues {
 
   private val nationalInsuranceNumber: Identifier = Identifier("AB123456C")
+
+  val filteredClass2MaReceipts = FilteredClass2MaReceipts(
+    List(
+      ReceiptDate(LocalDate.parse("2025-12-10"))
+    )
+  )
+
+  val filteredLiabilitySummaryDetails = FilteredLiabilitySummaryDetails(
+    List(
+      FilteredLiabilitySummaryDetailItem(
+        StartDate(LocalDate.parse("2026-01-01")),
+        Some(EndDate(LocalDate.parse("2027-01-01")))
+      )
+    )
+  )
+
+  val filteredMarriageDetails =
+    FilteredMarriageDetails(
+      List(
+        FilteredMarriageDetailsItem(
+          status = CivilPartner,
+          startDate = Some(MarriageStartDate(LocalDate.parse("1999-01-01"))),
+          startDateStatus = Some(MarriageStartDateStatus.Verified),
+          endDate = Some(MarriageEndDate(LocalDate.parse("2001-01-01"))),
+          endDateStatus = Some(Verified),
+          spouseIdentifier = Some(Identifier("AB123456C")),
+          spouseForename = Some(SpouseForename("Skywalker")),
+          spouseSurname = Some(SpouseSurname("Luke"))
+        )
+      )
+    )
+
+  val filteredIndividualStatePensionInfo = FilteredIndividualStatePensionInfo(
+    Some(NumberOfQualifyingYears(35)),
+    List(
+      FilteredIndividualStatePensionContributionsByTaxYear(
+        Some(TotalPrimaryPaidEarnings(48500.75)),
+        Some(QualifyingTaxYear(true))
+      ),
+      FilteredIndividualStatePensionContributionsByTaxYear(
+        Some(TotalPrimaryPaidEarnings(39875.90)),
+        Some(QualifyingTaxYear(false))
+      )
+    )
+  )
+
+  val filteredSchemeMembershipDetails = FilteredSchemeMembershipDetails(
+    List(
+      FilteredSchemeMembershipDetailsItem(
+        None,
+        Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
+        Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
+        Some(EmployersContractedOutNumberDetails("S3123456B"))
+      )
+    )
+  )
+
+  val filteredLongTermBenefitCalculationDetails = FilteredLongTermBenefitCalculationDetails(
+    List(
+      FilteredLongTermBenefitCalculationDetailsItem(
+        guaranteedMinimumPensionContractedOutDeductionsPre1988 =
+          Some(GuaranteedMinimumPensionContractedOutDeductionsPre1988(10.56)),
+        guaranteedMinimumPensionContractedOutDeductionsPost1988 =
+          Some(GuaranteedMinimumPensionContractedOutDeductionsPost1988(10.56)),
+        contractedOutDeductionsPre1988 = Some(ContractedOutDeductionsPre1988(10.56)),
+        contractedOutDeductionsPost1988 = Some(ContractedOutDeductionsPost1988(10.56)),
+        List(
+          Note("Invalid Note Type Encountered."),
+          Note(
+            "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025."
+          ),
+          Note("Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025"),
+          Note("Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025."),
+          Note("Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025."),
+          Note("Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025."),
+          Note("Retirement Position of UNKNOWN recorded on this account from 07/04/2025."),
+          Note("Retirement Position of UNKNOWN recorded on this account between NOT KNOWN.")
+        )
+      )
+    )
+  )
 
   val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
     Identifier("AA000001A"),
@@ -121,7 +218,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
           endDateStatus = Some(EnumLtpedttp.EndDateHeld),
           startDate = StartDate(LocalDate.parse("2026-01-01")),
-          endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
+          endDate = Some(EndDate(LocalDate.parse("2027-01-01"))),
           country = Some(Country.GreatBritain),
           trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
           casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
@@ -192,15 +289,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             .MarriageDetailsListElement(
               sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
               status = CivilPartner,
-              startDate = None,
-              startDateStatus = None,
-              endDate = None,
-              endDateStatus = None,
-              spouseIdentifier = None,
-              spouseForename = None,
-              spouseSurname = None,
-              separationDate = None,
-              reconciliationDate = None
+              startDate = Some(MarriageStartDate(LocalDate.parse("1999-01-01"))),
+              startDateStatus = Some(MarriageStartDateStatus.Verified),
+              endDate = Some(MarriageEndDate(LocalDate.parse("2001-01-01"))),
+              endDateStatus = Some(Verified),
+              spouseIdentifier = Some(Identifier("AB123456C")),
+              spouseForename = Some(SpouseForename("Skywalker")),
+              spouseSurname = Some(SpouseSurname("Luke")),
+              separationDate = Some(SeparationDate(LocalDate.parse("2002-01-01"))),
+              reconciliationDate = Some(ReconciliationDate(LocalDate.parse("2003-01-01")))
             )
         )
       ),
@@ -327,7 +424,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       currentOptimisticLock = CurrentOptimisticLock(4),
       schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
       schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
-      reconciliationDate = Some(ReconciliationDate("2025-03-31")),
+      reconciliationDate = Some(BenefitSchemeDetailsSuccess.ReconciliationDate("2025-03-31")),
       schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
     ),
     schemeAddressDetailsList = List(
@@ -600,8 +697,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expected = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
-          class2MAReceiptsSuccessResponse,
-          liabilitySummaryDetailsSuccessResponse,
+          filteredClass2MaReceipts,
+          filteredLiabilitySummaryDetails,
           niContributionsAndCreditsSuccessResponse
         )
 
@@ -612,8 +709,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val benefitEligibilityInfoSuccessResponseMa = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
-          class2MAReceiptsSuccessResponse,
-          liabilitySummaryDetailsSuccessResponse,
+          filteredClass2MaReceipts,
+          filteredLiabilitySummaryDetails,
           niContributionsAndCreditsSuccessResponse
         )
 
@@ -622,53 +719,17 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |   "benefitType":"MA",
             |   "nationalInsuranceNumber":"AB123456C",
             |   "class2MAReceiptsResult":{
-            |      "identifier":"AA000001A",
-            |      "class2MAReceiptDetails":[
-            |         {
-            |            "initials":"JP",
-            |            "surname":"van Cholmondley-warner",
-            |            "receivablePeriodStartDate":"2025-12-10",
-            |            "receivablePeriodEndDate":"2025-12-10",
-            |            "receivablePayment":10.56,
-            |            "receiptDate":"2025-12-10",
-            |            "liabilityStartDate":"2025-12-10",
-            |            "liabilityEndDate":"2025-12-10",
-            |            "billAmount":9999.98,
-            |            "billScheduleNumber":100,
-            |            "isClosedRecord":true,
-            |            "weeksPaid":2
-            |         }
+            |      "receiptDates":[
+            |         "2025-12-10"
             |      ]
             |   },
             |   "liabilitySummaryDetailsResult":{
-            |      "liabilityDetailsList":[
+            |      "liabilityDetails":[
             |         {
-            |            "identifier":"RN000001A",
-            |            "type":"ABROAD",
-            |            "occurrenceNumber":1,
-            |            "startDateStatus":"START DATE HELD",
-            |            "endDateStatus":"END DATE HELD",
             |            "startDate":"2026-01-01",
-            |            "endDate":"2026-01-01",
-            |            "country":"GREAT BRITAIN",
-            |            "trainingCreditApprovalStatus":"NO CREDIT FOR APPROVED TRAINING",
-            |            "casepaperReferenceNumber":"SCH/123/4",
-            |            "homeResponsibilitiesProtectionBenefitReference":"12345678AB",
-            |            "homeResponsibilitiesProtectionRate":10.56,
-            |            "lostCardNotificationReason":"NOT APPLICABLE",
-            |            "lostCardRulingReason":"NOT APPLICABLE",
-            |            "homeResponsibilityProtectionCalculationYear":2022,
-            |            "awardAmount":10.56,
-            |            "resourceGroupIdentifier":789,
-            |            "homeResponsibilitiesProtectionIndicator":"(NONE)",
-            |            "officeDetails":{
-            |               "officeLocationDecode":1,
-            |               "officeLocationValue":"HQ STATIONARY STORE",
-            |               "officeIdentifier":"(NONE)"
-            |            }
+            |            "endDate":"2027-01-01"
             |         }
-            |      ],
-            |      "callback":{"callbackURL":"/some/url"}
+            |      ]
             |   },
             |   "niContributionsAndCreditsResult":{
             |      "totalGraduatedPensionUnits":53,
@@ -721,8 +782,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expected = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber,
-          marriageDetailsSuccessResponse,
-          niContributionsAndCreditsSuccessResponse
+          niContributionsAndCreditsSuccessResponse,
+          filteredMarriageDetails
         )
 
         result.value shouldBe expected
@@ -732,28 +793,159 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val benefitEligibilityInfoSuccessResponseBsp = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber,
-          marriageDetailsSuccessResponse,
-          niContributionsAndCreditsSuccessResponse
+          niContributionsAndCreditsSuccessResponse,
+          filteredMarriageDetails
         )
 
         val expectedJson =
           """{
             |   "benefitType":"BSP",
             |   "nationalInsuranceNumber":"AB123456C",
-            |   "marriageDetailsResult":{
-            |      "marriageDetails":{
-            |         "activeMarriage":true,
-            |         "marriageDetailsList":[{
-            |            "sequenceNumber":2,
-            |            "status":"CIVIL PARTNER"
-            |         }],
-            |         "_links":{
-            |            "self":{
-            |               "href":"",
-            |               "methods":"get"
-            |            }
+            |   "niContributionsAndCreditsResult":{
+            |      "totalGraduatedPensionUnits":53,
+            |      "class1ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCategoryLetter":"U",
+            |            "contributionCategory":"(NONE)",
+            |            "contributionCreditType":"C1",
+            |            "primaryContribution":99999999999999.98,
+            |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+            |            "primaryPaidEarnings":99999999999999.98,
+            |            "creditSource":"NOT KNOWN",
+            |            "employerName":"ipOpMs",
+            |            "latePaymentPeriod":"L"
             |         }
-            |      }
+            |      ],
+            |      "class2ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCreditType":"C1",
+            |            "class2Or3EarningsFactor":99999999999999.98,
+            |            "class2NIContributionAmount":99999999999999.98,
+            |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+            |            "creditSource":"NOT KNOWN",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ]
+            |   },
+            |   "marriageDetailsResult":{
+            |      "marriageDetails":[
+            |         {
+            |            "status":"CIVIL PARTNER",
+            |            "startDate":"1999-01-01",
+            |            "startDateStatus":"VERIFIED",
+            |            "endDate":"2001-01-01",
+            |            "endDateStatus":"VERIFIED",
+            |            "spouseIdentifier":"AB123456C",
+            |            "spouseForename":"Skywalker",
+            |            "spouseSurname":"Luke"
+            |         }
+            |      ]
+            |   }
+            |}""".stripMargin
+
+        Json.toJson(benefitEligibilityInfoSuccessResponseBsp) shouldBe Json.parse(expectedJson)
+      }
+    }
+  }
+
+  "BenefitEligibilityInfoSuccessResponseGysp" - {
+    ".from" - {
+      "should convert to a BenefitEligibilityInfoSuccessResponseGysp" in {
+
+        val result = BenefitEligibilityInfoSuccessResponseGysp.from(
+          nationalInsuranceNumber,
+          EligibilityCheckDataResultGYSP(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse),
+            BenefitSchemeMembershipDetailsData(
+              NpsApiResult.SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse),
+              List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
+            ),
+            LongTermBenefitCalculationDetailsData(
+              NpsApiResult
+                .SuccessResult(LongTermBenefitCalculationDetails, longTermBenefitCalculationDetailsSuccessResponse),
+              List(NpsApiResult.SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse))
+            ),
+            NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse),
+            NpsApiResult.SuccessResult(IndividualStatePension, individualStatePensionInformationSuccessResponse)
+          )
+        )
+
+        val expected = BenefitEligibilityInfoSuccessResponseGysp(
+          nationalInsuranceNumber,
+          filteredMarriageDetails,
+          filteredLongTermBenefitCalculationDetails,
+          filteredSchemeMembershipDetails,
+          filteredIndividualStatePensionInfo,
+          niContributionsAndCreditsSuccessResponse
+        )
+
+        result.value shouldBe expected
+
+      }
+      "should serialize to json correctly" in {
+        val json =
+          """{
+            |   "benefitType":"GYSP",
+            |   "nationalInsuranceNumber":"AB123456C",
+            |   "marriageDetailsResult":{
+            |      "marriageDetails":[
+            |         {
+            |            "status":"CIVIL PARTNER",
+            |            "startDate":"1999-01-01",
+            |            "startDateStatus":"VERIFIED",
+            |            "endDate":"2001-01-01",
+            |            "endDateStatus":"VERIFIED",
+            |            "spouseIdentifier":"AB123456C",
+            |            "spouseForename":"Skywalker",
+            |            "spouseSurname":"Luke"
+            |         }
+            |      ]
+            |   },
+            |   "longTermBenefitCalculationDetailsResult":{
+            |      "benefitCalculationDetails":[
+            |         {
+            |            "guaranteedMinimumPensionContractedOutDeductionsPre1988":10.56,
+            |            "guaranteedMinimumPensionContractedOutDeductionsPost1988":10.56,
+            |            "contractedOutDeductionsPre1988":10.56,
+            |            "contractedOutDeductionsPost1988":10.56,
+            |            "longTermBenefitNotes":[
+            |               "Invalid Note Type Encountered.",
+            |               "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025.",
+            |               "Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025",
+            |               "Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025.",
+            |               "Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025.",
+            |               "Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025.",
+            |               "Retirement Position of UNKNOWN recorded on this account from 07/04/2025.",
+            |               "Retirement Position of UNKNOWN recorded on this account between NOT KNOWN."
+            |            ]
+            |         }
+            |      ]
+            |   },
+            |   "schemeMembershipDetailsResult":{
+            |      "schemeMembershipDetails":[
+            |         {
+            |            "schemeMembershipStartDate":"2022-06-27",
+            |            "schemeMembershipEndDate":"2022-06-27",
+            |            "employersContractedOutNumberDetails":"S3123456B"
+            |         }
+            |      ]
+            |   },
+            |   "individualStatePensionInfoResult":{
+            |      "numberOfQualifyingYears":35,
+            |      "contributionsByTaxYear":[
+            |         {
+            |            "totalPrimaryPaidEarnings":48500.75,
+            |            "qualifyingTaxYear":true
+            |         },
+            |         {
+            |            "totalPrimaryPaidEarnings":39875.9,
+            |            "qualifyingTaxYear":false
+            |         }
+            |      ]
             |   },
             |   "niContributionsAndCreditsResult":{
             |      "totalGraduatedPensionUnits":53,
@@ -787,425 +979,13 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |   }
             |}""".stripMargin
 
-        Json.toJson(benefitEligibilityInfoSuccessResponseBsp) shouldBe Json.parse(expectedJson)
-      }
-    }
-  }
-
-  "BenefitEligibilityInfoSuccessResponseGysp" - {
-    ".from" - {
-      "should convert to a BenefitEligibilityInfoSuccessResponseGysp" in {
-
-        val result = BenefitEligibilityInfoSuccessResponseGysp.from(
-          nationalInsuranceNumber,
-          EligibilityCheckDataResultGYSP(
-            List(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-            NpsApiResult.SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse),
-            List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse)),
-            NpsApiResult
-              .SuccessResult(LongTermBenefitCalculationDetails, longTermBenefitCalculationDetailsSuccessResponse),
-            List(NpsApiResult.SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse)),
-            NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse),
-            NpsApiResult.SuccessResult(IndividualStatePension, individualStatePensionInformationSuccessResponse)
-          )
-        )
-
-        val expected = BenefitEligibilityInfoSuccessResponseGysp(
-          nationalInsuranceNumber,
-          List(benefitSchemeDetailsSuccessResponse),
-          marriageDetailsSuccessResponse,
-          longTermBenefitCalculationDetailsSuccessResponse,
-          longTermBenefitNotesSuccessResponse,
-          schemeMembershipDetailsSuccessResponse,
-          individualStatePensionInformationSuccessResponse,
-          List(niContributionsAndCreditsSuccessResponse)
-        )
-
-        result.value shouldBe expected
-
-      }
-      "should serialize to json correctly" in {
-        val json =
-          """{
-            |   "benefitType":"GYSP",
-            |   "nationalInsuranceNumber":"AB123456C",
-            |   "benefitSchemeDetailsResult":[
-            |      {
-            |         "benefitSchemeDetails":{
-            |            "currentOptimisticLock":4,
-            |            "schemeContractedOutNumberDetails":"S2345678C",
-            |            "schemeInhibitionStatus":"Converted Stakeholder Pension",
-            |            "magneticTapeNumber":54321,
-            |            "schemeName":"EXAMPLE PENSION SCHEME",
-            |            "schemeStartDate":"1985-04-06",
-            |            "schemeCessationDate":"2024-12-31",
-            |            "contractedOutDeductionExtinguishedDate":"2024-12-31",
-            |            "paymentSuspensionDate":"2024-10-01",
-            |            "recoveriesSuspendedDate":"2024-10-01",
-            |            "paymentRestartDate":"2024-10-01",
-            |            "recoveriesRestartedDate":"2024-10-01",
-            |            "schemeNature":"UNIT TRUSTS",
-            |            "benefitSchemeInstitution":"UNIT TRUST",
-            |            "accruedGMPLiabilityServiceDate":"1990-04-06",
-            |            "rerouteToSchemeCessation":"RE-ROUTE TO CESSATION",
-            |            "statementInhibitor":"SET",
-            |            "certificateCancellationDate":"2024-12-31",
-            |            "suspendedDate":"2024-10-01",
-            |            "isleOfManInterest":false,
-            |            "schemeWindingUp":true,
-            |            "revaluationRateSequenceNumber":12,
-            |            "benefitSchemeStatus":"BLOCK ON PROVIDER",
-            |            "dateFormallyCertified":"1985-04-06",
-            |            "privatePensionSchemeSanctionDate":"1985-04-06",
-            |            "schemeConversionDate":"2024-12-31",
-            |            "reconciliationDate":"2025-03-31"
-            |         },
-            |         "schemeAddressDetailsList":[
-            |            {
-            |               "schemeAddressSequenceNumber":5,
-            |               "schemeContractedOutNumberDetails":"S2345678C",
-            |               "schemeAddressType":"GENERAL CORRESPONDENCE",
-            |               "schemeAddressStartDate":"2010-01-01",
-            |               "schemeAddressEndDate":"2024-12-31",
-            |               "country":"SCOTLAND",
-            |               "areaDiallingCode":"0131 (99)",
-            |               "schemeTelephoneNumber":"0131 000 0000",
-            |               "benefitSchemeAddressDetails":{
-            |                  "schemeAddressLine1":"1 Sample Road",
-            |                  "schemeAddressLine2":"Unit 2",
-            |                  "schemeAddressLocality":"Old Quarter",
-            |                  "schemeAddressPostalTown":"Exampleburgh",
-            |                  "schemePostcode":"EX2 2EX"
-            |               }
-            |            }
-            |         ]
-            |      }
-            |   ],
-            |   "marriageDetailsResult":{
-            |      "marriageDetails":{
-            |         "activeMarriage":true,
-            |         "marriageDetailsList":[{
-            |            "sequenceNumber":2,
-            |            "status":"CIVIL PARTNER"
-            |         }],
-            |         "_links":{
-            |            "self":{
-            |               "href":"",
-            |               "methods":"get"
-            |            }
-            |         }
-            |      }
-            |   },
-            |   "longTermBenefitCalculationDetailsResult":{
-            |      "statePensionAgeBefore2010TaxYear":true,
-            |      "statePensionAgeAfter2016TaxYear":true,
-            |      "benefitCalculationDetailsList":[
-            |         {
-            |            "additionalPensionAmountPre1997":10.56,
-            |            "additionalPensionAmountPost1997":10.56,
-            |            "pre97AgeRelatedAdditionalPension":10.56,
-            |            "post97AgeRelatedAdditionalPension":10.56,
-            |            "basicPensionIncrementsCashValue":10.56,
-            |            "additionalPensionIncrementsCashValue":10.56,
-            |            "graduatedRetirementBenefitCashValue":10.56,
-            |            "totalGuaranteedMinimumPension":10.56,
-            |            "totalNonGuaranteedMinimumPension":10.56,
-            |            "longTermBenefitsIncrementalCashValue":10.56,
-            |            "greatBritainPaymentAmount":10.56,
-            |            "dateOfBirth":"2022-06-27",
-            |            "notionalPost1997AdditionalPension":10.56,
-            |            "notionalPre1997AdditionalPension":10.56,
-            |            "inheritableNotionalAdditionalPensionIncrements":10.56,
-            |            "conditionOneSatisfied":"H",
-            |            "reasonForFormIssue":"REQUESTED BENEFIT CALCULATION",
-            |            "longTermBenefitsCategoryACashValue":10.56,
-            |            "longTermBenefitsCategoryBLCashValue":10.56,
-            |            "longTermBenefitsUnitValue":10.56,
-            |            "additionalPensionAmountPost2002":10.56,
-            |            "additionalNotionalPensionAmountPost2002":10.56,
-            |            "additionalNotionalPensionIncrementsInheritedPost2002":10.56,
-            |            "additionalPensionIncrementsInheritedPost2002":10.56,
-            |            "post02AgeRelatedAdditionalPension":10.56,
-            |            "pre1975ShortTermBenefits":2,
-            |            "survivingSpouseAge":45,
-            |            "operativeBenefitStartDate":"2022-06-27",
-            |            "sicknessBenefitStatusForReports":"Y",
-            |            "benefitCalculationDetail":{
-            |               "nationalInsuranceNumber":"AA123456",
-            |               "benefitType":"ALL",
-            |               "associatedCalculationSequenceNumber":86,
-            |               "calculationStatus":"DEFINITIVE",
-            |               "substitutionMethod1":235,
-            |               "substitutionMethod2":235,
-            |               "calculationDate":"2022-06-27",
-            |               "guaranteedMinimumPensionContractedOutDeductionsPre1988":10.56,
-            |               "guaranteedMinimumPensionContractedOutDeductionsPost1988":10.56,
-            |               "contractedOutDeductionsPre1988":10.56,
-            |               "contractedOutDeductionsPost1988":10.56,
-            |               "additionalPensionPercentage":10.56,
-            |               "basicPensionPercentage":86,
-            |               "survivorsBenefitAgeRelatedPensionPercentage":10.56,
-            |               "additionalAgeRelatedPensionPercentage":10.56,
-            |               "inheritedBasicPensionPercentage":10.56,
-            |               "inheritedAdditionalPensionPercentage":10.56,
-            |               "inheritedGraduatedPensionPercentage":10.56,
-            |               "inheritedGraduatedBenefit":10.56,
-            |               "calculationSource":"AP COMPONENT SUSPECT (APRIL - MAY CALC)",
-            |               "payday":"FRIDAY",
-            |               "dateOfBirth":"2022-06-27",
-            |               "husbandDateOfDeath":"2022-06-27",
-            |               "additionalPost1997PensionPercentage":10.56,
-            |               "additionalPost1997AgeRelatedPensionPercentage":10.56,
-            |               "additionalPensionNotionalPercentage":10.56,
-            |               "additionalPost1997PensionNotionalPercentage":10.56,
-            |               "inheritedAdditionalPensionNotionalPercentage":10.56,
-            |               "inheritableAdditionalPensionPercentage":90,
-            |               "additionalPost2002PensionNotionalPercentage":10.56,
-            |               "additionalPost2002PensionPercentage":10.56,
-            |               "inheritedAdditionalPost2002PensionNotionalPercentage":10.56,
-            |               "inheritedAdditionalPost2002PensionPercentage":10.56,
-            |               "additionalPost2002AgeRelatedPensionPercentage":10.56,
-            |               "singleContributionConditionRulesApply":true,
-            |               "officeDetails":{
-            |                  "officeLocationDecode":1,
-            |                  "officeLocationValue":"HQ STATIONARY STORE",
-            |                  "officeIdentifier":"(NONE)"
-            |               },
-            |               "newStatePensionCalculationDetails":{
-            |                  "netAdditionalPensionPre1997":10.56,
-            |                  "oldRulesStatePensionEntitlement":10.56,
-            |                  "netRulesAmount":10.56,
-            |                  "derivedRebateAmount":10.56,
-            |                  "initialStatePensionAmount":10.56,
-            |                  "protectedPayment2016":10.56,
-            |                  "minimumQualifyingPeriodMet":true,
-            |                  "qualifyingYearsAfter2016":3,
-            |                  "newStatePensionQualifyingYears":20,
-            |                  "newStatePensionRequisiteYears":35,
-            |                  "newStatePensionEntitlement":10.56,
-            |                  "protectedPayment":10.56,
-            |                  "pensionSharingOrderContractedOutEmploymentsGroup":true,
-            |                  "pensionSharingOrderStateEarningsRelatedPensionScheme":true,
-            |                  "considerReducedRateElection":true,
-            |                  "weeklyBudgetingLoanAmount":10.56,
-            |                  "calculationDate":"2022-06-27"
-            |               }
-            |            }
-            |         }
-            |      ]
-            |   },
-            |   "longTermBenefitNotesResult":{
-            |      "longTermBenefitNotes":[
-            |         "Invalid Note Type Encountered.",
-            |         "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025.",
-            |         "Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025",
-            |         "Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025.",
-            |         "Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025.",
-            |         "Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025.",
-            |         "Retirement Position of UNKNOWN recorded on this account from 07/04/2025.",
-            |         "Retirement Position of UNKNOWN recorded on this account between NOT KNOWN."
-            |      ]
-            |   },
-            |   "schemeMembershipDetailsResult":{
-            |      "schemeMembershipDetailsSummaryList":[
-            |         {
-            |            "stakeholderPensionSchemeType":"Non-Stakeholder Pension",
-            |            "schemeMembershipDetails":{
-            |               "nationalInsuranceNumber":"AA123456",
-            |               "schemeMembershipSequenceNumber":123,
-            |               "schemeMembershipOccurrenceNumber":1,
-            |               "schemeMembershipStartDate":"2022-06-27",
-            |               "contractedOutEmployerIdentifier":789,
-            |               "schemeMembershipEndDate":"2022-06-27",
-            |               "methodOfPreservationType":"NOT APPLICABLE (0)",
-            |               "totalLinkedGuaranteedMinimumPensionContractedOutDeductions":10.56,
-            |               "accruedPensionContractedOutDeductionsValue":10.56,
-            |               "totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988":10.56,
-            |               "accruedPensionContractedOutDeductionsValuePost1988":10.56,
-            |               "revaluationRate":"(NONE)",
-            |               "guaranteedMinimumPensionReconciliationStatus":"NOT APPLICABLE",
-            |               "employeesReference":"123/456/ABC",
-            |               "finalYearEarnings":10.56,
-            |               "penultimateYearEarnings":10.56,
-            |               "retrospectiveEarnings":10.56,
-            |               "furtherPaymentsConfirmation":"FURTHER PAYMENT ALLOWED",
-            |               "survivorStatus":"NOT APPLICABLE",
-            |               "transferPremiumElectionDate":"2022-06-27",
-            |               "revaluationApplied":true,
-            |               "stateEarningsRelatedPensionsSchemeNonRestorationValue":10.56,
-            |               "stateEarningsRelatedPensionsSchemeValuePost1988":10.56,
-            |               "apparentUnnotifiedTerminationStatus":"No Apparent Unnotified Termination",
-            |               "terminationMicrofilmNumber":789,
-            |               "debitVoucherMicrofilmNumber":40599123,
-            |               "creationMicrofilmNumber":40599123,
-            |               "inhibitSchemeProcessing":true,
-            |               "extensionDate":"2022-06-27",
-            |               "guaranteedMinimumPensionContractedOutDeductionsRevalued":10.56,
-            |               "clericalCalculationInvolved":"NO CLERICAL CALCULATION INVOLVED",
-            |               "clericallyControlledTotal":10.56,
-            |               "clericallyControlledTotalPost1988":10.56,
-            |               "certifiedAmount":10.56,
-            |               "enforcementStatus":"NOT ENFORCED",
-            |               "stateSchemePremiumDeemed":"SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED",
-            |               "transferTakeUpDate":"2022-06-27",
-            |               "schemeMembershipTransferSequenceNumber":123,
-            |               "contributionCategoryFinalYear":"A",
-            |               "contributionCategoryPenultimateYear":"A",
-            |               "contributionCategoryRetrospectiveYear":"A",
-            |               "protectedRightsStartDate":"2022-06-27",
-            |               "schemeMembershipDebitReason":"NOT APPLICABLE",
-            |               "technicalAmount":10.56,
-            |               "minimumFundTransferAmount":10.56,
-            |               "actualTransferValue":10.56,
-            |               "schemeSuspensionType":"NO SUSPENSION",
-            |               "guaranteedMinimumPensionConversionApplied":true,
-            |               "employersContractedOutNumberDetails":"S3123456B",
-            |               "schemeCreatingContractedOutNumberDetails":"A7123456Q",
-            |               "schemeTerminatingContractedOutNumberDetails":"S2123456B",
-            |               "importingAppropriateSchemeNumberDetails":"S2123456B",
-            |               "apparentUnnotifiedTerminationDestinationDetails":"S2123456B"
-            |            }
-            |         }
-            |      ],
-            |      "callback":{
-            |         "callbackURL":"some-url"
-            |      }
-            |   },
-            |   "individualStatePensionInfoResult":{
-            |      "identifier":"AA000001A",
-            |      "numberOfQualifyingYears":35,
-            |      "nonQualifyingYears":5,
-            |      "yearsToFinalRelevantYear":3,
-            |      "nonQualifyingYearsPayable":2,
-            |      "pre1975CCCount":156,
-            |      "dateOfEntry":"1975-04-06",
-            |      "contributionsByTaxYear":[
-            |         {
-            |            "taxYear":2022,
-            |            "qualifyingTaxYear":true,
-            |            "payableAccepted":false,
-            |            "amountNeeded":1250.5,
-            |            "classThreePayable":824.2,
-            |            "classThreePayableBy":"2028-04-05",
-            |            "classThreePayableByPenalty":"2030-04-05",
-            |            "classTwoPayable":164.25,
-            |            "classTwoPayableBy":"2028-01-31",
-            |            "classTwoPayableByPenalty":"2030-01-31",
-            |            "classTwoOutstandingWeeks":12,
-            |            "totalPrimaryContributions":3456.78,
-            |            "niEarnings":45000,
-            |            "coClassOnePaid":1234.56,
-            |            "coPrimaryPaidEarnings":52000,
-            |            "niEarningsSelfEmployed":25,
-            |            "niEarningsVoluntary":8,
-            |            "underInvestigationFlag":true,
-            |            "totalPrimaryPaidEarnings":48500.75,
-            |            "otherCredits":[
-            |               {
-            |                  "contributionCreditType":"CLASS 1 CREDIT",
-            |                  "creditSourceType":"JSA TAPE INPUT",
-            |                  "contributionCreditCount":15
-            |               },
-            |               {
-            |                  "contributionCreditType":"CLASS 3 CREDIT",
-            |                  "creditSourceType":"CARER'S CREDIT",
-            |                  "contributionCreditCount":52
-            |               },
-            |               {
-            |                  "contributionCreditType":"CLASS 2 - NORMAL RATE",
-            |                  "creditSourceType":"CHILD BENEFIT",
-            |                  "contributionCreditCount":-5
-            |               }
-            |            ]
-            |         },
-            |         {
-            |            "taxYear":2023,
-            |            "qualifyingTaxYear":false,
-            |            "payableAccepted":true,
-            |            "amountNeeded":2100.75,
-            |            "classThreePayable":876.8,
-            |            "classThreePayableBy":"2029-04-05",
-            |            "classThreePayableByPenalty":"2031-04-05",
-            |            "classTwoPayable":175.6,
-            |            "classTwoPayableBy":"2029-01-31",
-            |            "classTwoPayableByPenalty":"2031-01-31",
-            |            "classTwoOutstandingWeeks":35,
-            |            "totalPrimaryContributions":2987.45,
-            |            "niEarnings":38500.25,
-            |            "coClassOnePaid":987.65,
-            |            "coPrimaryPaidEarnings":41250.8,
-            |            "niEarningsSelfEmployed":42,
-            |            "niEarningsVoluntary":15,
-            |            "underInvestigationFlag":false,
-            |            "totalPrimaryPaidEarnings":39875.9,
-            |            "otherCredits":[
-            |               {
-            |                  "contributionCreditType":"CLASS 1 CREDIT",
-            |                  "creditSourceType":"UNIVERSAL CREDIT",
-            |                  "contributionCreditCount":26
-            |               },
-            |               {
-            |                  "contributionCreditType":"CLASS 2 - VOLUNTARY DEVELOPMENT WORKER'S RATE A",
-            |                  "creditSourceType":"STATUTORY MATERNITY PAY CREDIT",
-            |                  "contributionCreditCount":12
-            |               },
-            |               {
-            |                  "contributionCreditType":"CLASS 3 - RATE C",
-            |                  "creditSourceType":"MOD SPOUSE/CIVIL PARTNER'S CREDITS",
-            |                  "contributionCreditCount":39
-            |               },
-            |               {
-            |                  "contributionCreditType":"CLASS 1- EMPLOYEE ONLY",
-            |                  "creditSourceType":"SHARED PARENTAL PAY",
-            |                  "contributionCreditCount":-3
-            |               }
-            |            ]
-            |         }
-            |      ]
-            |   },
-            |   "niContributionsAndCreditsResult":[
-            |      {
-            |         "totalGraduatedPensionUnits":53,
-            |         "class1ContributionAndCredits":[
-            |            {
-            |               "taxYear":2022,
-            |               "numberOfContributionsAndCredits":53,
-            |               "contributionCategoryLetter":"U",
-            |               "contributionCategory":"(NONE)",
-            |               "contributionCreditType":"C1",
-            |               "primaryContribution":99999999999999.98,
-            |               "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
-            |               "primaryPaidEarnings":99999999999999.98,
-            |               "creditSource":"NOT KNOWN",
-            |               "employerName":"ipOpMs",
-            |               "latePaymentPeriod":"L"
-            |            }
-            |         ],
-            |         "class2ContributionAndCredits":[
-            |            {
-            |               "taxYear":2022,
-            |               "numberOfContributionsAndCredits":53,
-            |               "contributionCreditType":"C1",
-            |               "class2Or3EarningsFactor":99999999999999.98,
-            |               "class2NIContributionAmount":99999999999999.98,
-            |               "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
-            |               "creditSource":"NOT KNOWN",
-            |               "latePaymentPeriod":"L"
-            |            }
-            |         ]
-            |      }
-            |   ]
-            |}""".stripMargin
-
         val benefitEligibilityInfoSuccessResponseGysp = BenefitEligibilityInfoSuccessResponseGysp(
           nationalInsuranceNumber,
-          List(benefitSchemeDetailsSuccessResponse),
-          marriageDetailsSuccessResponse,
-          longTermBenefitCalculationDetailsSuccessResponse,
-          longTermBenefitNotesSuccessResponse,
-          schemeMembershipDetailsSuccessResponse,
-          individualStatePensionInformationSuccessResponse,
-          List(niContributionsAndCreditsSuccessResponse)
+          filteredMarriageDetails,
+          filteredLongTermBenefitCalculationDetails,
+          filteredSchemeMembershipDetails,
+          filteredIndividualStatePensionInfo,
+          niContributionsAndCreditsSuccessResponse
         )
 
         Json.toJson(benefitEligibilityInfoSuccessResponseGysp) shouldBe Json.parse(json)
@@ -1553,7 +1333,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         (() => mockEligibilityCheckDataResultJsa.allResults).expects().returning(mixedResults)
 
         (() => mockEligibilityCheckDataResultGysp.benefitType).expects().returning(BenefitType.GYSP)
-        (() => mockEligibilityCheckDataResultGysp.allResults).expects().returning(mixedResults)
+        (() => mockEligibilityCheckDataResultGysp.allResults).expects().returning(mixedResults).twice()
 
         (() => mockEligibilityCheckDataResultBsp.benefitType).expects().returning(BenefitType.BSP)
         (() => mockEligibilityCheckDataResultBsp.allResults).expects().returning(mixedResults)
@@ -1658,7 +1438,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         (() => mockEligibilityCheckDataResultJsa.allResults).expects().returning(allFailureResults)
 
         (() => mockEligibilityCheckDataResultGysp.benefitType).expects().returning(BenefitType.GYSP)
-        (() => mockEligibilityCheckDataResultGysp.allResults).expects().returning(allFailureResults)
+        (() => mockEligibilityCheckDataResultGysp.allResults).expects().returning(allFailureResults).twice()
 
         (() => mockEligibilityCheckDataResultBsp.benefitType).expects().returning(BenefitType.BSP)
         (() => mockEligibilityCheckDataResultBsp.allResults).expects().returning(allFailureResults)
@@ -1726,8 +1506,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
               nationalInsuranceNumber,
-              class2MAReceiptsSuccessResponse,
-              liabilitySummaryDetailsSuccessResponse,
+              filteredClass2MaReceipts,
+              filteredLiabilitySummaryDetails,
               niContributionsAndCreditsSuccessResponse
             )
           )
@@ -1795,8 +1575,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseBsp(
               nationalInsuranceNumber,
-              marriageDetailsSuccessResponse,
-              niContributionsAndCreditsSuccessResponse
+              niContributionsAndCreditsSuccessResponse,
+              filteredMarriageDetails
             )
           )
 
@@ -1804,30 +1584,32 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should return a success response if all of the api results in the data result are successful (GYSP)" in {
 
         val eligibilityCheckDataResultGYSP = EligibilityCheckDataResultGYSP(
-          List(
-            NpsApiResult.SuccessResult[ErrorReport, NiContributionsAndCreditsSuccessResponse](
-              NiContributionAndCredits,
-              niContributionsAndCreditsSuccessResponse
+          NpsApiResult.SuccessResult[ErrorReport, NiContributionsAndCreditsSuccessResponse](
+            NiContributionAndCredits,
+            niContributionsAndCreditsSuccessResponse
+          ),
+          BenefitSchemeMembershipDetailsData(
+            NpsApiResult.SuccessResult[ErrorReport, SchemeMembershipDetailsSuccessResponse](
+              ApiName.SchemeMembershipDetails,
+              schemeMembershipDetailsSuccessResponse
+            ),
+            List(
+              NpsApiResult.SuccessResult[ErrorReport, BenefitSchemeDetailsSuccessResponse](
+                ApiName.BenefitSchemeDetails,
+                benefitSchemeDetailsSuccessResponse
+              )
             )
           ),
-          NpsApiResult.SuccessResult[ErrorReport, SchemeMembershipDetailsSuccessResponse](
-            ApiName.SchemeMembershipDetails,
-            schemeMembershipDetailsSuccessResponse
-          ),
-          List(
-            NpsApiResult.SuccessResult[ErrorReport, BenefitSchemeDetailsSuccessResponse](
-              ApiName.BenefitSchemeDetails,
-              benefitSchemeDetailsSuccessResponse
-            )
-          ),
-          NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitCalculationDetailsSuccessResponse](
-            LongTermBenefitCalculationDetails,
-            longTermBenefitCalculationDetailsSuccessResponse
-          ),
-          List(
-            NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitNotesSuccessResponse](
-              LongTermBenefitNotes,
-              longTermBenefitNotesSuccessResponse
+          LongTermBenefitCalculationDetailsData(
+            NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitCalculationDetailsSuccessResponse](
+              LongTermBenefitCalculationDetails,
+              longTermBenefitCalculationDetailsSuccessResponse
+            ),
+            List(
+              NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitNotesSuccessResponse](
+                LongTermBenefitNotes,
+                longTermBenefitNotesSuccessResponse
+              )
             )
           ),
           NpsApiResult.SuccessResult[ErrorReport, MarriageDetailsSuccessResponse](
@@ -1847,13 +1629,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseGysp(
               nationalInsuranceNumber,
-              List(benefitSchemeDetailsSuccessResponse),
-              marriageDetailsSuccessResponse,
-              longTermBenefitCalculationDetailsSuccessResponse,
-              longTermBenefitNotesSuccessResponse,
-              schemeMembershipDetailsSuccessResponse,
-              individualStatePensionInformationSuccessResponse,
-              List(niContributionsAndCreditsSuccessResponse)
+              filteredMarriageDetails,
+              filteredLongTermBenefitCalculationDetails,
+              filteredSchemeMembershipDetails,
+              filteredIndividualStatePensionInfo,
+              niContributionsAndCreditsSuccessResponse
             )
           )
 

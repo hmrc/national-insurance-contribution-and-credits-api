@@ -28,7 +28,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
-
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
@@ -54,6 +53,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNo
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
@@ -732,11 +732,12 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultGYSP(
-                List(niContributionAndCreditsResult),
-                schemeMembershipDetailsResult,
-                List(benefitSchemeDetailsResult),
-                longTermBenefitCalculationDetailsResult,
-                List(longTermBenefitNotesResult),
+                niContributionAndCreditsResult,
+                BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, List(benefitSchemeDetailsResult)),
+                LongTermBenefitCalculationDetailsData(
+                  longTermBenefitCalculationDetailsResult,
+                  List(longTermBenefitNotesResult)
+                ),
                 marriageDetailsResult,
                 individualStatePensionInformationResult
               )
@@ -745,11 +746,12 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
         underTest.getEligibilityData(gyspEligibilityCheckDataRequest).value.futureValue shouldBe Right(
           EligibilityCheckDataResultGYSP(
-            List(niContributionAndCreditsResult),
-            schemeMembershipDetailsResult,
-            List(benefitSchemeDetailsResult),
-            longTermBenefitCalculationDetailsResult,
-            List(longTermBenefitNotesResult),
+            niContributionAndCreditsResult,
+            BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, List(benefitSchemeDetailsResult)),
+            LongTermBenefitCalculationDetailsData(
+              longTermBenefitCalculationDetailsResult,
+              List(longTermBenefitNotesResult)
+            ),
             marriageDetailsResult,
             individualStatePensionInformationResult
           )

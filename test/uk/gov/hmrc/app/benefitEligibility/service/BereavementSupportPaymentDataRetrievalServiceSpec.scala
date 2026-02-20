@@ -20,9 +20,8 @@ import cats.data.EitherT
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers.*
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
+import org.scalatest.matchers.should.Matchers.shouldBe
+import uk.gov.hmrc.app.benefitEligibility.common._
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   BSPEligibilityCheckDataRequest,
@@ -36,33 +35,13 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.{
-  Class1ContributionAndCredits,
-  Class2ContributionAndCredits,
-  Class2NIContributionAmount,
-  Class2Or3EarningsFactor,
-  ContributionCategoryLetter,
-  EmployerName,
-  NiContributionsAndCreditsSuccessResponse,
-  NumberOfCreditsAndContributions,
-  PrimaryContribution,
-  PrimaryPaidEarnings,
-  TotalGraduatedPensionUnits
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 
 class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
