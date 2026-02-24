@@ -16,14 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.controller
 
-import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.app.benefitEligibility.common.CorrelationId
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{
-  BenefitEligibilityInfoErrorResponse,
-  BenefitEligibilityInfoResponse
-}
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}
@@ -44,42 +38,10 @@ class BenefitEligibilityDataController @Inject() (
   def fetchBenefitEligibilityData: Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
-        val correlationId: CorrelationId = CorrelationId.generate
-        val correlationIdHeader          = "correlationId" -> correlationId.value.toString
-
-        request.body.asJson match {
-          case Some(data) =>
-            data.validate[EligibilityCheckDataRequest] match {
-              case JsSuccess(request, _) =>
-                benefitEligibilityDataRetrievalService
-                  .getEligibilityData(request)
-                  .map(BenefitEligibilityInfoResponse.from(request.nationalInsuranceNumber, _))
-                  .value
-                  .map {
-                    case Left(serviceError) =>
-                      InternalServerError(
-                        Json.toJson(new Response(Seq(new Failure("There was a problem processing the request", "500"))))
-                      ).withHeaders("correlationId" -> correlationId.value.toString)
-
-                    case Right(benefitEligibilityInfoResponse) =>
-                      benefitEligibilityInfoResponse match {
-                        case Left(errorResponse)    => BadGateway(Json.toJson(errorResponse))
-                        case Right(successResponse) => Ok(Json.toJson(successResponse))
-                      }
-                  }
-
-              case JsError(err) =>
-                Future.successful(
-                  BadRequest(Json.toJson(new Response(Seq(new Failure("There was a problem with the request", "400")))))
-                    .withHeaders(correlationIdHeader)
-                )
-            }
-          case None =>
-            Future.successful(
-              BadRequest(Json.toJson(new Response(Seq(new Failure("Missing JSON data", "400")))))
-                .withHeaders(correlationIdHeader)
-            )
-        }
+        BenefitEligibilityRequestHandler.handleRequest(
+          request,
+          benefitEligibilityDataRetrievalService.getEligibilityData
+        )
       }
     } else identity.async(_ => Future.successful(NotFound))
 

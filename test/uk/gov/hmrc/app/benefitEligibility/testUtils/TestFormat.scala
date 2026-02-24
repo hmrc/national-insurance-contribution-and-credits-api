@@ -18,6 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.testUtils
 
 import play.api.libs.json.{Json, OWrites, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.common.{MaternityAllowanceSortType, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
+
+import java.time.LocalDate
 
 object TestFormat {
 
@@ -34,5 +38,36 @@ object TestFormat {
 
   implicit val npsErrorResponseHipOriginResponseWrites: Writes[NpsErrorResponseHipOrigin] =
     Json.writes[NpsErrorResponseHipOrigin]
+
+  implicit val contributionCreditWrites: Writes[ContributionsAndCreditsRequestParams] =
+    Json.writes[ContributionsAndCreditsRequestParams]
+
+  implicit val liabilitiesWrites: Writes[LiabilitiesRequestParams] = Json.writes[LiabilitiesRequestParams]
+
+  implicit val maternityAllowanceSortTypeWrites: Writes[MaternityAllowanceSortType] =
+    Json.writes[MaternityAllowanceSortType]
+
+  implicit val class2MaReceiptsWrites: Writes[Class2MaReceiptsRequestParams] =
+    Json.writes[Class2MaReceiptsRequestParams]
+
+  implicit val marriageDetailsWrites: Writes[MarriageDetailsRequestParams] = Json.writes[MarriageDetailsRequestParams]
+
+  implicit val longTermBenefitCalculationWrites: Writes[LongTermBenefitCalculationRequestParams] =
+    Json.writes[LongTermBenefitCalculationRequestParams]
+
+  implicit val esaEligibilityCheckDataRequestWrites: Writes[ESAEligibilityCheckDataRequest] =
+    Json.writes[ESAEligibilityCheckDataRequest]
+
+  implicit val maEligibilityCheckDataRequestWrites: Writes[MAEligibilityCheckDataRequest] =
+    Json.writes[MAEligibilityCheckDataRequest]
+
+  implicit val jsaEligibilityCheckDataRequestWrites: Writes[JSAEligibilityCheckDataRequest] =
+    Json.writes[JSAEligibilityCheckDataRequest]
+
+  implicit val bspEligibilityCheckDataRequestWrites: Writes[BSPEligibilityCheckDataRequest] =
+    Json.writes[BSPEligibilityCheckDataRequest]
+
+  implicit val gypEligibilityCheckDataRequestWrites: Writes[GYSPEligibilityCheckDataRequest] =
+    Json.writes[GYSPEligibilityCheckDataRequest]
 
 }
