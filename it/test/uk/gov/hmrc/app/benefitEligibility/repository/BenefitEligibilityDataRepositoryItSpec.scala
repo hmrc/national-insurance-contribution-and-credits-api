@@ -57,7 +57,7 @@ class BenefitEligibilityDataRepositoryItSpec
         val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
         val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
-        
+
         val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
         val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
         val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
@@ -82,6 +82,38 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTasks = Table("page_task", pageTasksList: _*)
 
         forAll(pageTasks)(pageTaskList => repository.getItem(pageTaskList.id).futureValue mustBe Some(pageTaskList))
+      }
+      "should return None when a nonexistent id is parsed" in {
+
+        val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
+
+        val pageListForIdOne = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
+        val pageListForIdTwo = List(Pages(Liabilities, "SomeCallBackURLTwo"))
+        val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
+
+        val pageTasksList = List(
+          PageTask(
+            uuidOne,
+            pageListForIdOne
+          ),
+          PageTask(
+            uuidTwo,
+            pageListForIdTwo
+          ),
+          PageTask(
+            uuidThree,
+            pageListForIdThree
+          )
+        )
+
+        pageTasksList.foreach(insert)
+
+        val pageTasks = Table("page_task", pageTasksList: _*)
+
+        forAll(pageTasks)(pageTaskList =>
+          repository.getItem(UUID.fromString("ca4eab1b-55fa-4d6a-8aa4-7eb3debc6db7")).futureValue mustBe None)
       }
     }
 
@@ -110,13 +142,23 @@ class BenefitEligibilityDataRepositoryItSpec
             pageListForIdThree
           )
         )
+        val pageTasksListAfterDelete = List(
+          PageTask(
+            uuidOne,
+            pageListForIdOne
+          ),
+          PageTask(
+            uuidThree,
+            pageListForIdThree
+          )
+        )
 
         pageTasksList.foreach(insert)
 
         val pageTasks = Table("page_task", pageTasksList: _*)
 
         forAll(pageTasks)(pageTaskList => repository.delete(uuidTwo).futureValue mustBe true)
-
+        findAll().futureValue mustBe pageTasksListAfterDelete
       }
     }
   }

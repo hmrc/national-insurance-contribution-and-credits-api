@@ -35,7 +35,7 @@ trait BenefitEligibilityRepository {
 @Singleton
 class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[PageTask](
-      collectionName = "id",
+      collectionName = "page-tasks",
       mongoComponent = mongoComponent,
       domainFormat = PageTask.format,
       indexes = Seq(
