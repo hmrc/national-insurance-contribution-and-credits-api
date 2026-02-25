@@ -20,13 +20,15 @@ import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName
 
-case class Pages(
+import java.util.UUID
+
+final case class Pages(
     apiName: ApiName,
     callBackURL: String
 )
 
-case class PageTask(
-    id: String,
+final case class PageTask(
+    id: UUID,
     nextPages: List[Pages]
 )
 

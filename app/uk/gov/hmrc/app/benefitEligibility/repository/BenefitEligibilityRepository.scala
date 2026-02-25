@@ -23,12 +23,13 @@ import uk.gov.hmrc.app.benefitEligibility.models.*
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
 trait BenefitEligibilityRepository {
-  def getItem(id: String): Future[Option[PageTask]]
+  def getItem(id: UUID): Future[Option[PageTask]]
 }
 
 @Singleton
@@ -51,10 +52,10 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
     )
     with BenefitEligibilityRepository {
 
-  def getItem(id: String): Future[Option[PageTask]] =
-    collection.find(Filters.equal("id", id)).headOption()
+  def getItem(id: UUID): Future[Option[PageTask]] =
+    collection.find(Filters.equal("id", id.toString)).headOption()
 
-  def delete(id: String): Future[Boolean] =
-    collection.deleteOne(Filters.equal("id", id)).toFuture().map(_.wasAcknowledged)
+  def delete(id: UUID): Future[Boolean] =
+    collection.deleteOne(Filters.equal("id", id.toString)).toFuture().map(_.wasAcknowledged)
 
 }

@@ -29,6 +29,8 @@ import uk.gov.hmrc.app.benefitEligibility.models.{PageTask, Pages}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
+import java.util.UUID
+
 class BenefitEligibilityDataRepositoryItSpec
     extends AnyFreeSpecLike
     with DefaultPlayMongoRepositorySupport[PageTask]
@@ -52,21 +54,25 @@ class BenefitEligibilityDataRepositoryItSpec
     ".getItem" - {
       "should successfully return an item by id" in {
 
+        val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
+        
         val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
         val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
         val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
 
         val pageTasksList = List(
           PageTask(
-            "IdOne",
+            uuidOne,
             pageListForIdOne
           ),
           PageTask(
-            "IdTwo",
+            uuidTwo,
             pageListForIdTwo
           ),
           PageTask(
-            "IdThree",
+            uuidThree,
             pageListForIdThree
           )
         )
@@ -82,21 +88,25 @@ class BenefitEligibilityDataRepositoryItSpec
     ".delete" - {
       "should successfully delete an item by ID" in {
 
+        val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
+
         val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
         val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
         val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
 
         val pageTasksList = List(
           PageTask(
-            "IdOne",
+            uuidOne,
             pageListForIdOne
           ),
           PageTask(
-            "IdTwo",
+            uuidTwo,
             pageListForIdTwo
           ),
           PageTask(
-            "IdThree",
+            uuidThree,
             pageListForIdThree
           )
         )
@@ -105,7 +115,7 @@ class BenefitEligibilityDataRepositoryItSpec
 
         val pageTasks = Table("page_task", pageTasksList: _*)
 
-        forAll(pageTasks)(pageTaskList => repository.delete("IdTwo").futureValue mustBe true)
+        forAll(pageTasks)(pageTaskList => repository.delete(uuidTwo).futureValue mustBe true)
 
       }
     }
