@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.models
 
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName
+import uk.gov.hmrc.app.benefitEligibility.common.{ApiName, BenefitType}
 
 import java.util.UUID
 
@@ -29,7 +29,8 @@ final case class Pages(
 
 final case class PageTask(
     id: UUID,
-    nextPages: List[Pages]
+    nextPages: List[Pages],
+    benefitType: BenefitType
 )
 
 object Pages {

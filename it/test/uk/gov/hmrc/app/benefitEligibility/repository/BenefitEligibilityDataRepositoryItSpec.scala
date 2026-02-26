@@ -25,6 +25,7 @@ import org.scalatest.{BeforeAndAfterAll, OptionValues}
 import play.api.inject
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, GYSP, MA}
 import uk.gov.hmrc.app.benefitEligibility.models.{PageTask, Pages}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
@@ -65,15 +66,18 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTasksList = List(
           PageTask(
             uuidOne,
-            pageListForIdOne
+            pageListForIdOne,
+            MA
           ),
           PageTask(
             uuidTwo,
-            pageListForIdTwo
+            pageListForIdTwo,
+            GYSP
           ),
           PageTask(
             uuidThree,
-            pageListForIdThree
+            pageListForIdThree,
+            BSP
           )
         )
 
@@ -96,15 +100,18 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTasksList = List(
           PageTask(
             uuidOne,
-            pageListForIdOne
+            pageListForIdOne,
+            MA
           ),
           PageTask(
             uuidTwo,
-            pageListForIdTwo
+            pageListForIdTwo,
+            GYSP
           ),
           PageTask(
             uuidThree,
-            pageListForIdThree
+            pageListForIdThree,
+            BSP
           )
         )
 
@@ -131,25 +138,30 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTasksList = List(
           PageTask(
             uuidOne,
-            pageListForIdOne
+            pageListForIdOne,
+            MA
           ),
           PageTask(
             uuidTwo,
-            pageListForIdTwo
+            pageListForIdTwo,
+            GYSP
           ),
           PageTask(
             uuidThree,
-            pageListForIdThree
+            pageListForIdThree,
+            BSP
           )
         )
         val pageTasksListAfterDelete = List(
           PageTask(
             uuidOne,
-            pageListForIdOne
+            pageListForIdOne,
+            MA
           ),
           PageTask(
             uuidThree,
-            pageListForIdThree
+            pageListForIdThree,
+            BSP
           )
         )
 
