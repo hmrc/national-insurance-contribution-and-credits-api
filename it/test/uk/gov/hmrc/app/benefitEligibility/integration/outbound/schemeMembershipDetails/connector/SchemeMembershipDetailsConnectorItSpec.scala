@@ -246,168 +246,17 @@ class SchemeMembershipDetailsConnectorItSpec
             callback = None
           )
 
-          val successResponseJsonWithCallback =
-            s"""{
-               |  "callback": {
-               |    "callbackURL": "http://localhost:${server.port}/benefit-scheme/AB123456C/scheme-membership-details?seqNo=2"
-               |  },
-               |  "schemeMembershipDetailsSummaryList": [
-               |    {
-               |      "schemeMembershipDetails": {
-               |        "accruedPensionContractedOutDeductionsValue": 10.56,
-               |        "accruedPensionContractedOutDeductionsValuePost1988": 10.56,
-               |        "actualTransferValue": 10.56,
-               |        "apparentUnnotifiedTerminationStatus": "No Apparent Unnotified Termination",
-               |        "apparentUnnotifiedTerminationDestinationDetails": "S2123456B",
-               |        "certifiedAmount": 10.56,
-               |        "clericalCalculationInvolved": "NO CLERICAL CALCULATION INVOLVED",
-               |        "clericallyControlledTotal": 10.56,
-               |        "clericallyControlledTotalPost1988": 10.56,
-               |        "contractedOutEmployerIdentifier": 789,
-               |        "contributionCategoryFinalYear": "A",
-               |        "contributionCategoryPenultimateYear": "A",
-               |        "contributionCategoryRetrospectiveYear": "A",
-               |        "creationMicrofilmNumber": 40599123,
-               |        "debitVoucherMicrofilmNumber": 40599123,
-               |        "employeesReference": "123/456/ABC",
-               |        "employersContractedOutNumberDetails": "S3123456B",
-               |        "enforcementStatus": "NOT ENFORCED",
-               |        "extensionDate": "2022-06-27",
-               |        "finalYearEarnings": 10.56,
-               |        "furtherPaymentsConfirmation": "FURTHER PAYMENT ALLOWED",
-               |        "guaranteedMinimumPensionContractedOutDeductionsRevalued": 10.56,
-               |        "guaranteedMinimumPensionConversionApplied": true,
-               |        "guaranteedMinimumPensionReconciliationStatus": "NOT APPLICABLE",
-               |        "importingAppropriateSchemeNumberDetails": "S2123456B",
-               |        "inhibitSchemeProcessing": true,
-               |        "methodOfPreservationType": "NOT APPLICABLE (0)",
-               |        "minimumFundTransferAmount": 10.56,
-               |        "nationalInsuranceNumber": "AA123456",
-               |        "penultimateYearEarnings": 10.56,
-               |        "protectedRightsStartDate": "2022-06-27",
-               |        "retrospectiveEarnings": 10.56,
-               |        "revaluationApplied": true,
-               |        "revaluationRate": "(NONE)",
-               |        "schemeCreatingContractedOutNumberDetails": "A7123456Q",
-               |        "schemeMembershipDebitReason": "NOT APPLICABLE",
-               |        "schemeMembershipEndDate": "2022-06-27",
-               |        "schemeMembershipOccurrenceNumber": 1,
-               |        "schemeMembershipSequenceNumber": 123,
-               |        "schemeMembershipStartDate": "2022-06-27",
-               |        "schemeMembershipTransferSequenceNumber": 123,
-               |        "schemeSuspensionType": "NO SUSPENSION",
-               |        "stateEarningsRelatedPensionsSchemeNonRestorationValue": 10.56,
-               |        "stateEarningsRelatedPensionsSchemeValuePost1988": 10.56,
-               |        "stateSchemePremiumDeemed": "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED",
-               |        "survivorStatus": "NOT APPLICABLE",
-               |        "technicalAmount": 10.56,
-               |        "schemeTerminatingContractedOutNumberDetails": "S2123456B",
-               |        "terminationMicrofilmNumber": 789,
-               |        "totalLinkedGuaranteedMinimumPensionContractedOutDeductions": 10.56,
-               |        "totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988": 10.56,
-               |        "transferPremiumElectionDate": "2022-06-27",
-               |        "transferTakeUpDate": "2022-06-27"
-               |      },
-               |      "stakeholderPensionSchemeType": "Non-Stakeholder Pension"
-               |    }
-               |  ]
-               |}
-               |""".stripMargin
+          val responseBody = Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
 
-          val successResponseJsonWithoutCallback =
-            s"""{
-               |  "schemeMembershipDetailsSummaryList": [
-               |    {
-               |      "schemeMembershipDetails": {
-               |        "accruedPensionContractedOutDeductionsValue": 10.56,
-               |        "accruedPensionContractedOutDeductionsValuePost1988": 10.56,
-               |        "actualTransferValue": 10.56,
-               |        "apparentUnnotifiedTerminationStatus": "No Apparent Unnotified Termination",
-               |        "apparentUnnotifiedTerminationDestinationDetails": "S2123456B",
-               |        "certifiedAmount": 10.56,
-               |        "clericalCalculationInvolved": "NO CLERICAL CALCULATION INVOLVED",
-               |        "clericallyControlledTotal": 10.56,
-               |        "clericallyControlledTotalPost1988": 10.56,
-               |        "contractedOutEmployerIdentifier": 789,
-               |        "contributionCategoryFinalYear": "A",
-               |        "contributionCategoryPenultimateYear": "A",
-               |        "contributionCategoryRetrospectiveYear": "A",
-               |        "creationMicrofilmNumber": 40599123,
-               |        "debitVoucherMicrofilmNumber": 40599123,
-               |        "employeesReference": "123/456/ABC",
-               |        "employersContractedOutNumberDetails": "S3123456B",
-               |        "enforcementStatus": "NOT ENFORCED",
-               |        "extensionDate": "2022-06-27",
-               |        "finalYearEarnings": 10.56,
-               |        "furtherPaymentsConfirmation": "FURTHER PAYMENT ALLOWED",
-               |        "guaranteedMinimumPensionContractedOutDeductionsRevalued": 10.56,
-               |        "guaranteedMinimumPensionConversionApplied": true,
-               |        "guaranteedMinimumPensionReconciliationStatus": "NOT APPLICABLE",
-               |        "importingAppropriateSchemeNumberDetails": "S2123456B",
-               |        "inhibitSchemeProcessing": true,
-               |        "methodOfPreservationType": "NOT APPLICABLE (0)",
-               |        "minimumFundTransferAmount": 10.56,
-               |        "nationalInsuranceNumber": "AA123456",
-               |        "penultimateYearEarnings": 10.56,
-               |        "protectedRightsStartDate": "2022-06-27",
-               |        "retrospectiveEarnings": 10.56,
-               |        "revaluationApplied": true,
-               |        "revaluationRate": "(NONE)",
-               |        "schemeCreatingContractedOutNumberDetails": "A7123456Q",
-               |        "schemeMembershipDebitReason": "NOT APPLICABLE",
-               |        "schemeMembershipEndDate": "2022-06-27",
-               |        "schemeMembershipOccurrenceNumber": 1,
-               |        "schemeMembershipSequenceNumber": 123,
-               |        "schemeMembershipStartDate": "2022-06-27",
-               |        "schemeMembershipTransferSequenceNumber": 123,
-               |        "schemeSuspensionType": "NO SUSPENSION",
-               |        "stateEarningsRelatedPensionsSchemeNonRestorationValue": 10.56,
-               |        "stateEarningsRelatedPensionsSchemeValuePost1988": 10.56,
-               |        "stateSchemePremiumDeemed": "SSP TYPE RECEIVABLES TO BE TREAT AS DEEMED",
-               |        "survivorStatus": "NOT APPLICABLE",
-               |        "technicalAmount": 10.56,
-               |        "schemeTerminatingContractedOutNumberDetails": "S2123456B",
-               |        "terminationMicrofilmNumber": 789,
-               |        "totalLinkedGuaranteedMinimumPensionContractedOutDeductions": 10.56,
-               |        "totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988": 10.56,
-               |        "transferPremiumElectionDate": "2022-06-27",
-               |        "transferTakeUpDate": "2022-06-27"
-               |      },
-               |      "stakeholderPensionSchemeType": "Non-Stakeholder Pension"
-               |    }
-               |  ]
-               |}
-               |""".stripMargin
-
-          val responseBodyWithCallback = Json.parse(successResponseJsonWithCallback).toString()
-
-          val responseBodyWithoutCallback = Json.parse(successResponseJsonWithoutCallback).toString()
-
-          val testPath1 = "/benefit-scheme/AB123456C/scheme-membership-details"
-          val testPath2 = "/benefit-scheme/AB123456C/scheme-membership-details?seqNo=2"
+          val testPath = "/benefit-scheme/AB123456C/scheme-membership-details"
 
           server.stubFor(
-            get(urlEqualTo(testPath1))
-              .inScenario("Pagination")
-              .whenScenarioStateIs("Started")
-              .willSetStateTo("PAGINATION_COMPLETE")
+            get(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
                   .withHeader("Content-Type", "application/json")
-                  .withBody(responseBodyWithCallback)
-              )
-          )
-
-          server.stubFor(
-            get(urlEqualTo(testPath2))
-              .inScenario("Pagination")
-              .whenScenarioStateIs("PAGINATION_COMPLETE")
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(responseBodyWithoutCallback)
+                  .withBody(responseBody)
               )
           )
 
@@ -419,11 +268,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           server.verify(
-            getRequestedFor(urlEqualTo(testPath1))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(testPath2))
+            getRequestedFor(urlEqualTo(testPath))
           )
 
         }

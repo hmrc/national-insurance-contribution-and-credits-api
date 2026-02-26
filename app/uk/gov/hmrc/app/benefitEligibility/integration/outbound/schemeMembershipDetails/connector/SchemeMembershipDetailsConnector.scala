@@ -102,23 +102,7 @@ class SchemeMembershipDetailsConnector @Inject() (
           case OK =>
             attemptStrictParse[SchemeMembershipDetailsSuccessResponse](benefitType, response) match {
               case Left(error) => EitherT.leftT[Future, SchemeMembershipDetailsResult](error)
-              case Right(resp) =>
-                resp.callback.flatMap(_.callbackURL) match {
-                  case Some(callback) =>
-                    // TODO - save pagination cursor and return result
-                    fetchData(benefitType, callback.value, acc :+ resp)
-                  case None =>
-                    val successResponses = (acc :+ resp).flatMap(_.schemeMembershipDetailsSummaryList).flatten
-                    EitherT.pure[Future, BenefitEligibilityError](
-                      toSuccessResult(
-                        SchemeMembershipDetailsSuccessResponse(
-                          schemeMembershipDetailsSummaryList =
-                            if (successResponses.nonEmpty) Some(successResponses) else None,
-                          callback = None
-                        )
-                      )
-                    )
-                }
+              case Right(resp) => EitherT.pure[Future, BenefitEligibilityError](toSuccessResult(resp))
             }
           case code => handleErrors(code, response)
         }
