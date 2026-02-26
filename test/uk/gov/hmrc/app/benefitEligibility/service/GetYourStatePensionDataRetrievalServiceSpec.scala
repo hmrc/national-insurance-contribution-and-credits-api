@@ -705,11 +705,15 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .value
           .futureValue shouldBe Right(
           EligibilityCheckDataResultGYSP(
-            List(niContributionAndCreditsResult),
-            schemeMembershipDetailsResult,
-            List(benefitSchemeDetailsResult),
-            longTermBenefitCalculationDetailsResult,
-            List(longTermBenefitNotesResult),
+            niContributionAndCreditsResult,
+            BenefitSchemeMembershipDetailsData(
+              schemeMembershipDetailsResult,
+              List(benefitSchemeDetailsResult)
+            ),
+            LongTermBenefitCalculationDetailsData(
+              longTermBenefitCalculationDetailsResult,
+              List(longTermBenefitNotesResult)
+            ),
             marriageDetailsResult,
             individualStatePensionInformationResult
           )
@@ -817,11 +821,15 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .value
           .futureValue shouldBe Right(
           EligibilityCheckDataResultGYSP(
-            List(niContributionAndCreditsResult),
-            schemeMembershipDetailsResult,
-            List(benefitSchemeDetailsResult),
-            longTermBenefitCalculationDetailsResult,
-            Nil,
+            niContributionAndCreditsResult,
+            BenefitSchemeMembershipDetailsData(
+              schemeMembershipDetailsResult,
+              List(benefitSchemeDetailsResult)
+            ),
+            LongTermBenefitCalculationDetailsData(
+              longTermBenefitCalculationDetailsResult,
+              Nil
+            ),
             marriageDetailsResult,
             individualStatePensionInformationResult
           )
@@ -915,11 +923,15 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .value
           .futureValue shouldBe Right(
           EligibilityCheckDataResultGYSP(
-            List(niContributionAndCreditsResult),
-            schemeMembershipDetailsResult,
-            Nil,
-            longTermBenefitCalculationDetailsResult,
-            Nil,
+            niContributionAndCreditsResult,
+            BenefitSchemeMembershipDetailsData(
+              schemeMembershipDetailsResult,
+              Nil
+            ),
+            LongTermBenefitCalculationDetailsData(
+              longTermBenefitCalculationDetailsResult,
+              Nil
+            ),
             marriageDetailsResult,
             individualStatePensionInformationResult
           )

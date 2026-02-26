@@ -58,12 +58,12 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
   def get(path: String)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, NpsClientError, HttpResponse] =
-    EitherT(
-      httpClientV2
-        .get(url"$path")
-        .setHeader(commonHeaders *)
-        .execute[HttpResponse]
-        .attempt
-    ).leftMap(NpsClientError(_))
+
+    httpClientV2
+      .get(url"$path")
+      .setHeader(commonHeaders *)
+      .execute[HttpResponse]
+      .attemptT
+      .leftMap(NpsClientError(_))
 
 }

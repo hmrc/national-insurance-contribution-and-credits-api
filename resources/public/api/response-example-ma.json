@@ -1,0 +1,47 @@
+{
+  "benefitType":"MA",
+  "nationalInsuranceNumber":"AB123456C",
+  "class2MAReceiptsResult":{
+    "receiptDates":[
+      "2025-12-10"
+    ]
+  },
+  "liabilitySummaryDetailsResult":{
+    "liabilityDetails":[
+      {
+        "startDate":"2026-01-01",
+        "endDate":"2027-01-01"
+      }
+    ]
+  },
+  "niContributionsAndCreditsResult":{
+    "totalGraduatedPensionUnits":53,
+    "class1ContributionAndCredits":[
+      {
+        "taxYear":2022,
+        "numberOfContributionsAndCredits":53,
+        "contributionCategoryLetter":"U",
+        "contributionCategory":"(NONE)",
+        "contributionCreditType":"C1",
+        "primaryContribution":99999999999999.98,
+        "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+        "primaryPaidEarnings":99999999999999.98,
+        "creditSource":"NOT KNOWN",
+        "employerName":"ipOpMs",
+        "latePaymentPeriod":"L"
+      }
+    ],
+    "class2ContributionAndCredits":[
+      {
+        "taxYear":2022,
+        "numberOfContributionsAndCredits":53,
+        "contributionCreditType":"C1",
+        "class2Or3EarningsFactor":99999999999999.98,
+        "class2NIContributionAmount":99999999999999.98,
+        "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+        "creditSource":"NOT KNOWN",
+        "latePaymentPeriod":"L"
+      }
+    ]
+  }
+}

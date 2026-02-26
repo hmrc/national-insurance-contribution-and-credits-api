@@ -18,6 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.integration.outbound
 
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
+import uk.gov.hmrc.app.benefitEligibility.service.{
+  BenefitSchemeMembershipDetailsData,
+  LongTermBenefitCalculationDetailsData
+}
 
 sealed trait EligibilityCheckDataResult {
   def benefitType: BenefitType
@@ -51,21 +55,20 @@ object EligibilityCheckDataResult {
   }
 
   case class EligibilityCheckDataResultGYSP(
-      contributionCreditResult: List[ContributionCreditResult],
-      schemeMembershipDetails: SchemeMembershipDetailsResult,
-      benefitSchemeDetails: List[BenefitSchemeDetailsResult],
-      longTermBenefitCalculationDetailsResult: LongTermBenefitCalculationDetailsResult,
-      longTermBenefitNotes: List[LongTermBenefitNotesResult],
+      contributionCreditResult: ContributionCreditResult,
+      benefitSchemeMembershipDetailsData: BenefitSchemeMembershipDetailsData,
+      longTermBenefitCalculationDetailsData: LongTermBenefitCalculationDetailsData,
       marriageDetailsResult: MarriageDetailsResult,
       statePensionData: IndividualStatePensionResult
   ) extends EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.GYSP
 
     override def allResults: List[ApiResult] =
-      contributionCreditResult ++ benefitSchemeDetails ++ longTermBenefitNotes ++ List(
+      benefitSchemeMembershipDetailsData.benefitSchemeDetailsResults ++ longTermBenefitCalculationDetailsData.longTermBenefitNotesResults ++ List(
+        contributionCreditResult,
         marriageDetailsResult,
-        longTermBenefitCalculationDetailsResult,
-        schemeMembershipDetails,
+        benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult,
+        longTermBenefitCalculationDetailsData.longTermBenefitCalculationDetailsResult,
         statePensionData
       )
 

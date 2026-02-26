@@ -1,0 +1,48 @@
+{
+  "benefitType":"BSP",
+  "nationalInsuranceNumber":"AB123456C",
+  "niContributionsAndCreditsResult":{
+    "totalGraduatedPensionUnits":53,
+    "class1ContributionAndCredits":[
+      {
+        "taxYear":2022,
+        "numberOfContributionsAndCredits":53,
+        "contributionCategoryLetter":"U",
+        "contributionCategory":"(NONE)",
+        "contributionCreditType":"C1",
+        "primaryContribution":99999999999999.98,
+        "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+        "primaryPaidEarnings":99999999999999.98,
+        "creditSource":"NOT KNOWN",
+        "employerName":"ipOpMs",
+        "latePaymentPeriod":"L"
+      }
+    ],
+    "class2ContributionAndCredits":[
+      {
+        "taxYear":2022,
+        "numberOfContributionsAndCredits":53,
+        "contributionCreditType":"C1",
+        "class2Or3EarningsFactor":99999999999999.98,
+        "class2NIContributionAmount":99999999999999.98,
+        "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+        "creditSource":"NOT KNOWN",
+        "latePaymentPeriod":"L"
+      }
+    ]
+  },
+  "marriageDetailsResult":{
+    "marriageDetails":[
+      {
+        "status":"CIVIL PARTNER",
+        "startDate":"1999-01-01",
+        "startDateStatus":"VERIFIED",
+        "endDate":"2001-01-01",
+        "endDateStatus":"VERIFIED",
+        "spouseIdentifier":"AB123456C",
+        "spouseForename":"Skywalker",
+        "spouseSurname":"Luke"
+      }
+    ]
+  }
+}

@@ -22,22 +22,12 @@ import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.findValues
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
-  ApiResult,
-  EligibilityCheckDataResult,
-  NpsApiResponseStatus,
-  NpsApiResult
-}
 
 import scala.collection.immutable
 
@@ -101,8 +91,8 @@ case class Pagination(cursor: PaginationCursor, sources: List[Source])
 final case class BenefitEligibilityInfoSuccessResponseMa private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    class2MAReceiptsResult: Class2MAReceiptsSuccessResponse,
-    liabilitySummaryDetailsResult: LiabilitySummaryDetailsSuccessResponse,
+    class2MAReceiptsResult: FilteredClass2MaReceipts,
+    liabilitySummaryDetailsResult: FilteredLiabilitySummaryDetails,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
@@ -114,8 +104,8 @@ object BenefitEligibilityInfoSuccessResponseMa {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      class2MAReceiptsResult: Class2MAReceiptsSuccessResponse,
-      liabilitySummaryDetailsResult: LiabilitySummaryDetailsSuccessResponse,
+      class2MAReceiptsResult: FilteredClass2MaReceipts,
+      liabilitySummaryDetailsResult: FilteredLiabilitySummaryDetails,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) = new BenefitEligibilityInfoSuccessResponseMa(
     MA,
@@ -136,8 +126,8 @@ object BenefitEligibilityInfoSuccessResponseMa {
           BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult = co,
-            class2MAReceiptsResult = c2,
-            liabilitySummaryDetailsResult = l
+            class2MAReceiptsResult = FilteredClass2MaReceipts.from(c2),
+            liabilitySummaryDetailsResult = FilteredLiabilitySummaryDetails.from(l)
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
@@ -148,8 +138,8 @@ object BenefitEligibilityInfoSuccessResponseMa {
 final case class BenefitEligibilityInfoSuccessResponseBsp private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    marriageDetailsResult: MarriageDetailsSuccessResponse,
-    niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
+    niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
+    marriageDetailsResult: FilteredMarriageDetails
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
@@ -160,13 +150,13 @@ object BenefitEligibilityInfoSuccessResponseBsp {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      marriageDetailsResult: MarriageDetailsSuccessResponse,
-      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
+      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
+      marriageDetailsResult: FilteredMarriageDetails
   ) = new BenefitEligibilityInfoSuccessResponseBsp(
     BSP,
     nationalInsuranceNumber,
-    marriageDetailsResult,
-    niContributionsAndCreditsResult
+    niContributionsAndCreditsResult,
+    marriageDetailsResult
   )
 
   def from(
@@ -182,8 +172,8 @@ object BenefitEligibilityInfoSuccessResponseBsp {
         Right(
           BenefitEligibilityInfoSuccessResponseBsp(
             nationalInsuranceNumber = nationalInsuranceNumber,
-            marriageDetailsResult = marriageDetailsSuccessResponse,
-            niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse
+            niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse,
+            marriageDetailsResult = FilteredMarriageDetails.from(marriageDetailsSuccessResponse)
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
@@ -274,13 +264,11 @@ object BenefitEligibilityInfoSuccessResponseJsa {
 final case class BenefitEligibilityInfoSuccessResponseGysp private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    benefitSchemeDetailsResult: List[BenefitSchemeDetailsSuccessResponse],
-    marriageDetailsResult: MarriageDetailsSuccessResponse,
-    longTermBenefitCalculationDetailsResult: LongTermBenefitCalculationDetailsSuccessResponse,
-    longTermBenefitNotesResult: LongTermBenefitNotesSuccessResponse,
-    schemeMembershipDetailsResult: SchemeMembershipDetailsSuccessResponse,
-    individualStatePensionInfoResult: IndividualStatePensionInformationSuccessResponse,
-    niContributionsAndCreditsResult: List[NiContributionsAndCreditsSuccessResponse]
+    marriageDetailsResult: FilteredMarriageDetails,
+    longTermBenefitCalculationDetailsResult: FilteredLongTermBenefitCalculationDetails,
+    schemeMembershipDetailsResult: FilteredSchemeMembershipDetails,
+    individualStatePensionInfoResult: FilteredIndividualStatePensionInfo,
+    niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
@@ -291,20 +279,16 @@ object BenefitEligibilityInfoSuccessResponseGysp {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      benefitSchemeDetailsResult: List[BenefitSchemeDetailsSuccessResponse],
-      marriageDetailsResult: MarriageDetailsSuccessResponse,
-      longTermBenefitCalculationDetailsResult: LongTermBenefitCalculationDetailsSuccessResponse,
-      longTermBenefitNotesResult: LongTermBenefitNotesSuccessResponse,
-      schemeMembershipDetailsResult: SchemeMembershipDetailsSuccessResponse,
-      individualStatePensionInfoResult: IndividualStatePensionInformationSuccessResponse,
-      niContributionsAndCreditsResult: List[NiContributionsAndCreditsSuccessResponse]
+      marriageDetailsResult: FilteredMarriageDetails,
+      longTermBenefitCalculationDetailsResult: FilteredLongTermBenefitCalculationDetails,
+      schemeMembershipDetailsResult: FilteredSchemeMembershipDetails,
+      individualStatePensionInfoResult: FilteredIndividualStatePensionInfo,
+      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) = new BenefitEligibilityInfoSuccessResponseGysp(
     GYSP,
     nationalInsuranceNumber,
-    benefitSchemeDetailsResult,
     marriageDetailsResult,
     longTermBenefitCalculationDetailsResult,
-    longTermBenefitNotesResult,
     schemeMembershipDetailsResult,
     individualStatePensionInfoResult,
     niContributionsAndCreditsResult
@@ -315,33 +299,25 @@ object BenefitEligibilityInfoSuccessResponseGysp {
       result: EligibilityCheckDataResultGYSP
   ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseGysp] =
 
-    (
-      result.schemeMembershipDetails,
-      result.marriageDetailsResult,
-      result.longTermBenefitCalculationDetailsResult,
-      result.statePensionData
-    ) match {
-      case (
-            NpsApiResult.SuccessResult(_, schemeMembership),
-            NpsApiResult.SuccessResult(_, marriageDetails),
-            NpsApiResult.SuccessResult(_, longTermBenefitCalculationDetails),
-            NpsApiResult.SuccessResult(_, statePension)
-          ) =>
-        Right(
-          BenefitEligibilityInfoSuccessResponseGysp(
-            nationalInsuranceNumber,
-            result.benefitSchemeDetails.flatMap(_.getSuccess),
-            marriageDetails,
-            longTermBenefitCalculationDetails,
-            result.longTermBenefitNotes.flatMap(_.getSuccess).reduce { case (resp1, resp2) =>
-              LongTermBenefitNotesSuccessResponse(resp1.longTermBenefitNotes ++ resp2.longTermBenefitNotes)
-            },
-            schemeMembership,
-            statePension,
-            result.contributionCreditResult.flatMap(_.getSuccess)
-          )
+    if (result.allResults.exists(_.isFailure)) {
+      Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    } else {
+      Right(
+        BenefitEligibilityInfoSuccessResponseGysp(
+          nationalInsuranceNumber,
+          FilteredMarriageDetails.from(result.marriageDetailsResult.getSuccess.get),
+          FilteredLongTermBenefitCalculationDetails.from(
+            result.longTermBenefitCalculationDetailsData.longTermBenefitCalculationDetailsResult.getSuccess.get,
+            result.longTermBenefitCalculationDetailsData.longTermBenefitNotesResults.map(_.getSuccess.get)
+          ),
+          FilteredSchemeMembershipDetails.from(
+            result.benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get,
+            result.benefitSchemeMembershipDetailsData.benefitSchemeDetailsResults.map(_.getSuccess.get)
+          ),
+          FilteredIndividualStatePensionInfo.from(result.statePensionData.getSuccess.get),
+          result.contributionCreditResult.getSuccess.get
         )
-      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+      )
     }
 
 }

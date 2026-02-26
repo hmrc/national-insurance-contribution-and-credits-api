@@ -40,7 +40,12 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAn
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{ContributionCreditResult, NpsClient, NpsResponseHandler}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
+  ContributionCreditResult,
+  NpsApiResult,
+  NpsClient,
+  NpsResponseHandler
+}
 import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
@@ -67,7 +72,10 @@ class NiContributionsAndCreditsConnector @Inject() (
     npsClient
       .post(path, request)
       .flatMap { response =>
-        val contributionsAndCreditsResult =
+        val contributionsAndCreditsResult: Either[
+          BenefitEligibilityError,
+          NpsApiResult[NpsApiResult.ErrorReport, NiContributionsAndCreditsSuccessResponse]
+        ] =
           response.status match {
             case OK =>
               attemptStrictParse[NiContributionsAndCreditsSuccessResponse](benefitType, response).map(
@@ -91,7 +99,7 @@ class NiContributionsAndCreditsConnector @Inject() (
                 toFailureResult(UnprocessableEntity, Some(resp))
               }
 
-            case NOT_FOUND => Right(toFailureResult(NotFound, None))
+            case NOT_FOUND => Right(toFailureResult(NotFound, npsError = None))
 
             case INTERNAL_SERVER_ERROR =>
               Right(toFailureResult(InternalServerError, None))

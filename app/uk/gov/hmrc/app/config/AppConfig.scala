@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.app.config
 
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.nio.charset.StandardCharsets
@@ -29,6 +30,7 @@ class AppConfig @Inject() (config: ServicesConfig) {
 
   val benefitEligibilityInfoEndpointEnabled: Boolean = config.getBoolean("benefitEligibilityInfoEndpointEnabled")
   val hipBaseUrl: String                             = config.baseUrl("hip")
+  def hipBaseUrl(apiName: ApiName): String           = config.baseUrl(apiName.entryName)
   val hipOriginatorId: String                        = config.getString(s"$hipServicePrefix.originatorId")
   private val hipClientId: String                    = config.getString(s"$hipServicePrefix.clientId")
   private val hipClientSecret: String                = config.getString(s"$hipServicePrefix.clientSecret")

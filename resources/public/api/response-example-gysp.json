@@ -1,0 +1,90 @@
+{
+  "benefitType":"GYSP",
+  "nationalInsuranceNumber":"AB123456C",
+  "marriageDetailsResult":{
+    "marriageDetails":[
+      {
+        "status":"CIVIL PARTNER",
+        "startDate":"1999-01-01",
+        "startDateStatus":"VERIFIED",
+        "endDate":"2001-01-01",
+        "endDateStatus":"VERIFIED",
+        "spouseIdentifier":"AB123456C",
+        "spouseForename":"Skywalker",
+        "spouseSurname":"Luke"
+      }
+    ]
+  },
+  "longTermBenefitCalculationDetailsResult":{
+    "benefitCalculationDetails":[
+      {
+        "guaranteedMinimumPensionContractedOutDeductionsPre1988":10.56,
+        "guaranteedMinimumPensionContractedOutDeductionsPost1988":10.56,
+        "contractedOutDeductionsPre1988":10.56,
+        "contractedOutDeductionsPost1988":10.56,
+        "longTermBenefitNotes":[
+          "Invalid Note Type Encountered.",
+          "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025.",
+          "Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025",
+          "Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025.",
+          "Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025.",
+          "Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025.",
+          "Retirement Position of UNKNOWN recorded on this account from 07/04/2025.",
+          "Retirement Position of UNKNOWN recorded on this account between NOT KNOWN."
+        ]
+      }
+    ]
+  },
+  "schemeMembershipDetailsResult":{
+    "schemeMembershipDetails":[
+      {
+        "schemeMembershipStartDate":"2022-06-27",
+        "schemeMembershipEndDate":"2022-06-27",
+        "employersContractedOutNumberDetails":"S3123456B"
+      }
+    ]
+  },
+  "individualStatePensionInfoResult":{
+    "numberOfQualifyingYears":35,
+    "contributionsByTaxYear":[
+      {
+        "totalPrimaryPaidEarnings":48500.75,
+        "qualifyingTaxYear":true
+      },
+      {
+        "totalPrimaryPaidEarnings":39875.9,
+        "qualifyingTaxYear":false
+      }
+    ]
+  },
+  "niContributionsAndCreditsResult":{
+    "totalGraduatedPensionUnits":53,
+    "class1ContributionAndCredits":[
+      {
+        "taxYear":2022,
+        "numberOfContributionsAndCredits":53,
+        "contributionCategoryLetter":"U",
+        "contributionCategory":"(NONE)",
+        "contributionCreditType":"C1",
+        "primaryContribution":99999999999999.98,
+        "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+        "primaryPaidEarnings":99999999999999.98,
+        "creditSource":"NOT KNOWN",
+        "employerName":"ipOpMs",
+        "latePaymentPeriod":"L"
+      }
+    ],
+    "class2ContributionAndCredits":[
+      {
+        "taxYear":2022,
+        "numberOfContributionsAndCredits":53,
+        "contributionCreditType":"C1",
+        "class2Or3EarningsFactor":99999999999999.98,
+        "class2NIContributionAmount":99999999999999.98,
+        "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+        "creditSource":"NOT KNOWN",
+        "latePaymentPeriod":"L"
+      }
+    ]
+  }
+}
