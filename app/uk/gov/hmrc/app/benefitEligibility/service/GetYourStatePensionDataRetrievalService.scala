@@ -22,6 +22,10 @@ import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.{
+  ContributionsAndCreditsRequestParams,
+  LongTermBenefitCalculationRequestParams
+}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
@@ -71,7 +75,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
     (
       fetchNiContributionsAndCreditsData(eligibilityCheckDataRequest.niContributionsAndCredits),
-      fetchMarriageDetailsData(eligibilityCheckDataRequest.marriageDetails),
+      fetchMarriageDetailsData(),
       fetchBenefitSchemeMembershipDetailsData(),
       fetchLongTermBenefitCalculationDetailsData(eligibilityCheckDataRequest.longTermBenefitCalculation),
       fetchIndividualStatePensionInformation()
@@ -124,15 +128,10 @@ class GetYourStatePensionDataRetrievalService @Inject() (
     //  }.sequence
   }
 
-  private[service] def fetchMarriageDetailsData(
-      marriageDetails: Option[MarriageDetailsRequestParams]
-  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
+  private[service] def fetchMarriageDetailsData(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
     marriageDetailsConnector.fetchMarriageDetails(
       requestKey.benefitType,
-      requestKey.nationalInsuranceNumber,
-      marriageDetails.flatMap(_.searchStartYear),
-      marriageDetails.flatMap(_.latest),
-      None
+      requestKey.nationalInsuranceNumber
     )
 
   private[service] def fetchBenefitSchemeMembershipDetailsData()(
@@ -145,10 +144,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   ] = for {
     detailsResult <- schemeMembershipDetailsConnector.fetchSchemeMembershipDetails(
       benefitType = requestKey.benefitType,
-      nationalInsuranceNumber = requestKey.nationalInsuranceNumber,
-      sequenceNumber = None,
-      transferSequenceNumber = None,
-      occurrenceNumber = None
+      nationalInsuranceNumber = requestKey.nationalInsuranceNumber
     )
     resultTuple <-
       detailsResult match {
@@ -176,7 +172,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
   } yield BenefitSchemeMembershipDetailsData(resultTuple._1, resultTuple._2)
 
   private[service] def fetchLongTermBenefitCalculationDetailsData(
-      longTermBenefitCalculation: LongTermBenefitCalculationRequestParams
+      longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams]
   )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey): EitherT[
     Future,
     BenefitEligibilityError,
@@ -186,9 +182,8 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       .fetchBenefitCalculationDetails(
         requestKey.benefitType,
         requestKey.nationalInsuranceNumber,
-        None,
-        longTermBenefitCalculation.longTermBenefitType,
-        longTermBenefitCalculation.pensionProcessingArea
+        longTermBenefitCalculation.flatMap(_.longTermBenefitType),
+        longTermBenefitCalculation.flatMap(_.pensionProcessingArea)
       )
 
     resultTuple <-

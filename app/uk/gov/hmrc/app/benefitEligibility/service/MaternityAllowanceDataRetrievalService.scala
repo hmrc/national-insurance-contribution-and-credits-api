@@ -47,10 +47,7 @@ class MaternityAllowanceDataRetrievalService @Inject() (
     (
       class2MAReceiptsConnector.fetchClass2MAReceipts(
         eligibilityCheckDataRequest.benefitType,
-        eligibilityCheckDataRequest.nationalInsuranceNumber,
-        eligibilityCheckDataRequest.class2MaReceipts.archived,
-        eligibilityCheckDataRequest.class2MaReceipts.receiptDate,
-        eligibilityCheckDataRequest.class2MaReceipts.sortBy
+        eligibilityCheckDataRequest.nationalInsuranceNumber
       ),
       niContributionsAndCreditsConnector.fetchContributionsAndCredits(
         eligibilityCheckDataRequest.benefitType,
@@ -61,16 +58,16 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
         )
       ),
-      liabilitySummaryDetailsConnector.fetchLiabilitySummaryDetails(
-        eligibilityCheckDataRequest.benefitType,
-        eligibilityCheckDataRequest.nationalInsuranceNumber,
-        eligibilityCheckDataRequest.liabilities.searchCategory,
-        eligibilityCheckDataRequest.liabilities.liabilityOccurrenceNumber,
-        eligibilityCheckDataRequest.liabilities.liabilityType,
-        eligibilityCheckDataRequest.liabilities.earliestLiabilityStartDate,
-        eligibilityCheckDataRequest.liabilities.liabilityStart,
-        eligibilityCheckDataRequest.liabilities.liabilityEnd
-      )
+      eligibilityCheckDataRequest.liabilities.searchCategories.map { searchCategory =>
+        liabilitySummaryDetailsConnector.fetchLiabilitySummaryDetails(
+          eligibilityCheckDataRequest.benefitType,
+          eligibilityCheckDataRequest.nationalInsuranceNumber,
+          searchCategory,
+          eligibilityCheckDataRequest.liabilities.earliestLiabilityStartDate,
+          eligibilityCheckDataRequest.liabilities.liabilityStart,
+          eligibilityCheckDataRequest.liabilities.liabilityEnd
+        )
+      }.sequence
     ).parTupled
       .map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
         EligibilityCheckDataResultMA(

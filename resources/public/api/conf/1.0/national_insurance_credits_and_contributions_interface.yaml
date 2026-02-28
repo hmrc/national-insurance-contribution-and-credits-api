@@ -46,8 +46,8 @@ paths:
                     dateOfBirth: "1958-03-22"
                     startTaxYear: 2018
                     endTaxYear: 2024
-              GYSP_request:
-                summary: GYSP request
+              GYSP_full_request:
+                summary: GYSP request - optional fields included
                 value:
                   benefitType: "GYSP"
                   nationalInsuranceNumber: "GH567890J"
@@ -55,9 +55,18 @@ paths:
                     dateOfBirth: "1955-06-20"
                     startTaxYear: 2018
                     endTaxYear: 2023
-                  benefitCalculation:
-                    benefitType: "GRADUATED"
-                    pensionProcessingArea: "NORTH"
+                  longTermBenefitCalculation:
+                    longTermBenefitType: "GUARDIAN'S ALLOWANCE"
+                    pensionProcessingArea: "Job Centre+ Electronic Enabled Pension Processing"
+              GYSP_minimal_request:
+                summary: GYSP request - Minimal required fields
+                value:
+                  benefitType: "GYSP"
+                  nationalInsuranceNumber: "GH567890J"
+                  niContributionsAndCredits:
+                    dateOfBirth: "1955-06-20"
+                    startTaxYear: 2018
+                    endTaxYear: 2023
               ESA_request:
                 summary: ESA request
                 value:
@@ -479,7 +488,7 @@ components:
                 class2MAReceiptsResult:
                   receiptDates: []
                 liabilitySummaryDetailsResult:
-                  liabilityDetails: []
+                  - liabilityDetails: []
                 niContributionsAndCreditsResult:
                   class1ContributionAndCredits: []
                   class2ContributionAndCredits: []
@@ -493,7 +502,7 @@ components:
                   receiptDates:
                     - "2025-12-10"
                 liabilitySummaryDetailsResult:
-                  liabilityDetails:
+                  - liabilityDetails:
                     - startDate: "2026-01-01"
                       endDate: "2027-01-01"
                 niContributionsAndCreditsResult:
@@ -715,10 +724,8 @@ components:
 
     LongTermBenefitCalculation:
       type: object
-      required:
-        - benefitType
       properties:
-        benefitType:
+        longTermBenefitType:
           $ref: '#/components/schemas/EnumBenType'
         pensionProcessingArea:
           $ref: '#/components/schemas/EnumEeppflg'
@@ -790,7 +797,6 @@ components:
         - benefitType
         - nationalInsuranceNumber
         - contributionsAndCredits
-        - longTermBenefitCalculation
       properties:
         benefitType:
           type: string
@@ -899,7 +905,9 @@ components:
         class2MAReceiptsResult:
           $ref: '#/components/schemas/Class2MAReceiptsResult'
         liabilitySummaryDetailsResult:
-          $ref: '#/components/schemas/LiabilitySummaryDetailsResult'
+          type: array
+          items:
+            $ref: '#/components/schemas/LiabilitySummaryDetailsResult'
         niContributionsAndCreditsResult:
           $ref: '#/components/schemas/PostNIContCredResponse'
         nextCursor:
@@ -1589,18 +1597,12 @@ components:
       properties:
         status:
           type: string
-          enum: [PARTIAL_FAILURE, FAILURE]
+          enum: [PARTIAL FAILURE, FAILURE]
         benefitType:
           type: string
           enum: [BSP, GYSP, ESA, JSA, MA]
         nationalInsuranceNumber:
           $ref: '#/components/schemas/nationalInsuranceNumber'
-        dateOfBirth:
-          $ref: '#/components/schemas/dateString'
-        startTaxYear:
-          $ref: '#/components/schemas/taxYear'
-        endTaxYear:
-          $ref: '#/components/schemas/taxYear'
         summary:
           $ref: '#/components/schemas/Summary'
         downStreams:

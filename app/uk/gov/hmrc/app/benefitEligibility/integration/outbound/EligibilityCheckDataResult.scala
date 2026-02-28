@@ -32,13 +32,13 @@ object EligibilityCheckDataResult {
 
   case class EligibilityCheckDataResultMA(
       class2MaReceiptsResult: Class2MaReceiptsResult,
-      liabilityResult: LiabilityResult,
+      liabilityResult: List[LiabilityResult],
       contributionCreditResult: ContributionCreditResult
   ) extends EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.MA
 
     def allResults: List[ApiResult] =
-      List(contributionCreditResult, class2MaReceiptsResult, liabilityResult)
+      liabilityResult ++ List(contributionCreditResult, class2MaReceiptsResult)
 
   }
 

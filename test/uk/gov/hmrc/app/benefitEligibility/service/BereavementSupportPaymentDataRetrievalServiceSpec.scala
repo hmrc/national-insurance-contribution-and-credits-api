@@ -21,12 +21,10 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common._
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  BSPEligibilityCheckDataRequest,
-  ContributionsAndCreditsRequestParams
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.BSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
@@ -35,8 +33,8 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.m
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -76,8 +74,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)
-    ),
-    marriageDetails = None
+    )
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -170,12 +167,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, None, None, None, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -210,12 +204,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, None, None, None, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -250,12 +241,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, None, None, None, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -286,12 +274,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, None, None, None, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -316,12 +301,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, None, None, None, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )

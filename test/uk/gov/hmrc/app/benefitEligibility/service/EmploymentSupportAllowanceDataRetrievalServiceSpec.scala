@@ -24,10 +24,8 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.BadRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCreditsRequestParams,
-  ESAEligibilityCheckDataRequest
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.ESAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultESA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector

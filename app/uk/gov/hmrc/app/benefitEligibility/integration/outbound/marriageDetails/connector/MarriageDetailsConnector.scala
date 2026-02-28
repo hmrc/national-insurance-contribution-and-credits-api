@@ -57,26 +57,10 @@ class MarriageDetailsConnector @Inject() (
 
   def fetchMarriageDetails(
       benefitType: BenefitType,
-      identifier: Identifier,
-      startYear: Option[StartYear],
-      latestFilter: Option[FilterLatest],
-      seq: Option[Int]
+      identifier: Identifier
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
-    def searchStartYear: Option[String] = startYear.map(sy => sy.value.toString)
-    def latest: Option[String]          = latestFilter.map(l => l.value.toString)
-    def sequence: Option[String]        = seq.map(s => s.toString)
-
-    val options = List(
-      RequestOption("searchStartYear", searchStartYear),
-      RequestOption("latest", latest),
-      RequestOption("sequence", sequence)
-    )
-
-    val path = RequestBuilder.buildPath(
-      s"${appConfig.hipBaseUrl}/individual/${identifier.value}/marriage-cp",
-      options
-    )
+    val path = s"${appConfig.hipBaseUrl}/individual/${identifier.value}/marriage-cp"
 
     npsClient
       .get(path)

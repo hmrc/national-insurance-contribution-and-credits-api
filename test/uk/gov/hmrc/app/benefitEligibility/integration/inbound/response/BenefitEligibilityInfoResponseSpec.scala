@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.inbound
+package uk.gov.hmrc.app.benefitEligibility.integration.inbound.response
 
+import cats.data.Validated.Valid
+import com.networknt.schema.SpecVersion
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json
-import uk.gov.hmrc.app.benefitEligibility.common._
+import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   Class2MAReceipts,
   IndividualStatePension,
@@ -34,34 +35,33 @@ import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
   MarriageDetails,
   NiContributionAndCredits
 }
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   InternalServerError,
   ServiceUnavailable,
   UnprocessableEntity
 }
-import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, Partial, Success}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError._
+import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, Partial}
+import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
   CalculationSource,
   CalculationStatus,
@@ -72,32 +72,20 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNo
   Note
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.{
-  MarriageDetailsSuccessResponse,
-  MarriageEndDate,
-  MarriageStartDate,
-  ReconciliationDate,
-  SeparationDate,
-  SpouseForename,
-  SpouseSurname
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageEndDateStatus.Verified
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStartDateStatus
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStartDateStatus.NotKnown
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.{
-  NiContributionsAndCreditsSuccess,
-  enums
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
   LongTermBenefitCalculationDetailsData
 }
+import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 
 import java.time.LocalDate
 import scala.util.Random
@@ -121,6 +109,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     )
   )
 
+  val filteredLiabilitySummaryDetailsOptionalsExcluded = FilteredLiabilitySummaryDetails(
+    List(
+      FilteredLiabilitySummaryDetailItem(
+        StartDate(LocalDate.parse("2026-01-01")),
+        None
+      )
+    )
+  )
+
   val filteredMarriageDetails =
     FilteredMarriageDetails(
       List(
@@ -133,6 +130,22 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           spouseIdentifier = Some(Identifier("AB123456C")),
           spouseForename = Some(SpouseForename("Skywalker")),
           spouseSurname = Some(SpouseSurname("Luke"))
+        )
+      )
+    )
+
+  val filteredMarriageDetailsOptionalsExcluded =
+    FilteredMarriageDetails(
+      List(
+        FilteredMarriageDetailsItem(
+          status = CivilPartner,
+          startDate = None,
+          startDateStatus = None,
+          endDate = None,
+          endDateStatus = None,
+          spouseIdentifier = None,
+          spouseForename = None,
+          spouseSurname = None
         )
       )
     )
@@ -151,13 +164,38 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     )
   )
 
+  val filteredIndividualStatePensionInfoOptionalsExcluded = FilteredIndividualStatePensionInfo(
+    None,
+    List(
+      FilteredIndividualStatePensionContributionsByTaxYear(
+        None,
+        None
+      ),
+      FilteredIndividualStatePensionContributionsByTaxYear(
+        None,
+        None
+      )
+    )
+  )
+
   val filteredSchemeMembershipDetails = FilteredSchemeMembershipDetails(
     List(
       FilteredSchemeMembershipDetailsItem(
-        None,
+        Some(BenefitSchemeName("EXAMPLE PENSION SCHEME")),
         Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
         Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
-        Some(EmployersContractedOutNumberDetails("S3123456B"))
+        Some(EmployersContractedOutNumberDetails("S312345B"))
+      )
+    )
+  )
+
+  val filteredSchemeMembershipDetailsOptionalsExcluded = FilteredSchemeMembershipDetails(
+    List(
+      FilteredSchemeMembershipDetailsItem(
+        None,
+        None,
+        None,
+        None
       )
     )
   )
@@ -171,6 +209,29 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Some(GuaranteedMinimumPensionContractedOutDeductionsPost1988(10.56)),
         contractedOutDeductionsPre1988 = Some(ContractedOutDeductionsPre1988(10.56)),
         contractedOutDeductionsPost1988 = Some(ContractedOutDeductionsPost1988(10.56)),
+        List(
+          Note("Invalid Note Type Encountered."),
+          Note(
+            "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025."
+          ),
+          Note("Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025"),
+          Note("Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025."),
+          Note("Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025."),
+          Note("Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025."),
+          Note("Retirement Position of UNKNOWN recorded on this account from 07/04/2025."),
+          Note("Retirement Position of UNKNOWN recorded on this account between NOT KNOWN.")
+        )
+      )
+    )
+  )
+
+  val filteredLongTermBenefitCalculationDetailsOptionalExluded = FilteredLongTermBenefitCalculationDetails(
+    List(
+      FilteredLongTermBenefitCalculationDetailsItem(
+        guaranteedMinimumPensionContractedOutDeductionsPre1988 = None,
+        guaranteedMinimumPensionContractedOutDeductionsPost1988 = None,
+        contractedOutDeductionsPre1988 = None,
+        contractedOutDeductionsPost1988 = None,
         List(
           Note("Invalid Note Type Encountered."),
           Note(
@@ -280,6 +341,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     )
   )
 
+  val niContributionsAndCreditsSuccessResponseOptionalsExcluded = NiContributionsAndCreditsSuccessResponse(
+    totalGraduatedPensionUnits = None,
+    class1ContributionAndCredits = None,
+    class2ContributionAndCredits = None
+  )
+
   val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
     MarriageDetailsSuccess.MarriageDetails(
       MarriageDetailsSuccess.ActiveMarriage(true),
@@ -297,7 +364,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               spouseForename = Some(SpouseForename("Skywalker")),
               spouseSurname = Some(SpouseSurname("Luke")),
               separationDate = Some(SeparationDate(LocalDate.parse("2002-01-01"))),
-              reconciliationDate = Some(ReconciliationDate(LocalDate.parse("2003-01-01")))
+              reconciliationDate = Some(MarriageDetailsReconciliationDate(LocalDate.parse("2003-01-01")))
             )
         )
       ),
@@ -375,7 +442,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
             schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
             guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
-            employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
+            employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S312345B")),
             schemeCreatingContractedOutNumberDetails = Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
             schemeTerminatingContractedOutNumberDetails =
               Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
@@ -425,7 +492,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
       schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
       reconciliationDate = Some(BenefitSchemeDetailsSuccess.ReconciliationDate("2025-03-31")),
-      schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
+      schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S312345B")
     ),
     schemeAddressDetailsList = List(
       SchemeAddressDetails(
@@ -436,7 +503,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         country = Some(Country.Scotland),
         areaDiallingCode = Some(AreaDiallingCode.Code0131), // Note: This would need to be added to the enum
         schemeTelephoneNumber = Some(SchemeTelephoneNumber("0131 000 0000")),
-        schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C"),
+        schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S312345B"),
         benefitSchemeAddressDetails = Some(
           BenefitSchemeAddressDetails(
             schemeAddressLine1 = Some(SchemeAddressLine1("1 Sample Road")),
@@ -690,7 +757,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           nationalInsuranceNumber,
           EligibilityCheckDataResultMA(
             NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse),
-            NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
+            List(NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)),
             NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
           )
         )
@@ -698,7 +765,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val expected = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
           filteredClass2MaReceipts,
-          filteredLiabilitySummaryDetails,
+          List(filteredLiabilitySummaryDetails),
           niContributionsAndCreditsSuccessResponse
         )
 
@@ -710,7 +777,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val benefitEligibilityInfoSuccessResponseMa = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
           filteredClass2MaReceipts,
-          filteredLiabilitySummaryDetails,
+          List(filteredLiabilitySummaryDetails),
           niContributionsAndCreditsSuccessResponse
         )
 
@@ -723,14 +790,14 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |         "2025-12-10"
             |      ]
             |   },
-            |   "liabilitySummaryDetailsResult":{
+            |   "liabilitySummaryDetailsResult":[{
             |      "liabilityDetails":[
             |         {
             |            "startDate":"2026-01-01",
             |            "endDate":"2027-01-01"
             |         }
             |      ]
-            |   },
+            |   }],
             |   "niContributionsAndCreditsResult":{
             |      "totalGraduatedPensionUnits":53,
             |      "class1ContributionAndCredits":[
@@ -765,6 +832,55 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         Json.toJson(benefitEligibilityInfoSuccessResponseMa) shouldBe Json.parse(expectedJson)
       }
+    }
+
+    "should match openapi schema (all optionals included)" in {
+
+      val applicationOpenApiSpec =
+        "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+      def successResponseMaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+        applicationOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("MASuccessResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+      val successResponse = BenefitEligibilityInfoSuccessResponseMa(
+        nationalInsuranceNumber,
+        filteredClass2MaReceipts,
+        List(filteredLiabilitySummaryDetails),
+        niContributionsAndCreditsSuccessResponse
+      )
+
+      successResponseMaJsonSchema.validateAndGetErrors(
+        Json.toJson(successResponse)
+      ) shouldBe Nil
+
+    }
+    "should match openapi schema (all optionals excluded)" in {
+
+      val applicationOpenApiSpec =
+        "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+      def successResponseMaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+        applicationOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("MASuccessResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+      val successResponse = BenefitEligibilityInfoSuccessResponseMa(
+        nationalInsuranceNumber,
+        filteredClass2MaReceipts,
+        List(filteredLiabilitySummaryDetailsOptionalsExcluded),
+        niContributionsAndCreditsSuccessResponseOptionalsExcluded
+      )
+
+      successResponseMaJsonSchema.validateAndGetErrors(
+        Json.toJson(successResponse)
+      ) shouldBe Nil
+
     }
   }
 
@@ -850,6 +966,52 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         Json.toJson(benefitEligibilityInfoSuccessResponseBsp) shouldBe Json.parse(expectedJson)
       }
     }
+    "should match openapi schema (all optionals included)" in {
+
+      val applicationOpenApiSpec =
+        "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+      def successResponseBspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+        applicationOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("BSPSuccessResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+      val successResponse = BenefitEligibilityInfoSuccessResponseBsp(
+        nationalInsuranceNumber,
+        niContributionsAndCreditsSuccessResponse,
+        filteredMarriageDetails
+      )
+
+      successResponseBspJsonSchema.validateAndGetErrors(
+        Json.toJson(successResponse)
+      ) shouldBe Nil
+
+    }
+    "should match openapi schema (all optionals excluded)" in {
+
+      val applicationOpenApiSpec =
+        "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+      def successResponseBspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+        applicationOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("BSPSuccessResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+      val successResponse = BenefitEligibilityInfoSuccessResponseBsp(
+        nationalInsuranceNumber,
+        niContributionsAndCreditsSuccessResponseOptionalsExcluded,
+        filteredMarriageDetailsOptionalsExcluded
+      )
+
+      successResponseBspJsonSchema.validateAndGetErrors(
+        Json.toJson(successResponse)
+      ) shouldBe Nil
+
+    }
   }
 
   "BenefitEligibilityInfoSuccessResponseGysp" - {
@@ -928,9 +1090,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |   "schemeMembershipDetailsResult":{
             |      "schemeMembershipDetails":[
             |         {
+            |            "schemeName":"EXAMPLE PENSION SCHEME",
             |            "schemeMembershipStartDate":"2022-06-27",
             |            "schemeMembershipEndDate":"2022-06-27",
-            |            "employersContractedOutNumberDetails":"S3123456B"
+            |            "employersContractedOutNumberDetails":"S312345B"
             |         }
             |      ]
             |   },
@@ -989,6 +1152,58 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
 
         Json.toJson(benefitEligibilityInfoSuccessResponseGysp) shouldBe Json.parse(json)
+      }
+      "should match openapi schema (all optionals included)" in {
+
+        val applicationOpenApiSpec =
+          "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+        def successResponseGyspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+          applicationOpenApiSpec,
+          SpecVersion.VersionFlag.V7,
+          Some("GYSPSuccessResponse"),
+          metaSchemaValidation = Some(Valid(()))
+        )
+
+        val successResponse = BenefitEligibilityInfoSuccessResponseGysp(
+          nationalInsuranceNumber,
+          filteredMarriageDetails,
+          filteredLongTermBenefitCalculationDetails,
+          filteredSchemeMembershipDetails,
+          filteredIndividualStatePensionInfo,
+          niContributionsAndCreditsSuccessResponse
+        )
+
+        successResponseGyspJsonSchema.validateAndGetErrors(
+          Json.toJson(successResponse)
+        ) shouldBe Nil
+
+      }
+      "should match openapi schema (all optionals excluded)" in {
+
+        val applicationOpenApiSpec =
+          "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+        def successResponseGyspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+          applicationOpenApiSpec,
+          SpecVersion.VersionFlag.V7,
+          Some("GYSPSuccessResponse"),
+          metaSchemaValidation = Some(Valid(()))
+        )
+
+        val successResponse = BenefitEligibilityInfoSuccessResponseGysp(
+          nationalInsuranceNumber,
+          filteredMarriageDetailsOptionalsExcluded,
+          filteredLongTermBenefitCalculationDetailsOptionalExluded,
+          filteredSchemeMembershipDetailsOptionalsExcluded,
+          filteredIndividualStatePensionInfoOptionalsExcluded,
+          niContributionsAndCreditsSuccessResponseOptionalsExcluded
+        )
+
+        successResponseGyspJsonSchema.validateAndGetErrors(
+          Json.toJson(successResponse)
+        ) shouldBe Nil
+
       }
     }
   }
@@ -1057,6 +1272,50 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         Json.toJson(benefitEligibilityInfoSuccessResponseEsa) shouldBe Json.parse(expectedJson)
       }
+      "should match openapi schema (all optionals included)" in {
+
+        val applicationOpenApiSpec =
+          "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+        def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+          applicationOpenApiSpec,
+          SpecVersion.VersionFlag.V7,
+          Some("ESASuccessResponse"),
+          metaSchemaValidation = Some(Valid(()))
+        )
+
+        val successResponse = BenefitEligibilityInfoSuccessResponseEsa(
+          nationalInsuranceNumber,
+          niContributionsAndCreditsSuccessResponse
+        )
+
+        successResponseEsaJsonSchema.validateAndGetErrors(
+          Json.toJson(successResponse)
+        ) shouldBe Nil
+
+      }
+      "should match openapi schema (all optionals excluded)" in {
+
+        val applicationOpenApiSpec =
+          "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+        def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+          applicationOpenApiSpec,
+          SpecVersion.VersionFlag.V7,
+          Some("ESASuccessResponse"),
+          metaSchemaValidation = Some(Valid(()))
+        )
+
+        val successResponse = BenefitEligibilityInfoSuccessResponseEsa(
+          nationalInsuranceNumber,
+          niContributionsAndCreditsSuccessResponseOptionalsExcluded
+        )
+
+        successResponseEsaJsonSchema.validateAndGetErrors(
+          Json.toJson(successResponse)
+        ) shouldBe Nil
+
+      }
     }
   }
 
@@ -1124,45 +1383,55 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         Json.toJson(benefitEligibilityInfoSuccessResponseJsa) shouldBe Json.parse(expectedJson)
       }
+      "should match openapi schema (all optionals included)" in {
+
+        val applicationOpenApiSpec =
+          "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+        def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+          applicationOpenApiSpec,
+          SpecVersion.VersionFlag.V7,
+          Some("JSASuccessResponse"),
+          metaSchemaValidation = Some(Valid(()))
+        )
+
+        val successResponse = BenefitEligibilityInfoSuccessResponseJsa(
+          nationalInsuranceNumber,
+          niContributionsAndCreditsSuccessResponse
+        )
+
+        successResponseEsaJsonSchema.validateAndGetErrors(
+          Json.toJson(successResponse)
+        ) shouldBe Nil
+
+      }
+      "should match openapi schema (all optionals excluded)" in {
+
+        val applicationOpenApiSpec =
+          "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+        def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+          applicationOpenApiSpec,
+          SpecVersion.VersionFlag.V7,
+          Some("JSASuccessResponse"),
+          metaSchemaValidation = Some(Valid(()))
+        )
+
+        val successResponse = BenefitEligibilityInfoSuccessResponseJsa(
+          nationalInsuranceNumber,
+          niContributionsAndCreditsSuccessResponseOptionalsExcluded
+        )
+
+        successResponseEsaJsonSchema.validateAndGetErrors(
+          Json.toJson(successResponse)
+        ) shouldBe Nil
+
+      }
     }
   }
 
   "BenefitEligibilityInfoErrorResponse" - {
     ".from" - {
-      "should convert an EligibilityCheckDataResult into a BenefitEligibilityInfoErrorResponse (All success results) " in {
-
-        case class DummySuccessResponse(i: Int) extends NpsSuccessfulApiResponse
-        val dummySuccessResponse: DummySuccessResponse = DummySuccessResponse(2)
-        val randomApiName: ApiName                     = Random.shuffle(ApiName.values.toList).head
-        val benefitTypes                               = Table("benefitTypes", BenefitType.values.toList: _*)
-
-        val allSuccessResults: List[ApiResult] = List(
-          NpsApiResult.SuccessResult[ErrorReport, DummySuccessResponse](randomApiName, dummySuccessResponse),
-          NpsApiResult.SuccessResult[ErrorReport, DummySuccessResponse](randomApiName, dummySuccessResponse),
-          NpsApiResult.SuccessResult[ErrorReport, DummySuccessResponse](randomApiName, dummySuccessResponse)
-        )
-
-        val mockEligibilityCheckDataResult = mock[EligibilityCheckDataResult]
-        forAll(benefitTypes) { benefitType =>
-          (() => mockEligibilityCheckDataResult.benefitType).expects().returning(benefitType)
-          (() => mockEligibilityCheckDataResult.allResults).expects().returning(allSuccessResults)
-          BenefitEligibilityInfoErrorResponse.from(
-            nationalInsuranceNumber,
-            mockEligibilityCheckDataResult
-          ) shouldBe BenefitEligibilityInfoErrorResponse(
-            overallResultStatus = Success,
-            nationalInsuranceNumber = nationalInsuranceNumber,
-            benefitType = benefitType,
-            summary = OverallResultSummary(totalCalls = 3, successful = 3, failed = 0),
-            downStreams = List(
-              SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None),
-              SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None),
-              SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None)
-            )
-          )
-        }
-      }
-
       "should convert an EligibilityCheckDataResult into a BenefitEligibilityInfoErrorResponse (Mixed results) " in {
 
         case class DummySuccessResponse(i: Int) extends NpsSuccessfulApiResponse
@@ -1191,7 +1460,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             mockEligibilityCheckDataResult
           ) shouldBe
             BenefitEligibilityInfoErrorResponse(
-              overallResultStatus = Partial,
+              status = Partial,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1270,7 +1539,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             nationalInsuranceNumber,
             mockEligibilityCheckDataResult
           ) shouldBe BenefitEligibilityInfoErrorResponse(
-            overallResultStatus = Failure,
+            status = Failure,
             nationalInsuranceNumber = nationalInsuranceNumber,
             benefitType = benefitType,
             summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3),
@@ -1294,6 +1563,95 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         }
       }
+
+    }
+    "should serialize to json correctly" in {
+
+      val benefitTypes = Table("benefitTypes", BenefitType.values.toList: _*)
+
+      forAll(benefitTypes) { benefitType =>
+        val errorResponse: BenefitEligibilityInfoErrorResponse = BenefitEligibilityInfoErrorResponse(
+          status = Partial,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          benefitType = benefitType,
+          summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
+          downStreams = List(
+            SanitizedApiResult(apiName = Class2MAReceipts, status = NpsApiResponseStatus.Success, error = None),
+            SanitizedApiResult(
+              apiName = Liabilities,
+              status = NpsApiResponseStatus.Failure,
+              error = Some(UnprocessableEntity)
+            ),
+            SanitizedApiResult(apiName = NiContributionAndCredits, status = NpsApiResponseStatus.Success, error = None)
+          )
+        )
+
+        val expectedJson =
+          s"""{
+             |   "status":"PARTIAL FAILURE",
+             |   "nationalInsuranceNumber":"AB123456C",
+             |   "benefitType": "${benefitType.entryName}",
+             |   "summary":{
+             |      "totalCalls":3,
+             |      "successful":2,
+             |      "failed":1
+             |   },
+             |   "downStreams":[
+             |      {
+             |         "apiName":"Class2 MA Receipts",
+             |         "status":"SUCCESS"
+             |      },
+             |      {
+             |         "apiName":"Liabilities",
+             |         "status":"FAILURE",
+             |         "error":{
+             |            "code":"UNPROCESSABLE_ENTITY",
+             |            "message":"downstream could not process data in request",
+             |            "downstreamStatus":422
+             |         }
+             |      },
+             |      {
+             |         "apiName":"NI Contributions and credits",
+             |         "status":"SUCCESS"
+             |      }
+             |   ]
+             |}""".stripMargin
+
+        Json.toJson(errorResponse) shouldBe Json.parse(expectedJson)
+      }
+    }
+
+    "should match openapi schema" in {
+
+      val applicationOpenApiSpec =
+        "resources/public/api/conf/1.0/national_insurance_credits_and_contributions_interface.yaml"
+
+      def application502JsonSchema: SimpleJsonSchema = SimpleJsonSchema(
+        applicationOpenApiSpec,
+        SpecVersion.VersionFlag.V7,
+        Some("FailureResponse"),
+        metaSchemaValidation = Some(Valid(()))
+      )
+
+      val errorResponse: BenefitEligibilityInfoErrorResponse = BenefitEligibilityInfoErrorResponse(
+        status = Partial,
+        nationalInsuranceNumber = nationalInsuranceNumber,
+        benefitType = MA,
+        summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
+        downStreams = List(
+          SanitizedApiResult(apiName = Class2MAReceipts, status = NpsApiResponseStatus.Success, error = None),
+          SanitizedApiResult(
+            apiName = Liabilities,
+            status = NpsApiResponseStatus.Failure,
+            error = Some(UnprocessableEntity)
+          ),
+          SanitizedApiResult(apiName = NiContributionAndCredits, status = NpsApiResponseStatus.Success, error = None)
+        )
+      )
+
+      application502JsonSchema.validateAndGetErrors(
+        Json.toJson(errorResponse)
+      ) shouldBe Nil
 
     }
   }
@@ -1324,7 +1682,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val mockEligibilityCheckDataResultBsp  = mock[EligibilityCheckDataResultBSP]
 
         (() => mockEligibilityCheckDataResultMa.benefitType).expects().returning(BenefitType.MA)
-        (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(mixedResults)
+        (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(mixedResults).twice()
 
         (() => mockEligibilityCheckDataResultEsa.benefitType).expects().returning(BenefitType.ESA)
         (() => mockEligibilityCheckDataResultEsa.allResults).expects().returning(mixedResults)
@@ -1352,7 +1710,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             mockResult
           ) shouldBe Left(
             BenefitEligibilityInfoErrorResponse(
-              overallResultStatus = Partial,
+              status = Partial,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1429,7 +1787,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val mockEligibilityCheckDataResultBsp  = mock[EligibilityCheckDataResultBSP]
 
         (() => mockEligibilityCheckDataResultMa.benefitType).expects().returning(BenefitType.MA)
-        (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(allFailureResults)
+        (() => mockEligibilityCheckDataResultMa.allResults).expects().returning(allFailureResults).twice()
 
         (() => mockEligibilityCheckDataResultEsa.benefitType).expects().returning(BenefitType.ESA)
         (() => mockEligibilityCheckDataResultEsa.allResults).expects().returning(allFailureResults)
@@ -1457,7 +1815,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             mockResult
           ) shouldBe Left(
             BenefitEligibilityInfoErrorResponse(
-              overallResultStatus = Failure,
+              status = Failure,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3),
@@ -1489,9 +1847,11 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             Class2MAReceipts,
             class2MAReceiptsSuccessResponse
           ),
-          NpsApiResult.SuccessResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](
-            Liabilities,
-            liabilitySummaryDetailsSuccessResponse
+          List(
+            NpsApiResult.SuccessResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](
+              Liabilities,
+              liabilitySummaryDetailsSuccessResponse
+            )
           ),
           NpsApiResult.SuccessResult[ErrorReport, NiContributionsAndCreditsSuccessResponse](
             NiContributionAndCredits,
@@ -1507,7 +1867,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             BenefitEligibilityInfoSuccessResponseMa(
               nationalInsuranceNumber,
               filteredClass2MaReceipts,
-              filteredLiabilitySummaryDetails,
+              List(filteredLiabilitySummaryDetails),
               niContributionsAndCreditsSuccessResponse
             )
           )

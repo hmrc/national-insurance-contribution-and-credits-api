@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.inbound
+package uk.gov.hmrc.app.benefitEligibility.integration.inbound.response
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -33,15 +33,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDeta
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.{
-  MarriageDetailsSuccessResponse,
-  MarriageEndDate,
-  MarriageStartDate,
-  ReconciliationDate,
-  SeparationDate,
-  SpouseForename,
-  SpouseSurname
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageEndDateStatus.Verified
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStartDateStatus
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
@@ -69,7 +61,7 @@ class FilteredMarriageDetailsSpec extends AnyFreeSpec with Matchers {
               spouseForename = Some(SpouseForename("Skywalker")),
               spouseSurname = Some(SpouseSurname("Luke")),
               separationDate = Some(SeparationDate(LocalDate.parse("2002-01-01"))),
-              reconciliationDate = Some(ReconciliationDate(LocalDate.parse("2003-01-01")))
+              reconciliationDate = Some(MarriageDetailsReconciliationDate(LocalDate.parse("2003-01-01")))
             )
         )
       ),

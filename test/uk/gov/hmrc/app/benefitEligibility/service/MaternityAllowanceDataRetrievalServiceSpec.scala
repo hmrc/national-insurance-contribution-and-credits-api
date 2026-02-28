@@ -23,11 +23,8 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnprocessableEntity
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  Class2MaReceiptsRequestParams,
-  ContributionsAndCreditsRequestParams,
-  MAEligibilityCheckDataRequest
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
@@ -84,9 +81,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
-      .LiabilitiesRequestParams(Abroad, None, None, None, None, None),
-    Class2MaReceiptsRequestParams(None, None, None)
+    LiabilitiesRequestParams(List(Abroad), None, None, None)
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -193,12 +188,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
             _: BenefitType,
-            _: Identifier,
-            _: Option[Boolean],
-            _: Option[ReceiptDate],
-            _: Option[MaternityAllowanceSortType]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, None, None, None, *)
+          .expects(BenefitType.MA, identifier, *)
           .returning(
             EitherT.rightT(class2MAReceiptsResult)
           )
@@ -208,13 +200,11 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
-            _: Option[LiabilitiesOccurrenceNumber],
-            _: Option[LiabilitySearchCategoryHyphenated],
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, None, None, *)
+          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
           .returning(
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
@@ -225,7 +215,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
-            liabilitySummaryDetailsResult,
+            List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult
           )
         )
@@ -258,12 +248,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
             _: BenefitType,
-            _: Identifier,
-            _: Option[Boolean],
-            _: Option[ReceiptDate],
-            _: Option[MaternityAllowanceSortType]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, None, None, None, *)
+          .expects(BenefitType.MA, identifier, *)
           .returning(
             EitherT.rightT(class2MAReceiptsResult)
           )
@@ -273,13 +260,11 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
-            _: Option[LiabilitiesOccurrenceNumber],
-            _: Option[LiabilitySearchCategoryHyphenated],
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, None, None, *)
+          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
           .returning(
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
@@ -290,7 +275,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
-            liabilitySummaryDetailsResult,
+            List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult
           )
         )
@@ -323,12 +308,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
             _: BenefitType,
-            _: Identifier,
-            _: Option[Boolean],
-            _: Option[ReceiptDate],
-            _: Option[MaternityAllowanceSortType]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, None, None, None, *)
+          .expects(BenefitType.MA, identifier, *)
           .returning(
             EitherT.rightT(class2MAReceiptsResult)
           )
@@ -338,13 +320,11 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
-            _: Option[LiabilitiesOccurrenceNumber],
-            _: Option[LiabilitySearchCategoryHyphenated],
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, None, None, *)
+          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
           .returning(
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
@@ -355,7 +335,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
-            liabilitySummaryDetailsResult,
+            List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult
           )
         )
@@ -378,12 +358,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
             _: BenefitType,
-            _: Identifier,
-            _: Option[Boolean],
-            _: Option[ReceiptDate],
-            _: Option[MaternityAllowanceSortType]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, None, None, None, *)
+          .expects(BenefitType.MA, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -393,13 +370,11 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
-            _: Option[LiabilitiesOccurrenceNumber],
-            _: Option[LiabilitySearchCategoryHyphenated],
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, None, None, *)
+          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -424,12 +399,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
             _: BenefitType,
-            _: Identifier,
-            _: Option[Boolean],
-            _: Option[ReceiptDate],
-            _: Option[MaternityAllowanceSortType]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, None, None, None, *)
+          .expects(BenefitType.MA, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -439,13 +411,11 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
-            _: Option[LiabilitiesOccurrenceNumber],
-            _: Option[LiabilitySearchCategoryHyphenated],
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
           )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, None, None, *)
+          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )

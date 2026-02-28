@@ -47,19 +47,16 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
   def fetchBenefitCalculationDetails(
       benefitType: BenefitType,
       identifier: Identifier,
-      sequenceNumber: Option[AssociatedCalculationSequenceNumber],
       longTermBenefitType: Option[LongTermBenefitType],
       pensionProcessingArea: Option[PensionProcessingArea]
   )(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, LongTermBenefitCalculationDetailsResult] = {
 
-    def seqNo: Option[String]             = sequenceNumber.map(s => s.value.toString)
     def typeFilter: Option[String]        = longTermBenefitType.map(t => t.entryName)
     def pensionProcessing: Option[String] = pensionProcessingArea.map(p => p.entryName)
 
     val options = List(
-      RequestOption("seqNo", seqNo),
       RequestOption("type", typeFilter),
       RequestOption("pensionProcessingArea", pensionProcessing)
     )

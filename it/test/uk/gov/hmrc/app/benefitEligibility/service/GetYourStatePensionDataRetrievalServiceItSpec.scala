@@ -50,11 +50,11 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.{
   ContributionsAndCreditsRequestParams,
-  GYSPEligibilityCheckDataRequest,
   LongTermBenefitCalculationRequestParams
 }
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -587,8 +587,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        LongTermBenefitCalculationRequestParams(None, None),
-        None
+        Some(LongTermBenefitCalculationRequestParams(None, None))
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {

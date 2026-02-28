@@ -144,7 +144,15 @@ class LiabilitySummaryDetailsConnectorItSpec
                 )
               )
             ),
-            callback = None
+            callback = Some(
+              Callback(
+                Some(
+                  CallbackUrl(
+                    s"http://localhost:${server.port}/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"
+                  )
+                )
+              )
+            )
           )
 
           val successResponseJsonWithCallback =
@@ -155,52 +163,28 @@ class LiabilitySummaryDetailsConnectorItSpec
                |   "type": "ESA (S2P)",
                |   "occurrenceNumber": 2,
                |   "startDate": "2020-10-01"
+               | },
+               | {
+               |   "identifier": "AB123456C",
+               |   "type": "FULL TIME EDUCATION",
+               |   "occurrenceNumber": 3,
+               |   "startDate": "2021-11-03"
                | }
                |],
                |"callback": {"callbackURL": "http://localhost:${server.port}/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"}
                |}""".stripMargin
 
-          val successResponseJsonWithoutCallback =
-            """{
-              |"liabilityDetailsList": [
-              | {
-              |   "identifier": "AB123456C",
-              |   "type": "FULL TIME EDUCATION",
-              |   "occurrenceNumber": 3,
-              |   "startDate": "2021-11-03"
-              | }
-              |]
-              |}""".stripMargin
-
           val responseBodyWithCallback = Json.parse(successResponseJsonWithCallback).toString()
 
-          val responseBodyWithoutCallback = Json.parse(successResponseJsonWithoutCallback).toString()
-
-          val testPath1 = "/person/AB123456C/liability-summary/ABROAD"
-          val testPath2 = "/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"
+          val testPath = "/person/AB123456C/liability-summary/ABROAD"
 
           server.stubFor(
-            get(urlEqualTo(testPath1))
-              .inScenario("Pagination")
-              .whenScenarioStateIs("Started")
-              .willSetStateTo("PAGINATION_COMPLETE")
+            get(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
                   .withHeader("Content-Type", "application/json")
                   .withBody(responseBodyWithCallback)
-              )
-          )
-
-          server.stubFor(
-            get(urlEqualTo(testPath2))
-              .inScenario("Pagination")
-              .whenScenarioStateIs("PAGINATION_COMPLETE")
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(responseBodyWithoutCallback)
               )
           )
 
@@ -210,8 +194,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -222,13 +204,8 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(SuccessResult(Liabilities, successResponse))
 
           server.verify(
-            getRequestedFor(urlEqualTo(testPath1))
+            getRequestedFor(urlEqualTo(testPath))
           )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(testPath2))
-          )
-
         }
       }
 
@@ -270,8 +247,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -333,8 +308,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -384,8 +357,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -427,8 +398,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -480,8 +449,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -540,8 +507,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -596,8 +561,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -638,8 +601,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                   MA,
                   identifier,
                   liabilitySearchCategoryHyphenated,
-                  occurrenceNumber,
-                  typeFilter,
                   earliestStartDate,
                   liabilityStartDate,
                   liabilityEndDate
@@ -676,8 +637,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate
@@ -707,8 +666,6 @@ class LiabilitySummaryDetailsConnectorItSpec
                 MA,
                 identifier,
                 liabilitySearchCategoryHyphenated,
-                occurrenceNumber,
-                typeFilter,
                 earliestStartDate,
                 liabilityStartDate,
                 liabilityEndDate

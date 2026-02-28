@@ -110,7 +110,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           result shouldBe Right(SuccessResult(Class2MAReceipts, successResponse))
           server.verify(
@@ -153,7 +153,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
@@ -204,7 +204,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
@@ -243,7 +243,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -274,7 +274,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -315,7 +315,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
           val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -344,7 +344,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -388,7 +388,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
@@ -421,7 +421,7 @@ class Class2MAReceiptsConnectorItSpec
             )
 
             val result =
-              connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+              connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
             result shouldBe Right(
               FailureResult(
@@ -447,7 +447,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ParsingError]
@@ -470,7 +470,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[ValidationError]
@@ -489,7 +489,7 @@ class Class2MAReceiptsConnectorItSpec
           )
 
           val result =
-            connector.fetchClass2MAReceipts(MA, identifier, archived, receiptDate, sortType).value.futureValue
+            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[NpsClientError]

@@ -31,11 +31,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  ContributionsAndCreditsRequestParams,
-  GYSPEligibilityCheckDataRequest,
-  LongTermBenefitCalculationRequestParams
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -144,8 +141,12 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    LongTermBenefitCalculationRequestParams(None, None),
-    None
+    Some(
+      LongTermBenefitCalculationRequestParams(
+        Some(LongTermBenefitType.WidowsBenefit),
+        Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing)
+      )
+    )
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -643,12 +644,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -657,11 +655,16 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchBenefitCalculationDetails(
             _: BenefitType,
             _: Identifier,
-            _: Option[AssociatedCalculationSequenceNumber],
             _: Option[LongTermBenefitType],
             _: Option[PensionProcessingArea]
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(
+            BenefitType.GYSP,
+            identifier,
+            Some(LongTermBenefitType.WidowsBenefit),
+            Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing),
+            *
+          )
           .returning(
             EitherT.rightT(longTermBenefitCalculationDetailsResult)
           )
@@ -681,12 +684,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockSchemeMembershipDetailsConnector
           .fetchSchemeMembershipDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[SequenceNumber],
-            _: Option[TransferSequenceNumber],
-            _: Option[SchemeMembershipDetailsOccurrenceNumber]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(schemeMembershipDetailsResult)
           )
@@ -771,12 +771,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -785,11 +782,16 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchBenefitCalculationDetails(
             _: BenefitType,
             _: Identifier,
-            _: Option[AssociatedCalculationSequenceNumber],
             _: Option[LongTermBenefitType],
             _: Option[PensionProcessingArea]
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(
+            BenefitType.GYSP,
+            identifier,
+            Some(LongTermBenefitType.WidowsBenefit),
+            Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing),
+            *
+          )
           .returning(
             EitherT.rightT(longTermBenefitCalculationDetailsResult)
           )
@@ -797,12 +799,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockSchemeMembershipDetailsConnector
           .fetchSchemeMembershipDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[SequenceNumber],
-            _: Option[TransferSequenceNumber],
-            _: Option[SchemeMembershipDetailsOccurrenceNumber]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(schemeMembershipDetailsResult)
           )
@@ -873,12 +872,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -887,11 +883,16 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchBenefitCalculationDetails(
             _: BenefitType,
             _: Identifier,
-            _: Option[AssociatedCalculationSequenceNumber],
             _: Option[LongTermBenefitType],
             _: Option[PensionProcessingArea]
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(
+            BenefitType.GYSP,
+            identifier,
+            Some(LongTermBenefitType.WidowsBenefit),
+            Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing),
+            *
+          )
           .returning(
             EitherT.rightT(longTermBenefitCalculationDetailsResult)
           )
@@ -899,12 +900,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockSchemeMembershipDetailsConnector
           .fetchSchemeMembershipDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[SequenceNumber],
-            _: Option[TransferSequenceNumber],
-            _: Option[SchemeMembershipDetailsOccurrenceNumber]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(schemeMembershipDetailsResult)
           )
@@ -977,12 +975,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -991,11 +986,16 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchBenefitCalculationDetails(
             _: BenefitType,
             _: Identifier,
-            _: Option[AssociatedCalculationSequenceNumber],
             _: Option[LongTermBenefitType],
             _: Option[PensionProcessingArea]
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(
+            BenefitType.GYSP,
+            identifier,
+            Some(LongTermBenefitType.WidowsBenefit),
+            Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing),
+            *
+          )
           .returning(
             EitherT.rightT(longTermBenefitCalculationDetailsResult)
           )
@@ -1003,12 +1003,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockSchemeMembershipDetailsConnector
           .fetchSchemeMembershipDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[SequenceNumber],
-            _: Option[TransferSequenceNumber],
-            _: Option[SchemeMembershipDetailsOccurrenceNumber]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -1039,12 +1036,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[StartYear],
-            _: Option[FilterLatest],
-            _: Option[Int]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -1053,11 +1047,16 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchBenefitCalculationDetails(
             _: BenefitType,
             _: Identifier,
-            _: Option[AssociatedCalculationSequenceNumber],
             _: Option[LongTermBenefitType],
             _: Option[PensionProcessingArea]
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(
+            BenefitType.GYSP,
+            identifier,
+            Some(LongTermBenefitType.WidowsBenefit),
+            Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing),
+            *
+          )
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -1065,12 +1064,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         (mockSchemeMembershipDetailsConnector
           .fetchSchemeMembershipDetails(
             _: BenefitType,
-            _: Identifier,
-            _: Option[SequenceNumber],
-            _: Option[TransferSequenceNumber],
-            _: Option[SchemeMembershipDetailsOccurrenceNumber]
+            _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *, *, *, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )

@@ -137,10 +137,13 @@ object MarriageDetailsSuccess {
     implicit val separationDateReads: Format[SeparationDate] = Json.valueFormat[SeparationDate]
   }
 
-  case class ReconciliationDate(value: LocalDate) extends AnyVal
+  case class MarriageDetailsReconciliationDate(value: LocalDate) extends AnyVal
 
-  object ReconciliationDate {
-    implicit val reconciliationDateReads: Format[ReconciliationDate] = Json.valueFormat[ReconciliationDate]
+  object MarriageDetailsReconciliationDate {
+
+    implicit val reconciliationDateReads: Format[MarriageDetailsReconciliationDate] =
+      Json.valueFormat[MarriageDetailsReconciliationDate]
+
   }
 
   case class MarriageDetailsListElement(
@@ -154,7 +157,7 @@ object MarriageDetailsSuccess {
       spouseForename: Option[SpouseForename],
       spouseSurname: Option[SpouseSurname],
       separationDate: Option[SeparationDate],
-      reconciliationDate: Option[ReconciliationDate]
+      reconciliationDate: Option[MarriageDetailsReconciliationDate]
   )
 
   object MarriageDetailsListElement {

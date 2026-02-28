@@ -14,52 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.app.benefitEligibility.integration.inbound
+package uk.gov.hmrc.app.benefitEligibility.integration.inbound.response
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{
-  FilteredClass2MaReceipts,
-  FilteredLiabilitySummaryDetailItem,
-  FilteredLiabilitySummaryDetails,
-  FilteredSchemeMembershipDetails,
-  FilteredSchemeMembershipDetailsItem
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.{
-  AwardAmount,
-  CasepaperReferenceNumber,
-  EndDate,
-  HomeResponsibilitiesProtectionBenefitReference,
-  HomeResponsibilitiesProtectionRate,
-  HomeResponsibilityProtectionCalculationYear,
-  LiabilityDetailsList,
-  LiabilitySummaryDetailsSuccessResponse,
-  OccurrenceNumber,
-  OfficeDetails,
-  OfficeLocationDecode,
-  OfficeLocationValue,
-  ResourceGroupIdentifier,
-  StartDate
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.common._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums._
 
 import java.time.LocalDate
 

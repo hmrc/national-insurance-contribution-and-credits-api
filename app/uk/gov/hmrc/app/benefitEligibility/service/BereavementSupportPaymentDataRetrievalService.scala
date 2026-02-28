@@ -52,10 +52,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
       ),
       marriageDetailsConnector.fetchMarriageDetails(
         eligibilityCheckDataRequest.benefitType,
-        eligibilityCheckDataRequest.nationalInsuranceNumber,
-        eligibilityCheckDataRequest.marriageDetails.flatMap(_.searchStartYear),
-        eligibilityCheckDataRequest.marriageDetails.flatMap(_.latest),
-        None
+        eligibilityCheckDataRequest.nationalInsuranceNumber
       )
     ).parTupled
       .map { case (contributionsAndCreditResult, marriageDetailsResult) =>

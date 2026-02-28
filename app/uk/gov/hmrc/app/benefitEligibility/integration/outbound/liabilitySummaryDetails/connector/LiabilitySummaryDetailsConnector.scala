@@ -69,18 +69,12 @@ class LiabilitySummaryDetailsConnector @Inject() (
       benefitType: BenefitType,
       identifier: Identifier,
       liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated,
-      liabilityOccurrenceNumber: Option[LiabilitiesOccurrenceNumber],
-      liabilityType: Option[LiabilitySearchCategoryHyphenated],
       earliestLiabilityStartDate: Option[LocalDate],
       startDate: Option[LocalDate],
       endDate: Option[LocalDate]
   )(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, LiabilityResult] = {
-
-    def occurrenceNumber: Option[String] = liabilityOccurrenceNumber.map(o => o.toString)
-
-    def typeFilter: Option[String] = liabilityType.map(t => t.entryName)
 
     def earliestStartDate: Option[String] = earliestLiabilityStartDate.map(d => d.toString)
 
@@ -89,8 +83,6 @@ class LiabilitySummaryDetailsConnector @Inject() (
     def liabilityEndDate: Option[String] = endDate.map(d => d.toString)
 
     val options = List(
-      RequestOption("occurrenceNumber", occurrenceNumber),
-      RequestOption("type", typeFilter),
       RequestOption("earliestStartDate", earliestStartDate),
       RequestOption("liabilityStartDate", liabilityStartDate),
       RequestOption("liabilityEndDate", liabilityEndDate)
@@ -117,20 +109,7 @@ class LiabilitySummaryDetailsConnector @Inject() (
           case OK =>
             attemptStrictParse[LiabilitySummaryDetailsSuccessResponse](benefitType, response) match {
               case Left(error) => EitherT.leftT[Future, LiabilityResult](error)
-              case Right(resp) =>
-                resp.callback.flatMap(_.callbackURL) match {
-                  case Some(callback) => fetchData(benefitType, callback.value, acc :+ resp)
-                  case None =>
-                    val successResponses = (acc :+ resp).flatMap(_.liabilityDetailsList).flatten
-                    EitherT.pure[Future, BenefitEligibilityError](
-                      toSuccessResult(
-                        LiabilitySummaryDetailsSuccessResponse(
-                          liabilityDetailsList = if (successResponses.nonEmpty) Some(successResponses) else None,
-                          callback = None
-                        )
-                      )
-                    )
-                }
+              case Right(resp) => EitherT.rightT[Future, BenefitEligibilityError](toSuccessResult(resp))
             }
           case code => handleErrors(code, response)
         }

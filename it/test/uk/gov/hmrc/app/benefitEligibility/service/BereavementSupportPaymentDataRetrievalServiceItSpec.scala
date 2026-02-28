@@ -50,10 +50,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  BSPEligibilityCheckDataRequest,
-  ContributionsAndCreditsRequestParams
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.BSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -143,8 +141,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)
-        ),
-        None
+        )
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {

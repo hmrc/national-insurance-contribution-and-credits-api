@@ -28,7 +28,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.npsNormalizedErrorWrites
 import scala.collection.immutable
 
 trait BenefitEligibilityInfoSuccessResponse
@@ -92,7 +92,7 @@ final case class BenefitEligibilityInfoSuccessResponseMa private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     class2MAReceiptsResult: FilteredClass2MaReceipts,
-    liabilitySummaryDetailsResult: FilteredLiabilitySummaryDetails,
+    liabilitySummaryDetailsResult: List[FilteredLiabilitySummaryDetails],
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
@@ -105,7 +105,7 @@ object BenefitEligibilityInfoSuccessResponseMa {
   def apply(
       nationalInsuranceNumber: Identifier,
       class2MAReceiptsResult: FilteredClass2MaReceipts,
-      liabilitySummaryDetailsResult: FilteredLiabilitySummaryDetails,
+      liabilitySummaryDetailsResult: List[FilteredLiabilitySummaryDetails],
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
   ) = new BenefitEligibilityInfoSuccessResponseMa(
     MA,
@@ -120,17 +120,18 @@ object BenefitEligibilityInfoSuccessResponseMa {
       result: EligibilityCheckDataResultMA
   ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseMa] =
 
-    (result.liabilityResult, result.class2MaReceiptsResult, result.contributionCreditResult) match {
-      case (NpsApiResult.SuccessResult(_, l), NpsApiResult.SuccessResult(_, c2), NpsApiResult.SuccessResult(_, co)) =>
-        Right(
-          BenefitEligibilityInfoSuccessResponseMa(
-            nationalInsuranceNumber = nationalInsuranceNumber,
-            niContributionsAndCreditsResult = co,
-            class2MAReceiptsResult = FilteredClass2MaReceipts.from(c2),
-            liabilitySummaryDetailsResult = FilteredLiabilitySummaryDetails.from(l)
-          )
+    if (result.allResults.exists(_.isFailure)) {
+      Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    } else {
+      Right(
+        BenefitEligibilityInfoSuccessResponseMa(
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          niContributionsAndCreditsResult = result.contributionCreditResult.getSuccess.get,
+          class2MAReceiptsResult = FilteredClass2MaReceipts.from(result.class2MaReceiptsResult.getSuccess.get),
+          liabilitySummaryDetailsResult =
+            result.liabilityResult.map(r => FilteredLiabilitySummaryDetails.from(r.getSuccess.get))
         )
-      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+      )
     }
 
 }
@@ -346,7 +347,7 @@ object SanitizedApiResult {
 }
 
 case class BenefitEligibilityInfoErrorResponse(
-    overallResultStatus: OverallResultStatus,
+    status: OverallResultStatus,
     nationalInsuranceNumber: Identifier,
     benefitType: BenefitType,
     summary: OverallResultSummary,
@@ -367,7 +368,7 @@ object BenefitEligibilityInfoErrorResponse {
 
     eligibilityCheckDataResult
       .into[BenefitEligibilityInfoErrorResponse]
-      .withFieldComputed(_.overallResultStatus, _ => OverallResultStatus.fromApiResults(allResults))
+      .withFieldComputed(_.status, _ => OverallResultStatus.fromApiResults(allResults))
       .withFieldConst(_.nationalInsuranceNumber, nationalInsuranceNumber)
       .withFieldComputed(_.benefitType, _.benefitType)
       .withFieldComputed(_.summary, _ => OverallResultSummary.from(allResults))
