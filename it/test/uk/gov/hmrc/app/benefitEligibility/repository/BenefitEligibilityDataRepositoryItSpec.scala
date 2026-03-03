@@ -55,8 +55,8 @@ class BenefitEligibilityDataRepositoryItSpec
     ".getItem" - {
       "should successfully return an item by id" in {
 
-        val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidOne: UUID   = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuidTwo: UUID   = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
         val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
 
         val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
@@ -89,12 +89,12 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should return None when a nonexistent id is parsed" in {
 
-        val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidOne: UUID   = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuidTwo: UUID   = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
         val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
 
-        val pageListForIdOne = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
-        val pageListForIdTwo = List(Pages(Liabilities, "SomeCallBackURLTwo"))
+        val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
+        val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
         val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
 
         val pageTasksList = List(
@@ -120,15 +120,16 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTasks = Table("page_task", pageTasksList: _*)
 
         forAll(pageTasks)(pageTaskList =>
-          repository.getItem(UUID.fromString("ca4eab1b-55fa-4d6a-8aa4-7eb3debc6db7")).futureValue mustBe None)
+          repository.getItem(UUID.fromString("ca4eab1b-55fa-4d6a-8aa4-7eb3debc6db7")).futureValue mustBe None
+        )
       }
     }
 
     ".delete" - {
       "should successfully delete an item by ID" in {
 
-        val uuidOne: UUID = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val uuidTwo: UUID = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidOne: UUID   = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuidTwo: UUID   = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
         val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
 
         val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))

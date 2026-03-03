@@ -64,28 +64,10 @@ class SchemeMembershipDetailsConnector @Inject() (
 
   def fetchSchemeMembershipDetails(
       benefitType: BenefitType,
-      nationalInsuranceNumber: Identifier,
-      sequenceNumber: Option[SequenceNumber],
-      transferSequenceNumber: Option[TransferSequenceNumber],
-      occurrenceNumber: Option[SchemeMembershipDetailsOccurrenceNumber]
+      nationalInsuranceNumber: Identifier
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] = {
 
-    def sequenceNumberFilter: Option[String]         = sequenceNumber.map(sn => sn.value.toString)
-    def transferSequenceNumberFilter: Option[String] = transferSequenceNumber.map(tsn => tsn.value.toString)
-    def occurrenceNumberFilter: Option[String]       = occurrenceNumber.map(on => on.value.toString)
-
-    val options = List(
-      RequestOption("seqNo", sequenceNumberFilter),
-      RequestOption("transferSeqNo", transferSequenceNumberFilter),
-      RequestOption("occurrenceNo", occurrenceNumberFilter)
-    )
-
-    val path =
-      RequestBuilder.buildPath(
-        s"${appConfig.hipBaseUrl}/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details",
-        options
-      )
-
+    val path = s"${appConfig.hipBaseUrl}/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
     fetchData(benefitType, path, List())
   }
 
@@ -102,7 +84,7 @@ class SchemeMembershipDetailsConnector @Inject() (
           case OK =>
             attemptStrictParse[SchemeMembershipDetailsSuccessResponse](benefitType, response) match {
               case Left(error) => EitherT.leftT[Future, SchemeMembershipDetailsResult](error)
-              case Right(resp) => EitherT.pure[Future, BenefitEligibilityError](toSuccessResult(resp))
+              case Right(resp) => EitherT.rightT[Future, BenefitEligibilityError](toSuccessResult(resp))
             }
           case code => handleErrors(code, response)
         }

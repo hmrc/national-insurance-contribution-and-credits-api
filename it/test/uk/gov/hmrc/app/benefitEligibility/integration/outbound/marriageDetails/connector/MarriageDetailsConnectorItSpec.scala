@@ -93,7 +93,7 @@ class MarriageDetailsConnectorItSpec
             spouseForename = Some(SpouseForename("Jordan")),
             spouseSurname = Some(SpouseSurname("Kurt")),
             separationDate = Some(SeparationDate(LocalDate.parse("2014-01-01"))),
-            reconciliationDate = Some(ReconciliationDate(LocalDate.parse("2014-12-01")))
+            reconciliationDate = Some(MarriageDetailsReconciliationDate(LocalDate.parse("2014-12-01")))
           )
         )
       ),
@@ -160,7 +160,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -208,7 +208,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -262,7 +262,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -308,7 +308,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -349,7 +349,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -394,7 +394,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -452,7 +452,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -507,7 +507,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -540,7 +540,7 @@ class MarriageDetailsConnectorItSpec
 
             val result =
               connector
-                .fetchMarriageDetails(MA, identifier, None, None, None)
+                .fetchMarriageDetails(MA, identifier)
                 .value
                 .futureValue
 
@@ -569,7 +569,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -600,7 +600,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 
@@ -622,7 +622,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(MA, identifier, None, None, None)
+              .fetchMarriageDetails(MA, identifier)
               .value
               .futureValue
 

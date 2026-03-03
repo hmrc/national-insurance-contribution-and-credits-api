@@ -20,6 +20,7 @@ import play.api.libs.json.{Json, OWrites, Writes}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.common.{MaternityAllowanceSortType, ReceiptDate}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
 
 import java.time.LocalDate
 
@@ -46,11 +47,6 @@ object TestFormat {
 
   implicit val maternityAllowanceSortTypeWrites: Writes[MaternityAllowanceSortType] =
     Json.writes[MaternityAllowanceSortType]
-
-  implicit val class2MaReceiptsWrites: Writes[Class2MaReceiptsRequestParams] =
-    Json.writes[Class2MaReceiptsRequestParams]
-
-  implicit val marriageDetailsWrites: Writes[MarriageDetailsRequestParams] = Json.writes[MarriageDetailsRequestParams]
 
   implicit val longTermBenefitCalculationWrites: Writes[LongTermBenefitCalculationRequestParams] =
     Json.writes[LongTermBenefitCalculationRequestParams]

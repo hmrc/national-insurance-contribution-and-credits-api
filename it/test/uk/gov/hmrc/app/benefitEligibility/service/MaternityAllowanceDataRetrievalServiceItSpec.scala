@@ -50,11 +50,8 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
-  Class2MaReceiptsRequestParams,
-  ContributionsAndCreditsRequestParams,
-  MAEligibilityCheckDataRequest
-}
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -176,9 +173,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
-          .LiabilitiesRequestParams(Abroad, None, None, None, None, None),
-        Class2MaReceiptsRequestParams(None, None, None)
+        LiabilitiesRequestParams(List(Abroad), None, None, None)
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {
@@ -259,9 +254,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               SuccessResult(
                 ApiName.NiContributionAndCredits,
@@ -348,9 +345,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -429,9 +428,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -506,9 +507,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -572,9 +575,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -654,9 +659,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -717,9 +724,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -804,9 +813,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 ApiName.Class2MAReceipts,
                 class2MAReceiptsSuccessResponse
               ),
-              SuccessResult(
-                ApiName.Liabilities,
-                liabilitySummaryDetailsSuccessResponse
+              List(
+                SuccessResult(
+                  ApiName.Liabilities,
+                  liabilitySummaryDetailsSuccessResponse
+                )
               ),
               FailureResult(
                 ApiName.NiContributionAndCredits,
@@ -873,9 +884,11 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                   ApiName.Class2MAReceipts,
                   class2MAReceiptsSuccessResponse
                 ),
-                SuccessResult(
-                  ApiName.Liabilities,
-                  liabilitySummaryDetailsSuccessResponse
+                List(
+                  SuccessResult(
+                    ApiName.Liabilities,
+                    liabilitySummaryDetailsSuccessResponse
+                  )
                 ),
                 FailureResult(
                   ApiName.NiContributionAndCredits,

@@ -17,50 +17,69 @@
 package uk.gov.hmrc.app.benefitEligibility.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import play.api.libs.json.{JsNumber, JsObject, JsString, JsValue, Json, Writes}
 
 import scala.collection.immutable
 
-sealed abstract class NpsNormalizedError(override val entryName: String) extends EnumEntry {
-  val message: String
-  val code: Int
-}
+sealed abstract class NpsNormalizedError(val code: String, val message: String, val downstreamStatus: Int)
+    extends EnumEntry
 
 object NpsNormalizedError extends Enum[NpsNormalizedError] with PlayJsonEnum[NpsNormalizedError] {
 
   val values: immutable.IndexedSeq[NpsNormalizedError] = findValues
 
-  case object UnprocessableEntity extends NpsNormalizedError("UNPROCESSABLE_ENTITY") {
-    val message = "downstream could not process data in request"
-    val code    = 422
+  implicit val npsNormalizedErrorWrites: Writes[NpsNormalizedError] = Writes { error =>
+    JsObject(
+      Seq(
+        "code"             -> JsString(error.code),
+        "message"          -> JsString(error.message),
+        "downstreamStatus" -> JsNumber(error.downstreamStatus)
+      )
+    )
   }
 
-  case object BadRequest extends NpsNormalizedError("BAD_REQUEST") {
-    val message = "downstream received a malformed request"
-    val code    = 400
-  }
+  case object UnprocessableEntity
+      extends NpsNormalizedError(
+        code = "UNPROCESSABLE_ENTITY",
+        message = "downstream could not process data in request",
+        downstreamStatus = 422
+      )
 
-  case object AccessForbidden extends NpsNormalizedError("ACCESS_FORBIDDEN") {
-    val message = "downstream resource cannot be accessed by the calling client"
-    val code    = 403
-  }
+  case object BadRequest extends NpsNormalizedError("BAD_REQUEST", "downstream received a malformed request", 400)
 
-  case object NotFound extends NpsNormalizedError("NOT_FOUND") {
-    val message = "downstream could not not find the specified resource"
-    val code    = 404
-  }
+  case object AccessForbidden
+      extends NpsNormalizedError(
+        code = "ACCESS_FORBIDDEN",
+        message = "downstream resource cannot be accessed by the calling client",
+        downstreamStatus = 403
+      )
 
-  case object ServiceUnavailable extends NpsNormalizedError("SERVICE_UNAVAILABLE") {
-    val message = "downstream is currently unable to handle request"
-    val code    = 503
-  }
+  case object NotFound
+      extends NpsNormalizedError(
+        code = "NOT_FOUND",
+        message = "downstream could not not find the specified resource",
+        downstreamStatus = 404
+      )
 
-  case object InternalServerError extends NpsNormalizedError("INTERNAL_SERVER_ERROR") {
-    val message = "downstream failed to fulfil request"
-    val code    = 500
-  }
+  case object ServiceUnavailable
+      extends NpsNormalizedError(
+        code = "SERVICE_UNAVAILABLE",
+        message = "downstream is currently unable to handle request",
+        downstreamStatus = 503
+      )
 
-  case class UnexpectedStatus(code: Int) extends NpsNormalizedError("UNEXPECTED_STATUS_CODE") {
-    val message = "downstream returned an unexpected status"
-  }
+  case object InternalServerError
+      extends NpsNormalizedError(
+        code = "INTERNAL_SERVER_ERROR",
+        message = "downstream failed to fulfil request",
+        downstreamStatus = 500
+      )
+
+  case class UnexpectedStatus(override val downstreamStatus: Int)
+      extends NpsNormalizedError(
+        code = "UNEXPECTED_STATUS_CODE",
+        message = "downstream returned an unexpected status",
+        downstreamStatus = downstreamStatus
+      )
 
 }

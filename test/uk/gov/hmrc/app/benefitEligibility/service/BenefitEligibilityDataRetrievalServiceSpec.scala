@@ -25,6 +25,7 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
@@ -572,9 +573,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
-      .LiabilitiesRequestParams(Abroad, None, None, None, None, None),
-    Class2MaReceiptsRequestParams(None, None, None)
+    LiabilitiesRequestParams(List(Abroad), None, None, None)
   )
 
   val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
@@ -602,8 +601,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    LongTermBenefitCalculationRequestParams(None, None),
-    None
+    Some(LongTermBenefitCalculationRequestParams(None, None))
   )
 
   val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
@@ -612,8 +610,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)
-    ),
-    marriageDetails = None
+    )
   )
 
   val niContributionAndCreditsResult = SuccessResult(
@@ -672,7 +669,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultMA(
                 class2MAReceiptsResult,
-                liabilitySummaryDetailsResult,
+                List(liabilitySummaryDetailsResult),
                 niContributionAndCreditsResult
               )
             )
@@ -681,7 +678,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         underTest.getEligibilityData(maEligibilityCheckDataRequest).value.futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
-            liabilitySummaryDetailsResult,
+            List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult
           )
         )

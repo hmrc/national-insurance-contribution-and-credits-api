@@ -32,6 +32,7 @@ import play.api.test.Helpers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
 import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
@@ -60,10 +61,10 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNo
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.{
+  MarriageDetailsReconciliationDate,
   MarriageDetailsSuccessResponse,
   MarriageEndDate,
   MarriageStartDate,
-  ReconciliationDate,
   SeparationDate,
   SpouseForename,
   SpouseSurname
@@ -297,7 +298,7 @@ class BenefitEligibilityDataControllerItSpec
               spouseForename = Some(SpouseForename("Skywalker")),
               spouseSurname = Some(SpouseSurname("Luke")),
               separationDate = Some(SeparationDate(LocalDate.parse("2002-01-01"))),
-              reconciliationDate = Some(ReconciliationDate(LocalDate.parse("2003-01-01")))
+              reconciliationDate = Some(MarriageDetailsReconciliationDate(LocalDate.parse("2003-01-01")))
             )
         )
       ),
@@ -953,9 +954,7 @@ class BenefitEligibilityDataControllerItSpec
             StartTaxYear(2024),
             EndTaxYear(2025)
           ),
-          uk.gov.hmrc.app.benefitEligibility.integration.inbound.request
-            .LiabilitiesRequestParams(Abroad, None, None, None, None, None),
-          Class2MaReceiptsRequestParams(None, None, None)
+          LiabilitiesRequestParams(List(Abroad), None, None, None)
         )
 
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -971,7 +970,7 @@ class BenefitEligibilityDataControllerItSpec
         val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
           filteredClass2MaReceipts,
-          filteredLiabilitySummaryDetails,
+          List(filteredLiabilitySummaryDetails),
           niContributionsAndCreditsSuccessResponse
         )
 
@@ -1019,8 +1018,7 @@ class BenefitEligibilityDataControllerItSpec
             DateOfBirth(LocalDate.parse("2025-10-10")),
             StartTaxYear(2024),
             EndTaxYear(2025)
-          ),
-          None
+          )
         )
 
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1150,8 +1148,7 @@ class BenefitEligibilityDataControllerItSpec
             StartTaxYear(2024),
             EndTaxYear(2025)
           ),
-          LongTermBenefitCalculationRequestParams(None, None),
-          None
+          Some(LongTermBenefitCalculationRequestParams(None, None))
         )
 
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
