@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.{EitherT, Validated}
-import cats.implicits.catsSyntaxTuple6Semigroupal
+import cats.implicits.catsSyntaxTuple5Semigroupal
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, Ok, UnprocessableEntity}
 import play.api.mvc.{AnyContent, Request, Result}
@@ -108,11 +108,6 @@ object BenefitEligibilityRequestHandler {
         "invalid national insurance number format"
       ),
       Validated.condNel(
-        request.niContributionsAndCredits.startTaxYear.value >= 1975,
-        SuccessfulResult,
-        "Start tax year before 1975"
-      ),
-      Validated.condNel(
         request.niContributionsAndCredits.startTaxYear.value <= LocalDate.now().getYear - 1,
         SuccessfulResult,
         "Start tax year after CY-1"
@@ -132,7 +127,7 @@ object BenefitEligibilityRequestHandler {
         SuccessfulResult,
         "Start tax year before 1975"
       )
-    ).mapN((_, _, _, _, _, _) => SuccessfulResult) match {
+    ).mapN((_, _, _, _, _) => SuccessfulResult) match {
       case Validated.Valid(_)   => Right(SuccessfulResult)
       case Validated.Invalid(e) => Left(ValidationError(e.toList))
     }
