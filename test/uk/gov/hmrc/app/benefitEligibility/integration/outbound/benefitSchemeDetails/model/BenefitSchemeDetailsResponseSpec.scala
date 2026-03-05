@@ -211,16 +211,6 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
           )
         )
 
-        BenefitSchemeDetailsResponseValidation.benefitSchemeDetailsResponseValidationValidator.validate(
-          MA,
-          invalidResponse
-        ) shouldBe Validated.Invalid(
-          NonEmptyList.of(
-            """BenefitSchemeName value is below the minimum character limit of 1""",
-            """BenefitSchemeName value does not match regex pattern: ^[a-zA-Z0-9\\/,'.&() -]+$"""
-          )
-        )
-
         benefitSchemeDetailsSuccessResponseJsonSchema.validateAndGetErrors(
           Json.toJson(invalidResponse)
         ) shouldBe

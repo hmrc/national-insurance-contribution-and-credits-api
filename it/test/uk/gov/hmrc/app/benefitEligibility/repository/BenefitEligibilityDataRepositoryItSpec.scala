@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.repository
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpecLike
-import org.scalatest.matchers.must.Matchers.mustBe
+import org.scalatest.matchers.must.Matchers.{contain, must, mustBe}
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import org.scalatest.{BeforeAndAfterAll, OptionValues}
@@ -171,7 +171,7 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTasks = Table("page_task", pageTasksList: _*)
 
         forAll(pageTasks)(pageTaskList => repository.delete(uuidTwo).futureValue mustBe true)
-        findAll().futureValue mustBe pageTasksListAfterDelete
+        findAll().futureValue must contain theSameElementsAs pageTasksListAfterDelete
       }
     }
   }

@@ -55,7 +55,9 @@ class AuthAction @Inject() (
         Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
       case e =>
         logger.error(e.getMessage)
-        InternalServerError(Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason(e.getMessage))))
+        InternalServerError(
+          Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
+        )
     }
   }
 

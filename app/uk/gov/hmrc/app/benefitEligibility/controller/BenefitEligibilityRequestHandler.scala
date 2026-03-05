@@ -19,13 +19,14 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.{EitherT, Validated}
 import cats.implicits.catsSyntaxTuple5Semigroupal
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, Ok, UnprocessableEntity}
+import play.api.mvc.Results.{BadGateway, BadRequest, Forbidden, InternalServerError, Ok, UnprocessableEntity}
 import play.api.mvc.{AnyContent, Request, Result}
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Identifier, ValidationError}
+import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Identifier, JsonValidationError}
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.util.{RequestAwareLogger, SuccessfulResult}
+import uk.gov.hmrc.auth.core.{BearerTokenExpired, UnsupportedAuthProvider}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -74,10 +75,15 @@ object BenefitEligibilityRequestHandler {
                     }
                 }
               case JsError(errors) =>
-                logger.error(s"bad request ${errors.flatMap(_._2).mkString(",")}")
+                logger.error(s"bad request ${errors.mkString(",")}")
                 EitherT.rightT[Future, BenefitEligibilityError](
                   BadRequest(
-                    Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason(errors.flatMap(_._2).mkString(","))))
+                    Json.toJson(
+                      ErrorResponse(
+                        ErrorCode.BadRequest,
+                        ErrorReason(s"incompatible json, request body does not match schema")
+                      )
+                    )
                   )
                 )
             }
@@ -93,14 +99,14 @@ object BenefitEligibilityRequestHandler {
       case Left(value) =>
         logger.error(s"Internal server error ${value.toStringSafeToLogInProd}")
         InternalServerError(
-          Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason(value.toStringSafeToLogInProd)))
+          Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
         )
       case Right(value) => value
     }
 
-  def validateRequest(
+  private[controller] def validateRequest(
       request: EligibilityCheckDataRequest
-  ): Either[ValidationError, SuccessfulResult.type] =
+  ): Either[JsonValidationError, SuccessfulResult.type] =
     (
       Validated.condNel(
         Identifier.pattern.matches(request.nationalInsuranceNumber.value),
@@ -129,7 +135,7 @@ object BenefitEligibilityRequestHandler {
       )
     ).mapN((_, _, _, _, _) => SuccessfulResult) match {
       case Validated.Valid(_)   => Right(SuccessfulResult)
-      case Validated.Invalid(e) => Left(ValidationError(e.toList))
+      case Validated.Invalid(e) => Left(JsonValidationError(e.toList))
     }
 
 }

@@ -175,14 +175,14 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(ValidationError(List.empty))
+            EitherT.leftT(JsonValidationError(List.empty))
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          ValidationError(List.empty)
+          JsonValidationError(List.empty)
         )
       }
 
@@ -193,14 +193,14 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(ParsingError(error))
+            EitherT.leftT(InvalidJsonError(error))
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          ParsingError(error)
+          InvalidJsonError(error)
         )
       }
 

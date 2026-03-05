@@ -25,11 +25,11 @@ sealed abstract class OverallResultStatus(override val entryName: String) extend
 
 object OverallResultStatus extends Enum[OverallResultStatus] with PlayJsonEnum[OverallResultStatus] {
   val values: immutable.IndexedSeq[OverallResultStatus] = findValues
-  case object Failure extends OverallResultStatus("FAILURE")
-  case object Partial extends OverallResultStatus("PARTIAL FAILURE")
+  case object Failure        extends OverallResultStatus("FAILURE")
+  case object PartialFailure extends OverallResultStatus("PARTIAL FAILURE")
 
   def fromApiResults(allResults: List[ApiResult]): OverallResultStatus =
     if (allResults.forall(_.isFailure)) OverallResultStatus.Failure
-    else OverallResultStatus.Partial
+    else OverallResultStatus.PartialFailure
 
 }

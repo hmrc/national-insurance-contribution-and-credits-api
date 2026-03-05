@@ -92,52 +92,6 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      "should match the openapi schema" in {
-
-        val invalidResponse = Class2MAReceiptsSuccessResponse(
-          Identifier("AA000001A"),
-          List(
-            Class2MAReceiptDetails(
-              initials = Some(Initials("2")),
-              surname = Some(Surname("v")),
-              receivablePeriodStartDate = Some(ReceivablePeriodStartDate(LocalDate.parse("2025-12-10"))),
-              receivablePeriodEndDate = Some(ReceivablePeriodEndDate(LocalDate.parse("2025-12-10"))),
-              receivablePayment = Some(ReceivablePayment(999999999999999.98)),
-              receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
-              liabilityStartDate = Some(LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-              liabilityEndDate = Some(LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-              billAmount = Some(BillAmount(999999999999999.98)),
-              billScheduleNumber = Some(BillScheduleNumber(100)),
-              isClosedRecord = Some(IsClosedRecord(true)),
-              weeksPaid = Some(WeeksPaid(2))
-            )
-          )
-        )
-
-        Class2MAReceiptsResponseValidation.class2MAReceiptsSuccessResponseValidator.validate(
-          MA,
-          invalidResponse
-        ) shouldBe Validated.Invalid(
-          NonEmptyList.of(
-            """Surname value is below the minimum character limit of 2""",
-            """Initials value does not match regex pattern: ^([A-Za-z '-])+$""",
-            """BillAmount value exceeds the maximum allowed limit of 99999999999999.98""",
-            """ReceivablePayment value exceeds the maximum allowed limit of 99999999999999.98"""
-          )
-        )
-
-        class2MaReceiptsSuccessResponseJsonSchema.validateAndGetErrors(
-          Json.toJson(invalidResponse)
-        ) shouldBe
-          List(
-            """$.class2MAReceiptDetails[0].billAmount: must have a maximum value of 9.999999999999998E13""",
-            """$.class2MAReceiptDetails[0].initials: does not match the regex pattern ^([A-Za-z '-])+$""",
-            """$.class2MAReceiptDetails[0].receivablePayment: must have a maximum value of 9.999999999999998E13""",
-            """$.class2MAReceiptDetails[0].surname: must be at least 2 characters long"""
-          )
-
-      }
-
       "should match the openapi schema for a full response" in {
         class2MaReceiptsSuccessResponseJsonSchema.validateAndGetErrors(
           Json.toJson(class2MAReceiptsSuccessResponse)

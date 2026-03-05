@@ -216,14 +216,14 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(ValidationError(List.empty))
+            EitherT.leftT(JsonValidationError(List.empty))
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          ValidationError(List.empty)
+          JsonValidationError(List.empty)
         )
       }
 
@@ -232,14 +232,14 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.JSA, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(ParsingError(emptyThrowable))
+            EitherT.leftT(InvalidJsonError(emptyThrowable))
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          ParsingError(emptyThrowable)
+          InvalidJsonError(emptyThrowable)
         )
       }
 
