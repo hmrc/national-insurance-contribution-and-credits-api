@@ -638,7 +638,7 @@ class SchemeMembershipDetailsConnectorItSpec
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[ParsingError]
+          result.left.value shouldBe a[InvalidJsonError]
         }
       }
 

@@ -37,7 +37,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   NpsApiResult,
@@ -45,7 +44,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   NpsResponseHandler,
   SchemeMembershipDetailsResult
 }
-import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
+import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptParse
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -80,18 +79,23 @@ class SchemeMembershipDetailsConnector @Inject() (
     npsClient
       .get(path)
       .flatMap { response =>
+        logger.info(s"attempting to parse response from $apiName for $benefitType")
+
         response.status match {
           case OK =>
-            attemptStrictParse[SchemeMembershipDetailsSuccessResponse](benefitType, response) match {
+            attemptParse[SchemeMembershipDetailsSuccessResponse](response) match {
               case Left(error) => EitherT.leftT[Future, SchemeMembershipDetailsResult](error)
               case Right(resp) => EitherT.rightT[Future, BenefitEligibilityError](toSuccessResult(resp))
             }
           case code => handleErrors(code, response)
         }
       }
-      .leftMap { error =>
-        logger.error(s"call to downstream service failed: ${error.toString}")
-        error
+      .leftMap {
+        case error: JsonValidationError => error
+        case error: InvalidJsonError    => error
+        case error =>
+          logger.error(s"call to downstream service $apiName failed: ${error.toString}")
+          error
       }
 
   private[connector] def handleErrors(
@@ -102,44 +106,43 @@ class SchemeMembershipDetailsConnector @Inject() (
   ): EitherT[Future, BenefitEligibilityError, NpsApiResult[ErrorReport, SchemeMembershipDetailsSuccessResponse]] = {
     val schemeMembershipDetailsResult =
       statusCode match {
+
         case BAD_REQUEST =>
-          attemptParse[NpsErrorResponse400](response).map { resp =>
-            logger.warn(s"SchemeMembershipDetails returned a 400: $resp")
-            toFailureResult(BadRequest, Some(resp))
-          }
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+          attemptParse[NpsErrorResponse400](response).map(resp => toFailureResult(BadRequest, Some(resp)))
+
         case FORBIDDEN =>
-          attemptParse[NpsSingleErrorResponse](response).map { resp =>
-            logger.warn(s"SchemeMembershipDetails returned a 403: $resp")
-            toFailureResult(AccessForbidden, Some(resp))
-          }
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+          attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult(AccessForbidden, Some(resp)))
+
         case UNPROCESSABLE_ENTITY =>
-          attemptParse[NpsMultiErrorResponse](response).map { resp =>
-            logger.warn(s"SchemeMembershipDetails returned a 422: $resp")
-            toFailureResult(UnprocessableEntity, Some(resp))
-          }
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+          attemptParse[NpsMultiErrorResponse](response).map(resp => toFailureResult(UnprocessableEntity, Some(resp)))
 
         case NOT_FOUND =>
-          attemptParse[NpsSingleErrorResponse](response).map { resp =>
-            logger.warn(s"SchemeMembershipDetails returned a 404: $resp")
-            toFailureResult(NotFound, Some(resp))
-          }
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+          attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult(NotFound, Some(resp)))
+
         case INTERNAL_SERVER_ERROR =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-            logger.warn(s"SchemeMembershipDetails returned a 500: $resp")
             toFailureResult(InternalServerError, Some(resp))
           }
 
         case SERVICE_UNAVAILABLE =>
-          attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-            logger.warn(s"SchemeMembershipDetails returned a 503: $resp")
-            toFailureResult(ServiceUnavailable, Some(resp))
-          }
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+          attemptParse[NpsErrorResponseHipOrigin](response).map(resp => toFailureResult(ServiceUnavailable, Some(resp)))
         case code => Right(toFailureResult(UnexpectedStatus(code), None))
       }
 
-    EitherT.fromEither[Future](schemeMembershipDetailsResult).leftMap { error =>
-      logger.error(s"failed to process response from case code => test(code, response): ${error.toString}")
-      error
+    EitherT.fromEither[Future](schemeMembershipDetailsResult).leftMap {
+      case error: JsonValidationError =>
+        logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+        error
+      case error: InvalidJsonError =>
+        logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+        error
+      case error => error
     }
 
   }

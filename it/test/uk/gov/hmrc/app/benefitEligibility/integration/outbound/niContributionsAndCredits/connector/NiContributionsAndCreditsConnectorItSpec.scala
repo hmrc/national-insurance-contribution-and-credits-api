@@ -510,7 +510,7 @@ class NiContributionsAndCreditsConnectorItSpec
           val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[ParsingError]
+          result.left.value shouldBe a[InvalidJsonError]
         }
       }
 

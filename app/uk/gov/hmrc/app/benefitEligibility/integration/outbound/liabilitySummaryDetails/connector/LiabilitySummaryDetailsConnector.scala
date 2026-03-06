@@ -38,7 +38,6 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse
 }
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsResponseValidation.liabilitySummaryDetailsResponseValidator
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
@@ -47,7 +46,7 @@ import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{
   NpsClient,
   NpsResponseHandler
 }
-import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
+import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptParse
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -105,18 +104,23 @@ class LiabilitySummaryDetailsConnector @Inject() (
     npsClient
       .get(path)
       .flatMap { response =>
+        logger.info(s"attempting to parse response from $apiName for $benefitType")
+
         response.status match {
           case OK =>
-            attemptStrictParse[LiabilitySummaryDetailsSuccessResponse](benefitType, response) match {
+            attemptParse[LiabilitySummaryDetailsSuccessResponse](response) match {
               case Left(error) => EitherT.leftT[Future, LiabilityResult](error)
               case Right(resp) => EitherT.rightT[Future, BenefitEligibilityError](toSuccessResult(resp))
             }
           case code => handleErrors(code, response)
         }
       }
-      .leftMap { error =>
-        logger.error(s"call to downstream service failed: ${error.toString}")
-        error
+      .leftMap {
+        case error: JsonValidationError => error
+        case error: InvalidJsonError    => error
+        case error =>
+          logger.error(s"call to downstream service $apiName failed: ${error.toString}")
+          error
       }
 
   def handleErrors(
@@ -127,45 +131,56 @@ class LiabilitySummaryDetailsConnector @Inject() (
   ): EitherT[Future, BenefitEligibilityError, LiabilityResult] = {
     val liabilityResult =
       statusCode match {
+
         case BAD_REQUEST =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponse400](response).map { resp =>
-            logger.warn(s"LiabilitySummaryDetails returned a 400: $resp")
             toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](BadRequest, Some(resp))
           }
+
         case FORBIDDEN =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsSingleErrorResponse](response).map { resp =>
-            logger.warn(
-              s"LiabilitySummaryDetails returned a 403: $resp"
-            )
             toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](AccessForbidden, Some(resp))
           }
+
         case UNPROCESSABLE_ENTITY =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponse422Special](response).map { resp =>
-            logger.warn(s"LiabilitySummaryDetails returned a 422: $resp")
             toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](UnprocessableEntity, Some(resp))
           }
+
         case NOT_FOUND =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           Right(toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](NotFound, None))
 
         case INTERNAL_SERVER_ERROR =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-            logger.warn(s"LiabilitySummaryDetails returned a 500: $resp")
             toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](InternalServerError, Some(resp))
           }
+
         case SERVICE_UNAVAILABLE =>
+          logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-            logger.warn(s"LiabilitySummaryDetails returned a 503: $resp")
             toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](ServiceUnavailable, Some(resp))
           }
+
         case code =>
+          logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")
           Right(
             toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](UnexpectedStatus(code), None)
           )
       }
 
-    EitherT.fromEither[Future](liabilityResult).leftMap { error =>
-      logger.error(s"failed to process response from liabilitySummaryDetails: ${error.toString}")
-      error
+    EitherT.fromEither[Future](liabilityResult).leftMap {
+      case error: JsonValidationError =>
+        logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+        error
+      case error: InvalidJsonError =>
+        logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+        error
+      case error => error
     }
   }
 

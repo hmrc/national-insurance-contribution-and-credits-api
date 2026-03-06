@@ -41,7 +41,7 @@ import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
   ServiceUnavailable,
   UnprocessableEntity
 }
-import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, Partial}
+import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.{Failure, PartialFailure}
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.common.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
@@ -1460,7 +1460,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             mockEligibilityCheckDataResult
           ) shouldBe
             BenefitEligibilityInfoErrorResponse(
-              status = Partial,
+              status = PartialFailure,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1571,7 +1571,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       forAll(benefitTypes) { benefitType =>
         val errorResponse: BenefitEligibilityInfoErrorResponse = BenefitEligibilityInfoErrorResponse(
-          status = Partial,
+          status = PartialFailure,
           nationalInsuranceNumber = nationalInsuranceNumber,
           benefitType = benefitType,
           summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1634,7 +1634,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       )
 
       val errorResponse: BenefitEligibilityInfoErrorResponse = BenefitEligibilityInfoErrorResponse(
-        status = Partial,
+        status = PartialFailure,
         nationalInsuranceNumber = nationalInsuranceNumber,
         benefitType = MA,
         summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
@@ -1710,7 +1710,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             mockResult
           ) shouldBe Left(
             BenefitEligibilityInfoErrorResponse(
-              status = Partial,
+              status = PartialFailure,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
               summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),

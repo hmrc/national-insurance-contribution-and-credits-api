@@ -574,7 +574,7 @@ class MarriageDetailsConnectorItSpec
               .futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[ParsingError]
+          result.left.value shouldBe a[InvalidJsonError]
         }
       }
 
@@ -605,7 +605,7 @@ class MarriageDetailsConnectorItSpec
               .futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[ValidationError]
+          result.left.value shouldBe a[JsonValidationError]
         }
       }
 

@@ -34,10 +34,9 @@ import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
   NpsSingleErrorResponse
 }
 import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsResponseValidation.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{MarriageDetailsResult, NpsClient, NpsResponseHandler}
-import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.{attemptParse, attemptStrictParse}
+import uk.gov.hmrc.app.benefitEligibility.util.HttpParsing.attemptParse
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
@@ -65,55 +64,66 @@ class MarriageDetailsConnector @Inject() (
     npsClient
       .get(path)
       .flatMap { response =>
+        logger.info(s"attempting to parse response from $apiName for $benefitType")
+
         val marriageDetailsResult =
           response.status match {
+
             case OK =>
-              attemptStrictParse[MarriageDetailsSuccessResponse](benefitType, response).map(
+              attemptParse[MarriageDetailsSuccessResponse](response).map(
                 toSuccessResult
               )
+
             case BAD_REQUEST =>
-              attemptParse[NpsErrorResponse400](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 400: $resp")
-                toFailureResult(BadRequest, Some(resp))
-              }
+              logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+              attemptParse[NpsErrorResponse400](response).map(resp => toFailureResult(BadRequest, Some(resp)))
+
             case FORBIDDEN =>
-              attemptParse[NpsMultiErrorResponse](response).map { resp =>
-                logger.warn(
-                  s"MarriageDetails returned a 403: $resp"
-                )
-                toFailureResult(AccessForbidden, Some(resp))
-              }
+              logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+              attemptParse[NpsMultiErrorResponse](response).map(resp => toFailureResult(AccessForbidden, Some(resp)))
+
             case UNPROCESSABLE_ENTITY =>
+              logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
               attemptParse[NpsMultiErrorResponse](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 422: $resp")
                 toFailureResult(UnprocessableEntity, Some(resp))
               }
             case NOT_FOUND =>
-              attemptParse[NpsSingleErrorResponse](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 404: $resp")
-                toFailureResult(NotFound, Some(resp))
-              }
+              logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
+              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult(NotFound, Some(resp)))
+
             case INTERNAL_SERVER_ERROR =>
+              logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
               attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 500: $resp")
                 toFailureResult(InternalServerError, Some(resp))
               }
+
             case SERVICE_UNAVAILABLE =>
+              logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
               attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-                logger.warn(s"MarriageDetails returned a 503: $resp")
                 toFailureResult(ServiceUnavailable, Some(resp))
               }
-            case code => Right(toFailureResult(UnexpectedStatus(code), None))
+
+            case code =>
+              logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")
+              Right(toFailureResult(UnexpectedStatus(code), None))
           }
 
-        EitherT.fromEither[Future](marriageDetailsResult).leftMap { error =>
-          logger.error(s"failed to process response from MarriageDetails: ${error.toString}")
-          error
+        EitherT.fromEither[Future](marriageDetailsResult).leftMap {
+          case error: JsonValidationError =>
+            logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+            error
+          case error: InvalidJsonError =>
+            logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+            error
+          case error => error
         }
       }
-      .leftMap { error =>
-        logger.error(s"call to downstream service failed: ${error.toString}")
-        error
+      .leftMap {
+        case error: JsonValidationError => error
+        case error: InvalidJsonError    => error
+        case error =>
+          logger.error(s"call to downstream service $apiName failed: ${error.toString}")
+          error
       }
   }
 

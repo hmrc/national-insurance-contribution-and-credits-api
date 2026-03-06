@@ -30,10 +30,25 @@ import play.api.mvc.{AnyContent, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import uk.gov.hmrc.app.benefitEligibility.common.*
+import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{
+  Class2MAReceipts,
+  Liabilities,
+  MarriageDetails,
+  NiContributionAndCredits
+}
+import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, ESA, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnprocessableEntity
+import uk.gov.hmrc.app.benefitEligibility.common.OverallResultStatus.PartialFailure
 import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
+import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.ErrorCode.{
+  BadRequest,
+  InternalServerError,
+  UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponseStatus
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
@@ -677,516 +692,1369 @@ class BenefitEligibilityDataControllerItSpec
 
   "BenefitEligibilityController" - {
     ".fetchBenefitEligibilityData" - {
-      "should fetch ESA Data correctly" in {
+      "ESA" - {
+        "should fetch ESA Data correctly" in {
 
-        val successResponse = NiContributionsAndCreditsSuccessResponse(
-          Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
-          Some(
-            List(
-              Class1ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-                contributionCategory = Some(ContributionCategory.None),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                creditSource = Some(CreditSource.NotKnown),
-                employerName = Some(EmployerName("ipOpMs")),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
+          val successResponse = NiContributionsAndCreditsSuccessResponse(
+            Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
+            Some(
+              List(
+                Class1ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                  contributionCategory = Some(ContributionCategory.None),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                  creditSource = Some(CreditSource.NotKnown),
+                  employerName = Some(EmployerName("ipOpMs")),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
               )
-            )
-          ),
-          Some(
-            List(
-              Class2ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                creditSource = Some(CreditSource.NotKnown),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
-              )
-            )
-          )
-        )
-        val successResponseJson =
-          """{
-            |  "totalGraduatedPensionUnits": 100,
-            |  "class1ContributionAndCredits": [
-            |    {
-            |      "taxYear": 2022,
-            |      "numberOfContributionsAndCredits": 53,
-            |      "contributionCategoryLetter": "U",
-            |      "contributionCategory": "(NONE)",
-            |      "contributionCreditType": "C1",
-            |      "primaryContribution": 99999999999999.98,
-            |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
-            |      "primaryPaidEarnings": 99999999999999.98,
-            |      "creditSource": "NOT KNOWN",
-            |      "employerName": "ipOpMs",
-            |      "latePaymentPeriod": "L"
-            |    }
-            |  ],
-            |  "class2ContributionAndCredits": [
-            |    {
-            |      "taxYear": 2022,
-            |      "numberOfContributionsAndCredits": 53,
-            |      "contributionCreditType": "C1",
-            |      "class2Or3EarningsFactor": 99999999999999.98,
-            |      "class2NIContributionAmount": 99999999999999.98,
-            |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
-            |      "creditSource": "NOT KNOWN",
-            |      "latePaymentPeriod": "L"
-            |    }
-            |  ]
-            |}""".stripMargin
-
-        server.stubFor(
-          post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(successResponseJson)
-            )
-        )
-        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          )
-        )
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        val expectedResult = BenefitEligibilityInfoSuccessResponseEsa(nationalInsuranceNumber, successResponse)
-
-        status(result) shouldBe 200
-        contentAsJson(result) shouldBe Json.toJson(expectedResult)
-      }
-      "should fetch JSA Data correctly" in {
-
-        val successResponse = NiContributionsAndCreditsSuccessResponse(
-          Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
-          Some(
-            List(
-              Class1ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-                contributionCategory = Some(ContributionCategory.None),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                creditSource = Some(CreditSource.NotKnown),
-                employerName = Some(EmployerName("ipOpMs")),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
-              )
-            )
-          ),
-          Some(
-            List(
-              Class2ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                creditSource = Some(CreditSource.NotKnown),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
+            ),
+            Some(
+              List(
+                Class2ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                  class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                  creditSource = Some(CreditSource.NotKnown),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
               )
             )
           )
-        )
-        val successResponseJson =
-          """{
-            |  "totalGraduatedPensionUnits": 100,
-            |  "class1ContributionAndCredits": [
-            |    {
-            |      "taxYear": 2022,
-            |      "numberOfContributionsAndCredits": 53,
-            |      "contributionCategoryLetter": "U",
-            |      "contributionCategory": "(NONE)",
-            |      "contributionCreditType": "C1",
-            |      "primaryContribution": 99999999999999.98,
-            |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
-            |      "primaryPaidEarnings": 99999999999999.98,
-            |      "creditSource": "NOT KNOWN",
-            |      "employerName": "ipOpMs",
-            |      "latePaymentPeriod": "L"
-            |    }
-            |  ],
-            |  "class2ContributionAndCredits": [
-            |    {
-            |      "taxYear": 2022,
-            |      "numberOfContributionsAndCredits": 53,
-            |      "contributionCreditType": "C1",
-            |      "class2Or3EarningsFactor": 99999999999999.98,
-            |      "class2NIContributionAmount": 99999999999999.98,
-            |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
-            |      "creditSource": "NOT KNOWN",
-            |      "latePaymentPeriod": "L"
-            |    }
-            |  ]
-            |}""".stripMargin
+          val successResponseJson =
+            """{
+              |  "totalGraduatedPensionUnits": 100,
+              |  "class1ContributionAndCredits": [
+              |    {
+              |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
+              |      "contributionCategoryLetter": "U",
+              |      "contributionCategory": "(NONE)",
+              |      "contributionCreditType": "C1",
+              |      "primaryContribution": 99999999999999.98,
+              |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+              |      "primaryPaidEarnings": 99999999999999.98,
+              |      "creditSource": "NOT KNOWN",
+              |      "employerName": "ipOpMs",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ],
+              |  "class2ContributionAndCredits": [
+              |    {
+              |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
+              |      "contributionCreditType": "C1",
+              |      "class2Or3EarningsFactor": 99999999999999.98,
+              |      "class2NIContributionAmount": 99999999999999.98,
+              |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+              |      "creditSource": "NOT KNOWN",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ]
+              |}""".stripMargin
 
-        server.stubFor(
-          WireMock
-            .post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(successResponseJson)
-            )
-        )
-        val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
           )
-        )
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(jsaEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(successResponseJson)
+              )
           )
+          val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
-        val expectedResult = BenefitEligibilityInfoSuccessResponseJsa(nationalInsuranceNumber, successResponse)
+          val expectedResult = BenefitEligibilityInfoSuccessResponseEsa(nationalInsuranceNumber, successResponse)
 
-        status(result) shouldBe 200
-        contentAsJson(result) shouldBe Json.toJson(expectedResult)
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+        }
+        "should return a 502 if downstream calls to NPS services fail (ESA)" in {
 
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+              )
+          )
+          val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResponse = """{
+                                   |   "status":"FAILURE",
+                                   |   "nationalInsuranceNumber":"AB123456C",
+                                   |   "benefitType":"ESA",
+                                   |   "summary":{
+                                   |      "totalCalls":1,
+                                   |      "successful":0,
+                                   |      "failed":1
+                                   |   },
+                                   |   "downStreams":[
+                                   |      {
+                                   |         "apiName":"NI Contributions and credits",
+                                   |         "status":"FAILURE",
+                                   |         "error":{
+                                   |            "code":"UNEXPECTED_STATUS_CODE",
+                                   |            "message":"downstream returned an unexpected status",
+                                   |            "downstreamStatus":502
+                                   |         }
+                                   |      }
+                                   |   ]
+                                   |}""".stripMargin
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResponse)
+        }
       }
-      "Should Fetch MA Correctly" in {
 
-        val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-        val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+      "JSA" - {
+        "should fetch JSA Data correctly" in {
 
-        val class2MAReceiptsSuccessResponseBody        = Json.toJson(class2MAReceiptsSuccessResponse).toString()
-        val liabilitySummaryDetailsSuccessResponseBody = Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
-        val niContributionsAndCreditsSuccessResponseBody =
-          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+          val successResponse = NiContributionsAndCreditsSuccessResponse(
+            Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
+            Some(
+              List(
+                Class1ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                  contributionCategory = Some(ContributionCategory.None),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                  creditSource = Some(CreditSource.NotKnown),
+                  employerName = Some(EmployerName("ipOpMs")),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
+              )
+            ),
+            Some(
+              List(
+                Class2ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                  class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                  creditSource = Some(CreditSource.NotKnown),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
+              )
+            )
+          )
+          val successResponseJson =
+            """{
+              |  "totalGraduatedPensionUnits": 100,
+              |  "class1ContributionAndCredits": [
+              |    {
+              |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
+              |      "contributionCategoryLetter": "U",
+              |      "contributionCategory": "(NONE)",
+              |      "contributionCreditType": "C1",
+              |      "primaryContribution": 99999999999999.98,
+              |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+              |      "primaryPaidEarnings": 99999999999999.98,
+              |      "creditSource": "NOT KNOWN",
+              |      "employerName": "ipOpMs",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ],
+              |  "class2ContributionAndCredits": [
+              |    {
+              |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
+              |      "contributionCreditType": "C1",
+              |      "class2Or3EarningsFactor": 99999999999999.98,
+              |      "class2NIContributionAmount": 99999999999999.98,
+              |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+              |      "creditSource": "NOT KNOWN",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ]
+              |}""".stripMargin
+
+          server.stubFor(
+            WireMock
+              .post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(successResponseJson)
+              )
+          )
+          val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(jsaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseJsa(nationalInsuranceNumber, successResponse)
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+
+        }
+        "should return a 502 if downstream calls to NPS services fail (JSA)" in {
+
+          server.stubFor(
+            WireMock
+              .post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+              )
+          )
+          val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(jsaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResponse = """{
+                                   |   "status":"FAILURE",
+                                   |   "nationalInsuranceNumber":"AB123456C",
+                                   |   "benefitType":"JSA",
+                                   |   "summary":{
+                                   |      "totalCalls":1,
+                                   |      "successful":0,
+                                   |      "failed":1
+                                   |   },
+                                   |   "downStreams":[
+                                   |      {
+                                   |         "apiName":"NI Contributions and credits",
+                                   |         "status":"FAILURE",
+                                   |         "error":{
+                                   |            "code":"UNEXPECTED_STATUS_CODE",
+                                   |            "message":"downstream returned an unexpected status",
+                                   |            "downstreamStatus":502
+                                   |         }
+                                   |      }
+                                   |   ]
+                                   |}""".stripMargin
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResponse)
+
+        }
+      }
+
+      "MA" - {
+        "should Fetch MA Correctly" in {
+
+          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
+          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+
+          val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
+          val liabilitySummaryDetailsSuccessResponseBody =
+            Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsClass2MaReceiptsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(class2MAReceiptsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(liabilitySummaryDetailsSuccessResponseBody)
+              )
+          )
+          val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
+            nationalInsuranceNumber,
+            filteredClass2MaReceipts,
+            List(filteredLiabilitySummaryDetails),
+            niContributionsAndCreditsSuccessResponse
+          )
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+        }
+        "should return a 502 if some downstream calls to NPS services fail (MA - Partial Failure)" in {
+
+          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
+          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+
+          val liabilitySummaryDetailsSuccessResponseBody =
+            Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsClass2MaReceiptsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(liabilitySummaryDetailsSuccessResponseBody)
+              )
+          )
+          val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = """{
+                                 |   "status":"PARTIAL FAILURE",
+                                 |   "nationalInsuranceNumber":"AB123456C",
+                                 |   "benefitType":"MA",
+                                 |   "summary":{
+                                 |      "totalCalls":3,
+                                 |      "successful":1,
+                                 |      "failed":2
+                                 |   },
+                                 |   "downStreams":[
+                                 |      {
+                                 |         "apiName":"Liabilities",
+                                 |         "status":"SUCCESS"
+                                 |      },
+                                 |      {
+                                 |         "apiName":"NI Contributions and credits",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Class2 MA Receipts",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      }
+                                 |   ]
+                                 |}""".stripMargin
+
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResult)
+        }
+        "should return a 502 if all downstream calls to NPS services fail (MA - Failure)" in {
+
+          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
+          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsClass2MaReceiptsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = """{
+                                 |   "status":"FAILURE",
+                                 |   "nationalInsuranceNumber":"AB123456C",
+                                 |   "benefitType":"MA",
+                                 |   "summary":{
+                                 |      "totalCalls":3,
+                                 |      "successful":0,
+                                 |      "failed":3
+                                 |   },
+                                 |   "downStreams":[
+                                 |      {
+                                 |         "apiName":"Liabilities",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"NI Contributions and credits",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Class2 MA Receipts",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      }
+                                 |   ]
+                                 |}""".stripMargin
+
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResult)
+        }
+      }
+
+      "BSP" - {
+        "should Fetch BSP Correctly" in {
+
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+          val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(marriageDetailsSuccessResponseBody)
+              )
+          )
+
+          val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
+            nationalInsuranceNumber,
+            niContributionsAndCreditsSuccessResponse,
+            filteredMarriageDetails
+          )
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+        }
+        "should return a 502 if some downstream calls to NPS services fail (BSP - Partial Failure)" in {
+
+          val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(marriageDetailsSuccessResponseBody)
+              )
+          )
+
+          val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = """{
+                                 |   "status":"PARTIAL FAILURE",
+                                 |   "nationalInsuranceNumber":"AB123456C",
+                                 |   "benefitType":"BSP",
+                                 |   "summary":{
+                                 |      "totalCalls":2,
+                                 |      "successful":1,
+                                 |      "failed":1
+                                 |   },
+                                 |   "downStreams":[
+                                 |      {
+                                 |         "apiName":"Marriage Details",
+                                 |         "status":"SUCCESS"
+                                 |      },
+                                 |      {
+                                 |         "apiName":"NI Contributions and credits",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      }
+                                 |   ]
+                                 |}""".stripMargin
+
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResult)
+        }
+        "should return a 502 if all downstream calls to NPS services fail (BSP - Failure)" in {
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            )
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = """{
+                                 |   "status":"FAILURE",
+                                 |   "nationalInsuranceNumber":"AB123456C",
+                                 |   "benefitType":"BSP",
+                                 |   "summary":{
+                                 |      "totalCalls":2,
+                                 |      "successful":0,
+                                 |      "failed":2
+                                 |   },
+                                 |   "downStreams":[
+                                 |      {
+                                 |         "apiName":"Marriage Details",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"NI Contributions and credits",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      }
+                                 |   ]
+                                 |}""".stripMargin
+
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResult)
+        }
+      }
+
+      "GSYP" - {
+        "should Fetch GYSP Correctly" in {
+
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+          val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
+          val marriageDetailsSuccessResponseBody      = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+          val longTermBenefitCalculationDetailsSuccessResponseBody =
+            Json.toJson(longTermBenefitCalculationDetailsSuccessResponse).toString()
+
+          val longTermBenefitNotesSuccessResponseBody = Json.toJson(longTermBenefitNotesSuccessResponse).toString()
+
+          val schemeMembershipDetailsSuccessResponseBody =
+            Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
+
+          val individualStatePensionInformationSuccessResponseBody =
+            Json.toJson(individualStatePensionInformationSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(benefitSchemeDetailsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(marriageDetailsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(longTermBenefitCalculationDetailsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(longTermBenefitNotesSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(schemeMembershipDetailsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(individualStatePensionInformationSuccessResponseBody)
+              )
+          )
+
+          val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            Some(LongTermBenefitCalculationRequestParams(None, None))
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseGysp(
+            nationalInsuranceNumber,
+            filteredMarriageDetails,
+            filteredLongTermBenefitCalculationDetails,
+            filteredSchemeMembershipDetails,
+            filteredIndividualStatePensionInfo,
+            niContributionsAndCreditsSuccessResponse
+          )
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+
+        }
+        "should return a 502 if some downstream calls to NPS services fail (GYSP - Partial Failure)" in {
+
+          val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
+
+          val longTermBenefitCalculationDetailsSuccessResponseBody =
+            Json.toJson(longTermBenefitCalculationDetailsSuccessResponse).toString()
+
+          val longTermBenefitNotesSuccessResponseBody = Json.toJson(longTermBenefitNotesSuccessResponse).toString()
+
+          val schemeMembershipDetailsSuccessResponseBody =
+            Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
+
+          val individualStatePensionInformationSuccessResponseBody =
+            Json.toJson(individualStatePensionInformationSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(benefitSchemeDetailsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(longTermBenefitCalculationDetailsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(longTermBenefitNotesSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(schemeMembershipDetailsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(individualStatePensionInformationSuccessResponseBody)
+              )
+          )
+
+          val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            Some(LongTermBenefitCalculationRequestParams(None, None))
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = """{
+                                 |   "status":"PARTIAL FAILURE",
+                                 |   "nationalInsuranceNumber":"AB123456C",
+                                 |   "benefitType":"GYSP",
+                                 |   "summary":{
+                                 |      "totalCalls":7,
+                                 |      "successful":5,
+                                 |      "failed":2
+                                 |   },
+                                 |   "downStreams":[
+                                 |      {
+                                 |         "apiName":"Benefit Scheme Details",
+                                 |         "status":"SUCCESS"
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Long Term Benefit Notes",
+                                 |         "status":"SUCCESS"
+                                 |      },
+                                 |      {
+                                 |         "apiName":"NI Contributions and credits",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Marriage Details",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Scheme Membership Details",
+                                 |         "status":"SUCCESS"
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Long Term Benefit Calculation Details",
+                                 |         "status":"SUCCESS"
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Individual State Pension Information",
+                                 |         "status":"SUCCESS"
+                                 |      }
+                                 |   ]
+                                 |}""".stripMargin
+
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResult)
+
+        }
+        "should return a 502 if some downstream calls to NPS services fail (GYSP - Failure)" in {
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_GATEWAY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            Some(LongTermBenefitCalculationRequestParams(None, None))
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = """{
+                                 |   "status":"FAILURE",
+                                 |   "nationalInsuranceNumber":"AB123456C",
+                                 |   "benefitType":"GYSP",
+                                 |   "summary":{
+                                 |      "totalCalls":5,
+                                 |      "successful":0,
+                                 |      "failed":5
+                                 |   },
+                                 |   "downStreams":[
+                                 |      {
+                                 |         "apiName":"NI Contributions and credits",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Marriage Details",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Scheme Membership Details",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Long Term Benefit Calculation Details",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      },
+                                 |      {
+                                 |         "apiName":"Individual State Pension Information",
+                                 |         "status":"FAILURE",
+                                 |         "error":{
+                                 |            "code":"UNEXPECTED_STATUS_CODE",
+                                 |            "message":"downstream returned an unexpected status",
+                                 |            "downstreamStatus":502
+                                 |         }
+                                 |      }
+                                 |   ]
+                                 |}""".stripMargin
+
+          status(result) shouldBe 502
+          contentAsJson(result) shouldBe Json.parse(expectedResult)
+
+        }
+      }
+
+      "should return a 400 if a request is sent without a CorrelationID" in {
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(niContributionsAndCreditsSuccessResponseBody)
-            )
-        )
-
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(npsClass2MaReceiptsPath))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(class2MAReceiptsSuccessResponseBody)
-            )
-        )
-
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(liabilitySummaryDetailsSuccessResponseBody)
-            )
-        )
-        val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          ),
-          LiabilitiesRequestParams(List(Abroad), None, None, None)
-        )
-
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
-          nationalInsuranceNumber,
-          filteredClass2MaReceipts,
-          List(filteredLiabilitySummaryDetails),
-          niContributionsAndCreditsSuccessResponse
-        )
-
-        status(result) shouldBe 200
-        contentAsJson(result) shouldBe Json.toJson(expectedResult)
-      }
-      "Should Fetch BSP Correctly" in {
-
-        val niContributionsAndCreditsSuccessResponseBody =
-          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
-        val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
-
-        server.stubFor(
-          post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(niContributionsAndCreditsSuccessResponseBody)
-            )
-        )
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(marriageDetailsSuccessResponseBody)
-            )
-        )
-
-        val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          )
-        )
-
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
-          nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse,
-          filteredMarriageDetails
-        )
-
-        status(result) shouldBe 200
-        contentAsJson(result) shouldBe Json.toJson(expectedResult)
-      }
-      "Should Fetch GYP Correctly" in {
-
-        val niContributionsAndCreditsSuccessResponseBody =
-          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
-
-        val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
-        val marriageDetailsSuccessResponseBody      = Json.toJson(marriageDetailsSuccessResponse).toString()
-
-        val longTermBenefitCalculationDetailsSuccessResponseBody =
-          Json.toJson(longTermBenefitCalculationDetailsSuccessResponse).toString()
-
-        val longTermBenefitNotesSuccessResponseBody = Json.toJson(longTermBenefitNotesSuccessResponse).toString()
-
-        val schemeMembershipDetailsSuccessResponseBody =
-          Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
-
-        val individualStatePensionInformationSuccessResponseBody =
-          Json.toJson(individualStatePensionInformationSuccessResponse).toString()
-
-        server.stubFor(
-          post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(niContributionsAndCreditsSuccessResponseBody)
-            )
-        )
-
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(benefitSchemeDetailsSuccessResponseBody)
-            )
-        )
-
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(marriageDetailsSuccessResponseBody)
-            )
-        )
-
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(longTermBenefitCalculationDetailsSuccessResponseBody)
-            )
-        )
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(longTermBenefitNotesSuccessResponseBody)
-            )
-        )
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(schemeMembershipDetailsSuccessResponseBody)
-            )
-        )
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(individualStatePensionInformationSuccessResponseBody)
-            )
-        )
-
-        val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          ),
-          Some(LongTermBenefitCalculationRequestParams(None, None))
-        )
-
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        val expectedResult = BenefitEligibilityInfoSuccessResponseGysp(
-          nationalInsuranceNumber,
-          filteredMarriageDetails,
-          filteredLongTermBenefitCalculationDetails,
-          filteredSchemeMembershipDetails,
-          filteredIndividualStatePensionInfo,
-          niContributionsAndCreditsSuccessResponse
-        )
-
-        status(result) shouldBe 200
-        contentAsJson(result) shouldBe Json.toJson(expectedResult)
-
-      }
-      "should fetch ESA Data and return error 400, CorrelationID Missing" in {
-
-        server.stubFor(
-          post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
             .willReturn(
               aResponse()
                 .withStatus(OK)
@@ -1209,8 +2077,12 @@ class BenefitEligibilityDataControllerItSpec
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 400
+
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("Missing Header CorrelationId"))
+        )
       }
-      "should fetch ESA Data and return error 422 Validation error" in {
+      "should return a 422 if a request is sent with invalid data" in {
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
@@ -1221,15 +2093,7 @@ class BenefitEligibilityDataControllerItSpec
                 .withBody("{}")
             )
         )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
+
         val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
           nationalInsuranceNumber,
           ContributionsAndCreditsRequestParams(
@@ -1249,20 +2113,15 @@ class BenefitEligibilityDataControllerItSpec
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 422
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(ErrorCode.UnprocessableEntity, ErrorReason("End tax year after CY-1"))
+        )
+
       }
-      "should fetch ESA Data and return error 400, Bad Request, Cant validate Json" in {
+      "should return a 400 if a request is sent with json that fails domain validation" in {
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
             .willReturn(
               aResponse()
                 .withStatus(OK)
@@ -1282,22 +2141,11 @@ class BenefitEligibilityDataControllerItSpec
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 400
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("incompatible json, request body does not match schema"))
+        )
       }
-      "should fetch ESA Data and return error 500, Internal Server Error" in {
-
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson("{}"))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        status(result) shouldBe 500
-      }
-      "should fetch ESA Data and return error 400, Invalid Json as no json is parsed" in {
+      "should return a 400 if a request is sent with invalid json" in {
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
@@ -1308,15 +2156,6 @@ class BenefitEligibilityDataControllerItSpec
                 .withBody("{}")
             )
         )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
 
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
           .withHeaders(
@@ -1324,68 +2163,25 @@ class BenefitEligibilityDataControllerItSpec
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
+          .withTextBody("invalidJson")
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 400
+        contentAsJson(result) shouldBe Json.toJson(ErrorResponse(BadRequest, ErrorReason("invalid json")))
+
       }
-      "should fetch ESA Data and return error 502, Bad Gateway" in {
+
+      "should return a 500, Internal Server Error if an unexpected error occurs" in {
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
-            .willReturn(
-              aResponse()
-                .withStatus(BAD_GATEWAY)
-                .withHeader("Content-Type", "application/json")
-            )
-        )
-        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          )
-        )
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        status(result) shouldBe 502
-      }
-      "should fetch ESA Data and return random error with 500, Internal Server Error" in {
-
-        server.stubFor(
-          post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-        server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
             .willReturn(
               aResponse()
                 .withFault(Fault.RANDOM_DATA_THEN_CLOSE)
             )
         )
+
         val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
           nationalInsuranceNumber,
           ContributionsAndCreditsRequestParams(
@@ -1394,6 +2190,7 @@ class BenefitEligibilityDataControllerItSpec
             EndTaxYear(2025)
           )
         )
+
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
           .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
           .withHeaders(
@@ -1405,6 +2202,9 @@ class BenefitEligibilityDataControllerItSpec
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 500
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(InternalServerError, ErrorReason("unexpected internal failure"))
+        )
       }
     }
   }
