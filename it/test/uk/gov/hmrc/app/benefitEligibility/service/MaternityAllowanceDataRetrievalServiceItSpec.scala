@@ -87,7 +87,9 @@ class MaternityAllowanceDataRetrievalServiceItSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
-        "microservice.services.hip.port" -> server.port
+        "microservice.services.hip.nps.class2MaReceipts.port"         -> server.port,
+        "microservice.services.hip.nps.liabilities.port"              -> server.port,
+        "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port
       )
       .build()
 

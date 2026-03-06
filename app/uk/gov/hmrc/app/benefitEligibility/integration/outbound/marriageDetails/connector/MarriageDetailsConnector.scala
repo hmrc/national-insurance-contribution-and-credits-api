@@ -59,7 +59,7 @@ class MarriageDetailsConnector @Inject() (
       identifier: Identifier
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
-    val path = s"${appConfig.hipBaseUrl}/individual/${identifier.value}/marriage-cp"
+    val path = s"${appConfig.baseUrl(apiName)}/individual/${identifier.value}/marriage-cp"
 
     npsClient
       .get(path)

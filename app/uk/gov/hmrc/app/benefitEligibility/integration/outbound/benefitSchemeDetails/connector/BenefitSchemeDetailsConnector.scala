@@ -63,7 +63,7 @@ class BenefitSchemeDetailsConnector @Inject() (
   ): EitherT[Future, BenefitEligibilityError, BenefitSchemeDetailsResult] = {
 
     val path =
-      s"${appConfig.hipBaseUrl}/benefit-scheme/${identifier.value}/benefit-scheme-details/${schemeContractedOutNumberDetails.value}"
+      s"${appConfig.baseUrl(apiName)}/benefit-scheme/${identifier.value}/benefit-scheme-details/${schemeContractedOutNumberDetails.value}"
 
     npsClient
       .get(path)

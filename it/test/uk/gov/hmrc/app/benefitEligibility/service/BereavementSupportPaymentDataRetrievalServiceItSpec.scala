@@ -85,7 +85,8 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
-        "microservice.services.hip.port" -> server.port
+        "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port,
+        "microservice.services.hip.nps.marriageDetails.port"          -> server.port
       )
       .build()
 

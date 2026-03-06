@@ -112,7 +112,11 @@ class GetYourStatePensionDataRetrievalServiceItSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
-        "microservice.services.hip.port" -> server.port
+        "microservice.services.hip.nps.niContributionAndCredits.port"   -> server.port,
+        "microservice.services.hip.nps.marriageDetails.port"            -> server.port,
+        "microservice.services.hip.nps.individualStatePension.port"     -> server.port,
+        "microservice.services.hip.nps.schemeMembershipDetails.port"    -> server.port,
+        "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port
       )
       .build()
 

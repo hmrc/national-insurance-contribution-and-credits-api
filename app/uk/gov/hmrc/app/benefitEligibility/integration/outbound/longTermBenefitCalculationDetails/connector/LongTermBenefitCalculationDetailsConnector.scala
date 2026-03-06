@@ -61,7 +61,10 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
     )
 
     val path =
-      RequestBuilder.buildPath(s"${appConfig.hipBaseUrl}/long-term-benefits/${identifier.value}/calculation", options)
+      RequestBuilder.buildPath(
+        s"${appConfig.baseUrl(apiName)}/long-term-benefits/${identifier.value}/calculation",
+        options
+      )
 
     npsClient
       .get(path)
