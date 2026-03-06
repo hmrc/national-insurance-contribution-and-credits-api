@@ -16,20 +16,22 @@
 
 package uk.gov.hmrc.app.benefitEligibility.repository
 
+import cats.data.NonEmptyList
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.must.Matchers.{contain, must, mustBe}
+import org.scalatest.matchers.should.Matchers.{a, shouldBe}
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
-import org.scalatest.{BeforeAndAfterAll, OptionValues}
+import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import play.api.inject
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitType.{BSP, GYSP, MA}
-import uk.gov.hmrc.app.benefitEligibility.models.{PageTask, Pages}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 
 class BenefitEligibilityDataRepositoryItSpec
@@ -38,6 +40,7 @@ class BenefitEligibilityDataRepositoryItSpec
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
+    with EitherValues
     with BeforeAndAfterAll {
 
   private val app = GuiceApplicationBuilder()
@@ -51,33 +54,48 @@ class BenefitEligibilityDataRepositoryItSpec
 
   override protected def checkTtlIndex = false
 
+  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+
   "BenefitEligibilityRepository" - {
     ".getItem" - {
       "should successfully return an item by id" in {
 
-        val uuidOne: UUID   = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val uuidTwo: UUID   = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
-        val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
+        val uuidOne   = PaginationCursor(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo   = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val uuidThree = PaginationCursor(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
-        val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
-        val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
+        val paginationSource1 = PaginationSource(Class2MAReceipts, Some("SomeCallBackURLOne"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource3 = PaginationSource(MarriageDetails, Some("SomeCallBackURLThree"))
 
         val pageTasksList = List(
-          PageTask(
+          MaPageTask(
             uuidOne,
-            pageListForIdOne,
-            MA
+            List(paginationSource2, paginationSource2),
+            testInstant
           ),
-          PageTask(
+          BspPageTask(
             uuidTwo,
-            pageListForIdTwo,
-            GYSP
+            Some(paginationSource2),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            testInstant
           ),
-          PageTask(
+          GyspPageTask(
             uuidThree,
-            pageListForIdThree,
-            BSP
+            Some(paginationSource3),
+            Some(paginationSource1),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            testInstant
           )
         )
 
@@ -85,95 +103,189 @@ class BenefitEligibilityDataRepositoryItSpec
 
         val pageTasks = Table("page_task", pageTasksList: _*)
 
-        forAll(pageTasks)(pageTaskList => repository.getItem(pageTaskList.id).futureValue mustBe Some(pageTaskList))
+        forAll(pageTasks)(pageTask => repository.getItem(pageTask.id).value.futureValue shouldBe Right(pageTask))
       }
-      "should return None when a nonexistent id is parsed" in {
+      "should return database error if there is an unexpected db failure" in {
+        val uuidTwo = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
 
-        val uuidOne: UUID   = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val uuidTwo: UUID   = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
-        val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
+        repository.getItem(uuidTwo.value).value.futureValue shouldBe Left(DatabaseError(RecordNotFound(uuidTwo.value)))
+      }
+    }
+    ".upsert" - {
+      "should insert a new BspPageTask" in {
+        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
-        val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
-        val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
-        val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
-
-        val pageTasksList = List(
-          PageTask(
-            uuidOne,
-            pageListForIdOne,
-            MA
+        val bspPageTask = BspPageTask(
+          uuidOne,
+          Some(paginationSource1),
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
           ),
-          PageTask(
-            uuidTwo,
-            pageListForIdTwo,
-            GYSP
-          ),
-          PageTask(
-            uuidThree,
-            pageListForIdThree,
-            BSP
-          )
+          testInstant
         )
 
-        pageTasksList.foreach(insert)
+        repository.upsert(None, bspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+      }
+      "should insert a new MaPageTask" in {
+        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
-        val pageTasks = Table("page_task", pageTasksList: _*)
-
-        forAll(pageTasks)(pageTaskList =>
-          repository.getItem(UUID.fromString("ca4eab1b-55fa-4d6a-8aa4-7eb3debc6db7")).futureValue mustBe None
+        val maPageTask = MaPageTask(
+          uuidOne,
+          List(paginationSource1, paginationSource1),
+          testInstant
         )
+
+        repository.upsert(None, maPageTask).value.futureValue shouldBe Right(uuidOne.value)
+      }
+      "should insert a new GyspPageTask" in {
+        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val gyspPageTask = GyspPageTask(
+          uuidOne,
+          Some(paginationSource1),
+          Some(paginationSource2),
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          testInstant
+        )
+
+        repository.upsert(None, gyspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+      }
+      "should return a failure if mongo database fails" in {
+        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val gyspPageTask = GyspPageTask(
+          uuidOne,
+          Some(paginationSource1),
+          Some(paginationSource2),
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          testInstant
+        )
+        dropDatabase()
+
+        repository.upsert(None, gyspPageTask).value.futureValue shouldBe a[Left[DatabaseError, _]]
+      }
+      "should overwrite an existing MaPageTask" in {
+
+        val uuidOne = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidTwo = UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce")
+
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val maPageTask1 = MaPageTask(
+          PaginationCursor(uuidOne),
+          List(paginationSource1, paginationSource1),
+          testInstant
+        )
+
+        deleteAll().futureValue
+        insert(maPageTask1).futureValue
+
+        val maPageTask2 = MaPageTask(
+          PaginationCursor(uuidTwo),
+          List(paginationSource2, paginationSource2),
+          testInstant
+        )
+
+        repository.upsert(Some(uuidOne), maPageTask2).value.futureValue shouldBe Right(uuidTwo)
+        findAll().futureValue shouldBe List(maPageTask2)
+      }
+      "should overwrite an existing BspPageTask" in {
+
+        val uuidOne = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidTwo = UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce")
+
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val contributionAndCreditsPaging1 = ContributionAndCreditsPaging(
+          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+          DateOfBirth(LocalDate.parse("2025-10-10"))
+        )
+        val contributionAndCreditsPaging2 = ContributionAndCreditsPaging(
+          NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2020))),
+          DateOfBirth(LocalDate.parse("2025-10-10"))
+        )
+
+        val bspPageTask1 = BspPageTask(
+          PaginationCursor(uuidOne),
+          Some(paginationSource1),
+          Some(contributionAndCreditsPaging1),
+          testInstant
+        )
+
+        deleteAll().futureValue
+        insert(bspPageTask1).futureValue
+
+        val bspPageTask2 = BspPageTask(
+          PaginationCursor(uuidTwo),
+          Some(paginationSource2),
+          Some(contributionAndCreditsPaging2),
+          testInstant
+        )
+
+        repository.upsert(Some(uuidOne), bspPageTask2).value.futureValue shouldBe Right(uuidTwo)
+        findAll().futureValue shouldBe List(bspPageTask2)
+      }
+      "should overwrite an existing GyspPageTask" in {
+
+        val uuidOne = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
+        val uuidTwo = UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce")
+
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val contributionAndCreditsPaging1 = ContributionAndCreditsPaging(
+          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+          DateOfBirth(LocalDate.parse("2025-10-10"))
+        )
+        val contributionAndCreditsPaging2 = ContributionAndCreditsPaging(
+          NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2020))),
+          DateOfBirth(LocalDate.parse("2025-10-10"))
+        )
+        val gyspPageTask1 = GyspPageTask(
+          PaginationCursor(uuidOne),
+          Some(paginationSource1),
+          Some(paginationSource1),
+          Some(contributionAndCreditsPaging1),
+          testInstant
+        )
+
+        deleteAll().futureValue
+        insert(gyspPageTask1).futureValue
+
+        val gyspPageTask2 = GyspPageTask(
+          PaginationCursor(uuidTwo),
+          Some(paginationSource2),
+          Some(paginationSource2),
+          Some(contributionAndCreditsPaging2),
+          testInstant
+        )
+
+        repository.upsert(Some(uuidOne), gyspPageTask2).value.futureValue shouldBe Right(uuidTwo)
+        findAll().futureValue shouldBe List(gyspPageTask2)
       }
     }
 
-    ".delete" - {
-      "should successfully delete an item by ID" in {
-
-        val uuidOne: UUID   = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val uuidTwo: UUID   = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
-        val uuidThree: UUID = UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c")
-
-        val pageListForIdOne   = List(Pages(Class2MAReceipts, "SomeCallBackURLOne"))
-        val pageListForIdTwo   = List(Pages(Liabilities, "SomeCallBackURLTwo"))
-        val pageListForIdThree = List(Pages(MarriageDetails, "SomeCallBackURLThree"))
-
-        val pageTasksList = List(
-          PageTask(
-            uuidOne,
-            pageListForIdOne,
-            MA
-          ),
-          PageTask(
-            uuidTwo,
-            pageListForIdTwo,
-            GYSP
-          ),
-          PageTask(
-            uuidThree,
-            pageListForIdThree,
-            BSP
-          )
-        )
-        val pageTasksListAfterDelete = List(
-          PageTask(
-            uuidOne,
-            pageListForIdOne,
-            MA
-          ),
-          PageTask(
-            uuidThree,
-            pageListForIdThree,
-            BSP
-          )
-        )
-
-        pageTasksList.foreach(insert)
-
-        val pageTasks = Table("page_task", pageTasksList: _*)
-
-        forAll(pageTasks)(pageTaskList => repository.delete(uuidTwo).futureValue mustBe true)
-        findAll().futureValue must contain theSameElementsAs pageTasksListAfterDelete
-      }
-    }
   }
 
 }

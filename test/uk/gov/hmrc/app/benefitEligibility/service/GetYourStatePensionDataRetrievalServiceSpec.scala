@@ -22,68 +22,99 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.*
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{
+import uk.gov.hmrc.app.benefitEligibility.connectors.{
+  BenefitSchemeDetailsConnector,
+  IndividualStatePensionInformationConnector,
+  LiabilitySummaryDetailsConnector,
+  LongTermBenefitCalculationDetailsConnector,
+  LongTermBenefitNotesConnector,
+  MarriageDetailsConnector,
+  NiContributionsAndCreditsConnector,
+  SchemeMembershipDetailsConnector
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
   ServiceUnavailable,
   UnexpectedStatus,
   UnprocessableEntity
 }
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.connector.BenefitSchemeDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.connector.IndividualStatePensionInformationConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.{
+  AreaDiallingCode,
+  BenefitSchemeInstitutionType,
+  BenefitSchemeStatus,
+  RerouteToSchemeCessation,
+  SchemeAddressType,
+  SchemeInhibitionStatus,
+  StatementInhibitor
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.connector.LongTermBenefitCalculationDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.EnumOffidtp
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.connector.LongTermBenefitNotesConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.{
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.{
   NiContributionsAndCreditsRequest,
-  NiContributionsAndCreditsSuccess,
-  enums
+  NiContributionsAndCreditsSuccess
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.connector.SchemeMembershipDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
+  Class1ContributionStatus,
+  Class2Or3CreditStatus,
+  ContributionCategory,
+  CreditSource,
+  LatePaymentPeriod,
+  NiContributionCreditType
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
+  ApparentUnnotifiedTerminationStatus,
+  Clercalc,
+  ContCatLetter,
+  Enfcment,
+  FurtherPaymentsConfirmation,
+  GuaranteedMinimumPensionReconciliationStatus,
+  MethodOfPreservation,
+  RevaluationRate,
+  SchemeMembershipDebitReason,
+  SchemeSuspensionType,
+  SspDeem,
+  StakeholderPensionSchemeType,
+  SurvivorStatus
+}
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.repository.{GyspPageTask, PageTask, PaginationCursor, PaginationSource}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime}
+import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
 class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
@@ -115,6 +146,15 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
+  val mockPaginationService = mock[PaginationService]
+  val mockUUIDService       = mock[UuidGeneratorService]
+
+  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = testInstant
+  }
+
   val underTest = new GetYourStatePensionDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
     mockBenefitSchemeDetailsConnector,
@@ -122,7 +162,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     mockLongTermBenefitCalculationDetailsConnector,
     mockLongTermBenefitNotesConnector,
     mockSchemeMembershipDetailsConnector,
-    mockIndividualStatePensionInformationConnector
+    mockIndividualStatePensionInformationConnector,
+    mockPaginationService,
+    mockUUIDService,
+    currentTimeSource
   )
 
   val identifier = Identifier("GD379251T")
@@ -339,7 +382,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         schemeAddressStartDate = Some(SchemeAddressStartDate("2010-01-01")),
         schemeAddressEndDate = Some(SchemeAddressEndDate("2024-12-31")),
         country = Some(Country.Scotland),
-        areaDiallingCode = Some(AreaDiallingCode.Code0131), // Note: This would need to be added to the enum
+        areaDiallingCode = Some(AreaDiallingCode.Code0131),
         schemeTelephoneNumber = Some(SchemeTelephoneNumber("0131 000 0000")),
         schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C"),
         benefitSchemeAddressDetails = Some(
@@ -587,6 +630,14 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     )
   )
 
+  val paging = GyspPageTask(
+    PaginationCursor(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    Some(PaginationSource(ApiName.SchemeMembershipDetails, Some("some-url"))),
+    Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
+    None,
+    testInstant
+  )
+
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
       "should return an EligibilityCheckDataResult (all successful nps calls)" in {
@@ -643,10 +694,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -700,6 +750,13 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             EitherT.rightT(individualStatePensionInformationResult)
           )
 
+        (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
+
+        (mockPaginationService
+          .addTask(_: PageTask))
+          .expects(paging)
+          .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
+
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
@@ -715,7 +772,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
               List(longTermBenefitNotesResult)
             ),
             marriageDetailsResult,
-            individualStatePensionInformationResult
+            individualStatePensionInformationResult,
+            Some(PaginationCursor(paging.id))
           )
         )
 
@@ -770,10 +828,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -830,7 +887,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
               Nil
             ),
             marriageDetailsResult,
-            individualStatePensionInformationResult
+            individualStatePensionInformationResult,
+            None
           )
         )
 
@@ -871,10 +929,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -931,7 +988,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
               Nil
             ),
             marriageDetailsResult,
-            individualStatePensionInformationResult
+            individualStatePensionInformationResult,
+            None
           )
         )
       }
@@ -974,10 +1032,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -1035,10 +1092,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )

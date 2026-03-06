@@ -21,25 +21,35 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.BSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.{MarriageDetailsConnector, NiContributionsAndCreditsConnector}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
+  Class1ContributionStatus,
+  Class2Or3CreditStatus,
+  ContributionCategory,
+  CreditSource,
+  LatePaymentPeriod,
+  NiContributionCreditType
+}
+import uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.app.benefitEligibility.repository.*
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime}
+import java.util.UUID
 import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
 class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
@@ -54,9 +64,21 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
   val mockMarriageDetailsConnector: MarriageDetailsConnector =
     mock[MarriageDetailsConnector]
 
+  val mockPaginationService = mock[PaginationService]
+  val mockUUIDService       = mock[UuidGeneratorService]
+
+  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = testInstant
+  }
+
   val underTest = new BereavementSupportPaymentDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
-    mockMarriageDetailsConnector
+    mockMarriageDetailsConnector,
+    mockPaginationService,
+    mockUUIDService,
+    currentTimeSource
   )
 
   val identifier = Identifier("GD379251T")
@@ -144,6 +166,13 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
     )
   )
 
+  val paging = BspPageTask(
+    PaginationCursor(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
+    None,
+    testInstant
+  )
+
   "BereavementSupportPaymentDataRetrievalService" - {
     ".fetchEligibilityData" - {
       "should return an EligibilityCheckDataResult (all successful nps calls)" in {
@@ -166,19 +195,29 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
+
+        (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
+
+        (mockPaginationService
+          .addTask(_: PageTask))
+          .expects(paging)
+          .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Right(
-          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult)
+          EligibilityCheckDataResultBSP(
+            niContributionAndCreditsResult,
+            marriageDetailsResult,
+            Some(PaginationCursor(paging.id))
+          )
         )
 
       }
@@ -203,10 +242,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -215,7 +253,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Right(
-          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult)
+          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
         )
 
       }
@@ -240,10 +278,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -252,7 +289,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Right(
-          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult)
+          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
         )
 
       }
@@ -273,10 +310,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )
@@ -300,10 +336,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
-            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(BenefitType.BSP, identifier, *)
+          .expects(identifier, *)
           .returning(
             EitherT.leftT(NpsClientError(new RuntimeException("error")))
           )

@@ -19,14 +19,18 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.{EitherT, Validated}
 import cats.implicits.catsSyntaxTuple5Semigroupal
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.Results.{BadGateway, BadRequest, Forbidden, InternalServerError, Ok, UnprocessableEntity}
+import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, Ok, UnprocessableEntity}
 import play.api.mvc.{AnyContent, Request, Result}
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, Identifier, JsonValidationError}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, Identifier, JsonValidationError}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.response.{
+  BenefitEligibilityInfoResponse,
+  ErrorCode,
+  ErrorReason,
+  ErrorResponse
+}
 import uk.gov.hmrc.app.benefitEligibility.util.{RequestAwareLogger, SuccessfulResult}
-import uk.gov.hmrc.auth.core.{BearerTokenExpired, UnsupportedAuthProvider}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate

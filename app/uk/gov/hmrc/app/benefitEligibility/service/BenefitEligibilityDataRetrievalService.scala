@@ -18,9 +18,9 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.syntax.all.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.model.request.{
   BSPEligibilityCheckDataRequest,
   ESAEligibilityCheckDataRequest,
   EligibilityCheckDataRequest,
@@ -28,7 +28,6 @@ import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.{
   JSAEligibilityCheckDataRequest,
   MAEligibilityCheckDataRequest
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject

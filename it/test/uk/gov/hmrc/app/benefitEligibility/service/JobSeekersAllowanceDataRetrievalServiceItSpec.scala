@@ -43,20 +43,20 @@ import play.api.test.Helpers.{
   UNPROCESSABLE_ENTITY
 }
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.JSAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 

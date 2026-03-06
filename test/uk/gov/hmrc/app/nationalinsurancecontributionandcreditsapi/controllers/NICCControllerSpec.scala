@@ -29,22 +29,13 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.{Application, inject}
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.connectors.{FakeAuthAction, HipConnector}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.actions.AuthAction
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.{NICCClass1, NICCClass2, NPSResponse}
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{
-  ErrorResponse,
-  Failure,
-  Failures,
-  HIPErrorResponse,
-  HIPFailure,
-  HIPResponse,
-  Response
-}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.connectors.FakeAuthAction
 
 import scala.concurrent.Future
 
