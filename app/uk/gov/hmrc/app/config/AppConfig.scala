@@ -26,14 +26,27 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (config: ServicesConfig) {
 
+  def baseUrl(apiName: ApiName): String = {
+    val npsEndpointName: String = apiName match {
+      case ApiName.Class2MAReceipts                                                 => "class2MaReceipts"
+      case ApiName.Liabilities                                                      => "liabilities"
+      case ApiName.NiContributionAndCredits                                         => "niContributionAndCredits"
+      case ApiName.MarriageDetails                                                  => "marriageDetails"
+      case ApiName.IndividualStatePension                                           => "individualStatePension"
+      case ApiName.SchemeMembershipDetails | ApiName.BenefitSchemeDetails           => "schemeMembershipDetails"
+      case ApiName.LongTermBenefitNotes | ApiName.LongTermBenefitCalculationDetails => "longTermBenefitCalculation"
+    }
+    config.baseUrl(s"hip.nps.$npsEndpointName")
+  }
+
   private val hipServicePrefix = "microservice.services.hip"
 
   val benefitEligibilityInfoEndpointEnabled: Boolean = config.getBoolean("benefitEligibilityInfoEndpointEnabled")
   val hipBaseUrl: String                             = config.baseUrl("hip")
-  def hipBaseUrl(apiName: ApiName): String           = config.baseUrl(apiName.entryName)
-  val hipOriginatorId: String                        = config.getString(s"$hipServicePrefix.originatorId")
-  private val hipClientId: String                    = config.getString(s"$hipServicePrefix.clientId")
-  private val hipClientSecret: String                = config.getString(s"$hipServicePrefix.clientSecret")
+
+  val hipOriginatorId: String         = config.getString(s"$hipServicePrefix.originatorId")
+  private val hipClientId: String     = config.getString(s"$hipServicePrefix.clientId")
+  private val hipClientSecret: String = config.getString(s"$hipServicePrefix.clientSecret")
 
   val base64HipAuthToken: String =
     Base64.getEncoder.encode(s"$hipClientId:$hipClientSecret".getBytes(StandardCharsets.UTF_8)).map(_.toChar).mkString

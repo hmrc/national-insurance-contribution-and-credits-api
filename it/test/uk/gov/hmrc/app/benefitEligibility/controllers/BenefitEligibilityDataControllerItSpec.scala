@@ -109,10 +109,15 @@ class BenefitEligibilityDataControllerItSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
-        "microservice.services.hip.port"        -> server.port,
-        "benefitEligibilityInfoEndpointEnabled" -> true,
-        "microservice.services.auth.port"       -> server.port
-        // you might need some additional config
+        "microservice.services.hip.nps.class2MaReceipts.port"           -> server.port,
+        "microservice.services.hip.nps.liabilities.port"                -> server.port,
+        "microservice.services.hip.nps.niContributionAndCredits.port"   -> server.port,
+        "microservice.services.hip.nps.marriageDetails.port"            -> server.port,
+        "microservice.services.hip.nps.individualStatePension.port"     -> server.port,
+        "microservice.services.hip.nps.schemeMembershipDetails.port"    -> server.port,
+        "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port,
+        "benefitEligibilityInfoEndpointEnabled"                         -> true,
+        "microservice.services.auth.port"                               -> server.port
       )
       .build()
 
@@ -2145,6 +2150,7 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(BadRequest, ErrorReason("incompatible json, request body does not match schema"))
         )
       }
+
       "should return a 400 if a request is sent with invalid json" in {
 
         server.stubFor(

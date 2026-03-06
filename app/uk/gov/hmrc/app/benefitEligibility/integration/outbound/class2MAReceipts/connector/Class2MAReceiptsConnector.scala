@@ -63,7 +63,7 @@ class Class2MAReceiptsConnector @Inject() (
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] = {
 
-    val path = s"${appConfig.hipBaseUrl}/class-2/${identifier.value}/maternity-allowance/receipts"
+    val path = s"${appConfig.baseUrl(apiName)}/class-2/${identifier.value}/maternity-allowance/receipts"
 
     npsClient
       .get(path)
