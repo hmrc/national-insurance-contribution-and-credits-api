@@ -17,10 +17,8 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.app.benefitEligibility.common.CorrelationId
 import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
 import uk.gov.hmrc.app.config.AppConfig
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.{Failure, Response}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}

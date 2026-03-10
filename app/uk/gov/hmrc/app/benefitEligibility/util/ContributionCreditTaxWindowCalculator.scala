@@ -16,15 +16,11 @@
 
 package uk.gov.hmrc.app.benefitEligibility.util
 
-import uk.gov.hmrc.app.benefitEligibility.common.{EndTaxYear, StartTaxYear}
-
-import scala.annotation.tailrec
+import uk.gov.hmrc.app.benefitEligibility.model.common.{EndTaxYear, StartTaxYear, TaxWindow}
 
 object ContributionCreditTaxWindowCalculator {
 
   private final case class NormalizedTaxYear(start: Int, end: Int)
-
-  final case class TaxWindow(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear)
 
   def createTaxWindows(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear): List[TaxWindow] = {
 

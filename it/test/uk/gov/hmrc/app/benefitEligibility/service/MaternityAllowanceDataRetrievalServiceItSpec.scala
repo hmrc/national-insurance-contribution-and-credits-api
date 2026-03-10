@@ -26,7 +26,6 @@ import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.TableFor1
 import org.scalatest.prop.Tables.Table
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{Json, Reads}
@@ -43,39 +42,52 @@ import play.api.test.Helpers.{
   UNPROCESSABLE_ENTITY
 }
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class MaternityAllowanceDataRetrievalServiceItSpec
     extends AnyFreeSpec
+    with DefaultPlayMongoRepositorySupport[PageTask]
     with EitherValues
-    with GuiceOneAppPerSuite
     with WireMockHelper
     with Injecting
     with Matchers
     with ScalaFutures {
+
+  val uuidGenerator: UuidGenerator = new UuidGenerator {
+    override def generate: UUID = UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
+  }
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+  }
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
@@ -84,8 +96,12 @@ class MaternityAllowanceDataRetrievalServiceItSpec
     interval = Span(100, Millis)
   )
 
-  override def fakeApplication(): Application =
+  lazy val app: Application =
     GuiceApplicationBuilder()
+      .overrides(
+        play.api.inject.bind[UuidGenerator].toInstance(uuidGenerator),
+        play.api.inject.bind[MongoComponent].toInstance(mongoComponent)
+      )
       .configure(
         "microservice.services.hip.nps.class2MaReceipts.port"         -> server.port,
         "microservice.services.hip.nps.liabilities.port"              -> server.port,
@@ -96,7 +112,16 @@ class MaternityAllowanceDataRetrievalServiceItSpec
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
 
   private lazy val service: MaternityAllowanceDataRetrievalService =
-    inject[MaternityAllowanceDataRetrievalService]
+    app.injector.instanceOf[MaternityAllowanceDataRetrievalService]
+
+  // wiremock server must be started before the repo is injected else suite will fail
+  // perm fix: declare protected val repository: PlayMongoRepository[A] in PlayMongoRepositorySupport as a def (library update)
+  server.start()
+
+  override protected val repository: BenefitEligibilityRepositoryImpl =
+    inject[BenefitEligibilityRepositoryImpl]
+
+  override protected def checkTtlIndex = false
 
   "MaternityAllowanceDataRetrievalService" - {
 
@@ -265,7 +290,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 niContributionsAndCreditsSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -356,7 +382,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.BadRequest, Some(response))
-              )
+              ),
+              None
             )
           )
 
@@ -439,7 +466,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.BadRequest, Some(response))
-              )
+              ),
+              None
             )
           )
 
@@ -518,7 +546,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
-              )
+              ),
+              None
             )
           )
 
@@ -586,7 +615,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.NotFound, None)
-              )
+              ),
+              None
             )
           )
 
@@ -670,7 +700,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
-              )
+              ),
+              None
             )
           )
 
@@ -735,7 +766,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.InternalServerError, None)
-              )
+              ),
+              None
             )
           )
 
@@ -824,7 +856,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
-              )
+              ),
+              None
             )
           )
 
@@ -895,7 +928,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                 FailureResult(
                   ApiName.NiContributionAndCredits,
                   ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
-                )
+                ),
+                None
               )
             )
 
@@ -1012,7 +1046,133 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
         }
       }
+      "should parse successfully and map to result with a next cursor" in {
+        val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
+          Some(
+            List(
+              LiabilityDetailsList(
+                identifier = Identifier("RN000001A"),
+                `type` = EnumLiabtp.Abroad,
+                occurrenceNumber = OccurrenceNumber(1),
+                startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
+                endDateStatus = Some(EnumLtpedttp.EndDateHeld),
+                startDate = StartDate(LocalDate.parse("2026-01-01")),
+                endDate = Some(EndDate(LocalDate.parse("2026-01-01"))),
+                country = Some(Country.GreatBritain),
+                trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
+                casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
+                homeResponsibilitiesProtectionBenefitReference =
+                  Some(HomeResponsibilitiesProtectionBenefitReference("12345678AB")),
+                homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
+                lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
+                lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
+                homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
+                awardAmount = Some(AwardAmount(10.56)),
+                resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
+                homeResponsibilitiesProtectionIndicator = Some(EnumHrpIndicator.None),
+                officeDetails = Some(
+                  OfficeDetails(
+                    officeLocationDecode = Some(OfficeLocationDecode(1)),
+                    officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
+                    officeIdentifier = Some(EnumOffidtp.None)
+                  )
+                )
+              )
+            )
+          ),
+          Some(Callback(Some(CallbackUrl("SomeCallBackUrl"))))
+        )
 
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
+          Some(
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          ),
+          Some(
+            List(
+              Class2ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(npsClass2MaReceiptsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(class2MAReceiptsSuccessResponseBody)
+            )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(liabilitySummaryDetailsSuccessResponse).toString)
+            )
+        )
+
+        val result = service.fetchEligibilityData(maEligibilityCheckDataRequest).value.futureValue
+
+        result shouldBe Right(
+          EligibilityCheckDataResultMA(
+            SuccessResult(
+              ApiName.Class2MAReceipts,
+              class2MAReceiptsSuccessResponse
+            ),
+            List(
+              SuccessResult(
+                ApiName.Liabilities,
+                liabilitySummaryDetailsSuccessResponse
+              )
+            ),
+            SuccessResult(
+              ApiName.NiContributionAndCredits,
+              niContributionsAndCreditsSuccessResponse
+            ),
+            Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+          )
+        )
+      }
     }
   }
 

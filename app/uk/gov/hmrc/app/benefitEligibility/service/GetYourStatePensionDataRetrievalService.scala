@@ -19,30 +19,40 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.{
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.connectors.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{MarriageDetails, SchemeMembershipDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{
+  BenefitSchemeDetailsResult,
+  LongTermBenefitCalculationDetailsResult,
+  LongTermBenefitNotesResult,
+  NpsApiResult,
+  SchemeMembershipDetailsResult
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.{
   ContributionsAndCreditsRequestParams,
   LongTermBenefitCalculationRequestParams
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.ErrorReport
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.connector.BenefitSchemeDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.connector.IndividualStatePensionInformationConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.connector.LongTermBenefitCalculationDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.connector.LongTermBenefitNotesConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.connector.MarriageDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.connector.SchemeMembershipDetailsConnector
+import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  ContributionAndCreditsPaging,
+  GyspPageTask,
+  PaginationCursor,
+  PaginationSource
+}
 import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
+import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.{Instant, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
 final case class RequestKey(benefitType: BenefitType, nationalInsuranceNumber: Identifier)
 
@@ -63,7 +73,10 @@ class GetYourStatePensionDataRetrievalService @Inject() (
     longTermBenefitCalculationDetailsConnector: LongTermBenefitCalculationDetailsConnector,
     longTermBenefitNotesConnector: LongTermBenefitNotesConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
-    statePensionInformationConnector: IndividualStatePensionInformationConnector
+    statePensionInformationConnector: IndividualStatePensionInformationConnector,
+    paginationService: PaginationService,
+    uuidGenerator: UuidGenerator,
+    currentTimeSource: CurrentTimeSource
 )(implicit ec: ExecutionContext) {
 
   def fetchEligibilityData(
@@ -80,7 +93,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       fetchLongTermBenefitCalculationDetailsData(eligibilityCheckDataRequest.longTermBenefitCalculation),
       fetchIndividualStatePensionInformation()
     ).parTupled
-      .map {
+      .flatMap {
         case (
               contributionsAndCreditResult,
               marriageDetailsResult,
@@ -88,20 +101,57 @@ class GetYourStatePensionDataRetrievalService @Inject() (
               longTermBenefitCalculationDetailsData,
               individualStatePensionResult
             ) =>
-          EligibilityCheckDataResultGYSP(
+          val result = EligibilityCheckDataResultGYSP(
             contributionsAndCreditResult,
             benefitSchemeMembershipDetailsData,
             longTermBenefitCalculationDetailsData,
             marriageDetailsResult,
-            individualStatePensionResult
+            individualStatePensionResult,
+            None
           )
-      }
-      .leftMap { error =>
-        // TODO add logging
-        DataRetrievalServiceError()
+          val taxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
+            eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
+            eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
+          )
+          if (taxWindows.length > 1 || result.shouldPaginate) {
+            val marriageDetailsPaginate = marriageDetailsResult.getSuccess.flatMap(
+              _.marriageDetails._links
+                .flatMap(_.self.href)
+                .map(url => PaginationSource(MarriageDetails, Some(url.value)))
+            )
+
+            val benefitSchemeDetailsPaginate =
+              benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.flatMap(
+                _.callback.flatMap(_.callbackURL).map(url => PaginationSource(SchemeMembershipDetails, Some(url.value)))
+              )
+
+            val niContributionsCreditsPaginate = taxWindows.safeTailNel.map { remainingWindows =>
+              ContributionAndCreditsPaging(
+                remainingWindows,
+                eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
+              )
+            }
+
+            paginationService
+              .addTask(
+                GyspPageTask(
+                  PaginationCursor(uuidGenerator.generate),
+                  benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
+                  marriageDetailsPaging = marriageDetailsPaginate,
+                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                  currentTimeSource.instantNow()
+                )
+              )
+              .map(id => result.copy(nextCursor = Some(PaginationCursor(id))))
+
+          } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }
 
   }
+    .leftMap { error =>
+      // TODO add logging
+      DataRetrievalServiceError()
+    }
 
   // TODO - generate aggregation/paginationId
   private[service] def fetchNiContributionsAndCreditsData(
@@ -130,7 +180,6 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
   private[service] def fetchMarriageDetailsData(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
     marriageDetailsConnector.fetchMarriageDetails(
-      requestKey.benefitType,
       requestKey.nationalInsuranceNumber
     )
 

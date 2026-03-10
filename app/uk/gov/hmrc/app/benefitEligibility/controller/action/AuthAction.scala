@@ -17,16 +17,14 @@
 package uk.gov.hmrc.app.benefitEligibility.controller.action
 
 import play.api.libs.json.Json
-import play.api.mvc.Results.{Forbidden, InternalServerError}
 import play.api.mvc.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.response.{ErrorCode, ErrorReason, ErrorResponse}
+import play.api.mvc.Results.{Forbidden, InternalServerError}
+import uk.gov.hmrc.app.benefitEligibility.model.response.{ErrorCode, ErrorReason, ErrorResponse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.Failure
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

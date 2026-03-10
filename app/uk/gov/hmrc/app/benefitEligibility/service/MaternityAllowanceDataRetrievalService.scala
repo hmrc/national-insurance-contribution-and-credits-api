@@ -19,24 +19,31 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.common.{BenefitEligibilityError, DataRetrievalServiceError}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.{
+  Class2MAReceiptsConnector,
+  LiabilitySummaryDetailsConnector,
+  NiContributionsAndCreditsConnector
+}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DataRetrievalServiceError}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
+import java.time.{Instant, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 class MaternityAllowanceDataRetrievalService @Inject() (
     class2MAReceiptsConnector: Class2MAReceiptsConnector,
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
-    liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector
+    liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
+    paginationService: PaginationService,
+    uuidGenerator: UuidGenerator,
+    currentTimeSource: CurrentTimeSource
 )(
     implicit ec: ExecutionContext
 ) {
@@ -69,12 +76,26 @@ class MaternityAllowanceDataRetrievalService @Inject() (
         )
       }.sequence
     ).parTupled
-      .map { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
-        EligibilityCheckDataResultMA(
+      .flatMap { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
+
+        val result = EligibilityCheckDataResultMA(
           class2MaReceiptsResult,
           liabilityResult,
-          contributionsAndCreditResult
+          contributionsAndCreditResult,
+          None
         )
+        if (result.shouldPaginate) {
+          val liabilityPages = liabilityResult.flatMap {
+            case NpsApiResult.FailureResult(apiName, result) => None
+            case NpsApiResult.SuccessResult(apiName, result) =>
+              Some(PaginationSource(apiName, result.callback.flatMap(_.callbackURL.map(_.value))))
+          }
+          paginationService
+            .addTask(
+              MaPageTask(PaginationCursor(uuidGenerator.generate), liabilityPages, currentTimeSource.instantNow())
+            )
+            .map(id => result.copy(nextCursor = Some(PaginationCursor(id))))
+        } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }
       .leftMap { error =>
         // TODO ADD LOGGING

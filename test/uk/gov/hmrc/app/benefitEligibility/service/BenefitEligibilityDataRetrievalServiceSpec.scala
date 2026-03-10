@@ -22,45 +22,106 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.SuccessResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
+
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
+
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  ApiName,
+  AssociatedCalculationSequenceNumber,
+  BenefitEligibilityError,
+  Callback,
+  CallbackUrl,
+  Country,
+  DateOfBirth,
+  EndTaxYear,
+  Identifier,
+  LongTermBenefitType,
+  StartTaxYear,
+  TaxYear
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.{
+  AreaDiallingCode,
+  BenefitSchemeInstitutionType,
+  BenefitSchemeStatus,
+  RerouteToSchemeCessation,
+  SchemeAddressType,
+  SchemeInhibitionStatus,
+  StatementInhibitor
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
+  EnumAtcredfg,
+  EnumHrpIndicator,
+  EnumLcheadtp,
+  EnumLcruletp,
+  EnumLiabtp,
+  EnumLtpedttp,
+  EnumLtpsdttp,
+  EnumOffidtp
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
+  Class1ContributionStatus,
+  Class2Or3CreditStatus,
+  ContributionCategory,
+  CreditSource,
+  LatePaymentPeriod,
+  NiContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
+  ApparentUnnotifiedTerminationStatus,
+  Clercalc,
+  ContCatLetter,
+  Enfcment,
+  FurtherPaymentsConfirmation,
+  GuaranteedMinimumPensionReconciliationStatus,
+  MethodOfPreservation,
+  RevaluationRate,
+  SchemeMembershipDebitReason,
+  SchemeSuspensionType,
+  SspDeem,
+  StakeholderPensionSchemeType,
+  SurvivorStatus
+}
+import uk.gov.hmrc.app.benefitEligibility.model.request.{
+  BSPEligibilityCheckDataRequest,
+  ESAEligibilityCheckDataRequest,
+  GYSPEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest,
+  MAEligibilityCheckDataRequest
+}
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 
 import java.time.LocalDate
 import java.util.concurrent.Executors
@@ -670,7 +731,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
               EligibilityCheckDataResultMA(
                 class2MAReceiptsResult,
                 List(liabilitySummaryDetailsResult),
-                niContributionAndCreditsResult
+                niContributionAndCreditsResult,
+                None
               )
             )
           )
@@ -679,7 +741,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
-            niContributionAndCreditsResult
+            niContributionAndCreditsResult,
+            None
           )
         )
       }
@@ -736,7 +799,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
                   List(longTermBenefitNotesResult)
                 ),
                 marriageDetailsResult,
-                individualStatePensionInformationResult
+                individualStatePensionInformationResult,
+                None
               )
             )
           )
@@ -750,7 +814,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
               List(longTermBenefitNotesResult)
             ),
             marriageDetailsResult,
-            individualStatePensionInformationResult
+            individualStatePensionInformationResult,
+            None
           )
         )
       }
@@ -760,12 +825,12 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .expects(bspEligibilityCheckDataRequest, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult)
+              EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
             )
           )
 
         underTest.getEligibilityData(bspEligibilityCheckDataRequest).value.futureValue shouldBe Right(
-          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult)
+          EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
         )
       }
     }

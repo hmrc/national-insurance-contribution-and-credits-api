@@ -21,26 +21,48 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.NpsNormalizedError.UnprocessableEntity
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.MAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.connector.Class2MAReceiptsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.class2MAReceipts.model.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.connector.LiabilitySummaryDetailsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.connector.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.{
+  Class2MAReceiptsConnector,
+  LiabilitySummaryDetailsConnector,
+  NiContributionsAndCreditsConnector
+}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.UnprocessableEntity
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
+  EnumAtcredfg,
+  EnumHrpIndicator,
+  EnumLcheadtp,
+  EnumLcruletp,
+  EnumLiabtp,
+  EnumLtpedttp,
+  EnumLtpsdttp,
+  EnumOffidtp,
+  LiabilitySearchCategoryHyphenated
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
+  Class1ContributionStatus,
+  Class2Or3CreditStatus,
+  ContributionCategory,
+  CreditSource,
+  LatePaymentPeriod,
+  NiContributionCreditType
+}
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.repository.*
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime}
+import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
@@ -59,10 +81,22 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
+  val mockPaginationService: PaginationService = mock[PaginationService]
+  val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
+
+  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = testInstant
+  }
+
   val underTest = new MaternityAllowanceDataRetrievalService(
     mockClass2MAReceiptsConnector,
     mockNiContributionsAndCreditsConnector,
-    mockLiabilitySummaryDetailsConnector
+    mockLiabilitySummaryDetailsConnector,
+    mockPaginationService,
+    mockUUIDService,
+    currentTimeSource
   )
 
   val identifier = Identifier("GD379251T")
@@ -160,6 +194,12 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     Some(Callback(Some(CallbackUrl("/some/url"))))
   )
 
+  val paging = MaPageTask(
+    PaginationCursor(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    List(PaginationSource(ApiName.Liabilities, Some("/some/url"))),
+    testInstant
+  )
+
   "MaternityAllowanceDataRetrievalService" - {
     ".fetchEligibilityData" - {
       "should return an EligibilityCheckDataResult (all successful nps calls)" in {
@@ -209,6 +249,13 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
 
+        (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
+
+        (mockPaginationService
+          .addTask(_: PageTask))
+          .expects(paging)
+          .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
+
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
@@ -216,7 +263,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
-            niContributionAndCreditsResult
+            niContributionAndCreditsResult,
+            Some(PaginationCursor(paging.id))
           )
         )
 
@@ -276,7 +324,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
-            niContributionAndCreditsResult
+            niContributionAndCreditsResult,
+            None
           )
         )
 
@@ -336,7 +385,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
-            niContributionAndCreditsResult
+            niContributionAndCreditsResult,
+            None
           )
         )
       }

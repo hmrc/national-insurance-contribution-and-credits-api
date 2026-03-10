@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.config
 
-import uk.gov.hmrc.app.benefitEligibility.common.ApiName
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.nio.charset.StandardCharsets

@@ -16,20 +16,24 @@
 
 package uk.gov.hmrc.app.benefitEligibility.repository
 
-import com.google.inject.Inject
+import cats.data.EitherT
+import cats.implicits.catsSyntaxApplicativeError
+import com.google.inject.{ImplementedBy, Inject}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.*
-import uk.gov.hmrc.app.benefitEligibility.models.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DatabaseError, RecordNotFound}
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[BenefitEligibilityRepositoryImpl])
 trait BenefitEligibilityRepository {
-  def getItem(id: UUID): Future[Option[PageTask]]
+  def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask]
+  def upsert(id: Option[UUID], update: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
 }
 
 @Singleton
@@ -37,25 +41,75 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
     extends PlayMongoRepository[PageTask](
       collectionName = "page-tasks",
       mongoComponent = mongoComponent,
-      domainFormat = PageTask.format,
+      domainFormat = PageTask.pageTaskFormat,
       indexes = Seq(
+        IndexModel(Indexes.ascending("id"), IndexOptions().unique(true)),
         IndexModel(
-          Indexes.ascending("id"), // here is important
+          Indexes.ascending("createdAt"),
           IndexOptions()
-            .name("id")
-            .unique(true)
-            .background(false)
             .expireAfter(5000, TimeUnit.SECONDS)
+            .unique(false)
         )
       ),
       replaceIndexes = true
     )
     with BenefitEligibilityRepository {
 
-  def getItem(id: UUID): Future[Option[PageTask]] =
-    collection.find(Filters.equal("id", id.toString)).headOption()
+  def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask] =
+    collection
+      .find(Filters.equal("id", id.toString))
+      .headOption()
+      .attemptT
+      .flatMap {
+        case None           => EitherT.leftT(RecordNotFound(id))
+        case Some(pageTask) => EitherT.rightT(pageTask)
+      }
+      .leftMap(error => DatabaseError(error))
 
-  def delete(id: UUID): Future[Boolean] =
-    collection.deleteOne(Filters.equal("id", id.toString)).toFuture().map(_.wasAcknowledged)
+  def upsert(id: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
+    val updates = pageTask match {
+      case MaPageTask(id, benefitType, liabilitiesPaging, createdAt) =>
+        Updates.combine(
+          Updates.set("id", id.toString),
+          Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
+          Updates.set("benefitType", Codecs.toBson(benefitType)),
+          Updates.set("createdAt", Codecs.toBson(createdAt))
+        )
+      case BspPageTask(id, benefitType, marriageDetailsPaging, contributionAndCreditsPaging, createdAt) =>
+        Updates.combine(
+          Updates.set("id", id.toString),
+          Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
+          Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
+          Updates.set("benefitType", Codecs.toBson(benefitType)),
+          Updates.set("createdAt", Codecs.toBson(createdAt))
+        )
+      case GyspPageTask(
+            id,
+            benefitType,
+            benefitSchemeMembershipDetailsPaging,
+            marriageDetailsPaging,
+            contributionAndCreditsPaging,
+            createdAt
+          ) =>
+        Updates.combine(
+          Updates.set("id", id.toString),
+          Updates.set("benefitSchemeMembershipDetailsPaging", Codecs.toBson(benefitSchemeMembershipDetailsPaging)),
+          Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
+          Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
+          Updates.set("benefitType", Codecs.toBson(benefitType)),
+          Updates.set("createdAt", Codecs.toBson(createdAt))
+        )
+    }
+    collection
+      .findOneAndUpdate(
+        Filters.equal("id", Codecs.toBson(id.map(_.toString))),
+        updates,
+        FindOneAndUpdateOptions().upsert(true)
+      )
+      .toFuture()
+      .attemptT
+      .map(_ => pageTask.id)
+      .leftMap(error => DatabaseError(error))
+  }
 
 }

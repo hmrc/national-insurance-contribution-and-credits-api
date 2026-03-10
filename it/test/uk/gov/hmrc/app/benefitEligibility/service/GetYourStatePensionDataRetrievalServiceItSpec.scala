@@ -26,7 +26,6 @@ import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.TableFor1
 import org.scalatest.prop.Tables.Table
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{Json, Reads}
@@ -43,64 +42,70 @@ import play.api.test.Helpers.{
   UNPROCESSABLE_ENTITY
 }
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.common.*
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.{
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.EnumOffidtp
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.{
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.{
   ContributionsAndCreditsRequestParams,
   LongTermBenefitCalculationRequestParams
 }
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.benefitSchemeDetails.model.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.individualStatePensionInformation.model.enums.{
-  CreditSourceType,
-  IndividualStatePensionContributionCreditType
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.liabilitySummaryDetails.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitCalculationDetails.model.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.longTermBenefitNotes.model.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.marriageDetails.model.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.niContributionsAndCredits.model.enums.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.schemeMembershipDetails.model.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class GetYourStatePensionDataRetrievalServiceItSpec
     extends AnyFreeSpec
+    with DefaultPlayMongoRepositorySupport[PageTask]
     with EitherValues
-    with GuiceOneAppPerSuite
     with WireMockHelper
     with Injecting
     with Matchers
     with ScalaFutures {
+
+  val uuidGenerator: UuidGenerator = new UuidGenerator {
+    override def generate: UUID = UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
+  }
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+  }
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
@@ -109,8 +114,12 @@ class GetYourStatePensionDataRetrievalServiceItSpec
     interval = Span(100, Millis)
   )
 
-  override def fakeApplication(): Application =
+  lazy val app: Application =
     GuiceApplicationBuilder()
+      .overrides(
+        play.api.inject.bind[UuidGenerator].toInstance(uuidGenerator),
+        play.api.inject.bind[MongoComponent].toInstance(mongoComponent)
+      )
       .configure(
         "microservice.services.hip.nps.niContributionAndCredits.port"   -> server.port,
         "microservice.services.hip.nps.marriageDetails.port"            -> server.port,
@@ -123,7 +132,16 @@ class GetYourStatePensionDataRetrievalServiceItSpec
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
 
   private lazy val service: GetYourStatePensionDataRetrievalService =
-    inject[GetYourStatePensionDataRetrievalService]
+    app.injector.instanceOf[GetYourStatePensionDataRetrievalService]
+
+  // wiremock server must be started before the repo is injected else suite will fail
+  // perm fix: declare protected val repository: PlayMongoRepository[A] in PlayMongoRepositorySupport as a def (library update)
+  server.start()
+
+  override protected val repository: BenefitEligibilityRepositoryImpl =
+    inject[BenefitEligibilityRepositoryImpl]
+
+  override protected def checkTtlIndex = false
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
     totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
@@ -701,7 +719,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
             )
           )
 
@@ -867,7 +886,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1032,7 +1052,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1186,7 +1207,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1328,7 +1350,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1486,7 +1509,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1625,7 +1649,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1788,7 +1813,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               SuccessResult(
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
-              )
+              ),
+              None
             )
           )
 
@@ -1934,7 +1960,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 SuccessResult(
                   ApiName.IndividualStatePension,
                   individualStatePensionInformationSuccessResponse
-                )
+                ),
+                None
               )
             )
 
@@ -2176,7 +2203,6 @@ class GetYourStatePensionDataRetrievalServiceItSpec
           )
         }
       }
-
     }
   }
 

@@ -18,14 +18,8 @@ package uk.gov.hmrc.app.benefitEligibility.util
 
 import cats.implicits.catsSyntaxEitherId
 import play.api.libs.json.Reads
-import uk.gov.hmrc.app.benefitEligibility.common.{
-  ApiName,
-  BenefitEligibilityError,
-  BenefitType,
-  InvalidJsonError,
-  JsonValidationError
-}
-import uk.gov.hmrc.app.benefitEligibility.integration.outbound.NpsApiResponse
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, InvalidJsonError, JsonValidationError}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.util.{Failure, Success, Try}

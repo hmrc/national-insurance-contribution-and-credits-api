@@ -17,12 +17,10 @@
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
 import play.api.libs.json.{Json, OWrites, Writes}
-import uk.gov.hmrc.app.benefitEligibility.common.npsError.*
-import uk.gov.hmrc.app.benefitEligibility.common.{MaternityAllowanceSortType, ReceiptDate}
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.*
-import uk.gov.hmrc.app.benefitEligibility.integration.inbound.request.EligibilityCheckDataRequestParams.*
-
-import java.time.LocalDate
+import uk.gov.hmrc.app.benefitEligibility.model.common.MaternityAllowanceSortType
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.request._
 
 object TestFormat {
 
