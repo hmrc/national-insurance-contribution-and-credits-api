@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,15 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 
-sealed abstract class BenefitType(override val entryName: String) extends EnumEntry
+sealed abstract class PaginationType(override val entryName: String) extends EnumEntry
 
-object BenefitType extends Enum[BenefitType] with PlayJsonEnum[BenefitType] {
-  val values: immutable.IndexedSeq[BenefitType] = findValues
+object PaginationType extends Enum[PaginationType] with PlayJsonEnum[PaginationType] {
+  val values: immutable.IndexedSeq[PaginationType] = findValues
 
-  case object MA   extends BenefitType("MA")
-  case object ESA  extends BenefitType("ESA")
-  case object JSA  extends BenefitType("JSA")
-  case object GYSP extends BenefitType("GYSP")
-  case object BSP  extends BenefitType("BSP")
+  case object MA extends PaginationType("MA")
 
-  def from(paginationType: PaginationType) =
-    paginationType match {
-      case PaginationType.MA   => MA
-      case PaginationType.GYSP => GYSP
-      case PaginationType.BSP  => BSP
-    }
+  case object GYSP extends PaginationType("GYSP")
+
+  case object BSP extends PaginationType("BSP")
 
 }

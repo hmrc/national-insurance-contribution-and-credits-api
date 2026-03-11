@@ -55,6 +55,10 @@ case class JsonValidationError(errors: List[String]) extends BenefitEligibilityE
   override def getMessage: String = errors.mkString(",")
 } //TODO - should return as a 500 to DWP
 
+case class InvalidRequest(errors: List[String]) extends BenefitEligibilityError {
+  override def getMessage: String = errors.mkString(",")
+}
+
 case class InvalidJsonError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage
 } //TODO - should return as a 500 to DWP

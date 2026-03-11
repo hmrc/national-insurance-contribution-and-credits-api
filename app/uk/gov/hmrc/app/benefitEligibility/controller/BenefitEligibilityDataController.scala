@@ -17,10 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.app.benefitEligibility.service.BenefitEligibilityDataRetrievalService
+import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
+import uk.gov.hmrc.app.benefitEligibility.service.{BenefitEligibilityDataRetrievalService, PaginationService}
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,6 +31,7 @@ class BenefitEligibilityDataController @Inject() (
     cc: ControllerComponents,
     identity: action.AuthAction,
     benefitEligibilityDataRetrievalService: BenefitEligibilityDataRetrievalService,
+    paginationService: PaginationService,
     appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
@@ -38,7 +41,8 @@ class BenefitEligibilityDataController @Inject() (
       identity.async { implicit request =>
         BenefitEligibilityRequestHandler.handleRequest(
           request,
-          benefitEligibilityDataRetrievalService.getEligibilityData
+          benefitEligibilityDataRetrievalService.getEligibilityData,
+          paginationService.paginate
         )
       }
     } else identity.async(_ => Future.successful(NotFound))

@@ -189,7 +189,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         Some(LongTermBenefitType.WidowsBenefit),
         Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing)
       )
-    )
+    ),
+    None
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(

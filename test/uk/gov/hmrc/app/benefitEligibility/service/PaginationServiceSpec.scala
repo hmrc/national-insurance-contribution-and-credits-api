@@ -167,10 +167,11 @@ class PaginationServiceSpec
           .returning(EitherT.rightT(NpsApiResult.SuccessResult(ApiName.Liabilities, liabilitiesSuccessResponse)))
 
         val expectedResult = PaginationResult(
-          BenefitType.MA,
+          PaginationType.MA,
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
           None,
           ContributionCreditPagingResult(None, None),
+          None,
           None
         )
         underTest.paginate(pageTask.id, nationalInsuranceNumber).value.futureValue shouldBe Right(expectedResult)
@@ -225,7 +226,7 @@ class PaginationServiceSpec
           )
 
         val expected = PaginationResult(
-          benefitType = BenefitType.BSP,
+          paginationType = PaginationType.BSP,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(
@@ -446,7 +447,7 @@ class PaginationServiceSpec
           )
 
         val expected = PaginationResult(
-          benefitType = BenefitType.GYSP,
+          paginationType = PaginationType.GYSP,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(

@@ -81,17 +81,16 @@ object BenefitEligibilityInfoResponse {
   def from(
       nationalInsuranceNumber: Identifier,
       paginationResult: PaginationResult
-  ): Option[BenefitEligibilityInfoResponse] =
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponse] =
     if (paginationResult.allResults.exists(_.isFailure))
-      Some(
+      Left(
         BenefitEligibilityInfoErrorResponse
-          .from(paginationResult.benefitType, nationalInsuranceNumber, paginationResult.allResults)
+          .from(BenefitType.from(paginationResult.paginationType), nationalInsuranceNumber, paginationResult.allResults)
       )
     else
-      paginationResult.benefitType match {
-        case BenefitType.MA =>
-
-          Some(
+      paginationResult.paginationType match {
+        case PaginationType.MA =>
+          Right(
             BenefitEligibilityInfoSuccessResponseMa(
               nationalInsuranceNumber,
               FilteredClass2MaReceipts(Nil),
@@ -101,12 +100,12 @@ object BenefitEligibilityInfoResponse {
             )
           )
 
-        case BenefitType.GYSP =>
+        case PaginationType.GYSP =>
 
           val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(paginationResult)
           val filteredSchemeMembershipDetails                  = getFilteredSchemeMembershipDetails(paginationResult)
 
-          Some(
+          Right(
             BenefitEligibilityInfoSuccessResponseGysp(
               nationalInsuranceNumber = nationalInsuranceNumber,
               marriageDetailsResult = filteredMarriageDetails,
@@ -118,10 +117,10 @@ object BenefitEligibilityInfoResponse {
               paginationResult.getNextCursor
             )
           )
-        case BenefitType.BSP =>
+        case PaginationType.BSP =>
           val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(paginationResult)
 
-          Some(
+          Right(
             BenefitEligibilityInfoSuccessResponseBsp(
               nationalInsuranceNumber,
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
@@ -130,7 +129,6 @@ object BenefitEligibilityInfoResponse {
             )
           )
 
-        case _ => None
       }
 
   private def getFilteredMarriageDetails(paginationResult: PaginationResult) =

@@ -167,7 +167,8 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)
-        )
+        ),
+        None
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {

@@ -16,113 +16,107 @@
 
 package uk.gov.hmrc.app.benefitEligibility.controller
 
+import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
 import com.github.tomakehurst.wiremock.http.Fault
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.mvc.{AnyContent, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResponseStatus
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.{
-  AreaDiallingCode,
-  BenefitSchemeInstitutionType,
-  BenefitSchemeStatus,
-  RerouteToSchemeCessation,
-  SchemeAddressType,
-  SchemeInhibitionStatus,
-  StatementInhibitor
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
 }
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStartDateStatus
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
+  HipOrigin,
+  NpsErrorCode,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
-  ApparentUnnotifiedTerminationStatus,
-  Clercalc,
-  ContCatLetter,
-  Enfcment,
-  FurtherPaymentsConfirmation,
-  GuaranteedMinimumPensionReconciliationStatus,
-  MethodOfPreservation,
-  RevaluationRate,
-  SchemeMembershipDebitReason,
-  SchemeSuspensionType,
-  SspDeem,
-  StakeholderPensionSchemeType,
-  SurvivorStatus
-}
-import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
-import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, InternalServerError}
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
+import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, InternalServerError}
+import uk.gov.hmrc.app.benefitEligibility.repository.*
+import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
+import java.util.UUID
 import scala.concurrent.Future
 
 class BenefitEligibilityDataControllerItSpec
     extends AnyFreeSpec
     with EitherValues
-    with GuiceOneAppPerSuite
+    with DefaultPlayMongoRepositorySupport[PageTask]
     with WireMockHelper
     with Injecting
-    with Matchers {
+    with Matchers
+    with MockFactory {
 
-  override def fakeApplication(): Application =
+  val uuidOne: UUID   = UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
+  val uuidTwo: UUID   = UUID.fromString("f678d869-7922-4a11-82e2-5cf4e235cfee")
+  val uuidThree: UUID = UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")
+
+  val mockUuidGenerator: UuidGenerator = mock[UuidGenerator]
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+  }
+
+  lazy val app: Application =
     GuiceApplicationBuilder()
+      .overrides(
+        play.api.inject.bind[UuidGenerator].toInstance(mockUuidGenerator),
+        play.api.inject.bind[MongoComponent].toInstance(mongoComponent),
+        play.api.inject.bind[CurrentTimeSource].toInstance(currentTimeSource)
+      )
       .configure(
         "microservice.services.hip.nps.class2MaReceipts.port"           -> server.port,
         "microservice.services.hip.nps.liabilities.port"                -> server.port,
@@ -137,10 +131,70 @@ class BenefitEligibilityDataControllerItSpec
       .build()
 
   private lazy val underTest: BenefitEligibilityDataController =
-    inject[BenefitEligibilityDataController]
+    app.injector.instanceOf[BenefitEligibilityDataController]
+
+  server.start()
+
+  override protected val repository: BenefitEligibilityRepositoryImpl =
+    inject[BenefitEligibilityRepositoryImpl]
+
+  override protected def checkTtlIndex = false
 
   private val nationalInsuranceNumber: Identifier  = Identifier("AB123456C")
   private val nationalInsuranceNumber2: Identifier = Identifier("CD345678E")
+
+  val npsLiabilitySummaryDetailsPath: String = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+  val npsCreditsAndContributionsPath         = "/national-insurance/contributions-and-credits"
+  val npsIndividualMarriageDetailsPath       = s"/individual/${nationalInsuranceNumber.value}/marriage-cp"
+  val benefitSchemeDetailsPath    = s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"
+  val schemeMembershipDetailsPath = s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+  val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+    List(
+      MaPageTask(
+        PaginationCursor(uuidOne),
+        List(
+          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
+          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+        ),
+        currentTimeSource.instantNow()
+      ),
+      BspPageTask(
+        PaginationCursor(uuidTwo),
+        Some(
+          PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+        ),
+        Some(
+          ContributionAndCreditsPaging(
+            NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+            DateOfBirth(LocalDate.parse("2025-10-10"))
+          )
+        ),
+        currentTimeSource.instantNow()
+      ),
+      GyspPageTask(
+        PaginationCursor(uuidThree),
+        Some(
+          PaginationSource(
+            ApiName.BenefitSchemeDetails,
+            Some(benefitSchemeDetailsPath)
+          )
+        ),
+        Some(
+          PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+        ),
+        Some(
+          ContributionAndCreditsPaging(
+            NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+            DateOfBirth(LocalDate.parse("2025-10-10"))
+          )
+        ),
+        currentTimeSource.instantNow()
+      )
+    ).foreach(pageTask => insert(pageTask).futureValue)
+  }
 
   val filteredClass2MaReceipts = FilteredClass2MaReceipts(
     List(
@@ -337,14 +391,7 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
       ),
-      Some(
-        MarriageDetailsSuccess.Links(
-          MarriageDetailsSuccess.SelfLink(
-            Some(MarriageDetailsSuccess.Href("")),
-            Some(MarriageDetailsSuccess.Methods.get)
-          )
-        )
-      )
+      None
     )
   )
 
@@ -807,13 +854,14 @@ class BenefitEligibilityDataControllerItSpec
               EndTaxYear(2025)
             )
           )
-          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
-            .withHeaders(
-              "Content-Type"  -> "application/json",
-              "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
-            )
+          val request: FakeRequest[AnyContent] =
+            FakeRequest("POST", "/benefit-eligibility-info")
+              .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+              .withHeaders(
+                "Content-Type"  -> "application/json",
+                "Authorization" -> "Bearer token",
+                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
@@ -1121,7 +1169,8 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None)
+            LiabilitiesRequestParams(List(Abroad), None, None, None),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1146,9 +1195,6 @@ class BenefitEligibilityDataControllerItSpec
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
         "should return a 502 if some downstream calls to NPS services fail (MA - Partial Failure)" in {
-
-          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
 
           val liabilitySummaryDetailsSuccessResponseBody =
             Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
@@ -1202,7 +1248,8 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None)
+            LiabilitiesRequestParams(List(Abroad), None, None, None),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1255,9 +1302,6 @@ class BenefitEligibilityDataControllerItSpec
         }
         "should return a 502 if all downstream calls to NPS services fail (MA - Failure)" in {
 
-          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
-
           val niContributionsAndCreditsSuccessResponseBody =
             Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
 
@@ -1308,7 +1352,8 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None)
+            LiabilitiesRequestParams(List(Abroad), None, None, None),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1368,7 +1413,6 @@ class BenefitEligibilityDataControllerItSpec
 
       "BSP" - {
         "should Fetch BSP Correctly" in {
-
           val niContributionsAndCreditsSuccessResponseBody =
             Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
           val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
@@ -1383,7 +1427,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1393,7 +1437,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(npsIndividualMarriageDetailsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1408,7 +1452,8 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            )
+            ),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1470,7 +1515,8 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            )
+            ),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1549,7 +1595,8 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            )
+            ),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1600,7 +1647,6 @@ class BenefitEligibilityDataControllerItSpec
 
       "GSYP" - {
         "should Fetch GYSP Correctly" in {
-
           val niContributionsAndCreditsSuccessResponseBody =
             Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
 
@@ -1707,7 +1753,8 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None))
+            Some(LongTermBenefitCalculationRequestParams(None, None)),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1838,7 +1885,8 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None))
+            Some(LongTermBenefitCalculationRequestParams(None, None)),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1997,7 +2045,8 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None))
+            Some(LongTermBenefitCalculationRequestParams(None, None)),
+            None
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -2232,6 +2281,643 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(InternalServerError, ErrorReason("unexpected internal failure"))
         )
       }
+
+      "should handle a MA request containing nextCursor successfully (200)" in {
+        (() => mockUuidGenerator.generate).expects().returning(uuidOne)
+        val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
+          Some(
+            List(
+              LiabilityDetailsList(
+                identifier = nationalInsuranceNumber,
+                `type` = EnumLiabtp.Abroad,
+                occurrenceNumber = OccurrenceNumber(1),
+                startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
+                endDateStatus = Some(EnumLtpedttp.EndDateHeld),
+                startDate = StartDate(LocalDate.parse("2026-01-01")),
+                endDate = Some(EndDate(LocalDate.parse("2027-01-01"))),
+                country = Some(Country.GreatBritain),
+                trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
+                casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
+                homeResponsibilitiesProtectionBenefitReference =
+                  Some(HomeResponsibilitiesProtectionBenefitReference("12345678AB")),
+                homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
+                lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
+                lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
+                homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
+                awardAmount = Some(AwardAmount(10.56)),
+                resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
+                homeResponsibilitiesProtectionIndicator = Some(EnumHrpIndicator.None),
+                officeDetails = Some(
+                  OfficeDetails(
+                    officeLocationDecode = Some(OfficeLocationDecode(1)),
+                    officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
+                    officeIdentifier = Some(EnumOffidtp.None)
+                  )
+                )
+              )
+            )
+          ),
+          callback = Some(Callback(Some(CallbackUrl("SomeUrl"))))
+        )
+
+        val liabilitySummaryDetailsSuccessResponseBody =
+          Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(liabilitySummaryDetailsSuccessResponseBody)
+            )
+        )
+        val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          ),
+          LiabilitiesRequestParams(List(Abroad), None, None, None),
+          Some(PaginationCursor(uuidOne))
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
+          nationalInsuranceNumber,
+          FilteredClass2MaReceipts(
+            List()
+          ),
+          List(filteredLiabilitySummaryDetails, filteredLiabilitySummaryDetails),
+          NiContributionsAndCreditsSuccessResponse(None, None, None),
+          Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+        )
+
+        status(result) shouldBe 200
+        contentAsJson(result) shouldBe Json.toJson(expectedResult)
+      }
+      "should handle a MA request containing nextCursor successfully (502) " in {
+        (() => mockUuidGenerator.generate).expects().returning(uuidOne)
+        val npsStandardErrorResponse400 = NpsStandardErrorResponse400(
+          HipOrigin.Hip,
+          NpsMultiErrorResponse(
+            Some(
+              List(
+                NpsSingleErrorResponse(
+                  NpsErrorReason("HTTP message not readable"),
+                  NpsErrorCode("502")
+                ),
+                NpsSingleErrorResponse(
+                  NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+                  NpsErrorCode("502")
+                )
+              )
+            )
+          )
+        )
+
+        val npsStandardErrorResponse400Body =
+          Json.toJson(npsStandardErrorResponse400).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_REQUEST)
+                .withHeader("Content-Type", "application/json")
+                .withBody(npsStandardErrorResponse400Body)
+            )
+        )
+        val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          ),
+          LiabilitiesRequestParams(List(Abroad), None, None, None),
+          Some(PaginationCursor(uuidOne))
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        val expectedResult = BenefitEligibilityInfoErrorResponse(
+          OverallResultStatus.Failure,
+          nationalInsuranceNumber,
+          BenefitType.MA,
+          OverallResultSummary(2, 0, 2),
+          List(
+            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest)),
+            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest))
+          )
+        )
+
+        status(result) shouldBe 502
+        contentAsJson(result) shouldBe Json.toJson(expectedResult)
+      }
+
+      "should handle a BSP request containing nextCursor successfully (200)" in {
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
+
+        val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
+          MarriageDetailsSuccess.MarriageDetails(
+            MarriageDetailsSuccess.ActiveMarriage(true),
+            Some(
+              List(
+                MarriageDetailsSuccess
+                  .MarriageDetailsListElement(
+                    sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
+                    status = CivilPartner,
+                    startDate = Some(MarriageStartDate(LocalDate.parse("1999-01-01"))),
+                    startDateStatus = Some(MarriageStartDateStatus.Verified),
+                    endDate = Some(MarriageEndDate(LocalDate.parse("2001-01-01"))),
+                    endDateStatus = Some(Verified),
+                    spouseIdentifier = Some(nationalInsuranceNumber2),
+                    spouseForename = Some(SpouseForename("Skywalker")),
+                    spouseSurname = Some(SpouseSurname("Luke")),
+                    separationDate = Some(SeparationDate(LocalDate.parse("2002-01-01"))),
+                    reconciliationDate = Some(MarriageDetailsReconciliationDate(LocalDate.parse("2003-01-01")))
+                  )
+              )
+            ),
+            Some(
+              MarriageDetailsSuccess.Links(
+                MarriageDetailsSuccess.SelfLink(
+                  Some(MarriageDetailsSuccess.Href("SomeUrl")),
+                  Some(MarriageDetailsSuccess.Methods.get)
+                )
+              )
+            )
+          )
+        )
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+        val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(marriageDetailsSuccessResponseBody)
+            )
+        )
+
+        val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          ),
+          Some(PaginationCursor(uuidTwo))
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+          marriageDetailsResult = filteredMarriageDetails,
+          nextCursor = Some(PaginationCursor(UUID.fromString("f678d869-7922-4a11-82e2-5cf4e235cfee")))
+        )
+
+        status(result) shouldBe 200
+        contentAsJson(result) shouldBe Json.toJson(expectedResult)
+      }
+      "should handle a BSP request containing nextCursor successfully (502)" in {
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
+
+        val npsStandardErrorResponse400 = NpsStandardErrorResponse400(
+          HipOrigin.Hip,
+          NpsMultiErrorResponse(
+            Some(
+              List(
+                NpsSingleErrorResponse(
+                  NpsErrorReason("HTTP message not readable"),
+                  NpsErrorCode("502")
+                ),
+                NpsSingleErrorResponse(
+                  NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+                  NpsErrorCode("502")
+                )
+              )
+            )
+          )
+        )
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+        val npsStandardErrorResponse400Body = Json.toJson(npsStandardErrorResponse400).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_REQUEST)
+                .withHeader("Content-Type", "application/json")
+                .withBody(npsStandardErrorResponse400Body)
+            )
+        )
+
+        val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          ),
+          Some(PaginationCursor(uuidTwo))
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 502
+        contentAsJson(result)
+          .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
+      }
+
+      "should handle a GYSP request containing nextCursor successfully (200)" in {
+        (() => mockUuidGenerator.generate).expects().returning(uuidThree)
+
+        val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
+          schemeMembershipDetailsSummaryList = Some(
+            List(
+              SchemeMembershipDetailsSummary(
+                stakeholderPensionSchemeType = StakeholderPensionSchemeType.NonStakeholderPension,
+                schemeMembershipDetails = SchemeMembershipDetails(
+                  nationalInsuranceNumber = nationalInsuranceNumber,
+                  schemeMembershipSequenceNumber = SchemeMembershipSequenceNumber(123),
+                  schemeMembershipOccurrenceNumber = SchemeMembershipOccurrenceNumber(1),
+                  schemeMembershipStartDate = Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
+                  contractedOutEmployerIdentifier = Some(ContractedOutEmployerIdentifier(789)),
+                  schemeMembershipEndDate = Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
+                  methodOfPreservationType = Some(MethodOfPreservation.NotApplicable0),
+                  totalLinkedGuaranteedMinimumPensionContractedOutDeductions =
+                    Some(TotalLinkedGuaranteedMinimumPensionContractedOutDeductions(BigDecimal("10.56"))),
+                  accruedPensionContractedOutDeductionsValue =
+                    Some(AccruedPensionContractedOutDeductionsValue(BigDecimal("10.56"))),
+                  totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988 =
+                    Some(TotalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988(BigDecimal("10.56"))),
+                  accruedPensionContractedOutDeductionsValuePost1988 =
+                    Some(AccruedPensionContractedOutDeductionsValuePost1988(BigDecimal("10.56"))),
+                  revaluationRate = Some(RevaluationRate.None),
+                  guaranteedMinimumPensionReconciliationStatus =
+                    Some(GuaranteedMinimumPensionReconciliationStatus.NotApplicable),
+                  employeesReference = Some(EmployeesReference("123/456/ABC")),
+                  finalYearEarnings = Some(FinalYearEarnings(BigDecimal("10.56"))),
+                  penultimateYearEarnings = Some(PenultimateYearEarnings(BigDecimal("10.56"))),
+                  retrospectiveEarnings = Some(RetrospectiveEarnings(BigDecimal("10.56"))),
+                  furtherPaymentsConfirmation = Some(FurtherPaymentsConfirmation.FurtherPaymentAllowed),
+                  survivorStatus = Some(SurvivorStatus.NotApplicable),
+                  transferPremiumElectionDate = Some(TransferPremiumElectionDate(LocalDate.of(2022, 6, 27))),
+                  revaluationApplied = Some(RevaluationApplied(true)),
+                  stateEarningsRelatedPensionsSchemeNonRestorationValue =
+                    Some(StateEarningsRelatedPensionsSchemeNonRestorationValue(BigDecimal("10.56"))),
+                  stateEarningsRelatedPensionsSchemeValuePost1988 =
+                    Some(StateEarningsRelatedPensionsSchemeValuePost1988(BigDecimal("10.56"))),
+                  apparentUnnotifiedTerminationStatus =
+                    Some(ApparentUnnotifiedTerminationStatus.NoApparentUnnotifiedTermination),
+                  terminationMicrofilmNumber = Some(TerminationMicrofilmNumber(789)),
+                  debitVoucherMicrofilmNumber = Some(DebitVoucherMicrofilmNumber(40599123)),
+                  creationMicrofilmNumber = Some(CreationMicrofilmNumber(40599123)),
+                  inhibitSchemeProcessing = Some(InhibitSchemeProcessing(true)),
+                  extensionDate = Some(ExtensionDate(LocalDate.of(2022, 6, 27))),
+                  guaranteedMinimumPensionContractedOutDeductionsRevalued =
+                    Some(GuaranteedMinimumPensionContractedOutDeductionsRevalued(BigDecimal("10.56"))),
+                  clericalCalculationInvolved = Some(Clercalc.NoClericalCalculationInvolved),
+                  clericallyControlledTotal = Some(ClericallyControlledTotal(BigDecimal("10.56"))),
+                  clericallyControlledTotalPost1988 = Some(ClericallyControlledTotalPost1988(BigDecimal("10.56"))),
+                  certifiedAmount = Some(CertifiedAmount(BigDecimal("10.56"))),
+                  enforcementStatus = Some(Enfcment.NotEnforced),
+                  stateSchemePremiumDeemed = Some(SspDeem.SspTypeReceivablesToBeTreatAsDeemed),
+                  transferTakeUpDate = Some(TransferTakeUpDate(LocalDate.of(2022, 6, 27))),
+                  schemeMembershipTransferSequenceNumber = Some(SchemeMembershipTransferSequenceNumber(123)),
+                  contributionCategoryFinalYear = Some(ContCatLetter.A),
+                  contributionCategoryPenultimateYear = Some(ContCatLetter.A),
+                  contributionCategoryRetrospectiveYear = Some(ContCatLetter.A),
+                  protectedRightsStartDate = Some(ProtectedRightsStartDate(LocalDate.of(2022, 6, 27))),
+                  schemeMembershipDebitReason = Some(SchemeMembershipDebitReason.NotApplicable),
+                  technicalAmount = Some(TechnicalAmount(BigDecimal("10.56"))),
+                  minimumFundTransferAmount = Some(MinimumFundTransferAmount(BigDecimal("10.56"))),
+                  actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
+                  schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
+                  guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
+                  employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
+                  schemeCreatingContractedOutNumberDetails =
+                    Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+                  schemeTerminatingContractedOutNumberDetails =
+                    Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
+                  importingAppropriateSchemeNumberDetails = Some(ImportingAppropriateSchemeNumberDetails("S2123456B")),
+                  apparentUnnotifiedTerminationDestinationDetails =
+                    Some(ApparentUnnotifiedTerminationDestinationDetails("S2123456B"))
+                )
+              )
+            )
+          ),
+          callback = Some(Callback(Some(CallbackUrl("SomeUrl"))))
+        )
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+        val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
+        val marriageDetailsSuccessResponseBody      = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+        val schemeMembershipDetailsSuccessResponseBody =
+          Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(marriageDetailsSuccessResponseBody)
+            )
+        )
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(schemeMembershipDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(schemeMembershipDetailsSuccessResponseBody)
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(benefitSchemeDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(benefitSchemeDetailsSuccessResponseBody)
+            )
+        )
+
+        val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          ),
+          Some(LongTermBenefitCalculationRequestParams(None, None)),
+          Some(PaginationCursor(uuidThree))
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        val expectedResult = BenefitEligibilityInfoSuccessResponseGysp(
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          marriageDetailsResult = filteredMarriageDetails,
+          longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails(List()),
+          schemeMembershipDetailsResult = filteredSchemeMembershipDetails,
+          individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, List()),
+          niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+          nextCursor = Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+        )
+
+        status(result) shouldBe 200
+        contentAsJson(result) shouldBe Json.toJson(expectedResult)
+
+      }
+      "should handle a GYSP request containing nextCursor successfully (502)" in {
+        (() => mockUuidGenerator.generate).expects().returning(uuidThree)
+
+        val npsStandardErrorResponse400 = NpsStandardErrorResponse400(
+          HipOrigin.Hip,
+          NpsMultiErrorResponse(
+            Some(
+              List(
+                NpsSingleErrorResponse(
+                  NpsErrorReason("HTTP message not readable"),
+                  NpsErrorCode("502")
+                ),
+                NpsSingleErrorResponse(
+                  NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+                  NpsErrorCode("502")
+                )
+              )
+            )
+          )
+        )
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+        val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
+        val marriageDetailsSuccessResponseBody      = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+        val npsStandardErrorResponse400Body =
+          Json.toJson(npsStandardErrorResponse400).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(marriageDetailsSuccessResponseBody)
+            )
+        )
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(schemeMembershipDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_GATEWAY)
+                .withHeader("Content-Type", "application/json")
+                .withBody(npsStandardErrorResponse400Body)
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(benefitSchemeDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(benefitSchemeDetailsSuccessResponseBody)
+            )
+        )
+
+        val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          ),
+          Some(LongTermBenefitCalculationRequestParams(None, None)),
+          Some(PaginationCursor(uuidThree))
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 502
+        contentAsJson(result)
+          .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
+      }
+
     }
   }
 

@@ -628,13 +628,14 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   private val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
-    Identifier("GD379251T"),
-    ContributionsAndCreditsRequestParams(
+    nationalInsuranceNumber = Identifier("GD379251T"),
+    contributionsAndCredits = ContributionsAndCreditsRequestParams(
       DateOfBirth(LocalDate.parse("2025-10-10")),
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    LiabilitiesRequestParams(List(Abroad), None, None, None)
+    liabilities = LiabilitiesRequestParams(List(Abroad), None, None, None),
+    nextCursor = None
   )
 
   val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
@@ -656,13 +657,14 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val gyspEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
-    Identifier("GD379251T"),
-    ContributionsAndCreditsRequestParams(
+    nationalInsuranceNumber = Identifier("GD379251T"),
+    niContributionsAndCredits = ContributionsAndCreditsRequestParams(
       DateOfBirth(LocalDate.parse("2025-10-10")),
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    Some(LongTermBenefitCalculationRequestParams(None, None))
+    longTermBenefitCalculation = Some(LongTermBenefitCalculationRequestParams(None, None)),
+    nextCursor = None
   )
 
   val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
@@ -671,7 +673,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)
-    )
+    ),
+    nextCursor = None
   )
 
   val niContributionAndCreditsResult = SuccessResult(

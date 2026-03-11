@@ -96,7 +96,8 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)
-    )
+    ),
+    None
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(

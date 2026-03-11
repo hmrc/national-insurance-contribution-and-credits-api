@@ -20,6 +20,7 @@ import play.api.libs.json.*
 import EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 
 object EligibilityCheckDataRequest {
 
@@ -80,7 +81,8 @@ object JSAEligibilityCheckDataRequest {
 final case class BSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    niContributionsAndCredits: ContributionsAndCreditsRequestParams
+    niContributionsAndCredits: ContributionsAndCreditsRequestParams,
+    nextCursor: Option[PaginationCursor]
 ) extends EligibilityCheckDataRequest
 
 object BSPEligibilityCheckDataRequest {
@@ -90,8 +92,9 @@ object BSPEligibilityCheckDataRequest {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      niContributionsAndCredits: ContributionsAndCreditsRequestParams
-  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, niContributionsAndCredits)
+      niContributionsAndCredits: ContributionsAndCreditsRequestParams,
+      nextCursor: Option[PaginationCursor]
+  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, niContributionsAndCredits, nextCursor)
 
 }
 
@@ -99,7 +102,8 @@ final case class MAEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-    liabilities: LiabilitiesRequestParams
+    liabilities: LiabilitiesRequestParams,
+    nextCursor: Option[PaginationCursor]
 ) extends EligibilityCheckDataRequest
 
 object MAEligibilityCheckDataRequest {
@@ -107,12 +111,14 @@ object MAEligibilityCheckDataRequest {
   def apply(
       nationalInsuranceNumber: Identifier,
       contributionsAndCredits: ContributionsAndCreditsRequestParams,
-      liabilities: LiabilitiesRequestParams
+      liabilities: LiabilitiesRequestParams,
+      nextCursor: Option[PaginationCursor]
   ) = new MAEligibilityCheckDataRequest(
     MA,
     nationalInsuranceNumber,
     contributionsAndCredits,
-    liabilities
+    liabilities,
+    nextCursor
   )
 
   implicit val maEligibilityCheckDataRequestReads: Reads[MAEligibilityCheckDataRequest] =
@@ -124,7 +130,8 @@ final case class GYSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-    longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams]
+    longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams],
+    nextCursor: Option[PaginationCursor]
 ) extends EligibilityCheckDataRequest
 
 object GYSPEligibilityCheckDataRequest {
@@ -135,12 +142,14 @@ object GYSPEligibilityCheckDataRequest {
   def apply(
       nationalInsuranceNumber: Identifier,
       niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-      longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams]
+      longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams],
+      nextCursor: Option[PaginationCursor]
   ) = new GYSPEligibilityCheckDataRequest(
     GYSP,
     nationalInsuranceNumber,
     niContributionsAndCredits,
-    longTermBenefitCalculation
+    longTermBenefitCalculation,
+    nextCursor
   )
 
 }

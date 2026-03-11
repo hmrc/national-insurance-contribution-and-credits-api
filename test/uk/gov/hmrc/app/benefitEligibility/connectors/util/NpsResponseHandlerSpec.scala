@@ -95,10 +95,20 @@ class NpsResponseHandlerSpec extends AnyFreeSpec with MockFactory {
           SuccessResult(randomApiName, mockSuccessResponse)
       }
     }
+
     ".toFailureResult" - {
+      val errorList = List(
+        NpsNormalizedError.AccessForbidden,
+        NpsNormalizedError.NotFound,
+        NpsNormalizedError.InternalServerError,
+        NpsNormalizedError.UnprocessableEntity,
+        NpsNormalizedError.BadRequest,
+        NpsNormalizedError.ServiceUnavailable,
+        NpsNormalizedError.UnexpectedStatus(508)
+      )
       "should successfully convert to a FailureResult (with npsError)" in {
 
-        val errors = Table("error", NpsNormalizedError.values.toList: _*)
+        val errors = Table("error", errorList: _*)
 
         forAll(errors) { error =>
           underTest.toFailureResult(error, Some(hipFailureResponse)) shouldBe
@@ -107,7 +117,7 @@ class NpsResponseHandlerSpec extends AnyFreeSpec with MockFactory {
       }
       "should successfully convert to a FailureResult (without npsError)" in {
 
-        val errors = Table("error", NpsNormalizedError.values.toList: _*)
+        val errors = Table("error", errorList: _*)
 
         forAll(errors) { error =>
           underTest.toFailureResult(error, None) shouldBe

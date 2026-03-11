@@ -78,16 +78,17 @@ class PaginationService @Inject() (
       .flatMap(_.callBackURL)
       .map { callBackURL =>
         liabilitySummaryDetailsConnector
-          .fetchData(maPageTask.benefitType, callBackURL)
+          .fetchData(BenefitType.from(maPageTask.paginationType), callBackURL)
       }
       .sequence
       .map { result =>
         PaginationResult(
-          benefitType = maPageTask.benefitType,
+          paginationType = maPageTask.paginationType,
           liabilitiesResult = result,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           marriageDetailsResult = None,
-          benefitSchemeMembershipDetailsData = None
+          benefitSchemeMembershipDetailsData = None,
+          None
         )
       }
       .leftMap { error =>
@@ -103,19 +104,20 @@ class PaginationService @Inject() (
     (
       marriageDetailsConnectorFetchData(bspPageTask.marriageDetailsPaging),
       creditsAndContributionsFetchData(
-        bspPageTask.benefitType,
+        BenefitType.from(bspPageTask.paginationType),
         nationalInsuranceNumber,
         bspPageTask.contributionAndCreditsPaging
       )
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult) =>
         PaginationResult(
-          benefitType = bspPageTask.benefitType,
+          paginationType = bspPageTask.paginationType,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult =
             ContributionCreditPagingResult(contributionCreditResult, bspPageTask.contributionAndCreditsPaging),
           liabilitiesResult = Nil,
-          benefitSchemeMembershipDetailsData = None
+          benefitSchemeMembershipDetailsData = None,
+          None
         )
       }
       .leftMap { error =>
@@ -139,7 +141,7 @@ class PaginationService @Inject() (
         .map { page =>
           schemeMembershipDetailsConnector
             .fetchSchemeMembershipDetails(
-              benefitType = pageTask.benefitType,
+              benefitType = BenefitType.from(pageTask.paginationType),
               nationalInsuranceNumber = nationalInsuranceNumber
             )
             .flatMap {
@@ -152,7 +154,7 @@ class PaginationService @Inject() (
                     contractedOutNumberDetailsList
                       .map { contractedOutNumberDetails =>
                         benefitSchemeDetailsConnector.fetchBenefitSchemeDetails(
-                          pageTask.benefitType,
+                          BenefitType.from(pageTask.paginationType),
                           nationalInsuranceNumber,
                           SchemeContractedOutNumberDetails(contractedOutNumberDetails.value)
                         )
@@ -172,7 +174,7 @@ class PaginationService @Inject() (
     (
       marriageDetailsConnectorFetchData(gyspPageTask.marriageDetailsPaging),
       creditsAndContributionsFetchData(
-        gyspPageTask.benefitType,
+        BenefitType.from(gyspPageTask.paginationType),
         nationalInsuranceNumber,
         gyspPageTask.contributionAndCreditsPaging
       ),
@@ -180,12 +182,13 @@ class PaginationService @Inject() (
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult, benefitSchemeMembershipDetailsData) =>
         PaginationResult(
-          benefitType = gyspPageTask.benefitType,
+          paginationType = gyspPageTask.paginationType,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult =
             ContributionCreditPagingResult(contributionCreditResult, gyspPageTask.contributionAndCreditsPaging),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
-          liabilitiesResult = Nil
+          liabilitiesResult = Nil,
+          None
         )
       }
       .leftMap { error =>

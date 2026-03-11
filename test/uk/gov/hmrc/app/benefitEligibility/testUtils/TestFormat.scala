@@ -16,11 +16,25 @@
 
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
-import play.api.libs.json.{Json, OWrites, Writes}
+import play.api.libs.json.{JsError, JsNumber, JsObject, JsString, JsSuccess, Json, OWrites, Reads, Writes}
 import uk.gov.hmrc.app.benefitEligibility.model.common.MaternityAllowanceSortType
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.model.request._
+import uk.gov.hmrc.app.benefitEligibility.model.request.*
+import uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoResponse
+import uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse
+import uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary
+import uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
+  AccessForbidden,
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  ServiceUnavailable,
+  UnexpectedStatus,
+  UnprocessableEntity
+}
 
 object TestFormat {
 
@@ -63,5 +77,63 @@ object TestFormat {
 
   implicit val gypEligibilityCheckDataRequestWrites: Writes[GYSPEligibilityCheckDataRequest] =
     Json.writes[GYSPEligibilityCheckDataRequest]
+
+  implicit val overallResultSummaryReads: Reads[OverallResultSummary] = Json.reads[OverallResultSummary]
+  implicit val sanitizedApiResultReads: Reads[SanitizedApiResult]     = Json.reads[SanitizedApiResult]
+
+  implicit val npsNormalizedErrorReads: Reads[NpsNormalizedError] = Reads {
+    case JsObject(underlying) =>
+      val code             = underlying.getOrElse("code", JsError("code missing"))
+      val message          = underlying.getOrElse("message", JsError("message missing"))
+      val downstreamStatus = underlying.getOrElse("downstreamStatus", JsError("downstreamStatus missing"))
+
+      (code, message, downstreamStatus) match {
+        case (
+              JsString(AccessForbidden.code),
+              JsString(AccessForbidden.message),
+              JsNumber(AccessForbidden.downstreamStatus)
+            ) =>
+          JsSuccess(AccessForbidden)
+
+        case (JsString(BadRequest.code), JsString(BadRequest.message), JsNumber(BadRequest.downstreamStatus)) =>
+          JsSuccess(BadRequest)
+
+        case (JsString(NotFound.code), JsString(NotFound.message), JsNumber(NotFound.downstreamStatus)) =>
+          JsSuccess(NotFound)
+
+        case (
+              JsString(UnprocessableEntity.code),
+              JsString(UnprocessableEntity.message),
+              JsNumber(UnprocessableEntity.downstreamStatus)
+            ) =>
+          JsSuccess(UnprocessableEntity)
+
+        case (
+              JsString(ServiceUnavailable.code),
+              JsString(ServiceUnavailable.message),
+              JsNumber(ServiceUnavailable.downstreamStatus)
+            ) =>
+          JsSuccess(ServiceUnavailable)
+
+        case (
+              JsString(InternalServerError.code),
+              JsString(InternalServerError.message),
+              JsNumber(InternalServerError.downstreamStatus)
+            ) =>
+          JsSuccess(InternalServerError)
+
+        case (
+              JsString("UNEXPECTED_STATUS_CODE"),
+              JsString("downstream returned an unexpected status"),
+              JsNumber(status)
+            ) =>
+          JsSuccess(UnexpectedStatus(status.toInt))
+        case _ => JsError("incompatible json found, does not match a known error")
+      }
+    case _ => JsError("invalid type, expected JsObject()")
+  }
+
+  implicit val benefitEligibilityInfoErrorResponseReads: Reads[BenefitEligibilityInfoErrorResponse] =
+    Json.reads[BenefitEligibilityInfoErrorResponse]
 
 }

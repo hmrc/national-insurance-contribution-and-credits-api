@@ -27,15 +27,12 @@ import org.scalatest.matchers.should.Matchers
 import play.api.http.Status.OK
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.test.Helpers.FORBIDDEN
 import play.api.test.Injecting
 import play.api.{Application, inject}
-import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails, NiContributionAndCredits}
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, GYSP, MA}
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.AccessForbidden
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
@@ -47,7 +44,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.Marria
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{NpsErrorCode, NpsSingleErrorResponse}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.repository.*
@@ -239,7 +235,7 @@ class PaginationServiceItSpec
         service.paginate(uuidOne, nationalInsuranceNumber).value.futureValue shouldBe
           Right(
             PaginationResult(
-              benefitType = MA,
+              paginationType = PaginationType.MA,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
@@ -332,7 +328,7 @@ class PaginationServiceItSpec
         service.paginate(uuidTwo, nationalInsuranceNumber).value.futureValue shouldBe
           Right(
             PaginationResult(
-              benefitType = BSP,
+              paginationType = PaginationType.BSP,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
@@ -596,7 +592,7 @@ class PaginationServiceItSpec
         service.paginate(uuidThree, nationalInsuranceNumber).value.futureValue shouldBe
           Right(
             PaginationResult(
-              benefitType = GYSP,
+              paginationType = PaginationType.GYSP,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
