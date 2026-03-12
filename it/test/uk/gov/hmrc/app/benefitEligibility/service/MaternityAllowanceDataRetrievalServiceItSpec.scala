@@ -200,7 +200,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        LiabilitiesRequestParams(List(Abroad), None, None, None)
+        LiabilitiesRequestParams(List(Abroad), None, None, None),
+        None
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {

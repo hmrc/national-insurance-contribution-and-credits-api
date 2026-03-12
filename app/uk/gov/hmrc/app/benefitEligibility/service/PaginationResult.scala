@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{
   ApiResult,
   ContributionCreditResult,
@@ -34,12 +34,12 @@ final case class ContributionCreditPagingResult(
 
 // Todo: Add Pagination result Spec and move this to appropriate place
 final case class PaginationResult(
-    benefitType: BenefitType,
+    paginationType: PaginationType,
     liabilitiesResult: List[LiabilityResult],
     marriageDetailsResult: Option[MarriageDetailsResult],
     contributionCreditResult: ContributionCreditPagingResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
-    private val nextCursor: Option[PaginationCursor] = None
+    private val nextCursor: Option[PaginationCursor]
 ) {
 
   private def shouldPage: Boolean =

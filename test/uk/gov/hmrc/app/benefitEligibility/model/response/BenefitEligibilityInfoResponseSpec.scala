@@ -2027,9 +2027,9 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val liabilityResult =
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)))
         val paginationResult: PaginationResult =
-          PaginationResult(BenefitType.MA, liabilityResult, None, creditsAndContributionsPagingResult, None)
+          PaginationResult(PaginationType.MA, liabilityResult, None, creditsAndContributionsPagingResult, None, None)
 
-        val expectedResult = Some(
+        val expectedResult = Right(
           BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber = nationalInsuranceNumber,
             class2MAReceiptsResult = FilteredClass2MaReceipts(List()),
@@ -2047,9 +2047,9 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           ContributionCreditPagingResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
         val paginationResult: PaginationResult =
-          PaginationResult(BenefitType.BSP, liabilityResult, None, creditsAndContributionsPagingResult, None)
+          PaginationResult(PaginationType.BSP, liabilityResult, None, creditsAndContributionsPagingResult, None, None)
 
-        val expectedResult = Some(
+        val expectedResult = Right(
           BenefitEligibilityInfoSuccessResponseBsp(
             nationalInsuranceNumber = nationalInsuranceNumber,
             NiContributionsAndCreditsSuccessResponse(None, None, None),
@@ -2066,10 +2066,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           ContributionCreditPagingResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
         val paginationResult: PaginationResult =
-          PaginationResult(BenefitType.GYSP, liabilityResult, None, creditsAndContributionsPagingResult, None)
+          PaginationResult(PaginationType.GYSP, liabilityResult, None, creditsAndContributionsPagingResult, None, None)
 
-        val expectedResult = Some(value =
-          BenefitEligibilityInfoSuccessResponseGysp(
+        val expectedResult = Right(
+          value = BenefitEligibilityInfoSuccessResponseGysp(
             nationalInsuranceNumber = nationalInsuranceNumber,
             marriageDetailsResult = FilteredMarriageDetails(List()),
             longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails(List()),

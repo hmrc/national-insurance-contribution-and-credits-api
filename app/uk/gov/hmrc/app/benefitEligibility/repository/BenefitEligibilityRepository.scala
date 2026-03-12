@@ -68,24 +68,24 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
 
   def upsert(id: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     val updates = pageTask match {
-      case MaPageTask(id, benefitType, liabilitiesPaging, createdAt) =>
+      case MaPageTask(id, paginationType, liabilitiesPaging, createdAt) =>
         Updates.combine(
           Updates.set("id", id.toString),
           Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
-          Updates.set("benefitType", Codecs.toBson(benefitType)),
+          Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
-      case BspPageTask(id, benefitType, marriageDetailsPaging, contributionAndCreditsPaging, createdAt) =>
+      case BspPageTask(id, paginationType, marriageDetailsPaging, contributionAndCreditsPaging, createdAt) =>
         Updates.combine(
           Updates.set("id", id.toString),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
           Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
-          Updates.set("benefitType", Codecs.toBson(benefitType)),
+          Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
       case GyspPageTask(
             id,
-            benefitType,
+            paginationType,
             benefitSchemeMembershipDetailsPaging,
             marriageDetailsPaging,
             contributionAndCreditsPaging,
@@ -96,7 +96,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
           Updates.set("benefitSchemeMembershipDetailsPaging", Codecs.toBson(benefitSchemeMembershipDetailsPaging)),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
           Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
-          Updates.set("benefitType", Codecs.toBson(benefitType)),
+          Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
     }

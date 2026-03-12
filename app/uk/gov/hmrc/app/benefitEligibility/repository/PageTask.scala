@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, BenefitType, DateOfBirth, TaxWindow}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, DateOfBirth, PaginationType, TaxWindow}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{LiabilityResult, MarriageDetailsResult}
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
@@ -104,13 +104,13 @@ object ContributionAndCreditsPaging {
 
 sealed trait PageTask {
   def id: UUID
-  def benefitType: BenefitType
+  def paginationType: PaginationType
   def createdAt: Instant
 }
 
 final case class MaPageTask private (
     id: UUID,
-    benefitType: BenefitType,
+    paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
     createdAt: Instant
 ) extends PageTask
@@ -126,7 +126,7 @@ object MaPageTask {
   ) =
     new MaPageTask(
       paginationCursor.value,
-      BenefitType.MA,
+      PaginationType.MA,
       liabilitiesPaging,
       createdAt
     )
@@ -135,7 +135,7 @@ object MaPageTask {
 
 final case class BspPageTask private (
     id: UUID,
-    benefitType: BenefitType,
+    paginationType: PaginationType,
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
     createdAt: Instant
@@ -153,7 +153,7 @@ object BspPageTask {
   ) =
     new BspPageTask(
       paginationCursor.value,
-      BenefitType.BSP,
+      PaginationType.BSP,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
       createdAt
@@ -163,7 +163,7 @@ object BspPageTask {
 
 final case class GyspPageTask private (
     id: UUID,
-    benefitType: BenefitType,
+    paginationType: PaginationType,
     benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
@@ -183,7 +183,7 @@ object GyspPageTask {
   ) =
     new GyspPageTask(
       paginationCursor.value,
-      BenefitType.GYSP,
+      PaginationType.GYSP,
       benefitSchemeMembershipDetailsPaging,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
@@ -196,11 +196,10 @@ object GyspPageTask {
 object PageTask {
 
   private val pageTaskReads: Reads[PageTask] = Reads { json =>
-    (json \ "benefitType").validate[BenefitType].flatMap {
-      case BenefitType.BSP  => BspPageTask.bspPageTaskformat.reads(json)
-      case BenefitType.MA   => MaPageTask.maPageTaskformat.reads(json)
-      case BenefitType.GYSP => GyspPageTask.gyspPageTaskformat.reads(json)
-      case _                => JsError("unsupported benefit type")
+    (json \ "paginationType").validate[PaginationType].flatMap {
+      case PaginationType.BSP  => BspPageTask.bspPageTaskformat.reads(json)
+      case PaginationType.MA   => MaPageTask.maPageTaskformat.reads(json)
+      case PaginationType.GYSP => GyspPageTask.gyspPageTaskformat.reads(json)
     }
   }
 
@@ -216,41 +215,34 @@ object PageTask {
       paginationResult: PaginationResult,
       currentTime: CurrentTimeSource
   ): Option[PageTask] =
-    paginationResult.getNextCursor.flatMap { cursor =>
+    paginationResult.getNextCursor.map { cursor =>
       val now = currentTime.instantNow()
-      paginationResult.benefitType match {
-        case BenefitType.MA =>
-          Some(
-            MaPageTask(
-              paginationCursor = cursor,
-              liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
-              now
-            )
+      paginationResult.paginationType match {
+        case PaginationType.MA =>
+          MaPageTask(
+            paginationCursor = cursor,
+            liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
+            now
           )
-        case BenefitType.GYSP =>
-          Some(
-            GyspPageTask(
-              paginationCursor = cursor,
-              benefitSchemeMembershipDetailsPaging = PaginationSource.fromBenefitSchemeMembershipDetails(
-                paginationResult.benefitSchemeMembershipDetailsData
-              ),
-              marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
-              contributionAndCreditsPaging =
-                ContributionAndCreditsPaging.fromContributionAndCredits(paginationResult.contributionCreditResult),
-              now
-            )
+        case PaginationType.GYSP =>
+          GyspPageTask(
+            paginationCursor = cursor,
+            benefitSchemeMembershipDetailsPaging = PaginationSource.fromBenefitSchemeMembershipDetails(
+              paginationResult.benefitSchemeMembershipDetailsData
+            ),
+            marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
+            contributionAndCreditsPaging =
+              ContributionAndCreditsPaging.fromContributionAndCredits(paginationResult.contributionCreditResult),
+            now
           )
-        case BenefitType.BSP =>
-          Some(
-            BspPageTask(
-              paginationCursor = cursor,
-              marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
-              contributionAndCreditsPaging =
-                ContributionAndCreditsPaging.fromContributionAndCredits(paginationResult.contributionCreditResult),
-              now
-            )
+        case PaginationType.BSP =>
+          BspPageTask(
+            paginationCursor = cursor,
+            marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
+            contributionAndCreditsPaging =
+              ContributionAndCreditsPaging.fromContributionAndCredits(paginationResult.contributionCreditResult),
+            now
           )
-        case _ => None
       }
     }
 

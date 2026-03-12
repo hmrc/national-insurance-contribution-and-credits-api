@@ -115,7 +115,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    LiabilitiesRequestParams(List(Abroad), None, None, None)
+    LiabilitiesRequestParams(List(Abroad), None, None, None),
+    None
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(

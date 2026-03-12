@@ -22,11 +22,8 @@ import play.api.libs.json.{JsNumber, JsObject, JsString, Writes}
 import scala.collection.immutable
 
 sealed abstract class NpsNormalizedError(val code: String, val message: String, val downstreamStatus: Int)
-    extends EnumEntry
 
-object NpsNormalizedError extends Enum[NpsNormalizedError] with PlayJsonEnum[NpsNormalizedError] {
-
-  val values: immutable.IndexedSeq[NpsNormalizedError] = findValues
+object NpsNormalizedError {
 
   implicit val npsNormalizedErrorWrites: Writes[NpsNormalizedError] = Writes { error =>
     JsObject(

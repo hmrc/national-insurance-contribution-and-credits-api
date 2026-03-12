@@ -609,7 +609,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        Some(LongTermBenefitCalculationRequestParams(None, None))
+        Some(LongTermBenefitCalculationRequestParams(None, None)),
+        None
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {
