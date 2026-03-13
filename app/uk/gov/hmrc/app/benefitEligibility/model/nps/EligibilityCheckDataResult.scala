@@ -26,7 +26,6 @@ import uk.gov.hmrc.app.benefitEligibility.service.{
 sealed trait EligibilityCheckDataResult {
   def benefitType: BenefitType
   def allResults: List[ApiResult]
-  def shouldPaginate: Boolean
 }
 
 object EligibilityCheckDataResult {
@@ -42,27 +41,18 @@ object EligibilityCheckDataResult {
     def allResults: List[ApiResult] =
       liabilityResult ++ List(contributionCreditResult, class2MaReceiptsResult)
 
-    def shouldPaginate: Boolean =
-      if (allResults.exists(_.isFailure))
-        false
-      else
-        liabilityResult.forall(_.getSuccess.get.callback.isDefined)
-
   }
 
   case class EligibilityCheckDataResultESA(contributionCreditResult: ContributionCreditResult)
       extends EligibilityCheckDataResult {
     def benefitType: BenefitType    = BenefitType.ESA
     def allResults: List[ApiResult] = List(contributionCreditResult)
-
-    def shouldPaginate: Boolean = false
   }
 
   case class EligibilityCheckDataResultJSA(contributionCreditResult: ContributionCreditResult)
       extends EligibilityCheckDataResult {
     def benefitType: BenefitType             = BenefitType.JSA
     override def allResults: List[ApiResult] = List(contributionCreditResult)
-    def shouldPaginate: Boolean              = false
   }
 
   case class EligibilityCheckDataResultGYSP(
@@ -84,14 +74,6 @@ object EligibilityCheckDataResult {
         statePensionData
       )
 
-    def shouldPaginate: Boolean =
-      if (allResults.exists(_.isFailure))
-        false
-      else {
-        marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined ||
-        benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get.callback.isDefined
-      }
-
   }
 
   case class EligibilityCheckDataResultBSP(
@@ -102,13 +84,6 @@ object EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.BSP
 
     override def allResults: List[ApiResult] = List(marriageDetailsResult, contributionCreditResult)
-
-    def shouldPaginate: Boolean =
-      if (allResults.exists(_.isFailure))
-        false
-      else {
-        marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined
-      }
 
   }
 

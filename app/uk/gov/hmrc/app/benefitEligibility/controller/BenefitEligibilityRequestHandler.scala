@@ -70,6 +70,7 @@ object BenefitEligibilityRequestHandler {
           )
         )
       case Some(value) =>
+        // TODO add validation for correlation id as UUID
         request.body.asJson match {
           case Some(requestJson) =>
             requestJson.validate[EligibilityCheckDataRequest] match {

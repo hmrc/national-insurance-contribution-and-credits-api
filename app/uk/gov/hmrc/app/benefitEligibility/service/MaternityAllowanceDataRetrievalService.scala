@@ -84,7 +84,14 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           contributionsAndCreditResult,
           None
         )
-        if (result.shouldPaginate) {
+
+        val shouldPaginate: Boolean =
+          if (result.allResults.exists(_.isFailure))
+            false
+          else
+            liabilityResult.forall(_.getSuccess.get.callback.isDefined)
+
+        if (shouldPaginate) {
           val liabilityPages = liabilityResult.flatMap {
             case NpsApiResult.FailureResult(apiName, result) => None
             case NpsApiResult.SuccessResult(apiName, result) =>

@@ -238,7 +238,7 @@ object BenefitEligibilityInfoSuccessResponseMa {
           class2MAReceiptsResult = FilteredClass2MaReceipts.from(result.class2MaReceiptsResult.getSuccess.get),
           liabilitySummaryDetailsResult =
             result.liabilityResult.map(r => FilteredLiabilitySummaryDetails.from(r.getSuccess.get)),
-          None
+          nextCursor = result.nextCursor
         )
       )
     }
@@ -287,7 +287,7 @@ object BenefitEligibilityInfoSuccessResponseBsp {
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse,
             marriageDetailsResult = FilteredMarriageDetails.from(marriageDetailsSuccessResponse),
-            None
+            nextCursor = result.nextCursor
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
@@ -421,19 +421,20 @@ object BenefitEligibilityInfoSuccessResponseGysp {
     } else {
       Right(
         BenefitEligibilityInfoSuccessResponseGysp(
-          nationalInsuranceNumber,
-          FilteredMarriageDetails.from(result.marriageDetailsResult.getSuccess.get),
-          FilteredLongTermBenefitCalculationDetails.from(
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          marriageDetailsResult = FilteredMarriageDetails.from(result.marriageDetailsResult.getSuccess.get),
+          longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails.from(
             result.longTermBenefitCalculationDetailsData.longTermBenefitCalculationDetailsResult.getSuccess.get,
             result.longTermBenefitCalculationDetailsData.longTermBenefitNotesResults.map(_.getSuccess.get)
           ),
-          FilteredSchemeMembershipDetails.from(
+          schemeMembershipDetailsResult = FilteredSchemeMembershipDetails.from(
             result.benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get,
             result.benefitSchemeMembershipDetailsData.benefitSchemeDetailsResults.map(_.getSuccess.get)
           ),
-          FilteredIndividualStatePensionInfo.from(result.statePensionData.getSuccess.get),
-          result.contributionCreditResult.getSuccess.get,
-          None
+          individualStatePensionInfoResult =
+            FilteredIndividualStatePensionInfo.from(result.statePensionData.getSuccess.get),
+          niContributionsAndCreditsResult = result.contributionCreditResult.getSuccess.get,
+          nextCursor = result.nextCursor
         )
       )
     }
@@ -483,11 +484,11 @@ object BenefitEligibilityInfoErrorResponse {
   ): BenefitEligibilityInfoErrorResponse =
 
     BenefitEligibilityInfoErrorResponse(
-      OverallResultStatus.fromApiResults(allResults),
-      nationalInsuranceNumber,
-      benefitType,
-      OverallResultSummary.from(allResults),
-      allResults.map { result =>
+      status = OverallResultStatus.fromApiResults(allResults),
+      nationalInsuranceNumber = nationalInsuranceNumber,
+      benefitType = benefitType,
+      summary = OverallResultSummary.from(allResults),
+      downStreams = allResults.map { result =>
         SanitizedApiResult(
           result.apiName,
           if (result.isSuccess) NpsApiResponseStatus.Success else NpsApiResponseStatus.Failure,
