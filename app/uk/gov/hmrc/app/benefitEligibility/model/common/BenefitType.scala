@@ -25,11 +25,12 @@ sealed abstract class BenefitType(override val entryName: String) extends EnumEn
 object BenefitType extends Enum[BenefitType] with PlayJsonEnum[BenefitType] {
   val values: immutable.IndexedSeq[BenefitType] = findValues
 
-  case object MA   extends BenefitType("MA")
-  case object ESA  extends BenefitType("ESA")
-  case object JSA  extends BenefitType("JSA")
-  case object GYSP extends BenefitType("GYSP")
-  case object BSP  extends BenefitType("BSP")
+  case object MA              extends BenefitType("MA")
+  case object ESA             extends BenefitType("ESA")
+  case object JSA             extends BenefitType("JSA")
+  case object GYSP            extends BenefitType("GYSP")
+  case object BSP             extends BenefitType("BSP")
+  case object BSP_SEARCHLIGHT extends BenefitType("BSP_SEARCHLIGHT")
 
   def from(paginationType: PaginationType) =
     paginationType match {
