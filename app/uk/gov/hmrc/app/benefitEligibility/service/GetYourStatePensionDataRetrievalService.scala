@@ -113,7 +113,15 @@ class GetYourStatePensionDataRetrievalService @Inject() (
             eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
             eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
           )
-          if (taxWindows.length > 1 || result.shouldPaginate) {
+
+          val shouldPage =
+            if (result.allResults.exists(_.isFailure)) false
+            else {
+              marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined ||
+              benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get.callback.isDefined || taxWindows.length > 1
+            }
+
+          if (shouldPage) {
             val marriageDetailsPaginate = marriageDetailsResult.getSuccess.flatMap(
               _.marriageDetails._links
                 .flatMap(_.self.href)

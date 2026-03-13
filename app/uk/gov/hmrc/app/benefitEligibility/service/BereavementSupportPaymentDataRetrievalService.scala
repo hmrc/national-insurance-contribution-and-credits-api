@@ -77,7 +77,13 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
           eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
         )
 
-        if (result.shouldPaginate) {
+        val shouldPage =
+          if (result.allResults.exists(_.isFailure)) false
+          else {
+            marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined || taxWindows.length > 1
+          }
+
+        if (shouldPage) {
           val marriageDetailsPaginate: Option[PaginationSource] = marriageDetailsResult.getSuccess.flatMap(
             _.marriageDetails._links.flatMap(_.self.href).map(url => PaginationSource(MarriageDetails, Some(url.value)))
           )
