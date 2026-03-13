@@ -31,7 +31,7 @@ object EligibilityCheckDataRequest {
       case BenefitType.BSP             => json.validate[BSPEligibilityCheckDataRequest]
       case BenefitType.MA              => json.validate[MAEligibilityCheckDataRequest]
       case BenefitType.GYSP            => json.validate[GYSPEligibilityCheckDataRequest]
-      case BenefitType.BSP_SEARCHLIGHT => json.validate[BSPSEligibilityCheckDataRequest]
+      case BenefitType.BSP_SEARCHLIGHT => json.validate[BSPSearchlightEligibilityCheckDataRequest]
     }
   }
 
@@ -155,20 +155,20 @@ object GYSPEligibilityCheckDataRequest {
 
 }
 
-final case class BSPSEligibilityCheckDataRequest private (
+final case class BSPSearchlightEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCredits: ContributionsAndCreditsRequestParams
 ) extends EligibilityCheckDataRequest
 
-object BSPSEligibilityCheckDataRequest {
+object BSPSearchlightEligibilityCheckDataRequest {
 
-  implicit val bspsEligibilityCheckDataRequestReads: Reads[BSPSEligibilityCheckDataRequest] =
-    Json.reads[BSPSEligibilityCheckDataRequest]
+  implicit val bspSearchlightEligibilityCheckDataRequestReads: Reads[BSPSearchlightEligibilityCheckDataRequest] =
+    Json.reads[BSPSearchlightEligibilityCheckDataRequest]
 
   def apply(
       nationalInsuranceNumber: Identifier,
       niContributionsAndCredits: ContributionsAndCreditsRequestParams
-  ) = new BSPSEligibilityCheckDataRequest(BSP_SEARCHLIGHT, nationalInsuranceNumber, niContributionsAndCredits)
+  ) = new BSPSearchlightEligibilityCheckDataRequest(BSP_SEARCHLIGHT, nationalInsuranceNumber, niContributionsAndCredits)
 
 }

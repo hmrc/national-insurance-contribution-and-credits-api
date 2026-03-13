@@ -57,8 +57,8 @@ object BenefitEligibilityInfoSuccessResponse {
       BenefitEligibilityInfoSuccessResponseJsa.benefitEligibilityInfoResponseJsaWrites.writes(r)
     case r: BenefitEligibilityInfoSuccessResponseGysp =>
       BenefitEligibilityInfoSuccessResponseGysp.benefitEligibilityInfoResponseGyspWrites.writes(r)
-    case r: BenefitEligibilityInfoSuccessResponseBsps =>
-      BenefitEligibilityInfoSuccessResponseBsps.benefitEligibilityInfoResponseBspsWrites.writes(r)
+    case r: BenefitEligibilityInfoSuccessResponseBspSearchLight =>
+      BenefitEligibilityInfoSuccessResponseBspSearchLight.benefitEligibilityInfoResponseBspSearchlightWrites.writes(r)
   }
 
 }
@@ -297,6 +297,52 @@ object BenefitEligibilityInfoSuccessResponseBsp {
 
 }
 
+final case class BenefitEligibilityInfoSuccessResponseBspSearchLight private (
+    benefitType: BenefitType,
+    nationalInsuranceNumber: Identifier,
+    niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
+    nextCursor: Option[PaginationCursor]
+) extends BenefitEligibilityInfoResponse
+    with BenefitEligibilityInfoSuccessResponse
+
+object BenefitEligibilityInfoSuccessResponseBspSearchLight {
+
+  implicit val benefitEligibilityInfoResponseBspSearchlightWrites
+      : Writes[BenefitEligibilityInfoSuccessResponseBspSearchLight] =
+    Json.writes[BenefitEligibilityInfoSuccessResponseBspSearchLight]
+
+  def apply(
+      nationalInsuranceNumber: Identifier,
+      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
+      nextCursor: Option[PaginationCursor]
+  ) = new BenefitEligibilityInfoSuccessResponseBspSearchLight(
+    BSP_SEARCHLIGHT,
+    nationalInsuranceNumber,
+    niContributionsAndCreditsResult,
+    nextCursor
+  )
+
+  def from(
+      nationalInsuranceNumber: Identifier,
+      result: EligibilityCheckDataResultBspSearchLight
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseBspSearchLight] =
+
+    result.contributionCreditResult match {
+      case (
+            NpsApiResult.SuccessResult(_, contributionsAndCreditsSuccessResponse)
+          ) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseBspSearchLight(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse,
+            None
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
+    }
+
+}
+
 final case class BenefitEligibilityInfoSuccessResponseEsa private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
@@ -438,46 +484,6 @@ object BenefitEligibilityInfoSuccessResponseGysp {
           None
         )
       )
-    }
-
-}
-
-final case class BenefitEligibilityInfoSuccessResponseBsps private (
-    benefitType: BenefitType,
-    nationalInsuranceNumber: Identifier,
-    niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
-) extends BenefitEligibilityInfoResponse
-    with BenefitEligibilityInfoSuccessResponse
-
-object BenefitEligibilityInfoSuccessResponseBsps {
-
-  implicit val benefitEligibilityInfoResponseBspsWrites: Writes[BenefitEligibilityInfoSuccessResponseBsps] =
-    Json.writes[BenefitEligibilityInfoSuccessResponseBsps]
-
-  def apply(
-      nationalInsuranceNumber: Identifier,
-      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
-  ) =
-    new BenefitEligibilityInfoSuccessResponseBsps(
-      BSP_SEARCHLIGHT,
-      nationalInsuranceNumber,
-      niContributionsAndCreditsResult
-    )
-
-  def from(
-      nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataResultBSPS
-  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseBsps] =
-
-    result.contributionCreditResult match {
-      case NpsApiResult.SuccessResult(_, niContributionsAndCreditsSuccessResponse) =>
-        Right(
-          BenefitEligibilityInfoSuccessResponseBsps(
-            nationalInsuranceNumber = nationalInsuranceNumber,
-            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse
-          )
-        )
-      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
     }
 
 }
