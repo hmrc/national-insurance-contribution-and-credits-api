@@ -112,4 +112,13 @@ object EligibilityCheckDataResult {
 
   }
 
+  case class EligibilityCheckDataResultBSPS(contributionCreditResult: ContributionCreditResult)
+      extends EligibilityCheckDataResult {
+    def benefitType: BenefitType = BenefitType.BSP_SEARCHLIGHT
+
+    def allResults: List[ApiResult] = List(contributionCreditResult)
+
+    def shouldPaginate: Boolean = false
+  }
+
 }

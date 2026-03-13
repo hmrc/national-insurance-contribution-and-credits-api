@@ -26,7 +26,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.findValues
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.npsNormalizedErrorWrites
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{
   ApiResult,
@@ -57,6 +57,8 @@ object BenefitEligibilityInfoSuccessResponse {
       BenefitEligibilityInfoSuccessResponseJsa.benefitEligibilityInfoResponseJsaWrites.writes(r)
     case r: BenefitEligibilityInfoSuccessResponseGysp =>
       BenefitEligibilityInfoSuccessResponseGysp.benefitEligibilityInfoResponseGyspWrites.writes(r)
+    case r: BenefitEligibilityInfoSuccessResponseBsps =>
+      BenefitEligibilityInfoSuccessResponseBsps.benefitEligibilityInfoResponseBspsWrites.writes(r)
   }
 
 }
@@ -436,6 +438,46 @@ object BenefitEligibilityInfoSuccessResponseGysp {
           None
         )
       )
+    }
+
+}
+
+final case class BenefitEligibilityInfoSuccessResponseBsps private (
+    benefitType: BenefitType,
+    nationalInsuranceNumber: Identifier,
+    niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
+) extends BenefitEligibilityInfoResponse
+    with BenefitEligibilityInfoSuccessResponse
+
+object BenefitEligibilityInfoSuccessResponseBsps {
+
+  implicit val benefitEligibilityInfoResponseBspsWrites: Writes[BenefitEligibilityInfoSuccessResponseBsps] =
+    Json.writes[BenefitEligibilityInfoSuccessResponseBsps]
+
+  def apply(
+      nationalInsuranceNumber: Identifier,
+      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse
+  ) =
+    new BenefitEligibilityInfoSuccessResponseBsps(
+      BSP_SEARCHLIGHT,
+      nationalInsuranceNumber,
+      niContributionsAndCreditsResult
+    )
+
+  def from(
+      nationalInsuranceNumber: Identifier,
+      result: EligibilityCheckDataResultBSPS
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseBsps] =
+
+    result.contributionCreditResult match {
+      case NpsApiResult.SuccessResult(_, niContributionsAndCreditsSuccessResponse) =>
+        Right(
+          BenefitEligibilityInfoSuccessResponseBsps(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse
+          )
+        )
+      case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
     }
 
 }
