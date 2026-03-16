@@ -1,0 +1,576 @@
+package uk.gov.hmrc.app.benefitEligibility.service
+
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, postRequestedFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.http.Fault
+import org.scalatest.EitherValues
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks.forAll
+import org.scalatest.prop.TableFor1
+import org.scalatest.prop.Tables.Table
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{Json, Reads}
+import play.api.test.Helpers.{
+  BAD_REQUEST,
+  FORBIDDEN,
+  INTERNAL_SERVER_ERROR,
+  METHOD_NOT_ALLOWED,
+  MULTIPLE_CHOICES,
+  MULTI_STATUS,
+  NOT_FOUND,
+  OK,
+  SERVICE_UNAVAILABLE,
+  UNPROCESSABLE_ENTITY
+}
+import play.api.test.Injecting
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
+  Class1ContributionStatus,
+  Class2Or3CreditStatus,
+  ContributionCategory,
+  CreditSource,
+  LatePaymentPeriod,
+  NiContributionCreditType
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
+import uk.gov.hmrc.app.benefitEligibility.model.request.BSPSearchlightEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
+import uk.gov.hmrc.http.HeaderCarrier
+
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext
+
+class BspSearchlightDataRetrievalServiceItSpec
+  extends AnyFreeSpec
+    with EitherValues
+    with GuiceOneAppPerSuite
+    with WireMockHelper
+    with Injecting
+    with Matchers
+    with ScalaFutures {
+
+  implicit val ec: ExecutionContext = ExecutionContext.global
+  implicit val defaultPatience: PatienceConfig = PatienceConfig(
+    timeout = Span(10, Seconds),
+    interval = Span(100, Millis)
+  )
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure(
+        "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port
+      )
+      .build()
+
+  implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
+
+  private lazy val service: BspSearchlightDataRetrievalService =
+    inject[BspSearchlightDataRetrievalService]
+
+  "BspSearchlightDataRetrievalService" - {
+
+    ".fetchEligibilityData" - {
+
+      val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
+
+      val bspSearchlightEligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+        Identifier("GD379251T"),
+        ContributionsAndCreditsRequestParams(
+          DateOfBirth(LocalDate.parse("2025-10-10")),
+          StartTaxYear(2025),
+          EndTaxYear(2026)
+        )
+      )
+
+      "when the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
+        "should parse response and map to result successfully" in {
+          val successResponse = NiContributionsAndCreditsSuccessResponse(
+            Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
+            Some(
+              List(
+                Class1ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                  contributionCategory = Some(ContributionCategory.None),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                  creditSource = Some(CreditSource.NotKnown),
+                  employerName = Some(EmployerName("ipOpMs")),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
+              )
+            ),
+            Some(
+              List(
+                Class2ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                  class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                  creditSource = Some(CreditSource.NotKnown),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
+              )
+            )
+          )
+
+          val successResponseJson =
+            """{
+              |  "totalGraduatedPensionUnits": 100,
+              |  "class1ContributionAndCredits": [
+              |    {
+              |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
+              |      "contributionCategoryLetter": "U",
+              |      "contributionCategory": "(NONE)",
+              |      "contributionCreditType": "C1",
+              |      "primaryContribution": 99999999999999.98,
+              |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+              |      "primaryPaidEarnings": 99999999999999.98,
+              |      "creditSource": "NOT KNOWN",
+              |      "employerName": "ipOpMs",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ],
+              |  "class2ContributionAndCredits": [
+              |    {
+              |      "taxYear": 2022,
+              |      "numberOfContributionsAndCredits": 53,
+              |      "contributionCreditType": "C1",
+              |      "class2Or3EarningsFactor": 99999999999999.98,
+              |      "class2NIContributionAmount": 99999999999999.98,
+              |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+              |      "creditSource": "NOT KNOWN",
+              |      "latePaymentPeriod": "L"
+              |    }
+              |  ]
+              |}""".stripMargin
+
+          val responseBody = Json.parse(successResponseJson).toString()
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result = service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                successResponse
+              ),
+              None
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (400 - StandardErrorResponse400)" - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |    "failures": [
+              |      {
+              |        "reason": "reason_1",
+              |        "code": "400.1"
+              |      },
+              |      {
+              |        "reason": "reason_2",
+              |        "code": "400.2"
+              |      }
+              |    ]
+              |  }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_REQUEST)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          val jsonReads = implicitly[Reads[NpsStandardErrorResponse400]]
+          val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ),
+              None
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns BAD_REQUEST (400 - HipFailureResponse400) " - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |   "failures": [
+              |    {
+              |      "type": "Type of Failure",
+              |      "reason": "Reason for Failure"
+              |    },
+              |    {
+              |      "type": "Type of ';'",
+              |      "reason": "Reason for Failure"
+              |    }
+              |  ]
+              | }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(BAD_REQUEST)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          val jsonReads = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ),
+              None
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns FORBIDDEN (403)" - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |   "reason":"Forbidden",
+              |   "code":"403.2"
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(FORBIDDEN)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          val jsonReads = implicitly[Reads[NpsSingleErrorResponse]]
+          val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ),
+              None
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns NOT_FOUND (404)" - {
+        "should parse error response and map to result" in {
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(NOT_FOUND)
+                  .withHeader("Content-Type", "application/json")
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.NotFound, None)
+              ),
+              None
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns UNPROCESSABLE_ENTITY (422)" - {
+        "should parse error response and map to result" in {
+
+          val errorResponse =
+            """{
+              |"failures":[
+              | {
+              |   "reason":"Some reason",
+              |   "code":"fail code"
+              | }
+              |]
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(UNPROCESSABLE_ENTITY)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          val jsonReads = implicitly[Reads[NpsMultiErrorResponse]]
+          val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ),
+              None
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
+        "should map to InternalServerError result" in {
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(INTERNAL_SERVER_ERROR)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ),
+              None
+            )
+          )
+
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns an INTERNAL_SERVER_ERROR (503)" - {
+
+        val errorResponse =
+          """{
+            |  "origin": "HIP",
+            |  "response": {
+            |   "failures": [
+            |    {
+            |      "type": "Type of Failure",
+            |      "reason": "Reason for Failure"
+            |    },
+            |    {
+            |      "type": "Type of ';'",
+            |      "reason": "Reason for Failure"
+            |    }
+            |  ]
+            | }
+            |}""".stripMargin
+
+        "should map to Service unavailable result" in {
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(SERVICE_UNAVAILABLE)
+                  .withBody(errorResponse)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          val jsonReads = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
+
+          result shouldBe Right(
+            EligibilityCheckDataResultBspSearchLight(
+              FailureResult(
+                ApiName.NiContributionAndCredits,
+                ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              ),
+              None
+            )
+          )
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns an unexpected statusCode" - {
+        "should map to InternalServerError result" in {
+
+          val statusCodes: TableFor1[Int] =
+            Table("statusCodes", MULTIPLE_CHOICES, MULTI_STATUS, METHOD_NOT_ALLOWED)
+
+          forAll(statusCodes) { statusCode =>
+            server.stubFor(
+              post(urlEqualTo(npsCreditsAndContributionsPath))
+                .willReturn(
+                  aResponse()
+                    .withStatus(statusCode)
+                )
+            )
+
+            val result =
+              service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+            result shouldBe Right(
+              EligibilityCheckDataResultBspSearchLight(
+                FailureResult(
+                  ApiName.NiContributionAndCredits,
+                  ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ),
+                None
+              )
+            )
+          }
+
+        }
+      }
+
+      "when the NiContributionsAndCredits endpoint returns malformed JSON" - {
+        "should return parsing error" in {
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{ invalid json structure")
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          result shouldBe a[Left[_, _]]
+          result.left.value shouldBe a[InvalidJsonError]
+        }
+      }
+
+      "when the request to the downstream fails unexpectedly" - {
+        "should return downstream error" in {
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withFault(Fault.RANDOM_DATA_THEN_CLOSE)
+              )
+          )
+
+          val result =
+            service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
+
+          result shouldBe a[Left[_, _]]
+          result.left.value shouldBe a[NpsClientError]
+        }
+      }
+
+    }
+  }
+
+}
