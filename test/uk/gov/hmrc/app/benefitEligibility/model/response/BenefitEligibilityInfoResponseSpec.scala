@@ -1336,6 +1336,76 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     }
   }
 
+  "BenefitEligibilityInfoSuccessResponseBspSearchlight" - {
+    ".from" - {
+      "should convert to a BenefitEligibilityInfoSuccessResponseBspSearchlight" in {
+
+        val result = BenefitEligibilityInfoSuccessResponseBspSearchLight.from(
+          nationalInsuranceNumber,
+          EligibilityCheckDataResultBspSearchLight(
+            NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse),
+            None
+          )
+        )
+
+        val expected = BenefitEligibilityInfoSuccessResponseBspSearchLight(
+          nationalInsuranceNumber,
+          niContributionsAndCreditsSuccessResponse,
+          None
+        )
+
+        result.value shouldBe expected
+
+      }
+      "should serialize to json correctly" in {
+
+        val benefitEligibilityInfoSuccessResponseBspSearchlight = BenefitEligibilityInfoSuccessResponseBspSearchLight(
+          nationalInsuranceNumber,
+          niContributionsAndCreditsSuccessResponse,
+          None
+        )
+
+        val expectedJson =
+          """{
+            |   "benefitType":"BSP_SEARCHLIGHT",
+            |   "nationalInsuranceNumber":"AB123456C",
+            |   "niContributionsAndCreditsResult":{
+            |      "totalGraduatedPensionUnits":53,
+            |      "class1ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCategoryLetter":"U",
+            |            "contributionCategory":"(NONE)",
+            |            "contributionCreditType":"C1",
+            |            "primaryContribution":99999999999999.98,
+            |            "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+            |            "primaryPaidEarnings":99999999999999.98,
+            |            "creditSource":"NOT KNOWN",
+            |            "employerName":"ipOpMs",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ],
+            |      "class2ContributionAndCredits":[
+            |         {
+            |            "taxYear":2022,
+            |            "numberOfContributionsAndCredits":53,
+            |            "contributionCreditType":"C1",
+            |            "class2Or3EarningsFactor":99999999999999.98,
+            |            "class2NIContributionAmount":99999999999999.98,
+            |            "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+            |            "creditSource":"NOT KNOWN",
+            |            "latePaymentPeriod":"L"
+            |         }
+            |      ]
+            |   }
+            |}""".stripMargin
+
+        Json.toJson(benefitEligibilityInfoSuccessResponseBspSearchlight) shouldBe Json.parse(expectedJson)
+      }
+    }
+  }
+
   "BenefitEligibilityInfoSuccessResponseJsa" - {
     ".from" - {
       "should convert to a BenefitEligibilityInfoSuccessResponseJsa" in {
