@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.model.request
 
 import play.api.libs.json.*
 import EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 
@@ -26,11 +26,12 @@ object EligibilityCheckDataRequest {
 
   implicit val reads: Reads[EligibilityCheckDataRequest] = Reads { json =>
     (json \ "benefitType").validate[BenefitType].flatMap {
-      case BenefitType.ESA  => json.validate[ESAEligibilityCheckDataRequest]
-      case BenefitType.JSA  => json.validate[JSAEligibilityCheckDataRequest]
-      case BenefitType.BSP  => json.validate[BSPEligibilityCheckDataRequest]
-      case BenefitType.MA   => json.validate[MAEligibilityCheckDataRequest]
-      case BenefitType.GYSP => json.validate[GYSPEligibilityCheckDataRequest]
+      case BenefitType.ESA             => json.validate[ESAEligibilityCheckDataRequest]
+      case BenefitType.JSA             => json.validate[JSAEligibilityCheckDataRequest]
+      case BenefitType.BSP             => json.validate[BSPEligibilityCheckDataRequest]
+      case BenefitType.MA              => json.validate[MAEligibilityCheckDataRequest]
+      case BenefitType.GYSP            => json.validate[GYSPEligibilityCheckDataRequest]
+      case BenefitType.BSP_SEARCHLIGHT => json.validate[BSPSearchlightEligibilityCheckDataRequest]
     }
   }
 
@@ -151,5 +152,23 @@ object GYSPEligibilityCheckDataRequest {
     longTermBenefitCalculation,
     nextCursor
   )
+
+}
+
+final case class BSPSearchlightEligibilityCheckDataRequest private (
+    benefitType: BenefitType,
+    nationalInsuranceNumber: Identifier,
+    niContributionsAndCredits: ContributionsAndCreditsRequestParams
+) extends EligibilityCheckDataRequest
+
+object BSPSearchlightEligibilityCheckDataRequest {
+
+  implicit val bspSearchlightEligibilityCheckDataRequestReads: Reads[BSPSearchlightEligibilityCheckDataRequest] =
+    Json.reads[BSPSearchlightEligibilityCheckDataRequest]
+
+  def apply(
+      nationalInsuranceNumber: Identifier,
+      niContributionsAndCredits: ContributionsAndCreditsRequestParams
+  ) = new BSPSearchlightEligibilityCheckDataRequest(BSP_SEARCHLIGHT, nationalInsuranceNumber, niContributionsAndCredits)
 
 }

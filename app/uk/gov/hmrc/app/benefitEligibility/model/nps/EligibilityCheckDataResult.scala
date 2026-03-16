@@ -87,4 +87,16 @@ object EligibilityCheckDataResult {
 
   }
 
+  case class EligibilityCheckDataResultBspSearchLight(
+      contributionCreditResult: ContributionCreditResult,
+      nextCursor: Option[PaginationCursor]
+  ) extends EligibilityCheckDataResult {
+    def benefitType: BenefitType = BenefitType.BSP_SEARCHLIGHT
+
+    override def allResults: List[ApiResult] = List(contributionCreditResult)
+
+    def shouldPaginate: Boolean = false
+
+  }
+
 }
