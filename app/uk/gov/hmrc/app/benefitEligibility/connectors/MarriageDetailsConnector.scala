@@ -55,7 +55,6 @@ class MarriageDetailsConnector @Inject() (
 
   private val logger = new RequestAwareLogger(this.getClass)
 
-  // TODO create method that takes just path
   def fetchMarriageDetails(
       identifier: Identifier
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
