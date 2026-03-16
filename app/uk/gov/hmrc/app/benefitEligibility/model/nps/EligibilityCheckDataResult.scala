@@ -95,8 +95,6 @@ object EligibilityCheckDataResult {
 
     override def allResults: List[ApiResult] = List(contributionCreditResult)
 
-    def shouldPaginate: Boolean = false
-
   }
 
 }
