@@ -46,7 +46,6 @@ final case class PaginationSource(
     callBackURL: Option[String]
 )
 
-// Todo: Add PaginationSource Spec
 object PaginationSource {
   implicit val format: OFormat[PaginationSource] = Json.format[PaginationSource]
 
@@ -63,7 +62,8 @@ object PaginationSource {
     marriageDetailsResult.flatMap {
       _.getSuccess
         .map(_.marriageDetails)
-        .map(m => PaginationSource(MarriageDetails, m._links.flatMap(_.self.href.map(_.value))))
+        .flatMap(m => m._links.flatMap(_.self.href.map(_.value)))
+        .map(url => PaginationSource(MarriageDetails, Some(url)))
     }
 
   def fromLiabilities(liabilitiesResult: List[LiabilityResult]): List[PaginationSource] = liabilitiesResult.flatMap {
@@ -78,7 +78,6 @@ final case class ContributionAndCreditsPaging private (
     dateOfBirth: DateOfBirth
 )
 
-// Todo: Add ContributionAndCreditsPaging Spec
 object ContributionAndCreditsPaging {
 
   implicit val nonEmptyListTawWindowFormat: Format[NonEmptyList[TaxWindow]] =
@@ -192,7 +191,6 @@ object GyspPageTask {
 
 }
 
-//Todo: Add PageTask spec
 object PageTask {
 
   private val pageTaskReads: Reads[PageTask] = Reads { json =>

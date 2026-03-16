@@ -1194,6 +1194,124 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
+        "should Fetch MA Correctly and response contains nextCursor" in {
+          (() => mockUuidGenerator.generate)
+            .expects()
+            .returning(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e"))
+
+          val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
+            Some(
+              List(
+                LiabilityDetailsList(
+                  identifier = nationalInsuranceNumber,
+                  `type` = EnumLiabtp.Abroad,
+                  occurrenceNumber = OccurrenceNumber(1),
+                  startDateStatus = Some(EnumLtpsdttp.StartDateHeld),
+                  endDateStatus = Some(EnumLtpedttp.EndDateHeld),
+                  startDate = StartDate(LocalDate.parse("2026-01-01")),
+                  endDate = Some(EndDate(LocalDate.parse("2027-01-01"))),
+                  country = Some(Country.GreatBritain),
+                  trainingCreditApprovalStatus = Some(EnumAtcredfg.NoCreditForApprovedTraining),
+                  casepaperReferenceNumber = Some(CasepaperReferenceNumber("SCH/123/4")),
+                  homeResponsibilitiesProtectionBenefitReference =
+                    Some(HomeResponsibilitiesProtectionBenefitReference("12345678AB")),
+                  homeResponsibilitiesProtectionRate = Some(HomeResponsibilitiesProtectionRate(10.56)),
+                  lostCardNotificationReason = Some(EnumLcheadtp.NotApplicable),
+                  lostCardRulingReason = Some(EnumLcruletp.NotApplicable),
+                  homeResponsibilityProtectionCalculationYear = Some(HomeResponsibilityProtectionCalculationYear(2022)),
+                  awardAmount = Some(AwardAmount(10.56)),
+                  resourceGroupIdentifier = Some(ResourceGroupIdentifier(789)),
+                  homeResponsibilitiesProtectionIndicator = Some(EnumHrpIndicator.None),
+                  officeDetails = Some(
+                    OfficeDetails(
+                      officeLocationDecode = Some(OfficeLocationDecode(1)),
+                      officeLocationValue = Some(OfficeLocationValue("HQ STATIONARY STORE")),
+                      officeIdentifier = Some(EnumOffidtp.None)
+                    )
+                  )
+                )
+              )
+            ),
+            callback = Some(Callback(Some(CallbackUrl("someUrl"))))
+          )
+          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
+          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+
+          val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
+          val liabilitySummaryDetailsSuccessResponseBody =
+            Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsClass2MaReceiptsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(class2MAReceiptsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(liabilitySummaryDetailsSuccessResponseBody)
+              )
+          )
+          val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            LiabilitiesRequestParams(List(Abroad), None, None, None),
+            None
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
+            nationalInsuranceNumber,
+            filteredClass2MaReceipts,
+            List(filteredLiabilitySummaryDetails),
+            niContributionsAndCreditsSuccessResponse,
+            Some(PaginationCursor(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e")))
+          )
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+        }
         "should return a 502 if some downstream calls to NPS services fail (MA - Partial Failure)" in {
 
           val liabilitySummaryDetailsSuccessResponseBody =
@@ -1471,6 +1589,105 @@ class BenefitEligibilityDataControllerItSpec
             niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
             marriageDetailsResult = filteredMarriageDetails,
             nextCursor = None
+          )
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+        }
+        "should Fetch BSP Correctly and response contains nextCursor" in {
+          (() => mockUuidGenerator.generate)
+            .expects()
+            .returning(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e"))
+          val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
+            MarriageDetailsSuccess.MarriageDetails(
+              MarriageDetailsSuccess.ActiveMarriage(true),
+              Some(
+                List(
+                  MarriageDetailsSuccess
+                    .MarriageDetailsListElement(
+                      sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
+                      status = CivilPartner,
+                      startDate = Some(MarriageStartDate(LocalDate.parse("1999-01-01"))),
+                      startDateStatus = Some(MarriageStartDateStatus.Verified),
+                      endDate = Some(MarriageEndDate(LocalDate.parse("2001-01-01"))),
+                      endDateStatus = Some(Verified),
+                      spouseIdentifier = Some(nationalInsuranceNumber2),
+                      spouseForename = Some(SpouseForename("Skywalker")),
+                      spouseSurname = Some(SpouseSurname("Luke")),
+                      separationDate = Some(SeparationDate(LocalDate.parse("2002-01-01"))),
+                      reconciliationDate = Some(MarriageDetailsReconciliationDate(LocalDate.parse("2003-01-01")))
+                    )
+                )
+              ),
+              Some(
+                MarriageDetailsSuccess.Links(
+                  MarriageDetailsSuccess.SelfLink(
+                    Some(MarriageDetailsSuccess.Href("SomeUrl")),
+                    Some(MarriageDetailsSuccess.Methods.get)
+                  )
+                )
+              )
+            )
+          )
+
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+          val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(npsIndividualMarriageDetailsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(marriageDetailsSuccessResponseBody)
+              )
+          )
+
+          val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            None
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+            marriageDetailsResult = filteredMarriageDetails,
+            nextCursor = Some(PaginationCursor(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e")))
           )
 
           status(result) shouldBe 200
@@ -1775,6 +1992,224 @@ class BenefitEligibilityDataControllerItSpec
             filteredIndividualStatePensionInfo,
             niContributionsAndCreditsSuccessResponse,
             None
+          )
+
+          status(result) shouldBe 200
+          contentAsJson(result) shouldBe Json.toJson(expectedResult)
+
+        }
+        "should Fetch GYSP Correctly and response contains nextCursor" in {
+          (() => mockUuidGenerator.generate)
+            .expects()
+            .returning(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e"))
+
+          val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
+            schemeMembershipDetailsSummaryList = Some(
+              List(
+                SchemeMembershipDetailsSummary(
+                  stakeholderPensionSchemeType = StakeholderPensionSchemeType.NonStakeholderPension,
+                  schemeMembershipDetails = SchemeMembershipDetails(
+                    nationalInsuranceNumber = nationalInsuranceNumber,
+                    schemeMembershipSequenceNumber = SchemeMembershipSequenceNumber(123),
+                    schemeMembershipOccurrenceNumber = SchemeMembershipOccurrenceNumber(1),
+                    schemeMembershipStartDate = Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
+                    contractedOutEmployerIdentifier = Some(ContractedOutEmployerIdentifier(789)),
+                    schemeMembershipEndDate = Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
+                    methodOfPreservationType = Some(MethodOfPreservation.NotApplicable0),
+                    totalLinkedGuaranteedMinimumPensionContractedOutDeductions =
+                      Some(TotalLinkedGuaranteedMinimumPensionContractedOutDeductions(BigDecimal("10.56"))),
+                    accruedPensionContractedOutDeductionsValue =
+                      Some(AccruedPensionContractedOutDeductionsValue(BigDecimal("10.56"))),
+                    totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988 =
+                      Some(TotalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988(BigDecimal("10.56"))),
+                    accruedPensionContractedOutDeductionsValuePost1988 =
+                      Some(AccruedPensionContractedOutDeductionsValuePost1988(BigDecimal("10.56"))),
+                    revaluationRate = Some(RevaluationRate.None),
+                    guaranteedMinimumPensionReconciliationStatus =
+                      Some(GuaranteedMinimumPensionReconciliationStatus.NotApplicable),
+                    employeesReference = Some(EmployeesReference("123/456/ABC")),
+                    finalYearEarnings = Some(FinalYearEarnings(BigDecimal("10.56"))),
+                    penultimateYearEarnings = Some(PenultimateYearEarnings(BigDecimal("10.56"))),
+                    retrospectiveEarnings = Some(RetrospectiveEarnings(BigDecimal("10.56"))),
+                    furtherPaymentsConfirmation = Some(FurtherPaymentsConfirmation.FurtherPaymentAllowed),
+                    survivorStatus = Some(SurvivorStatus.NotApplicable),
+                    transferPremiumElectionDate = Some(TransferPremiumElectionDate(LocalDate.of(2022, 6, 27))),
+                    revaluationApplied = Some(RevaluationApplied(true)),
+                    stateEarningsRelatedPensionsSchemeNonRestorationValue =
+                      Some(StateEarningsRelatedPensionsSchemeNonRestorationValue(BigDecimal("10.56"))),
+                    stateEarningsRelatedPensionsSchemeValuePost1988 =
+                      Some(StateEarningsRelatedPensionsSchemeValuePost1988(BigDecimal("10.56"))),
+                    apparentUnnotifiedTerminationStatus =
+                      Some(ApparentUnnotifiedTerminationStatus.NoApparentUnnotifiedTermination),
+                    terminationMicrofilmNumber = Some(TerminationMicrofilmNumber(789)),
+                    debitVoucherMicrofilmNumber = Some(DebitVoucherMicrofilmNumber(40599123)),
+                    creationMicrofilmNumber = Some(CreationMicrofilmNumber(40599123)),
+                    inhibitSchemeProcessing = Some(InhibitSchemeProcessing(true)),
+                    extensionDate = Some(ExtensionDate(LocalDate.of(2022, 6, 27))),
+                    guaranteedMinimumPensionContractedOutDeductionsRevalued =
+                      Some(GuaranteedMinimumPensionContractedOutDeductionsRevalued(BigDecimal("10.56"))),
+                    clericalCalculationInvolved = Some(Clercalc.NoClericalCalculationInvolved),
+                    clericallyControlledTotal = Some(ClericallyControlledTotal(BigDecimal("10.56"))),
+                    clericallyControlledTotalPost1988 = Some(ClericallyControlledTotalPost1988(BigDecimal("10.56"))),
+                    certifiedAmount = Some(CertifiedAmount(BigDecimal("10.56"))),
+                    enforcementStatus = Some(Enfcment.NotEnforced),
+                    stateSchemePremiumDeemed = Some(SspDeem.SspTypeReceivablesToBeTreatAsDeemed),
+                    transferTakeUpDate = Some(TransferTakeUpDate(LocalDate.of(2022, 6, 27))),
+                    schemeMembershipTransferSequenceNumber = Some(SchemeMembershipTransferSequenceNumber(123)),
+                    contributionCategoryFinalYear = Some(ContCatLetter.A),
+                    contributionCategoryPenultimateYear = Some(ContCatLetter.A),
+                    contributionCategoryRetrospectiveYear = Some(ContCatLetter.A),
+                    protectedRightsStartDate = Some(ProtectedRightsStartDate(LocalDate.of(2022, 6, 27))),
+                    schemeMembershipDebitReason = Some(SchemeMembershipDebitReason.NotApplicable),
+                    technicalAmount = Some(TechnicalAmount(BigDecimal("10.56"))),
+                    minimumFundTransferAmount = Some(MinimumFundTransferAmount(BigDecimal("10.56"))),
+                    actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
+                    schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
+                    guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
+                    employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
+                    schemeCreatingContractedOutNumberDetails =
+                      Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+                    schemeTerminatingContractedOutNumberDetails =
+                      Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
+                    importingAppropriateSchemeNumberDetails =
+                      Some(ImportingAppropriateSchemeNumberDetails("S2123456B")),
+                    apparentUnnotifiedTerminationDestinationDetails =
+                      Some(ApparentUnnotifiedTerminationDestinationDetails("S2123456B"))
+                  )
+                )
+              )
+            ),
+            callback = Some(Callback(Some(CallbackUrl("SomeUrl"))))
+          )
+
+          val niContributionsAndCreditsSuccessResponseBody =
+            Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+          val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
+          val marriageDetailsSuccessResponseBody      = Json.toJson(marriageDetailsSuccessResponse).toString()
+
+          val longTermBenefitCalculationDetailsSuccessResponseBody =
+            Json.toJson(longTermBenefitCalculationDetailsSuccessResponse).toString()
+
+          val longTermBenefitNotesSuccessResponseBody = Json.toJson(longTermBenefitNotesSuccessResponse).toString()
+
+          val schemeMembershipDetailsSuccessResponseBody =
+            Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
+
+          val individualStatePensionInformationSuccessResponseBody =
+            Json.toJson(individualStatePensionInformationSuccessResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+          server.stubFor(
+            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(niContributionsAndCreditsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(benefitSchemeDetailsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(marriageDetailsSuccessResponseBody)
+              )
+          )
+
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(longTermBenefitCalculationDetailsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(longTermBenefitNotesSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(schemeMembershipDetailsSuccessResponseBody)
+              )
+          )
+          server.stubFor(
+            WireMock
+              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(individualStatePensionInformationSuccessResponseBody)
+              )
+          )
+
+          val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2024),
+              EndTaxYear(2025)
+            ),
+            Some(LongTermBenefitCalculationRequestParams(None, None)),
+            None
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          val expectedResult = BenefitEligibilityInfoSuccessResponseGysp(
+            nationalInsuranceNumber,
+            filteredMarriageDetails,
+            filteredLongTermBenefitCalculationDetails,
+            filteredSchemeMembershipDetails,
+            filteredIndividualStatePensionInfo,
+            niContributionsAndCreditsSuccessResponse,
+            Some(PaginationCursor(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e")))
           )
 
           status(result) shouldBe 200
