@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, postRequestedFor, urlEqualTo}
@@ -56,7 +72,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
 class BspSearchlightDataRetrievalServiceItSpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with EitherValues
     with GuiceOneAppPerSuite
     with WireMockHelper
@@ -65,6 +81,7 @@ class BspSearchlightDataRetrievalServiceItSpec
     with ScalaFutures {
 
   implicit val ec: ExecutionContext = ExecutionContext.global
+
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
     interval = Span(100, Millis)
@@ -232,7 +249,7 @@ class BspSearchlightDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads = implicitly[Reads[NpsStandardErrorResponse400]]
+          val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
@@ -286,7 +303,7 @@ class BspSearchlightDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
@@ -329,7 +346,7 @@ class BspSearchlightDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads = implicitly[Reads[NpsSingleErrorResponse]]
+          val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
@@ -407,7 +424,7 @@ class BspSearchlightDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads = implicitly[Reads[NpsMultiErrorResponse]]
+          val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
           val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
@@ -484,7 +501,7 @@ class BspSearchlightDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads = implicitly[Reads[NpsErrorResponseHipOrigin]]
+          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(

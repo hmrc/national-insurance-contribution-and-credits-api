@@ -162,7 +162,7 @@ class PaginationServiceItSpec
 
   "PaginationService" - {
     ".addTask" - {
-      "Should successfully add a new task" in {
+      "should successfully add a new task" in {
         deleteAll().futureValue
         val pageTask: MaPageTask =
           MaPageTask(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")), List(), Instant.now)
@@ -252,10 +252,6 @@ class PaginationServiceItSpec
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
 
         val paginationSource1 = PaginationSource(MarriageDetails, Some("CallBackUrl1"))
-        val paginationSource2 = ContributionAndCreditsPaging(
-          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-          DateOfBirth(LocalDate.parse("2025-10-10"))
-        )
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -333,7 +329,7 @@ class PaginationServiceItSpec
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-                Some(paginationSource2)
+                None
               ),
               benefitSchemeMembershipDetailsData = None,
               nextCursor = Some(PaginationCursor(uuidTwo))
@@ -342,11 +338,6 @@ class PaginationServiceItSpec
       }
       "should process Gysp pagination task successfully" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidThree)
-
-        val paginationSource2 = ContributionAndCreditsPaging(
-          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-          DateOfBirth(LocalDate.parse("2025-10-10"))
-        )
 
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
           totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
@@ -597,7 +588,7 @@ class PaginationServiceItSpec
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-                Some(paginationSource2)
+                None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
               nextCursor = Some(PaginationCursor(uuidThree))

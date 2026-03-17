@@ -2091,7 +2091,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
 
       }
-      "Should return a success response if Pagination resul is all Ok (MA)" in {
+      "should return a success response if Pagination resul is all Ok (MA)" in {
         val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
           ContributionCreditPagingResult(None, None)
         val liabilityResult =
@@ -2111,7 +2111,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         BenefitEligibilityInfoResponse.from(nationalInsuranceNumber, paginationResult) shouldBe expectedResult
       }
-      "Should return a success response if Pagination resul is all Ok (BSP)" in {
+      "should return a success response if Pagination resul is all Ok (BSP)" in {
 
         val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
           ContributionCreditPagingResult(None, None)
@@ -2130,7 +2130,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         BenefitEligibilityInfoResponse.from(nationalInsuranceNumber, paginationResult) shouldBe expectedResult
       }
-      "Should return a success response if Pagination resul is all Ok (GYSP)" in {
+      "should return a success response if Pagination resul is all Ok (GYSP)" in {
 
         val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
           ContributionCreditPagingResult(None, None)

@@ -56,7 +56,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.en
   NiContributionCreditType
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.NpsStandardErrorResponse400
-import uk.gov.hmrc.app.benefitEligibility.repository.ContributionAndCreditsPaging.fromContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.service.ContributionCreditPagingResult
 
 import java.time.LocalDate
@@ -72,7 +71,7 @@ class ContributionsAndCreditsPagingSpec
 
   "ContributionAndCreditsPaging" - {
     ".apply" - {
-      "Should successfully create ContributionAndCreditsPaging" in {
+      "should successfully create ContributionAndCreditsPaging" in {
         val taxWindow = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030)))
 
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
@@ -83,137 +82,27 @@ class ContributionsAndCreditsPagingSpec
         result.apiName shouldBe NiContributionAndCredits
       }
     }
-    ".fromContributionAndCredits" - {
-      "Should return ContributionAndCreditsPaging if successful ContributionCreditPagingResult has more than one tax window" in {
+    ".tail" - {
+      "should return an updated ContributionAndCreditsPaging with the tail of the windows on the initial ContributionAndCreditsPaging object" in {
         val taxWindow = NonEmptyList.of(
           TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
           TaxWindow(StartTaxYear(2021), EndTaxYear(2030))
         )
-        val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-          Some(TotalGraduatedPensionUnits(BigDecimal("100"))),
-          Some(
-            List(
-              Class1ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-                contributionCategory = Some(ContributionCategory.None),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                creditSource = Some(CreditSource.NotKnown),
-                employerName = Some(EmployerName("ipOpMs")),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
-              )
-            )
-          ),
-          Some(
-            List(
-              Class2ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                creditSource = Some(CreditSource.NotKnown),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
-              )
-            )
-          )
-        )
+        val dob              = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationSource = ContributionAndCreditsPaging(taxWindow, dob)
 
-        val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
-          ContributionCreditPagingResult(
-            Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-            Some(paginationSource)
-          )
+        val result = paginationSource.tail
 
-        val result = fromContributionAndCredits(creditsAndContributionsPagingResult)
-        result shouldBe Some(
-          ContributionAndCreditsPaging(NonEmptyList.of(TaxWindow(StartTaxYear(2021), EndTaxYear(2030))), dob)
-        )
+        result shouldBe
+          Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2030))), dob))
       }
-      "Should return None if successful ContributionCreditPagingResult has one tax window" in {
-        val taxWindow = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)))
-        val dob       = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
-          Some(TotalGraduatedPensionUnits(BigDecimal("100"))),
-          Some(
-            List(
-              Class1ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
-                contributionCategory = Some(ContributionCategory.None),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                creditSource = Some(CreditSource.NotKnown),
-                employerName = Some(EmployerName("ipOpMs")),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
-              )
-            )
-          ),
-          Some(
-            List(
-              Class2ContributionAndCredits(
-                taxYear = Some(TaxYear(2022)),
-                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                contributionCreditType = Some(NiContributionCreditType.C1),
-                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
-                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                creditSource = Some(CreditSource.NotKnown),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
-              )
-            )
-          )
-        )
+      "should return None if ContributionAndCreditsPaging has only one tax window" in {
+        val taxWindow        = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)))
+        val dob              = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationSource = ContributionAndCreditsPaging(taxWindow, dob)
 
-        val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
-          ContributionCreditPagingResult(
-            Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-            Some(paginationSource)
-          )
+        val result = paginationSource.tail
 
-        val result = fromContributionAndCredits(creditsAndContributionsPagingResult)
-        result shouldBe None
-      }
-      "Should return None if Failure ContributionCreditPagingResult passed in" in {
-        val errorResponse =
-          """{
-            |  "origin": "HIP",
-            |  "response": {
-            |    "failures": [
-            |      {
-            |        "reason": "reason_1",
-            |        "code": "400.1"
-            |      },
-            |      {
-            |        "reason": "reason_2",
-            |        "code": "400.2"
-            |      }
-            |    ]
-            |  }
-            |}""".stripMargin
-        val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
-        val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
-
-        val failureResult = FailureResult(
-          NiContributionAndCredits,
-          ErrorReport(NpsNormalizedError.BadRequest, Some(response))
-        )
-
-        val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
-          ContributionCreditPagingResult(Some(failureResult), None)
-
-        val result = fromContributionAndCredits(creditsAndContributionsPagingResult)
         result shouldBe None
       }
     }

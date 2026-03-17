@@ -76,7 +76,13 @@ final case class ContributionAndCreditsPaging private (
     apiName: ApiName,
     niContributionAndCreditsTaxWindows: NonEmptyList[TaxWindow],
     dateOfBirth: DateOfBirth
-)
+) {
+
+  def tail: Option[ContributionAndCreditsPaging] = niContributionAndCreditsTaxWindows.toList.safeTailNel.map(
+    remaining => this.copy(niContributionAndCreditsTaxWindows = remaining)
+  )
+
+}
 
 object ContributionAndCreditsPaging {
 
@@ -87,17 +93,6 @@ object ContributionAndCreditsPaging {
 
   def apply(niContributionAndCreditsTaxWindows: NonEmptyList[TaxWindow], dateOfBirth: DateOfBirth) =
     new ContributionAndCreditsPaging(ApiName.NiContributionAndCredits, niContributionAndCreditsTaxWindows, dateOfBirth)
-
-  def fromContributionAndCredits(
-      contributionCreditPagingResult: ContributionCreditPagingResult
-  ): Option[ContributionAndCreditsPaging] =
-    for {
-      remainingTaxWindows <- contributionCreditPagingResult.contributionAndCreditsPaging.flatMap(
-        _.niContributionAndCreditsTaxWindows.toList.safeTailNel
-      )
-      dob <- contributionCreditPagingResult.contributionAndCreditsPaging.map(_.dateOfBirth)
-
-    } yield ContributionAndCreditsPaging(remainingTaxWindows, dob)
 
 }
 
@@ -229,16 +224,14 @@ object PageTask {
               paginationResult.benefitSchemeMembershipDetailsData
             ),
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
-            contributionAndCreditsPaging =
-              ContributionAndCreditsPaging.fromContributionAndCredits(paginationResult.contributionCreditResult),
+            contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             now
           )
         case PaginationType.BSP =>
           BspPageTask(
             paginationCursor = cursor,
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
-            contributionAndCreditsPaging =
-              ContributionAndCreditsPaging.fromContributionAndCredits(paginationResult.contributionCreditResult),
+            contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             now
           )
       }

@@ -113,8 +113,10 @@ class PaginationService @Inject() (
         PaginationResult(
           paginationType = bspPageTask.paginationType,
           marriageDetailsResult = marriageDetailsResult,
-          contributionCreditResult =
-            ContributionCreditPagingResult(contributionCreditResult, bspPageTask.contributionAndCreditsPaging),
+          contributionCreditResult = ContributionCreditPagingResult(
+            contributionCreditResult,
+            bspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
+          ),
           liabilitiesResult = Nil,
           benefitSchemeMembershipDetailsData = None,
           None
@@ -184,8 +186,10 @@ class PaginationService @Inject() (
         PaginationResult(
           paginationType = gyspPageTask.paginationType,
           marriageDetailsResult = marriageDetailsResult,
-          contributionCreditResult =
-            ContributionCreditPagingResult(contributionCreditResult, gyspPageTask.contributionAndCreditsPaging),
+          contributionCreditResult = ContributionCreditPagingResult(
+            contributionCreditResult,
+            gyspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
+          ),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
           liabilitiesResult = Nil,
           None

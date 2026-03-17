@@ -127,10 +127,12 @@ class PageTaskSpec
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           BspPageTask(
-            PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
-            None,
-            None,
-            currentTimeSource.instantNow()
+            paginationCursor = PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            marriageDetailsPaging = None,
+            contributionAndCreditsPaging = Some(
+              ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+            ),
+            createdAt = currentTimeSource.instantNow()
           )
         )
       }
@@ -273,11 +275,13 @@ class PageTaskSpec
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           GyspPageTask(
-            PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
-            None,
-            None,
-            None,
-            currentTimeSource.instantNow()
+            paginationCursor = PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            benefitSchemeMembershipDetailsPaging = None,
+            marriageDetailsPaging = None,
+            contributionAndCreditsPaging = Some(
+              ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+            ),
+            createdAt = currentTimeSource.instantNow()
           )
         )
       }
