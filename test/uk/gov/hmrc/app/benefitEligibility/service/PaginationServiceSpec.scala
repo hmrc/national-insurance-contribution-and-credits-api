@@ -185,7 +185,11 @@ class PaginationServiceSpec
 
         val paginationSource1 = PaginationSource(ApiName.MarriageDetails, Some(marriageDetailsCallBackUrl))
         val paginationSource2 =
-          ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+          ContributionAndCreditsPaging(
+            NonEmptyList
+              .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
+            dob
+          )
 
         val marriageDetailsSuccessResponse =
           MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
@@ -241,7 +245,7 @@ class PaginationServiceSpec
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           nextCursor = Some(PaginationCursor(uuid))
@@ -394,7 +398,8 @@ class PaginationServiceSpec
           marriageDetailsPaging = Some(paginationSource1),
           contributionAndCreditsPaging = Some(
             ContributionAndCreditsPaging(
-              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+              NonEmptyList
+                .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
@@ -462,7 +467,7 @@ class PaginationServiceSpec
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = Some(
             BenefitSchemeMembershipDetailsData(

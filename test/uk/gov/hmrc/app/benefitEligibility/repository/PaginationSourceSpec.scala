@@ -56,7 +56,7 @@ class PaginationSourceSpec
 
   "PaginationSource" - {
     ".fromBenefitSchemeMembershipDetails" - {
-      "Should return PaginationSource if successful BenefitSchemeMembershipDetailsData with callback url" in {
+      "should return PaginationSource if successful BenefitSchemeMembershipDetailsData with callback url" in {
         val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
           schemeMembershipDetailsSummaryList = Some(
             List(
@@ -203,7 +203,7 @@ class PaginationSourceSpec
         val result = fromBenefitSchemeMembershipDetails(Some(benefitSchemeMembershipDetailsData))
         result shouldBe Some(PaginationSource(ApiName.BenefitSchemeDetails, Some("SomeURL")))
       }
-      "Should return None if successful BenefitSchemeMembershipDetailsData with No callback url" in {
+      "should return None if successful BenefitSchemeMembershipDetailsData with No callback url" in {
         val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
           schemeMembershipDetailsSummaryList = Some(
             List(
@@ -350,7 +350,7 @@ class PaginationSourceSpec
         val result = fromBenefitSchemeMembershipDetails(Some(benefitSchemeMembershipDetailsData))
         result shouldBe None
       }
-      "Should return None if Failure BenefitSchemeMembershipDetailsData passed in" in {
+      "should return None if Failure BenefitSchemeMembershipDetailsData passed in" in {
         val errorResponse =
           """{
             |  "origin": "HIP",
@@ -440,7 +440,7 @@ class PaginationSourceSpec
       }
     }
     ".fromMarriageDetails" - {
-      "Should return PaginationSource if successful MarriageDetailsResult with callback url" in {
+      "should return PaginationSource if successful MarriageDetailsResult with callback url" in {
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -481,7 +481,7 @@ class PaginationSourceSpec
         val result = fromMarriageDetails(Some(marriageDetailsResult))
         result shouldBe Some(PaginationSource(ApiName.MarriageDetails, Some("SomeUrl")))
       }
-      "Should return None if successful MarriageDetailsResult with no callback url" in {
+      "should return None if successful MarriageDetailsResult with no callback url" in {
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -498,7 +498,7 @@ class PaginationSourceSpec
         val result = fromMarriageDetails(Some(marriageDetailsResult))
         result shouldBe None
       }
-      "Should return None if Failure MarriageDetailsResult passed in" in {
+      "should return None if Failure MarriageDetailsResult passed in" in {
         val errorResponse =
           """{
             |  "origin": "HIP",
@@ -528,7 +528,7 @@ class PaginationSourceSpec
       }
     }
     ".fromLiabilities" - {
-      "Should return PaginationSource if successful LiabilityResult with callback url" in {
+      "should return PaginationSource if successful LiabilityResult with callback url" in {
 
         val liabilitiesResult = List(
           SuccessResult(
@@ -540,7 +540,7 @@ class PaginationSourceSpec
         val result = fromLiabilities(liabilitiesResult)
         result shouldBe List(PaginationSource(Liabilities, Some("SomeUrl")))
       }
-      "Should return EmptyList if successful LiabilityResult with no callback url" in {
+      "should return EmptyList if successful LiabilityResult with no callback url" in {
         val liabilitiesResult =
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)))
 
@@ -548,7 +548,7 @@ class PaginationSourceSpec
         result shouldBe List()
 
       }
-      "Should return EmptyList if Failure LiabilityResult passed in" in {
+      "should return EmptyList if Failure LiabilityResult passed in" in {
         val errorResponse =
           """{
             |  "origin": "HIP",
