@@ -32,7 +32,6 @@ final case class ContributionCreditPagingResult(
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging]
 )
 
-// Todo: Add Pagination result Spec and move this to appropriate place
 final case class PaginationResult(
     paginationType: PaginationType,
     liabilitiesResult: List[LiabilityResult],

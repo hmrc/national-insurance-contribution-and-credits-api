@@ -2589,6 +2589,41 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(BadRequest, ErrorReason("Missing Header CorrelationId"))
         )
       }
+      "should return a 400 if a request is sent with an invalid CorrelationID" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2025),
+            EndTaxYear(2026)
+          )
+        )
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "notValidCorrelationId"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("Invalid correlationId value found, expected a valid UUID"))
+        )
+      }
 
       "should return a 422 if a request is sent with invalid data" in {
 
