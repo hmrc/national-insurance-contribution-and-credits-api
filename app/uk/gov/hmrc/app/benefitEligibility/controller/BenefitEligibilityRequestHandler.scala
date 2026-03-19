@@ -24,8 +24,10 @@ import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, Ok, Un
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
+  CorrelationId,
   Identifier,
   InvalidRequest,
+  InvalidUUID,
   JsonValidationError
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
@@ -70,73 +72,87 @@ object BenefitEligibilityRequestHandler {
           )
         )
       case Some(value) =>
-        // TODO add validation for correlation id as UUID
-        request.body.asJson match {
-          case Some(requestJson) =>
-            requestJson.validate[EligibilityCheckDataRequest] match {
-              case JsSuccess(eligibilityCheckDataRequest, _) =>
-                val maybeNextCursor = eligibilityCheckDataRequest match {
-                  case bspReq: BSPEligibilityCheckDataRequest   => bspReq.nextCursor
-                  case maReq: MAEligibilityCheckDataRequest     => maReq.nextCursor
-                  case gyspReq: GYSPEligibilityCheckDataRequest => gyspReq.nextCursor
-                  case _                                        => None
-                }
-                validateRequest(eligibilityCheckDataRequest) match {
-                  case Left(validationError) =>
-                    logger.error(s"Validation Error: ${validationError.errors.mkString(",")}")
+        validateCorrelationId(value) match {
+          case Right(value) =>
+            request.body.asJson match {
+              case Some(requestJson) =>
+                requestJson.validate[EligibilityCheckDataRequest] match {
+                  case JsSuccess(eligibilityCheckDataRequest, _) =>
+                    validateRequest(eligibilityCheckDataRequest) match {
+                      case Left(validationError) =>
+                        logger.error(s"Validation Error: ${validationError.errors.mkString(",")}")
+                        EitherT.rightT[Future, BenefitEligibilityError](
+                          UnprocessableEntity(
+                            Json.toJson(
+                              ErrorResponse(
+                                ErrorCode.UnprocessableEntity,
+                                ErrorReason(validationError.errors.mkString(","))
+                              )
+                            )
+                          )
+                        )
+                      case Right(value) =>
+                        val maybeNextCursor = eligibilityCheckDataRequest match {
+                          case bspReq: BSPEligibilityCheckDataRequest   => bspReq.nextCursor
+                          case maReq: MAEligibilityCheckDataRequest     => maReq.nextCursor
+                          case gyspReq: GYSPEligibilityCheckDataRequest => gyspReq.nextCursor
+                          case _                                        => None
+                        }
+                        maybeNextCursor match {
+                          case Some(nextCursor) =>
+                            paginationFunction(nextCursor.value, eligibilityCheckDataRequest.nationalInsuranceNumber)
+                              .map { paginationResult =>
+                                BenefitEligibilityInfoResponse.from(
+                                  eligibilityCheckDataRequest.nationalInsuranceNumber,
+                                  paginationResult
+                                ) match {
+                                  case Left(value)  => BadGateway(Json.toJson(value))
+                                  case Right(value) => Ok(Json.toJson(value))
+                                }
+                              }
+                          case None =>
+                            fn(eligibilityCheckDataRequest).map { result =>
+                              BenefitEligibilityInfoResponse.from(
+                                eligibilityCheckDataRequest.nationalInsuranceNumber,
+                                result
+                              ) match {
+                                case Left(value)  => BadGateway(Json.toJson(value))
+                                case Right(value) => Ok(Json.toJson(value))
+                              }
+                            }
+                        }
+                    }
+                  case JsError(errors) =>
+                    logger.error(s"bad request ${errors.mkString(",")}")
                     EitherT.rightT[Future, BenefitEligibilityError](
-                      UnprocessableEntity(
+                      BadRequest(
                         Json.toJson(
                           ErrorResponse(
-                            ErrorCode.UnprocessableEntity,
-                            ErrorReason(validationError.errors.mkString(","))
+                            ErrorCode.BadRequest,
+                            ErrorReason(s"incompatible json, request body does not match schema")
                           )
                         )
                       )
                     )
-                  case Right(value) =>
-                    maybeNextCursor match {
-                      case Some(nextCursor) =>
-                        paginationFunction(nextCursor.value, eligibilityCheckDataRequest.nationalInsuranceNumber).map {
-                          paginationResult =>
-                            BenefitEligibilityInfoResponse.from(
-                              eligibilityCheckDataRequest.nationalInsuranceNumber,
-                              paginationResult
-                            ) match {
-                              case Left(value)  => BadGateway(Json.toJson(value))
-                              case Right(value) => Ok(Json.toJson(value))
-                            }
-                        }
-                      case None =>
-                        fn(eligibilityCheckDataRequest).map { result =>
-                          BenefitEligibilityInfoResponse.from(
-                            eligibilityCheckDataRequest.nationalInsuranceNumber,
-                            result
-                          ) match {
-                            case Left(value)  => BadGateway(Json.toJson(value))
-                            case Right(value) => Ok(Json.toJson(value))
-                          }
-                        }
-                    }
                 }
-              case JsError(errors) =>
-                logger.error(s"bad request ${errors.mkString(",")}")
+              case None =>
+                logger.error("invalid json")
                 EitherT.rightT[Future, BenefitEligibilityError](
                   BadRequest(
-                    Json.toJson(
-                      ErrorResponse(
-                        ErrorCode.BadRequest,
-                        ErrorReason(s"incompatible json, request body does not match schema")
-                      )
-                    )
+                    Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
                   )
                 )
             }
-          case None =>
-            logger.error("invalid json")
+          case Left(error) =>
+            logger.error("Correlation Id is not a valid UUID")
             EitherT.rightT[Future, BenefitEligibilityError](
               BadRequest(
-                Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
+                Json.toJson(
+                  ErrorResponse(
+                    ErrorCode.BadRequest,
+                    ErrorReason(error.errors.mkString(","))
+                  )
+                )
               )
             )
         }
@@ -181,6 +197,18 @@ object BenefitEligibilityRequestHandler {
     ).mapN((_, _, _, _, _) => SuccessfulResult) match {
       case Validated.Valid(_)   => Right(SuccessfulResult)
       case Validated.Invalid(e) => Left(JsonValidationError(e.toList))
+    }
+
+  private[controller] def validateCorrelationId(correlationId: String): Either[InvalidUUID, SuccessfulResult.type] =
+    Validated
+      .condNel(
+        Try(UUID.fromString(correlationId)).toOption.isDefined,
+        SuccessfulResult,
+        "Invalid correlationId value found, expected a valid UUID"
+      )
+      .map(_ => SuccessfulResult) match {
+      case Validated.Valid(_)   => Right(SuccessfulResult)
+      case Validated.Invalid(e) => Left(InvalidUUID(e.toList))
     }
 
 }
