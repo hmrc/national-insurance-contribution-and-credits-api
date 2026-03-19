@@ -45,6 +45,12 @@ class AuthAction @Inject() (
     authorised(AuthProviders(AuthProvider.PrivilegedApplication)) {
       block(request)
     }.recover {
+      case e: MissingBearerToken =>
+        logger.error(e.msg)
+        Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
+      case e: InvalidBearerToken =>
+        logger.error(e.msg)
+        Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))
       case e: UnsupportedAuthProvider =>
         logger.error(e.msg)
         Forbidden(Json.toJson(ErrorResponse(ErrorCode.Forbidden, ErrorReason(e.msg))))

@@ -41,13 +41,23 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MARec
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{CreditSourceType, IndividualStatePensionContributionCreditType}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
+  CreditSourceType,
+  IndividualStatePensionContributionCreditType
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{CalculationSource, CalculationStatus, Payday}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{LongTermBenefitNotesSuccessResponse, Note}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
+  CalculationSource,
+  CalculationStatus,
+  Payday
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
@@ -56,13 +66,19 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.Marria
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{HipOrigin, NpsErrorCode, NpsMultiErrorResponse, NpsSingleErrorResponse, NpsStandardErrorResponse400}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
+  HipOrigin,
+  NpsErrorCode,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
-import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, InternalServerError}
+import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, Forbidden, InternalServerError}
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
@@ -1194,7 +1210,7 @@ class BenefitEligibilityDataControllerItSpec
             FakeRequest("POST", "/benefit-eligibility-info")
               .withJsonBody(Json.toJson(bspSearchlightEligibilityCheckDataRequest))
               .withHeaders(
-                "Content-Type" -> "application/json",
+                "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
                 "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
               )
@@ -1205,10 +1221,8 @@ class BenefitEligibilityDataControllerItSpec
           println(contentAsString(result))
           println("====================")
 
-          val expectedResult = BenefitEligibilityInfoSuccessResponseBspSearchLight(
-            nationalInsuranceNumber,
-            successResponse,
-            None)
+          val expectedResult =
+            BenefitEligibilityInfoSuccessResponseBspSearchLight(nationalInsuranceNumber, successResponse, None)
 
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
@@ -1243,7 +1257,7 @@ class BenefitEligibilityDataControllerItSpec
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
             .withJsonBody(Json.toJson(bspSearchlightEligibilityCheckDataRequest))
             .withHeaders(
-              "Content-Type" -> "application/json",
+              "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
             )
@@ -2791,7 +2805,79 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(BadRequest, ErrorReason("Invalid correlationId value found, expected a valid UUID"))
         )
       }
+      "should return a 403 if Bearer token is not supplied" in {
 
+        val successResponseJson =
+          """{
+            |  "totalGraduatedPensionUnits": 100,
+            |  "class1ContributionAndCredits": [
+            |    {
+            |      "taxYear": 2022,
+            |      "numberOfContributionsAndCredits": 53,
+            |      "contributionCategoryLetter": "U",
+            |      "contributionCategory": "(NONE)",
+            |      "contributionCreditType": "C1",
+            |      "primaryContribution": 99999999999999.98,
+            |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+            |      "primaryPaidEarnings": 99999999999999.98,
+            |      "creditSource": "NOT KNOWN",
+            |      "employerName": "ipOpMs",
+            |      "latePaymentPeriod": "L"
+            |    }
+            |  ],
+            |  "class2ContributionAndCredits": [
+            |    {
+            |      "taxYear": 2022,
+            |      "numberOfContributionsAndCredits": 53,
+            |      "contributionCreditType": "C1",
+            |      "class2Or3EarningsFactor": 99999999999999.98,
+            |      "class2NIContributionAmount": 99999999999999.98,
+            |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+            |      "creditSource": "NOT KNOWN",
+            |      "latePaymentPeriod": "L"
+            |    }
+            |  ]
+            |}""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(successResponseJson)
+            )
+        )
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          )
+        )
+        val request: FakeRequest[AnyContent] =
+          FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type" -> "application/json",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 403
+        contentAsJson(result) shouldBe Json.toJson(ErrorResponse(Forbidden, ErrorReason("Bearer token not supplied")))
+      }
       "should return a 422 if a request is sent with invalid data" in {
 
         server.stubFor(
