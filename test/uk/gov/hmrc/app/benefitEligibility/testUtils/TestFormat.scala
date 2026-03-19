@@ -66,6 +66,9 @@ object TestFormat {
   implicit val esaEligibilityCheckDataRequestWrites: Writes[ESAEligibilityCheckDataRequest] =
     Json.writes[ESAEligibilityCheckDataRequest]
 
+  implicit val BSPSearchlightEligibilityCheckDataRequestWrites: Writes[BSPSearchlightEligibilityCheckDataRequest] =
+    Json.writes[BSPSearchlightEligibilityCheckDataRequest]
+
   implicit val maEligibilityCheckDataRequestWrites: Writes[MAEligibilityCheckDataRequest] =
     Json.writes[MAEligibilityCheckDataRequest]
 

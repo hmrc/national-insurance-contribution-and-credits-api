@@ -182,6 +182,8 @@ object BenefitEligibilityInfoResponse {
         BenefitEligibilityInfoSuccessResponseGysp.from(nationalInsuranceNumber, r)
       case r: EligibilityCheckDataResult.EligibilityCheckDataResultBSP =>
         BenefitEligibilityInfoSuccessResponseBsp.from(nationalInsuranceNumber, r)
+      case r: EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight =>
+        BenefitEligibilityInfoSuccessResponseBspSearchLight.from(nationalInsuranceNumber, r)
     }
 
 }

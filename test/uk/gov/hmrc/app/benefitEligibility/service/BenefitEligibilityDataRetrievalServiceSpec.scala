@@ -27,9 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
-
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
@@ -40,9 +38,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDeta
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
-
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
   AssociatedCalculationSequenceNumber,
@@ -114,13 +110,13 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.{
   BSPEligibilityCheckDataRequest,
+  BSPSearchlightEligibilityCheckDataRequest,
   ESAEligibilityCheckDataRequest,
   GYSPEligibilityCheckDataRequest,
   JSAEligibilityCheckDataRequest,
   MAEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 
 import java.time.LocalDate
@@ -144,12 +140,16 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   private val mockBereavementSupportPaymentDataRetrievalService: BereavementSupportPaymentDataRetrievalService =
     mock[BereavementSupportPaymentDataRetrievalService]
 
+  private val mockBspSearchlightDataRetrievalService: BspSearchlightDataRetrievalService =
+    mock[BspSearchlightDataRetrievalService]
+
   private val underTest = new BenefitEligibilityDataRetrievalService(
     mockMaternityAllowanceDataRetrievalService,
     mockEmploymentSupportAllowanceDataRetrievalService,
     mockJobSeekersAllowanceDataRetrievalService,
     mockGetYourStatePensionDataRetrievalService,
-    mockBereavementSupportPaymentDataRetrievalService
+    mockBereavementSupportPaymentDataRetrievalService,
+    mockBspSearchlightDataRetrievalService
   )
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -656,6 +656,15 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     )
   )
 
+  val bspSearchlightEligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+    nationalInsuranceNumber = Identifier("GD379251T"),
+    niContributionsAndCredits = ContributionsAndCreditsRequestParams(
+      dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
+      startTaxYear = StartTaxYear(2025),
+      endTaxYear = EndTaxYear(2025)
+    )
+  )
+
   val gyspEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),
     niContributionsAndCredits = ContributionsAndCreditsRequestParams(
@@ -784,6 +793,27 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         underTest.getEligibilityData(esaEligibilityCheckDataRequest).value.futureValue shouldBe Right(
           EligibilityCheckDataResultESA(
             niContributionAndCreditsResult
+          )
+        )
+      }
+
+      "should retrieve eligibility data for BSP Searchlight" in {
+        (mockBspSearchlightDataRetrievalService
+          .fetchEligibilityData(_: BSPSearchlightEligibilityCheckDataRequest)(_: HeaderCarrier))
+          .expects(bspSearchlightEligibilityCheckDataRequest, *)
+          .returning(
+            EitherT.pure[Future, BenefitEligibilityError](
+              EligibilityCheckDataResultBspSearchLight(
+                niContributionAndCreditsResult,
+                None
+              )
+            )
+          )
+
+        underTest.getEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+          EligibilityCheckDataResultBspSearchLight(
+            niContributionAndCreditsResult,
+            None
           )
         )
       }
