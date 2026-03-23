@@ -2869,7 +2869,7 @@ class BenefitEligibilityDataControllerItSpec
           FakeRequest("POST", "/benefit-eligibility-info")
             .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
             .withHeaders(
-              "Content-Type" -> "application/json",
+              "Content-Type"  -> "application/json",
               "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
             )
 
