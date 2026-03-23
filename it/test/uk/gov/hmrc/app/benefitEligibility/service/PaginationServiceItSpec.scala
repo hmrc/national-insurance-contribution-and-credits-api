@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import cats.data.NonEmptyList
+import cats.data.{EitherT, NonEmptyList}
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
+import com.mongodb.{ServerAddress, WriteConcernResult}
+import org.mongodb.scala.bson.BsonDocument
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
@@ -174,6 +176,22 @@ class PaginationServiceItSpec
 
         findAll().futureValue shouldBe List(pageTask)
       }
+      "should return a new uuid if current uuid already exists in database" in {
+        val uuidTwo = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+
+        val pageTask = MaPageTask(
+          PageTaskId(uuidOne),
+          List(
+            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
+            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+          ),
+          currentTimeSource.instantNow()
+        )
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+        service.addTask(pageTask).value.futureValue shouldBe Right(uuidTwo.value)
+      }
+
     }
     ".paginate" - {
       "should return a BenefitEligibilityError if paginate fails" in {

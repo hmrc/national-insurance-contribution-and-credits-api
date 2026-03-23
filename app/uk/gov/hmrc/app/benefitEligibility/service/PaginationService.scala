@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, DatabaseError, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
@@ -46,8 +46,39 @@ class PaginationService @Inject() (
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
-  def addTask(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] =
-    pageTaskRepo.upsert(None, pageTask)
+  def addTask(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
+    def createNewPageTask(pageTask: PageTask) = {
+      val newPageTask: PageTask = pageTask match {
+        case m: MaPageTask => MaPageTask(PageTaskId(uuidGenerator.generate), m.liabilitiesPaging, m.createdAt)
+        case b: BspPageTask =>
+          BspPageTask(
+            PageTaskId(uuidGenerator.generate),
+            b.marriageDetailsPaging,
+            b.contributionAndCreditsPaging,
+            b.createdAt
+          )
+        case g: GyspPageTask =>
+          GyspPageTask(
+            PageTaskId(uuidGenerator.generate),
+            g.benefitSchemeMembershipDetailsPaging,
+            g.marriageDetailsPaging,
+            g.contributionAndCreditsPaging,
+            g.createdAt
+          )
+      }
+      addTask(newPageTask)
+    }
+
+    pageTaskRepo.insert(pageTask).recoverWith {
+      case DatabaseError(dbError: com.mongodb.MongoWriteException)
+          if dbError.getError.getCategory == com.mongodb.ErrorCategory.DUPLICATE_KEY =>
+        createNewPageTask(pageTask)
+      case DatabaseError(dbError: com.mongodb.DuplicateKeyException) =>
+        createNewPageTask(pageTask)
+      case error =>
+        EitherT.leftT(error)
+    }
+  }
 
   def paginate(
       id: PageTaskId,
