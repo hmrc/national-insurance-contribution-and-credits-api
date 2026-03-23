@@ -31,6 +31,7 @@ import play.api.test.Injecting
 import play.api.{Application, inject}
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails, NiContributionAndCredits}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.MA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -118,7 +119,7 @@ class PaginationServiceItSpec
     super.beforeEach()
     List(
       MaPageTask(
-        PaginationCursor(uuidOne),
+        PageTaskId(uuidOne),
         List(
           PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
           PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
@@ -126,7 +127,7 @@ class PaginationServiceItSpec
         currentTimeSource.instantNow()
       ),
       BspPageTask(
-        PaginationCursor(uuidTwo),
+        PageTaskId(uuidTwo),
         Some(
           PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
         ),
@@ -139,7 +140,7 @@ class PaginationServiceItSpec
         currentTimeSource.instantNow()
       ),
       GyspPageTask(
-        PaginationCursor(uuidThree),
+        PageTaskId(uuidThree),
         Some(
           PaginationSource(
             ApiName.BenefitSchemeDetails,
@@ -165,7 +166,7 @@ class PaginationServiceItSpec
       "should successfully add a new task" in {
         deleteAll().futureValue
         val pageTask: MaPageTask =
-          MaPageTask(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")), List(), Instant.now)
+          MaPageTask(PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")), List(), Instant.now)
 
         service.addTask(pageTask).value.futureValue shouldBe Right(
           UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
@@ -184,7 +185,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(uuidOne, nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne), nationalInsuranceNumber).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
@@ -232,7 +233,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(uuidOne, nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne), nationalInsuranceNumber).value.futureValue shouldBe
           Right(
             PaginationResult(
               paginationType = PaginationType.MA,
@@ -243,7 +244,7 @@ class PaginationServiceItSpec
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
-              nextCursor = Some(PaginationCursor(uuidOne))
+              nextCursor = Some(PaginationCursor(PaginationType.MA, PageTaskId(uuidOne)))
             )
           )
 
@@ -321,7 +322,7 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(uuidTwo, nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidTwo), nationalInsuranceNumber).value.futureValue shouldBe
           Right(
             PaginationResult(
               paginationType = PaginationType.BSP,
@@ -332,7 +333,7 @@ class PaginationServiceItSpec
                 None
               ),
               benefitSchemeMembershipDetailsData = None,
-              nextCursor = Some(PaginationCursor(uuidTwo))
+              nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(uuidTwo)))
             )
           )
       }
@@ -580,7 +581,7 @@ class PaginationServiceItSpec
           List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
         )
 
-        service.paginate(uuidThree, nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidThree), nationalInsuranceNumber).value.futureValue shouldBe
           Right(
             PaginationResult(
               paginationType = PaginationType.GYSP,
@@ -591,7 +592,7 @@ class PaginationServiceItSpec
                 None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
-              nextCursor = Some(PaginationCursor(uuidThree))
+              nextCursor = Some(PaginationCursor(PaginationType.GYSP, PageTaskId(uuidThree)))
             )
           )
       }

@@ -22,29 +22,16 @@ import cats.implicits.{catsSyntaxTuple2Semigroupal, catsSyntaxTuple5Semigroupal}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, Ok, UnprocessableEntity}
 import play.api.mvc.{AnyContent, Request, Result}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  BenefitEligibilityError,
-  CorrelationId,
-  Identifier,
-  InvalidRequest,
-  InvalidUUID,
-  JsonValidationError
-}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
-import uk.gov.hmrc.app.benefitEligibility.model.request.{
-  BSPEligibilityCheckDataRequest,
-  ESAEligibilityCheckDataRequest,
-  EligibilityCheckDataRequest,
-  GYSPEligibilityCheckDataRequest,
-  JSAEligibilityCheckDataRequest,
-  MAEligibilityCheckDataRequest
-}
+import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.{
   BenefitEligibilityInfoResponse,
   ErrorCode,
   ErrorReason,
   ErrorResponse
 }
+import uk.gov.hmrc.app.benefitEligibility.repository.{PageTaskId, PaginationCursor}
 import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
 import uk.gov.hmrc.app.benefitEligibility.util.{RequestAwareLogger, SuccessfulResult}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -61,7 +48,7 @@ object BenefitEligibilityRequestHandler {
   def handleRequest(
       request: Request[AnyContent],
       fn: EligibilityCheckDataRequest => EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult],
-      paginationFunction: (UUID, Identifier) => EitherT[Future, BenefitEligibilityError, PaginationResult]
+      paginationFunction: (PageTaskId, Identifier) => EitherT[Future, BenefitEligibilityError, PaginationResult]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (request.headers.get("CorrelationId") match {
       case None =>
@@ -92,15 +79,28 @@ object BenefitEligibilityRequestHandler {
                           )
                         )
                       case Right(value) =>
-                        val maybeNextCursor = eligibilityCheckDataRequest match {
-                          case bspReq: BSPEligibilityCheckDataRequest   => bspReq.nextCursor
-                          case maReq: MAEligibilityCheckDataRequest     => maReq.nextCursor
-                          case gyspReq: GYSPEligibilityCheckDataRequest => gyspReq.nextCursor
-                          case _                                        => None
-                        }
+                        val maybeNextCursor =
+                          request.queryString
+                            .get("nextCursor")
+                            .flatMap(_.headOption)
+                            .map(id => PaginationCursor.from(CursorId(id)))
                         maybeNextCursor match {
-                          case Some(nextCursor) =>
-                            paginationFunction(nextCursor.value, eligibilityCheckDataRequest.nationalInsuranceNumber)
+                          case Some(Failure(e)) =>
+                            EitherT.rightT[Future, BenefitEligibilityError](
+                              BadRequest(
+                                Json.toJson(
+                                  ErrorResponse(
+                                    ErrorCode.BadRequest,
+                                    ErrorReason("invalid nextCursor " + e.getMessage)
+                                  )
+                                )
+                              )
+                            )
+                          case Some(Success(nextCursor)) =>
+                            paginationFunction(
+                              nextCursor.pageTaskId,
+                              eligibilityCheckDataRequest.nationalInsuranceNumber
+                            )
                               .map { paginationResult =>
                                 BenefitEligibilityInfoResponse.from(
                                   eligibilityCheckDataRequest.nationalInsuranceNumber,

@@ -61,7 +61,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  BenefitEligibilityRepositoryImpl,
+  PageTask,
+  PageTaskId,
+  PaginationCursor
+}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -200,8 +205,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        LiabilitiesRequestParams(List(Abroad), None, None, None),
-        None
+        LiabilitiesRequestParams(List(Abroad), None, None, None)
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {
@@ -1170,7 +1174,9 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               ApiName.NiContributionAndCredits,
               niContributionsAndCreditsSuccessResponse
             ),
-            Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+            Some(
+              PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+            )
           )
         )
       }

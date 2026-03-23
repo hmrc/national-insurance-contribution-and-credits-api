@@ -154,7 +154,7 @@ class BenefitEligibilityDataControllerItSpec
     super.beforeEach()
     List(
       MaPageTask(
-        PaginationCursor(uuidOne),
+        PageTaskId(uuidOne),
         List(
           PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
           PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
@@ -162,7 +162,7 @@ class BenefitEligibilityDataControllerItSpec
         currentTimeSource.instantNow()
       ),
       BspPageTask(
-        PaginationCursor(uuidTwo),
+        PageTaskId(uuidTwo),
         Some(
           PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
         ),
@@ -175,7 +175,7 @@ class BenefitEligibilityDataControllerItSpec
         currentTimeSource.instantNow()
       ),
       GyspPageTask(
-        PaginationCursor(uuidThree),
+        PageTaskId(uuidThree),
         Some(
           PaginationSource(
             ApiName.BenefitSchemeDetails,
@@ -1350,8 +1350,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None),
-            None
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1468,8 +1467,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None),
-            None
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1487,7 +1485,11 @@ class BenefitEligibilityDataControllerItSpec
             filteredClass2MaReceipts,
             List(filteredLiabilitySummaryDetails),
             niContributionsAndCreditsSuccessResponse,
-            Some(PaginationCursor(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e")))
+            Some(
+              CursorId(
+                "eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6ImRmOTRkN2JkLTcyNjktNGZjOC1iY2Y4LTQwYWU5NTVhYzc2ZSJ9"
+              )
+            )
           )
 
           status(result) shouldBe 200
@@ -1547,8 +1549,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None),
-            None
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1651,8 +1652,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            LiabilitiesRequestParams(List(Abroad), None, None, None),
-            None
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1751,8 +1751,7 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            ),
-            None
+            )
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1850,8 +1849,7 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            ),
-            None
+            )
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1868,7 +1866,11 @@ class BenefitEligibilityDataControllerItSpec
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
             marriageDetailsResult = filteredMarriageDetails,
-            nextCursor = Some(PaginationCursor(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e")))
+            nextCursor = Some(
+              CursorId(
+                "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJkZjk0ZDdiZC03MjY5LTRmYzgtYmNmOC00MGFlOTU1YWM3NmUifQ=="
+              )
+            )
           )
 
           status(result) shouldBe 200
@@ -1913,8 +1915,7 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            ),
-            None
+            )
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -1993,8 +1994,7 @@ class BenefitEligibilityDataControllerItSpec
               DateOfBirth(LocalDate.parse("2025-10-10")),
               StartTaxYear(2024),
               EndTaxYear(2025)
-            ),
-            None
+            )
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -2151,8 +2151,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None)),
-            None
+            Some(LongTermBenefitCalculationRequestParams(None, None))
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -2369,8 +2368,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None)),
-            None
+            Some(LongTermBenefitCalculationRequestParams(None, None))
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -2390,7 +2388,11 @@ class BenefitEligibilityDataControllerItSpec
             filteredSchemeMembershipDetails,
             filteredIndividualStatePensionInfo,
             niContributionsAndCreditsSuccessResponse,
-            Some(PaginationCursor(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e")))
+            Some(
+              CursorId(
+                "eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiZGY5NGQ3YmQtNzI2OS00ZmM4LWJjZjgtNDBhZTk1NWFjNzZlIn0="
+              )
+            )
           )
 
           status(result) shouldBe 200
@@ -2501,8 +2503,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None)),
-            None
+            Some(LongTermBenefitCalculationRequestParams(None, None))
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -2661,8 +2662,7 @@ class BenefitEligibilityDataControllerItSpec
               StartTaxYear(2024),
               EndTaxYear(2025)
             ),
-            Some(LongTermBenefitCalculationRequestParams(None, None)),
-            None
+            Some(LongTermBenefitCalculationRequestParams(None, None))
           )
 
           val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
@@ -3073,11 +3073,13 @@ class BenefitEligibilityDataControllerItSpec
             StartTaxYear(2024),
             EndTaxYear(2025)
           ),
-          LiabilitiesRequestParams(List(Abroad), None, None, None),
-          Some(PaginationCursor(uuidOne))
+          LiabilitiesRequestParams(List(Abroad), None, None, None)
         )
 
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "POST",
+          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+        )
           .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
@@ -3094,7 +3096,11 @@ class BenefitEligibilityDataControllerItSpec
           ),
           List(filteredLiabilitySummaryDetails, filteredLiabilitySummaryDetails),
           NiContributionsAndCreditsSuccessResponse(None, None, None),
-          Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+          Some(
+            CursorId(
+              "eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+            )
+          )
         )
 
         status(result) shouldBe 200
@@ -3150,11 +3156,13 @@ class BenefitEligibilityDataControllerItSpec
             StartTaxYear(2024),
             EndTaxYear(2025)
           ),
-          LiabilitiesRequestParams(List(Abroad), None, None, None),
-          Some(PaginationCursor(uuidOne))
+          LiabilitiesRequestParams(List(Abroad), None, None, None)
         )
 
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "POST",
+          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+        )
           .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
@@ -3254,11 +3262,13 @@ class BenefitEligibilityDataControllerItSpec
             DateOfBirth(LocalDate.parse("2025-10-10")),
             StartTaxYear(2024),
             EndTaxYear(2025)
-          ),
-          Some(PaginationCursor(uuidTwo))
+          )
         )
 
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "POST",
+          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+        )
           .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
@@ -3272,7 +3282,11 @@ class BenefitEligibilityDataControllerItSpec
           nationalInsuranceNumber = nationalInsuranceNumber,
           niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
           marriageDetailsResult = filteredMarriageDetails,
-          nextCursor = Some(PaginationCursor(UUID.fromString("f678d869-7922-4a11-82e2-5cf4e235cfee")))
+          nextCursor = Some(
+            CursorId(
+              "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+            )
+          )
         )
 
         status(result) shouldBe 200
@@ -3339,11 +3353,13 @@ class BenefitEligibilityDataControllerItSpec
             DateOfBirth(LocalDate.parse("2025-10-10")),
             StartTaxYear(2024),
             EndTaxYear(2025)
-          ),
-          Some(PaginationCursor(uuidTwo))
+          )
         )
 
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "POST",
+          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+        )
           .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
@@ -3506,11 +3522,13 @@ class BenefitEligibilityDataControllerItSpec
             StartTaxYear(2024),
             EndTaxYear(2025)
           ),
-          Some(LongTermBenefitCalculationRequestParams(None, None)),
-          Some(PaginationCursor(uuidThree))
+          Some(LongTermBenefitCalculationRequestParams(None, None))
         )
 
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "POST",
+          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+        )
           .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
@@ -3527,7 +3545,11 @@ class BenefitEligibilityDataControllerItSpec
           schemeMembershipDetailsResult = filteredSchemeMembershipDetails,
           individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, List()),
           niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
-          nextCursor = Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          nextCursor = Some(
+            CursorId(
+              "eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+            )
+          )
         )
 
         status(result) shouldBe 200
@@ -3622,11 +3644,13 @@ class BenefitEligibilityDataControllerItSpec
             StartTaxYear(2024),
             EndTaxYear(2025)
           ),
-          Some(LongTermBenefitCalculationRequestParams(None, None)),
-          Some(PaginationCursor(uuidThree))
+          Some(LongTermBenefitCalculationRequestParams(None, None))
         )
 
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "POST",
+          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+        )
           .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",

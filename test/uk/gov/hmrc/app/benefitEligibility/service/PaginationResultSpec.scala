@@ -26,7 +26,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, NiC
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
+import uk.gov.hmrc.app.benefitEligibility.repository.{PageTaskId, PaginationCursor}
 
 import java.util.UUID
 
@@ -51,7 +51,8 @@ class PaginationResultSpec
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
-      nextCursor = Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+      nextCursor =
+        Some(PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))))
     )
 
     val paginationResultWithoutNextCursor = PaginationResult(
@@ -109,7 +110,9 @@ class PaginationResultSpec
       "should return next cursor if next cursor exists" in {
         val nextCursor = paginationResultWithNextCursor.getNextCursor
 
-        nextCursor shouldBe Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+        nextCursor shouldBe Some(
+          PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+        )
       }
       "should return none if no next cursor" in {
         val nextCursor = paginationResultWithoutNextCursor.getNextCursor

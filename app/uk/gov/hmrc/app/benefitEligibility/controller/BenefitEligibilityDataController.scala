@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class BenefitEligibilityDataController @Inject() (
     cc: ControllerComponents,
-    identity: action.AuthAction,
+    identity: uk.gov.hmrc.app.benefitEligibility.controller.action.AuthAction,
     benefitEligibilityDataRetrievalService: BenefitEligibilityDataRetrievalService,
     paginationService: PaginationService,
     appConfig: AppConfig

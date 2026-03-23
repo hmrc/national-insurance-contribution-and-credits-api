@@ -98,7 +98,7 @@ object BenefitEligibilityInfoResponse {
               FilteredClass2MaReceipts(Nil),
               paginationResult.liabilitiesResult.map(toFilteredLiabilitySummaryDetails),
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getNextCursor
+              paginationResult.getNextCursor.map(CursorId.from)
             )
           )
 
@@ -116,7 +116,7 @@ object BenefitEligibilityInfoResponse {
               individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, Nil),
               niContributionsAndCreditsResult =
                 toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getNextCursor
+              paginationResult.getNextCursor.map(CursorId.from)
             )
           )
         case PaginationType.BSP =>
@@ -127,7 +127,7 @@ object BenefitEligibilityInfoResponse {
               nationalInsuranceNumber,
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
               filteredMarriageDetails,
-              paginationResult.getNextCursor
+              paginationResult.getNextCursor.map(CursorId.from)
             )
           )
 
@@ -203,7 +203,7 @@ final case class BenefitEligibilityInfoSuccessResponseMa private (
     class2MAReceiptsResult: FilteredClass2MaReceipts,
     liabilitySummaryDetailsResult: List[FilteredLiabilitySummaryDetails],
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-    nextCursor: Option[PaginationCursor]
+    nextCursor: Option[CursorId]
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
@@ -217,7 +217,7 @@ object BenefitEligibilityInfoSuccessResponseMa {
       class2MAReceiptsResult: FilteredClass2MaReceipts,
       liabilitySummaryDetailsResult: List[FilteredLiabilitySummaryDetails],
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-      nextCursor: Option[PaginationCursor]
+      nextCursor: Option[CursorId]
   ) = new BenefitEligibilityInfoSuccessResponseMa(
     MA,
     nationalInsuranceNumber,
@@ -242,7 +242,7 @@ object BenefitEligibilityInfoSuccessResponseMa {
           class2MAReceiptsResult = FilteredClass2MaReceipts.from(result.class2MaReceiptsResult.getSuccess.get),
           liabilitySummaryDetailsResult =
             result.liabilityResult.map(r => FilteredLiabilitySummaryDetails.from(r.getSuccess.get)),
-          nextCursor = result.nextCursor
+          nextCursor = result.nextCursor.map(CursorId.from)
         )
       )
     }
@@ -254,7 +254,7 @@ final case class BenefitEligibilityInfoSuccessResponseBsp private (
     nationalInsuranceNumber: Identifier,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
     marriageDetailsResult: FilteredMarriageDetails,
-    nextCursor: Option[PaginationCursor]
+    nextCursor: Option[CursorId]
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
@@ -267,7 +267,7 @@ object BenefitEligibilityInfoSuccessResponseBsp {
       nationalInsuranceNumber: Identifier,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
       marriageDetailsResult: FilteredMarriageDetails,
-      nextCursor: Option[PaginationCursor]
+      nextCursor: Option[CursorId]
   ) = new BenefitEligibilityInfoSuccessResponseBsp(
     BSP,
     nationalInsuranceNumber,
@@ -291,7 +291,7 @@ object BenefitEligibilityInfoSuccessResponseBsp {
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse,
             marriageDetailsResult = FilteredMarriageDetails.from(marriageDetailsSuccessResponse),
-            nextCursor = result.nextCursor
+            nextCursor = result.nextCursor.map(CursorId.from)
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
@@ -303,7 +303,7 @@ final case class BenefitEligibilityInfoSuccessResponseBspSearchLight private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-    nextCursor: Option[PaginationCursor]
+    nextCursor: Option[CursorId]
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
@@ -316,7 +316,7 @@ object BenefitEligibilityInfoSuccessResponseBspSearchLight {
   def apply(
       nationalInsuranceNumber: Identifier,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-      nextCursor: Option[PaginationCursor]
+      nextCursor: Option[CursorId]
   ) = new BenefitEligibilityInfoSuccessResponseBspSearchLight(
     BSP_SEARCHLIGHT,
     nationalInsuranceNumber,
@@ -337,7 +337,7 @@ object BenefitEligibilityInfoSuccessResponseBspSearchLight {
           BenefitEligibilityInfoSuccessResponseBspSearchLight(
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse,
-            None
+            result.nextCursor.map(CursorId.from)
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))
@@ -433,7 +433,7 @@ final case class BenefitEligibilityInfoSuccessResponseGysp private (
     schemeMembershipDetailsResult: FilteredSchemeMembershipDetails,
     individualStatePensionInfoResult: FilteredIndividualStatePensionInfo,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-    nextCursor: Option[PaginationCursor]
+    nextCursor: Option[CursorId]
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
@@ -449,7 +449,7 @@ object BenefitEligibilityInfoSuccessResponseGysp {
       schemeMembershipDetailsResult: FilteredSchemeMembershipDetails,
       individualStatePensionInfoResult: FilteredIndividualStatePensionInfo,
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-      nextCursor: Option[PaginationCursor]
+      nextCursor: Option[CursorId]
   ) = new BenefitEligibilityInfoSuccessResponseGysp(
     GYSP,
     nationalInsuranceNumber,
@@ -484,7 +484,7 @@ object BenefitEligibilityInfoSuccessResponseGysp {
           individualStatePensionInfoResult =
             FilteredIndividualStatePensionInfo.from(result.statePensionData.getSuccess.get),
           niContributionsAndCreditsResult = result.contributionCreditResult.getSuccess.get,
-          nextCursor = result.nextCursor
+          nextCursor = result.nextCursor.map(CursorId.from)
         )
       )
     }

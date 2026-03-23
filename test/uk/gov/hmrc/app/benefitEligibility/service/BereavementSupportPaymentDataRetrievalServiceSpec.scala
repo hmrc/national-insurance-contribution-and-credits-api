@@ -96,8 +96,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
       startTaxYear = StartTaxYear(2025),
       endTaxYear = EndTaxYear(2025)
-    ),
-    None
+    )
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -168,7 +167,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
   )
 
   val paging = BspPageTask(
-    PaginationCursor(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
     None,
     testInstant
@@ -217,7 +216,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           EligibilityCheckDataResultBSP(
             niContributionAndCreditsResult,
             marriageDetailsResult,
-            Some(PaginationCursor(paging.id))
+            Some(PaginationCursor(PaginationType.BSP, paging.pageTaskId))
           )
         )
 

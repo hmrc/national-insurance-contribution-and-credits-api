@@ -43,7 +43,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       mongoComponent = mongoComponent,
       domainFormat = PageTask.pageTaskFormat,
       indexes = Seq(
-        IndexModel(Indexes.ascending("id"), IndexOptions().unique(true)),
+        IndexModel(Indexes.ascending("pageTaskId"), IndexOptions().unique(true)),
         IndexModel(
           Indexes.ascending("createdAt"),
           IndexOptions()
@@ -57,7 +57,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
 
   def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask] =
     collection
-      .find(Filters.equal("id", id.toString))
+      .find(Filters.equal("pageTaskId", id.toString))
       .headOption()
       .attemptT
       .flatMap {
@@ -66,18 +66,18 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       }
       .leftMap(error => DatabaseError(error))
 
-  def upsert(id: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
+  def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     val updates = pageTask match {
       case MaPageTask(id, paginationType, liabilitiesPaging, createdAt) =>
         Updates.combine(
-          Updates.set("id", id.toString),
+          Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
           Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
       case BspPageTask(id, paginationType, marriageDetailsPaging, contributionAndCreditsPaging, createdAt) =>
         Updates.combine(
-          Updates.set("id", id.toString),
+          Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
           Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
           Updates.set("paginationType", Codecs.toBson(paginationType)),
@@ -92,7 +92,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
             createdAt
           ) =>
         Updates.combine(
-          Updates.set("id", id.toString),
+          Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("benefitSchemeMembershipDetailsPaging", Codecs.toBson(benefitSchemeMembershipDetailsPaging)),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
           Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
@@ -102,13 +102,13 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
     }
     collection
       .findOneAndUpdate(
-        Filters.equal("id", Codecs.toBson(id.map(_.toString))),
+        Filters.equal("pageTaskId", Codecs.toBson(existingPageTaskId.map(_.toString))),
         updates,
         FindOneAndUpdateOptions().upsert(true)
       )
       .toFuture()
       .attemptT
-      .map(_ => pageTask.id)
+      .map(_ => pageTask.pageTaskId.value)
       .leftMap(error => DatabaseError(error))
   }
 
