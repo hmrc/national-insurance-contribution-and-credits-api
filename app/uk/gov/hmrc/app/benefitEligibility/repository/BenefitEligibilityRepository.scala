@@ -16,12 +16,16 @@
 
 package uk.gov.hmrc.app.benefitEligibility.repository
 
+import cats.Show.Shown.mat
 import cats.data.EitherT
 import cats.implicits.catsSyntaxApplicativeError
 import com.google.inject.{ImplementedBy, Inject}
+import com.mongodb.DuplicateKeyException
+import org.mongodb.scala.MongoException
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DatabaseError, RecordNotFound}
+import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -34,11 +38,13 @@ import scala.concurrent.{ExecutionContext, Future}
 trait BenefitEligibilityRepository {
   def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask]
   def upsert(id: Option[UUID], update: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
+  def insert(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
 }
 
 @Singleton
-class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent)(implicit ec: ExecutionContext)
-    extends PlayMongoRepository[PageTask](
+class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent)(
+    implicit ec: ExecutionContext
+) extends PlayMongoRepository[PageTask](
       collectionName = "page-tasks",
       mongoComponent = mongoComponent,
       domainFormat = PageTask.pageTaskFormat,
@@ -111,5 +117,15 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       .map(_ => pageTask.pageTaskId.value)
       .leftMap(error => DatabaseError(error))
   }
+
+  def insert(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] =
+    collection
+      .insertOne(
+        pageTask
+      )
+      .toFuture()
+      .attemptT
+      .map(_ => pageTask.pageTaskId.value)
+      .leftMap(error => DatabaseError(error))
 
 }

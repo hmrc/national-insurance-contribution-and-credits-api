@@ -290,7 +290,58 @@ class BenefitEligibilityDataRepositoryItSpec
         findAll().futureValue shouldBe List(gyspPageTask2)
       }
     }
+    ".insert" - {
+      "should insert a new BspPageTask" in {
+        val uuidOne           = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
+        val bspPageTask = BspPageTask(
+          uuidOne,
+          Some(paginationSource1),
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          testInstant
+        )
+
+        repository.insert(bspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+      }
+      "should insert a new MaPageTask" in {
+        val uuidOne           = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val maPageTask = MaPageTask(
+          uuidOne,
+          List(paginationSource1, paginationSource1),
+          testInstant
+        )
+
+        repository.insert(maPageTask).value.futureValue shouldBe Right(uuidOne.value)
+      }
+      "should insert a new GyspPageTask" in {
+        val uuidOne           = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+
+        val gyspPageTask = GyspPageTask(
+          uuidOne,
+          Some(paginationSource1),
+          Some(paginationSource2),
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          testInstant
+        )
+
+        repository.insert(gyspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+      }
+    }
   }
 
 }

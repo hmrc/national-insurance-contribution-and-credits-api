@@ -17,6 +17,8 @@
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.{EitherT, NonEmptyList}
+import com.mongodb.{ServerAddress, WriteConcernResult, WriteError}
+import org.mongodb.scala.bson.BsonDocument
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
@@ -75,7 +77,7 @@ class PaginationServiceSpec
     override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
   }
 
-  val mockUudiGenerator: UuidGenerator                                       = mock[UuidGenerator]
+  val mockUuidGenerator: UuidGenerator                                       = mock[UuidGenerator]
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
@@ -97,7 +99,7 @@ class PaginationServiceSpec
     benefitSchemeDetailsConnector = mockBenefitSchemeDetailsConnector,
     pageTaskRepo = mockBenefitEligibilityRepository,
     currentTime = currentTimeSource,
-    uuidGenerator = mockUudiGenerator
+    uuidGenerator = mockUuidGenerator
   )
 
   "PaginationService" - {
@@ -113,8 +115,8 @@ class PaginationServiceSpec
         )
 
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask))
-          .expects(None, pageTask)
+          .insert(_: PageTask))
+          .expects(pageTask)
           .returning(EitherT.rightT(pageTask.pageTaskId.value))
 
         underTest.addTask(pageTask).value.futureValue shouldBe Right(
@@ -133,12 +135,49 @@ class PaginationServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask))
-          .expects(None, pageTask)
+          .insert(_: PageTask))
+          .expects(pageTask)
           .returning(EitherT.leftT(DatabaseError(error)))
 
         underTest.addTask(pageTask).value.futureValue shouldBe Left(DatabaseError(error))
 
+      }
+      "should return a new uuid if current uuid already exists in database" in {
+        val uuidOne           = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, Some("SomeCallBackURLThree")))
+
+        val pageTask = MaPageTask(
+          pageTaskId = uuidOne,
+          liabilitiesPaging = paginationSource3,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val newPageTask = MaPageTask(
+          pageTaskId = uuidTwo,
+          liabilitiesPaging = paginationSource3,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val serverAddress              = new ServerAddress()
+        val errorDetails: BsonDocument = new BsonDocument()
+        val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
+        val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask))
+          .expects(pageTask)
+          .returning(EitherT.leftT(DatabaseError(error)))
+          .noMoreThanOnce()
+
+        // Note: This verifies that a new uuid is being generated if we get a duplicate key error
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask))
+          .expects(newPageTask)
+          .returning(EitherT.rightT(newPageTask.pageTaskId.value))
+          .noMoreThanOnce()
+
+        underTest.addTask(pageTask).value.futureValue
       }
     }
     ".paginate" - {
@@ -157,7 +196,7 @@ class PaginationServiceSpec
           Instant.now
         )
 
-        (() => mockUudiGenerator.generate).expects().returning(uuid)
+        (() => mockUuidGenerator.generate).expects().returning(uuid)
         val liabilitiesSuccessResponse = LiabilitySummaryDetailsSuccessResponse(None, None)
         (mockBenefitEligibilityRepository
           .getItem(_: UUID))
@@ -211,7 +250,7 @@ class PaginationServiceSpec
           Instant.now
         )
 
-        (() => mockUudiGenerator.generate).expects().returning(uuid)
+        (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
           .getItem(_: UUID))
           .expects(pageTask.pageTaskId.value)
@@ -414,7 +453,7 @@ class PaginationServiceSpec
           Instant.now
         )
 
-        (() => mockUudiGenerator.generate).expects().returning(uuid)
+        (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
           .getItem(_: UUID))
           .expects(pageTask.pageTaskId.value)
