@@ -60,9 +60,9 @@ class BenefitEligibilityDataRepositoryItSpec
     ".getItem" - {
       "should successfully return an item by id" in {
 
-        val uuidOne   = PaginationCursor(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val uuidTwo   = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val uuidThree = PaginationCursor(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
+        val pageTaskId1 = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val pageTaskId2 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId3 = PageTaskId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
         val paginationSource1 = PaginationSource(Class2MAReceipts, Some("SomeCallBackURLOne"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
@@ -70,12 +70,12 @@ class BenefitEligibilityDataRepositoryItSpec
 
         val pageTasksList = List(
           MaPageTask(
-            uuidOne,
+            pageTaskId1,
             List(paginationSource2, paginationSource2),
             testInstant
           ),
           BspPageTask(
-            uuidTwo,
+            pageTaskId2,
             Some(paginationSource2),
             Some(
               ContributionAndCreditsPaging(
@@ -86,7 +86,7 @@ class BenefitEligibilityDataRepositoryItSpec
             testInstant
           ),
           GyspPageTask(
-            uuidThree,
+            pageTaskId3,
             Some(paginationSource3),
             Some(paginationSource1),
             Some(
@@ -103,21 +103,26 @@ class BenefitEligibilityDataRepositoryItSpec
 
         val pageTasks = Table("page_task", pageTasksList: _*)
 
-        forAll(pageTasks)(pageTask => repository.getItem(pageTask.id).value.futureValue shouldBe Right(pageTask))
+        forAll(pageTasks) { pageTask =>
+          repository.getItem(pageTask.pageTaskId.value).value.futureValue shouldBe Right(pageTask)
+        }
       }
-      "should return database error if there is an unexpected db failure" in {
-        val uuidTwo = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
 
-        repository.getItem(uuidTwo.value).value.futureValue shouldBe Left(DatabaseError(RecordNotFound(uuidTwo.value)))
+      "should return database error if there is an unexpected db failure" in {
+        val pageTaskId = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+
+        repository.getItem(pageTaskId.value).value.futureValue shouldBe Left(
+          DatabaseError(RecordNotFound(pageTaskId.value))
+        )
       }
     }
     ".upsert" - {
       "should insert a new BspPageTask" in {
-        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val bspPageTask = BspPageTask(
-          uuidOne,
+          pageTaskId,
           Some(paginationSource1),
           Some(
             ContributionAndCreditsPaging(
@@ -128,27 +133,27 @@ class BenefitEligibilityDataRepositoryItSpec
           testInstant
         )
 
-        repository.upsert(None, bspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+        repository.upsert(None, bspPageTask).value.futureValue shouldBe Right(pageTaskId.value)
       }
       "should insert a new MaPageTask" in {
-        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val maPageTask = MaPageTask(
-          uuidOne,
+          pageTaskId,
           List(paginationSource1, paginationSource1),
           testInstant
         )
 
-        repository.upsert(None, maPageTask).value.futureValue shouldBe Right(uuidOne.value)
+        repository.upsert(None, maPageTask).value.futureValue shouldBe Right(pageTaskId.value)
       }
       "should insert a new GyspPageTask" in {
-        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val gyspPageTask = GyspPageTask(
-          uuidOne,
+          pageTaskId,
           Some(paginationSource1),
           Some(paginationSource2),
           Some(
@@ -160,15 +165,15 @@ class BenefitEligibilityDataRepositoryItSpec
           testInstant
         )
 
-        repository.upsert(None, gyspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+        repository.upsert(None, gyspPageTask).value.futureValue shouldBe Right(pageTaskId.value)
       }
       "should return a failure if mongo database fails" in {
-        val uuidOne           = PaginationCursor(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val gyspPageTask = GyspPageTask(
-          uuidOne,
+          pageTaskId,
           Some(paginationSource1),
           Some(paginationSource2),
           Some(
@@ -185,14 +190,14 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should overwrite an existing MaPageTask" in {
 
-        val uuidOne = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
-        val uuidTwo = UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce")
+        val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val maPageTask1 = MaPageTask(
-          PaginationCursor(uuidOne),
+          pageTaskId1,
           List(paginationSource1, paginationSource1),
           testInstant
         )
@@ -201,18 +206,18 @@ class BenefitEligibilityDataRepositoryItSpec
         insert(maPageTask1).futureValue
 
         val maPageTask2 = MaPageTask(
-          PaginationCursor(uuidTwo),
+          pageTaskId2,
           List(paginationSource2, paginationSource2),
           testInstant
         )
 
-        repository.upsert(Some(uuidOne), maPageTask2).value.futureValue shouldBe Right(uuidTwo)
+        repository.upsert(Some(pageTaskId1.value), maPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
         findAll().futureValue shouldBe List(maPageTask2)
       }
       "should overwrite an existing BspPageTask" in {
 
-        val uuidOne = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
-        val uuidTwo = UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce")
+        val pageTask1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTask2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
@@ -227,7 +232,7 @@ class BenefitEligibilityDataRepositoryItSpec
         )
 
         val bspPageTask1 = BspPageTask(
-          PaginationCursor(uuidOne),
+          pageTask1,
           Some(paginationSource1),
           Some(contributionAndCreditsPaging1),
           testInstant
@@ -237,19 +242,19 @@ class BenefitEligibilityDataRepositoryItSpec
         insert(bspPageTask1).futureValue
 
         val bspPageTask2 = BspPageTask(
-          PaginationCursor(uuidTwo),
+          pageTask2,
           Some(paginationSource2),
           Some(contributionAndCreditsPaging2),
           testInstant
         )
 
-        repository.upsert(Some(uuidOne), bspPageTask2).value.futureValue shouldBe Right(uuidTwo)
+        repository.upsert(Some(pageTask1.value), bspPageTask2).value.futureValue shouldBe Right(pageTask2.value)
         findAll().futureValue shouldBe List(bspPageTask2)
       }
       "should overwrite an existing GyspPageTask" in {
 
-        val uuidOne = UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356")
-        val uuidTwo = UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce")
+        val pageTask1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTask2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
@@ -263,7 +268,7 @@ class BenefitEligibilityDataRepositoryItSpec
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
         val gyspPageTask1 = GyspPageTask(
-          PaginationCursor(uuidOne),
+          pageTask1,
           Some(paginationSource1),
           Some(paginationSource1),
           Some(contributionAndCreditsPaging1),
@@ -274,14 +279,14 @@ class BenefitEligibilityDataRepositoryItSpec
         insert(gyspPageTask1).futureValue
 
         val gyspPageTask2 = GyspPageTask(
-          PaginationCursor(uuidTwo),
+          pageTask2,
           Some(paginationSource2),
           Some(paginationSource2),
           Some(contributionAndCreditsPaging2),
           testInstant
         )
 
-        repository.upsert(Some(uuidOne), gyspPageTask2).value.futureValue shouldBe Right(uuidTwo)
+        repository.upsert(Some(pageTask1.value), gyspPageTask2).value.futureValue shouldBe Right(pageTask2.value)
         findAll().futureValue shouldBe List(gyspPageTask2)
       }
     }

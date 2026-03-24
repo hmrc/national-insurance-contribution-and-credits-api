@@ -115,8 +115,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       StartTaxYear(2025),
       EndTaxYear(2026)
     ),
-    LiabilitiesRequestParams(List(Abroad), None, None, None),
-    None
+    LiabilitiesRequestParams(List(Abroad), None, None, None)
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -196,7 +195,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val paging = MaPageTask(
-    PaginationCursor(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     List(PaginationSource(ApiName.Liabilities, Some("/some/url"))),
     testInstant
   )
@@ -265,7 +264,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
-            Some(PaginationCursor(paging.id))
+            Some(PaginationCursor(PaginationType.MA, paging.pageTaskId))
           )
         )
 

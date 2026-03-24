@@ -107,7 +107,13 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{GyspPageTask, PageTask, PaginationCursor, PaginationSource}
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  GyspPageTask,
+  PageTask,
+  PageTaskId,
+  PaginationCursor,
+  PaginationSource
+}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Instant, LocalDate, LocalDateTime}
@@ -189,8 +195,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         Some(LongTermBenefitType.WidowsBenefit),
         Some(PensionProcessingArea.StandardElectronicEnabledPensionProcessing)
       )
-    ),
-    None
+    )
   )
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -632,7 +637,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
   )
 
   val paging = GyspPageTask(
-    PaginationCursor(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Some(PaginationSource(ApiName.SchemeMembershipDetails, Some("some-url"))),
     Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
     None,
@@ -774,7 +779,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             ),
             marriageDetailsResult,
             individualStatePensionInformationResult,
-            Some(PaginationCursor(paging.id))
+            Some(PaginationCursor(PaginationType.GYSP, paging.pageTaskId))
           )
         )
 

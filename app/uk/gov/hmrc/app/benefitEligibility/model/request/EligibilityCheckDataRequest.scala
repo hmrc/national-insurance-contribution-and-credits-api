@@ -82,8 +82,7 @@ object JSAEligibilityCheckDataRequest {
 final case class BSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-    nextCursor: Option[PaginationCursor]
+    niContributionsAndCredits: ContributionsAndCreditsRequestParams
 ) extends EligibilityCheckDataRequest
 
 object BSPEligibilityCheckDataRequest {
@@ -93,9 +92,8 @@ object BSPEligibilityCheckDataRequest {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-      nextCursor: Option[PaginationCursor]
-  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, niContributionsAndCredits, nextCursor)
+      niContributionsAndCredits: ContributionsAndCreditsRequestParams
+  ) = new BSPEligibilityCheckDataRequest(BSP, nationalInsuranceNumber, niContributionsAndCredits)
 
 }
 
@@ -103,8 +101,7 @@ final case class MAEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-    liabilities: LiabilitiesRequestParams,
-    nextCursor: Option[PaginationCursor]
+    liabilities: LiabilitiesRequestParams
 ) extends EligibilityCheckDataRequest
 
 object MAEligibilityCheckDataRequest {
@@ -112,14 +109,12 @@ object MAEligibilityCheckDataRequest {
   def apply(
       nationalInsuranceNumber: Identifier,
       contributionsAndCredits: ContributionsAndCreditsRequestParams,
-      liabilities: LiabilitiesRequestParams,
-      nextCursor: Option[PaginationCursor]
+      liabilities: LiabilitiesRequestParams
   ) = new MAEligibilityCheckDataRequest(
     MA,
     nationalInsuranceNumber,
     contributionsAndCredits,
-    liabilities,
-    nextCursor
+    liabilities
   )
 
   implicit val maEligibilityCheckDataRequestReads: Reads[MAEligibilityCheckDataRequest] =
@@ -131,8 +126,7 @@ final case class GYSPEligibilityCheckDataRequest private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-    longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams],
-    nextCursor: Option[PaginationCursor]
+    longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams]
 ) extends EligibilityCheckDataRequest
 
 object GYSPEligibilityCheckDataRequest {
@@ -143,14 +137,12 @@ object GYSPEligibilityCheckDataRequest {
   def apply(
       nationalInsuranceNumber: Identifier,
       niContributionsAndCredits: ContributionsAndCreditsRequestParams,
-      longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams],
-      nextCursor: Option[PaginationCursor]
+      longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams]
   ) = new GYSPEligibilityCheckDataRequest(
     GYSP,
     nationalInsuranceNumber,
     niContributionsAndCredits,
-    longTermBenefitCalculation,
-    nextCursor
+    longTermBenefitCalculation
   )
 
 }

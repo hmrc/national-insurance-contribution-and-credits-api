@@ -22,7 +22,11 @@ import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.{MarriageDetailsConnector, NiContributionsAndCreditsConnector}
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DataRetrievalServiceError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  DataRetrievalServiceError,
+  PaginationType
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
@@ -30,6 +34,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataR
 import uk.gov.hmrc.app.benefitEligibility.repository.{
   BspPageTask,
   ContributionAndCreditsPaging,
+  PageTaskId,
   PaginationCursor,
   PaginationSource
 }
@@ -98,13 +103,13 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
           paginationService
             .addTask(
               BspPageTask(
-                PaginationCursor(uuidGenerator.generate),
+                PageTaskId(uuidGenerator.generate),
                 marriageDetailsPaging = marriageDetailsPaginate,
                 contributionAndCreditsPaging = niContributionsCreditsPaginate,
                 currentTimeSource.instantNow()
               )
             )
-            .map(id => result.copy(nextCursor = Some(PaginationCursor(id))))
+            .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(id)))))
         } else {
           EitherT
             .rightT[Future, BenefitEligibilityError](result)

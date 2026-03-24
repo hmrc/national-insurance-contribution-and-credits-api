@@ -79,7 +79,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
   LongTermBenefitCalculationRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  BenefitEligibilityRepositoryImpl,
+  PageTask,
+  PageTaskId,
+  PaginationCursor
+}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -609,8 +614,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
           StartTaxYear(2025),
           EndTaxYear(2026)
         ),
-        Some(LongTermBenefitCalculationRequestParams(None, None)),
-        None
+        Some(LongTermBenefitCalculationRequestParams(None, None))
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {
@@ -721,7 +725,12 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
               ),
-              Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+              Some(
+                PaginationCursor(
+                  PaginationType.GYSP,
+                  PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
+                )
+              )
             )
           )
 

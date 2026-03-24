@@ -50,13 +50,13 @@ class PaginationService @Inject() (
     pageTaskRepo.upsert(None, pageTask)
 
   def paginate(
-      id: UUID,
+      id: PageTaskId,
       nationalInsuranceNumber: Identifier
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginate has been called")
 
     for {
-      existingPageTask <- pageTaskRepo.getItem(id)
+      existingPageTask <- pageTaskRepo.getItem(id.value)
       paginationResult <- existingPageTask match {
         case task: MaPageTask   => processMaPageTask(task)
         case task: BspPageTask  => processBspPageTask(task, nationalInsuranceNumber)
@@ -65,7 +65,7 @@ class PaginationService @Inject() (
       paginationResultWithCursor = paginationResult.setNextCursor(uuidGenerator.generate)
       _ <- PageTask
         .createPaginatingTask(paginationResultWithCursor, currentTime)
-        .map(newPageTask => pageTaskRepo.upsert(Some(existingPageTask.id), newPageTask))
+        .map(newPageTask => pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask))
         .sequence
     } yield paginationResultWithCursor
   }

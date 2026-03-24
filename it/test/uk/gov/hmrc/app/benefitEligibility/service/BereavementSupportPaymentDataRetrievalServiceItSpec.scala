@@ -43,6 +43,7 @@ import play.api.test.Helpers.{
 }
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -59,7 +60,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
-import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  BenefitEligibilityRepositoryImpl,
+  PageTask,
+  PageTaskId,
+  PaginationCursor
+}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -167,8 +173,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
           DateOfBirth(LocalDate.parse("2025-10-10")),
           StartTaxYear(2025),
           EndTaxYear(2026)
-        ),
-        None
+        )
       )
 
       "when all NPS endpoint returns OK (200) with valid responses" - {
@@ -243,7 +248,12 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
                 ApiName.MarriageDetails,
                 marriageDetailsSuccessResponse
               ),
-              Some(PaginationCursor(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+              Some(
+                PaginationCursor(
+                  PaginationType.BSP,
+                  PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
+                )
+              )
             )
           )
 

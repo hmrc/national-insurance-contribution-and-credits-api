@@ -26,7 +26,11 @@ import uk.gov.hmrc.app.benefitEligibility.connectors.{
   NiContributionsAndCreditsConnector
 }
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DataRetrievalServiceError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  DataRetrievalServiceError,
+  PaginationType
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
@@ -99,9 +103,9 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           }
           paginationService
             .addTask(
-              MaPageTask(PaginationCursor(uuidGenerator.generate), liabilityPages, currentTimeSource.instantNow())
+              MaPageTask(PageTaskId(uuidGenerator.generate), liabilityPages, currentTimeSource.instantNow())
             )
-            .map(id => result.copy(nextCursor = Some(PaginationCursor(id))))
+            .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.MA, PageTaskId(id)))))
         } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }
       .leftMap { error =>

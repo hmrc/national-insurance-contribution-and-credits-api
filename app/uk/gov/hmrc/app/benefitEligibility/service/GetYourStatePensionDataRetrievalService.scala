@@ -43,6 +43,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckData
 import uk.gov.hmrc.app.benefitEligibility.repository.{
   ContributionAndCreditsPaging,
   GyspPageTask,
+  PageTaskId,
   PaginationCursor,
   PaginationSource
 }
@@ -143,14 +144,14 @@ class GetYourStatePensionDataRetrievalService @Inject() (
             paginationService
               .addTask(
                 GyspPageTask(
-                  PaginationCursor(uuidGenerator.generate),
+                  PageTaskId(uuidGenerator.generate),
                   benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
                   marriageDetailsPaging = marriageDetailsPaginate,
                   contributionAndCreditsPaging = niContributionsCreditsPaginate,
                   currentTimeSource.instantNow()
                 )
               )
-              .map(id => result.copy(nextCursor = Some(PaginationCursor(id))))
+              .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.GYSP, PageTaskId(id)))))
 
           } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }

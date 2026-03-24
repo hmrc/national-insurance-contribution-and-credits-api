@@ -88,13 +88,15 @@ class PageTaskSpec
           marriageDetailsResult = None,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
-          nextCursor = Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          nextCursor = Some(
+            PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          )
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           MaPageTask(
-            PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             List(),
             currentTimeSource.instantNow()
           )
@@ -121,13 +123,15 @@ class PageTaskSpec
             Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
-          nextCursor = Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          nextCursor = Some(
+            PaginationCursor(PaginationType.BSP, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          )
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           BspPageTask(
-            paginationCursor = PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             marriageDetailsPaging = None,
             contributionAndCreditsPaging = Some(
               ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
@@ -269,13 +273,15 @@ class PageTaskSpec
               )
             )
           ),
-          nextCursor = Some(PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          nextCursor = Some(
+            PaginationCursor(PaginationType.GYSP, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          )
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           GyspPageTask(
-            paginationCursor = PaginationCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             benefitSchemeMembershipDetailsPaging = None,
             marriageDetailsPaging = None,
             contributionAndCreditsPaging = Some(

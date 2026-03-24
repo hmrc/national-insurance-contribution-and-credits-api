@@ -23,7 +23,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.{
   LiabilityResult,
   MarriageDetailsResult
 }
-import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsPaging, PaginationCursor, PaginationSource}
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  ContributionAndCreditsPaging,
+  PageTaskId,
+  PaginationCursor,
+  PaginationSource
+}
 
 import java.util.UUID
 
@@ -49,7 +54,8 @@ final case class PaginationResult(
     ).flatten.nonEmpty || contributionCreditResult.contributionAndCreditsPaging.isDefined
 
   def setNextCursor(uuid: UUID): PaginationResult =
-    if (shouldPage) this.copy(nextCursor = Some(PaginationCursor(uuid))) else this.copy(nextCursor = None)
+    if (shouldPage) this.copy(nextCursor = Some(PaginationCursor(paginationType, PageTaskId(uuid))))
+    else this.copy(nextCursor = None)
 
   def getNextCursor: Option[PaginationCursor] = this.nextCursor
 

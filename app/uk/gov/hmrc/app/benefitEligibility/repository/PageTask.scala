@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, DateOfBirth, PaginationType, TaxWindow}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, CursorId, DateOfBirth, PaginationType, TaxWindow}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{LiabilityResult, MarriageDetailsResult}
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
@@ -33,12 +33,19 @@ import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSynta
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
 import java.time.{Instant, LocalDateTime}
-import java.util.UUID
+import java.util.{Base64, UUID}
+import scala.util.Try
 
-case class PaginationCursor(value: UUID) extends AnyVal
+case class PaginationCursor(paginationType: PaginationType, pageTaskId: PageTaskId)
 
 object PaginationCursor {
-  implicit val format: Format[PaginationCursor] = Json.valueFormat[PaginationCursor]
+  implicit val format: Format[PaginationCursor] = Json.format[PaginationCursor]
+
+  def from(cursorId: CursorId): Try[PaginationCursor] = {
+    val maybePaginationCursor = new String(Base64.getDecoder.decode(cursorId.value))
+    scala.util.Try(Json.parse(maybePaginationCursor).as[PaginationCursor])
+  }
+
 }
 
 final case class PaginationSource(
@@ -96,14 +103,20 @@ object ContributionAndCreditsPaging {
 
 }
 
+case class PageTaskId(value: UUID) extends AnyVal
+
+object PageTaskId {
+  implicit val pageTaskIdFormat: Format[PageTaskId] = Json.valueFormat[PageTaskId]
+}
+
 sealed trait PageTask {
-  def id: UUID
+  def pageTaskId: PageTaskId
   def paginationType: PaginationType
   def createdAt: Instant
 }
 
 final case class MaPageTask private (
-    id: UUID,
+    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
     createdAt: Instant
@@ -114,12 +127,12 @@ object MaPageTask {
   implicit val maPageTaskformat: OFormat[MaPageTask] = Json.format[MaPageTask]
 
   def apply(
-      paginationCursor: PaginationCursor,
+      pageTaskId: PageTaskId,
       liabilitiesPaging: List[PaginationSource],
       createdAt: Instant
   ) =
     new MaPageTask(
-      paginationCursor.value,
+      pageTaskId,
       PaginationType.MA,
       liabilitiesPaging,
       createdAt
@@ -128,7 +141,7 @@ object MaPageTask {
 }
 
 final case class BspPageTask private (
-    id: UUID,
+    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
@@ -140,13 +153,13 @@ object BspPageTask {
   implicit val bspPageTaskformat: OFormat[BspPageTask] = Json.format[BspPageTask]
 
   def apply(
-      paginationCursor: PaginationCursor,
+      pageTaskId: PageTaskId,
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
       createdAt: Instant
   ) =
     new BspPageTask(
-      paginationCursor.value,
+      pageTaskId,
       PaginationType.BSP,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
@@ -156,7 +169,7 @@ object BspPageTask {
 }
 
 final case class GyspPageTask private (
-    id: UUID,
+    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
     marriageDetailsPaging: Option[PaginationSource],
@@ -169,14 +182,14 @@ object GyspPageTask {
   implicit val gyspPageTaskformat: OFormat[GyspPageTask] = Json.format[GyspPageTask]
 
   def apply(
-      paginationCursor: PaginationCursor,
+      pageTaskId: PageTaskId,
       benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
       createdAt: Instant
   ) =
     new GyspPageTask(
-      paginationCursor.value,
+      pageTaskId,
       PaginationType.GYSP,
       benefitSchemeMembershipDetailsPaging,
       marriageDetailsPaging,
@@ -213,13 +226,13 @@ object PageTask {
       paginationResult.paginationType match {
         case PaginationType.MA =>
           MaPageTask(
-            paginationCursor = cursor,
+            pageTaskId = cursor.pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
             now
           )
         case PaginationType.GYSP =>
           GyspPageTask(
-            paginationCursor = cursor,
+            pageTaskId = cursor.pageTaskId,
             benefitSchemeMembershipDetailsPaging = PaginationSource.fromBenefitSchemeMembershipDetails(
               paginationResult.benefitSchemeMembershipDetailsData
             ),
@@ -229,7 +242,7 @@ object PageTask {
           )
         case PaginationType.BSP =>
           BspPageTask(
-            paginationCursor = cursor,
+            pageTaskId = cursor.pageTaskId,
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             now
