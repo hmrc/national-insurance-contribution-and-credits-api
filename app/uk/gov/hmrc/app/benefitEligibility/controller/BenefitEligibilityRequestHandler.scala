@@ -123,13 +123,14 @@ object BenefitEligibilityRequestHandler {
                         }
                     }
                   case JsError(errors) =>
+                    val errorMessages = errors.flatMap(_._2.map(_.message)).mkString(", ")
                     logger.error(s"bad request ${errors.mkString(",")}")
                     EitherT.rightT[Future, BenefitEligibilityError](
                       BadRequest(
                         Json.toJson(
                           ErrorResponse(
                             ErrorCode.BadRequest,
-                            ErrorReason(s"incompatible json, request body does not match schema")
+                            ErrorReason(s"incompatible json, request body does not match schema - $errorMessages")
                           )
                         )
                       )
