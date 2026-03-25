@@ -103,7 +103,12 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           }
           paginationService
             .addTask(
-              MaPageTask(PageTaskId(uuidGenerator.generate), liabilityPages, currentTimeSource.instantNow())
+              MaPageTask(
+                PageTaskId(uuidGenerator.generate),
+                liabilityPages,
+                eligibilityCheckDataRequest.nationalInsuranceNumber,
+                currentTimeSource.instantNow()
+              )
             )
             .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.MA, PageTaskId(id)))))
         } else EitherT.rightT[Future, BenefitEligibilityError](result)

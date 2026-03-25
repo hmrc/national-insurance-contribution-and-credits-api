@@ -78,11 +78,14 @@ class PageTaskSpec
     override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
   }
 
+  val nationalInsuranceNumber = Identifier("AB123456C")
+
   "PageTask" - {
     ".createPaginatingTask" - {
       "should return pageTask if MA pagination result with next cursor" in {
         val paginationResult = PaginationResult(
           paginationType = PaginationType.MA,
+          nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult =
             List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
           marriageDetailsResult = None,
@@ -98,6 +101,7 @@ class PageTaskSpec
           MaPageTask(
             PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             List(),
+            nationalInsuranceNumber,
             currentTimeSource.instantNow()
           )
         )
@@ -106,6 +110,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           paginationType = PaginationType.BSP,
+          nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(
@@ -136,6 +141,7 @@ class PageTaskSpec
             contributionAndCreditsPaging = Some(
               ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
             ),
+            nationalInsuranceNumber,
             createdAt = currentTimeSource.instantNow()
           )
         )
@@ -144,6 +150,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           paginationType = PaginationType.GYSP,
+          nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(
@@ -287,6 +294,7 @@ class PageTaskSpec
             contributionAndCreditsPaging = Some(
               ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
             ),
+            nationalInsuranceNumber,
             createdAt = currentTimeSource.instantNow()
           )
         )
@@ -294,6 +302,7 @@ class PageTaskSpec
       "should return None if MA pagination result without next cursor" in {
         val paginationResult = PaginationResult(
           paginationType = PaginationType.MA,
+          nationalInsuranceNumber,
           liabilitiesResult =
             List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
           marriageDetailsResult = None,
@@ -309,6 +318,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           paginationType = PaginationType.BSP,
+          nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(
@@ -336,6 +346,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           paginationType = PaginationType.GYSP,
+          nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(

@@ -17,10 +17,11 @@
 package uk.gov.hmrc.app.benefitEligibility.repository
 
 import cats.data.NonEmptyList
+import org.mongodb.scala.model.Filters
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.must.Matchers.{contain, must, mustBe}
-import org.scalatest.matchers.should.Matchers.{a, shouldBe}
+import org.scalatest.matchers.should.Matchers.{a, should, shouldBe}
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
@@ -29,6 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.Codecs
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.{Instant, LocalDate}
@@ -56,6 +58,8 @@ class BenefitEligibilityDataRepositoryItSpec
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
+  val nationalInsuranceNumber = Identifier("AB123456C")
+
   "BenefitEligibilityRepository" - {
     ".getItem" - {
       "should successfully return an item by id" in {
@@ -72,6 +76,7 @@ class BenefitEligibilityDataRepositoryItSpec
           MaPageTask(
             pageTaskId1,
             List(paginationSource2, paginationSource2),
+            nationalInsuranceNumber,
             testInstant
           ),
           BspPageTask(
@@ -83,6 +88,7 @@ class BenefitEligibilityDataRepositoryItSpec
                 DateOfBirth(LocalDate.parse("2025-10-10"))
               )
             ),
+            nationalInsuranceNumber,
             testInstant
           ),
           GyspPageTask(
@@ -95,6 +101,7 @@ class BenefitEligibilityDataRepositoryItSpec
                 DateOfBirth(LocalDate.parse("2025-10-10"))
               )
             ),
+            nationalInsuranceNumber,
             testInstant
           )
         )
@@ -130,6 +137,7 @@ class BenefitEligibilityDataRepositoryItSpec
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -142,6 +150,7 @@ class BenefitEligibilityDataRepositoryItSpec
         val maPageTask = MaPageTask(
           pageTaskId,
           List(paginationSource1, paginationSource1),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -162,6 +171,7 @@ class BenefitEligibilityDataRepositoryItSpec
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -182,6 +192,7 @@ class BenefitEligibilityDataRepositoryItSpec
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
+          nationalInsuranceNumber,
           testInstant
         )
         dropDatabase()
@@ -199,6 +210,7 @@ class BenefitEligibilityDataRepositoryItSpec
         val maPageTask1 = MaPageTask(
           pageTaskId1,
           List(paginationSource1, paginationSource1),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -208,6 +220,7 @@ class BenefitEligibilityDataRepositoryItSpec
         val maPageTask2 = MaPageTask(
           pageTaskId2,
           List(paginationSource2, paginationSource2),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -235,6 +248,7 @@ class BenefitEligibilityDataRepositoryItSpec
           pageTask1,
           Some(paginationSource1),
           Some(contributionAndCreditsPaging1),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -245,6 +259,7 @@ class BenefitEligibilityDataRepositoryItSpec
           pageTask2,
           Some(paginationSource2),
           Some(contributionAndCreditsPaging2),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -272,6 +287,7 @@ class BenefitEligibilityDataRepositoryItSpec
           Some(paginationSource1),
           Some(paginationSource1),
           Some(contributionAndCreditsPaging1),
+          nationalInsuranceNumber,
           testInstant
         )
 
@@ -283,20 +299,21 @@ class BenefitEligibilityDataRepositoryItSpec
           Some(paginationSource2),
           Some(paginationSource2),
           Some(contributionAndCreditsPaging2),
+          nationalInsuranceNumber,
           testInstant
         )
 
         repository.upsert(Some(pageTask1.value), gyspPageTask2).value.futureValue shouldBe Right(pageTask2.value)
-        findAll().futureValue shouldBe List(gyspPageTask2)
+        findAll().futureValue should contain theSameElementsAs List(gyspPageTask2)
       }
     }
     ".insert" - {
       "should insert a new BspPageTask" in {
-        val uuidOne           = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val bspPageTask = BspPageTask(
-          uuidOne,
+          pageTaskId1,
           Some(paginationSource1),
           Some(
             ContributionAndCreditsPaging(
@@ -304,30 +321,35 @@ class BenefitEligibilityDataRepositoryItSpec
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
+          nationalInsuranceNumber,
           testInstant
         )
 
-        repository.insert(bspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+        repository.insert(bspPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
+        find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(bspPageTask)
       }
       "should insert a new MaPageTask" in {
-        val uuidOne           = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val maPageTask = MaPageTask(
-          uuidOne,
+          pageTaskId1,
           List(paginationSource1, paginationSource1),
+          nationalInsuranceNumber,
           testInstant
         )
 
-        repository.insert(maPageTask).value.futureValue shouldBe Right(uuidOne.value)
+        repository.insert(maPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
+        find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(maPageTask)
+
       }
       "should insert a new GyspPageTask" in {
-        val uuidOne           = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
         val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
 
         val gyspPageTask = GyspPageTask(
-          uuidOne,
+          pageTaskId1,
           Some(paginationSource1),
           Some(paginationSource2),
           Some(
@@ -336,10 +358,13 @@ class BenefitEligibilityDataRepositoryItSpec
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
+          nationalInsuranceNumber,
           testInstant
         )
 
-        repository.insert(gyspPageTask).value.futureValue shouldBe Right(uuidOne.value)
+        repository.insert(gyspPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
+        find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(gyspPageTask)
+
       }
     }
   }

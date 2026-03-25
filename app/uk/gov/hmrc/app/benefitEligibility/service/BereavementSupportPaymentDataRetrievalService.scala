@@ -106,6 +106,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
                 PageTaskId(uuidGenerator.generate),
                 marriageDetailsPaging = marriageDetailsPaginate,
                 contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                eligibilityCheckDataRequest.nationalInsuranceNumber,
                 currentTimeSource.instantNow()
               )
             )

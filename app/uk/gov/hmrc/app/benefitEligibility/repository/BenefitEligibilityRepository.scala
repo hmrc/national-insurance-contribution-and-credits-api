@@ -16,16 +16,12 @@
 
 package uk.gov.hmrc.app.benefitEligibility.repository
 
-import cats.Show.Shown.mat
 import cats.data.EitherT
 import cats.implicits.catsSyntaxApplicativeError
 import com.google.inject.{ImplementedBy, Inject}
-import com.mongodb.DuplicateKeyException
-import org.mongodb.scala.MongoException
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DatabaseError, RecordNotFound}
-import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -74,16 +70,25 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
 
   def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     val updates = pageTask match {
-      case MaPageTask(id, paginationType, liabilitiesPaging, createdAt) =>
+      case MaPageTask(id, paginationType, liabilitiesPaging, nationalInsuranceNumber, createdAt) =>
         Updates.combine(
           Updates.set("pageTaskId", Codecs.toBson(id)),
+          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
           Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
-      case BspPageTask(id, paginationType, marriageDetailsPaging, contributionAndCreditsPaging, createdAt) =>
+      case BspPageTask(
+            id,
+            paginationType,
+            marriageDetailsPaging,
+            contributionAndCreditsPaging,
+            nationalInsuranceNumber,
+            createdAt
+          ) =>
         Updates.combine(
           Updates.set("pageTaskId", Codecs.toBson(id)),
+          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
           Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
           Updates.set("paginationType", Codecs.toBson(paginationType)),
@@ -95,10 +100,12 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
             benefitSchemeMembershipDetailsPaging,
             marriageDetailsPaging,
             contributionAndCreditsPaging,
+            nationalInsuranceNumber,
             createdAt
           ) =>
         Updates.combine(
           Updates.set("pageTaskId", Codecs.toBson(id)),
+          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("benefitSchemeMembershipDetailsPaging", Codecs.toBson(benefitSchemeMembershipDetailsPaging)),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
           Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),

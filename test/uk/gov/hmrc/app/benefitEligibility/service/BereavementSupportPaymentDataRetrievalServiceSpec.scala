@@ -170,6 +170,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
     None,
+    identifier,
     testInstant
   )
 

@@ -91,6 +91,8 @@ class PaginationServiceSpec
 
   val mockBenefitEligibilityRepository: BenefitEligibilityRepository = mock[BenefitEligibilityRepository]
 
+  val nationalInsuranceNumber = Identifier("AB123456C")
+
   val underTest = new PaginationService(
     liabilitySummaryDetailsConnector = mockLiabilitySummaryDetailsConnector,
     niContributionsAndCreditsConnector = mockNiContributionsAndCreditsConnector,
@@ -111,6 +113,7 @@ class PaginationServiceSpec
         val pageTask = MaPageTask(
           pageTaskId = pageTaskId1,
           liabilitiesPaging = paginationSource3,
+          nationalInsuranceNumber,
           Instant.now
         )
 
@@ -130,6 +133,7 @@ class PaginationServiceSpec
         val pageTask = MaPageTask(
           pageTaskId = pageTaskId1,
           liabilitiesPaging = paginationSource3,
+          nationalInsuranceNumber,
           Instant.now
         )
 
@@ -150,11 +154,13 @@ class PaginationServiceSpec
         val pageTask = MaPageTask(
           pageTaskId = uuidOne,
           liabilitiesPaging = paginationSource3,
+          nationalInsuranceNumber,
           createdAt = currentTimeSource.instantNow()
         )
         val newPageTask = MaPageTask(
           pageTaskId = uuidTwo,
           liabilitiesPaging = paginationSource3,
+          nationalInsuranceNumber,
           createdAt = currentTimeSource.instantNow()
         )
         val serverAddress              = new ServerAddress()
@@ -193,6 +199,7 @@ class PaginationServiceSpec
         val pageTask = MaPageTask(
           pageTaskId = pageTaskId,
           liabilitiesPaging = paginationSource1,
+          nationalInsuranceNumber,
           Instant.now
         )
 
@@ -210,13 +217,14 @@ class PaginationServiceSpec
 
         val expectedResult = PaginationResult(
           PaginationType.MA,
+          nationalInsuranceNumber,
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
           None,
           ContributionCreditPagingResult(None, None),
           None,
           None
         )
-        underTest.paginate(pageTask.pageTaskId, nationalInsuranceNumber).value.futureValue shouldBe Right(
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(
           expectedResult
         )
       }
@@ -247,6 +255,7 @@ class PaginationServiceSpec
           pageTaskId = pageTaskId,
           marriageDetailsPaging = Some(paginationSource1),
           contributionAndCreditsPaging = Some(paginationSource2),
+          nationalInsuranceNumber,
           Instant.now
         )
 
@@ -278,6 +287,7 @@ class PaginationServiceSpec
 
         val expected = PaginationResult(
           paginationType = PaginationType.BSP,
+          nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(
@@ -298,7 +308,7 @@ class PaginationServiceSpec
           nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(uuid)))
         )
 
-        underTest.paginate(pageTask.pageTaskId, nationalInsuranceNumber).value.futureValue shouldBe Right(expected)
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(expected)
       }
       "should return pagination result for GYSP" in {
         val uuid       = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
@@ -450,6 +460,7 @@ class PaginationServiceSpec
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
           ),
+          nationalInsuranceNumber,
           Instant.now
         )
 
@@ -503,6 +514,7 @@ class PaginationServiceSpec
 
         val expected = PaginationResult(
           paginationType = PaginationType.GYSP,
+          nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
             SuccessResult(
@@ -635,7 +647,7 @@ class PaginationServiceSpec
           nextCursor = Some(PaginationCursor(PaginationType.GYSP, pageTaskId))
         )
 
-        underTest.paginate(pageTask.pageTaskId, nationalInsuranceNumber).value.futureValue shouldBe Right(expected)
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(expected)
       }
       "should error if connector call fails" in {
         val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
@@ -649,6 +661,7 @@ class PaginationServiceSpec
         val pageTask = MaPageTask(
           pageTaskId = pageTaskId,
           liabilitiesPaging = paginationSource1,
+          nationalInsuranceNumber,
           Instant.now
         )
 
@@ -663,13 +676,12 @@ class PaginationServiceSpec
           .expects(BenefitType.MA, liabilitiesCallBackUrl, *)
           .returning(EitherT.leftT(NpsClientError(error)))
 
-        underTest.paginate(pageTask.pageTaskId, nationalInsuranceNumber).value.futureValue shouldBe Left(
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Left(
           NpsClientError(error)
         )
       }
       "should error if database returns error" in {
-        val pageTaskId1             = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val nationalInsuranceNumber = Identifier("GD379251T")
+        val pageTaskId1 = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -679,7 +691,7 @@ class PaginationServiceSpec
           .expects(pageTaskId1.value)
           .returning(EitherT.leftT(DatabaseError(error)))
 
-        underTest.paginate(pageTaskId1, nationalInsuranceNumber).value.futureValue shouldBe Left(
+        underTest.paginate(pageTaskId1).value.futureValue shouldBe Left(
           DatabaseError(error)
         )
       }

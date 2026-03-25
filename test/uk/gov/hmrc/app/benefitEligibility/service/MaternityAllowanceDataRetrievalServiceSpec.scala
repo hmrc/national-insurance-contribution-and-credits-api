@@ -197,6 +197,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   val paging = MaPageTask(
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     List(PaginationSource(ApiName.Liabilities, Some("/some/url"))),
+    identifier,
     testInstant
   )
 
