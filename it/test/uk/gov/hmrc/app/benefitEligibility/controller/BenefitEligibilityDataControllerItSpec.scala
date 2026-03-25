@@ -2939,7 +2939,7 @@ class BenefitEligibilityDataControllerItSpec
 
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
-          ErrorResponse(BadRequest, ErrorReason("incompatible json, request body does not match schema"))
+          ErrorResponse(BadRequest, ErrorReason("incompatible json, request body does not match schema - \\\"{}\\\" is not an object"))
         )
       }
 
