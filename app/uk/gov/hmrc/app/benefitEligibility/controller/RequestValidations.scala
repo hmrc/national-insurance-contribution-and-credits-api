@@ -17,11 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.Validated
-import cats.implicits.catsSyntaxTuple5Semigroupal
+import cats.implicits.catsSyntaxTuple6Semigroupal
 import play.api.libs.json.JsonValidationError
-import uk.gov.hmrc.app.benefitEligibility.model.common.{Identifier, InvalidUUID}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, Identifier, InvalidUUID}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult
+import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -54,11 +55,23 @@ object RequestValidations {
         "Start tax year after end tax year"
       ),
       Validated.condNel(
+        (Set(MA, ESA, JSA).contains(request.benefitType) &&
+          (ContributionCreditTaxWindowCalculator
+            .createTaxWindows(
+              request.niContributionsAndCredits.startTaxYear,
+              request.niContributionsAndCredits.endTaxYear
+            )
+            .size == 1)) ||
+          Set(BSP, GYSP, BSP_SEARCHLIGHT).contains(request.benefitType),
+        SuccessfulResult,
+        "Tax year range greater than six years"
+      ),
+      Validated.condNel(
         request.niContributionsAndCredits.startTaxYear.value >= 1975,
         SuccessfulResult,
         "Start tax year before 1975"
       )
-    ).mapN((_, _, _, _, _) => SuccessfulResult) match {
+    ).mapN((_, _, _, _, _, _) => SuccessfulResult) match {
       case Validated.Valid(_)   => Right(SuccessfulResult)
       case Validated.Invalid(e) => Left(JsonValidationError(e.toList))
     }

@@ -78,7 +78,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
-import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, Forbidden, InternalServerError}
+import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{
+  BadRequest,
+  Forbidden,
+  InternalServerError,
+  UnprocessableEntity
+}
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
@@ -934,6 +939,43 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 502
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
         }
+        "should return 422 if ESA Tax years exceed 6 years" in {
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2015),
+              EndTaxYear(2025)
+            )
+          )
+          val request: FakeRequest[AnyContent] =
+            FakeRequest("POST", "/benefit-eligibility-info")
+              .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+              .withHeaders(
+                "Content-Type"  -> "application/json",
+                "Authorization" -> "Bearer token",
+                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          status(result) shouldBe 422
+          contentAsJson(result) shouldBe Json.toJson(
+            ErrorResponse(UnprocessableEntity, ErrorReason("Tax year range greater than six years"))
+          )
+        }
+
       }
 
       "JSA" - {
@@ -1111,6 +1153,44 @@ class BenefitEligibilityDataControllerItSpec
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
 
         }
+        "should return 422 if JSA Tax years exceed 6 years" in {
+
+          server.stubFor(
+            WireMock
+              .post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2015),
+              EndTaxYear(2025)
+            )
+          )
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(jsaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          status(result) shouldBe 422
+          contentAsJson(result) shouldBe Json.toJson(
+            ErrorResponse(UnprocessableEntity, ErrorReason("Tax year range greater than six years"))
+          )
+
+        }
+
       }
 
       "BSP Searchlight" - {
@@ -1711,6 +1791,44 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 502
           contentAsJson(result) shouldBe Json.parse(expectedResult)
         }
+        "should return 422 if MA Tax years exceed 6 years" in {
+
+          server.stubFor(
+            post(urlEqualTo("/auth/authorise"))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody("{}")
+              )
+          )
+
+          val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+            nationalInsuranceNumber,
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2015),
+              EndTaxYear(2025)
+            ),
+            LiabilitiesRequestParams(List(Abroad), None, None, None)
+          )
+
+          val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type"  -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            )
+
+          val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+          status(result) shouldBe 422
+          contentAsJson(result) shouldBe Json.toJson(
+            ErrorResponse(UnprocessableEntity, ErrorReason("Tax year range greater than six years"))
+          )
+        }
+
       }
 
       "BSP" - {
@@ -2942,7 +3060,10 @@ class BenefitEligibilityDataControllerItSpec
 
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
-          ErrorResponse(BadRequest, ErrorReason("incompatible json, request body does not match schema - [\"{}\" is not an object]"))
+          ErrorResponse(
+            BadRequest,
+            ErrorReason("incompatible json, request body does not match schema - [\"{}\" is not an object]")
+          )
         )
       }
 
