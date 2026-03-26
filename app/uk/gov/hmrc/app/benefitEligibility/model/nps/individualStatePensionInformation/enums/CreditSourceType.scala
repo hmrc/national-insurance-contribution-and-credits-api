@@ -117,13 +117,13 @@ object CreditSourceType extends Enum[CreditSourceType] with PlayJsonEnum[CreditS
 
   case object StatutoryAdoptionPayCredit extends CreditSourceType("STATUTORY ADOPTION PAY CREDIT")
 
-  case object DisabledTaxCreditEmployed extends CreditSourceType("DISABLED TAX CREDIT (EMPLOYED)")
+  case object DisabledTaxCreditEmployed extends CreditSourceType("Disabled Tax Credit (Employed)")
 
-  case object DisabledTaxCreditSelfEmployed extends CreditSourceType("DISABLED TAX CREDIT (SELF-EMPLOYED)")
+  case object DisabledTaxCreditSelfEmployed extends CreditSourceType("Disabled Tax Credit (Self-Employed)")
 
-  case object WorkingTaxCreditEmployed extends CreditSourceType("WORKING TAX CREDIT (EMPLOYED)")
+  case object WorkingTaxCreditEmployed extends CreditSourceType("Working Tax Credit (Employed)")
 
-  case object WorkingTaxCreditSelfEmployed extends CreditSourceType("WORKING TAX CREDIT (SELF-EMPLOYED)")
+  case object WorkingTaxCreditSelfEmployed extends CreditSourceType("Working Tax Credit (Self-Employed)")
 
   case object EmploymentAndSupport extends CreditSourceType("EMPLOYMENT AND SUPPORT")
 
@@ -135,7 +135,7 @@ object CreditSourceType extends Enum[CreditSourceType] with PlayJsonEnum[CreditS
 
   case object FosterCarer extends CreditSourceType("FOSTER CARER")
 
-  case object ModSpouseCivilPartnersCredits extends CreditSourceType("MOD SPOUSE/CIVIL PARTNER'S CREDITS")
+  case object ModSpouseCivilPartnersCredits extends CreditSourceType("MoD Spouse/Civil Partner's Credits")
 
   case object AdditionalStatutoryPaternityPay extends CreditSourceType("ADDITTIONAL STATUTORY PATERNITY PAY")
 
@@ -145,7 +145,7 @@ object CreditSourceType extends Enum[CreditSourceType] with PlayJsonEnum[CreditS
 
   case object SharedParentalPay extends CreditSourceType("SHARED PARENTAL PAY")
 
-  case object Post75ServiceSpousesCredit extends CreditSourceType("POST 75 SERVICE SPOUSES CREDIT")
+  case object Post75ServiceSpousesCredit extends CreditSourceType("Post 75 Service Spouses Credit")
 
-  case object StatutoryParentalBereavementPay extends CreditSourceType("STATUTORY PARENTAL BEREAVEMENT PAY")
+  case object StatutoryParentalBereavementPay extends CreditSourceType("Statutory Parental Bereavement Pay")
 }

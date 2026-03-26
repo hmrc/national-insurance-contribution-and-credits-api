@@ -4,7 +4,7 @@ info:
   description: |-
     # Usage Terms
     This interface is business-critical for HMRC and is expected to be consumed by Digital users and other HMRC systems - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 0.0.3
+  version: 0.0.5
   x-integration-catalogue:
     reviewed-date: 2026-01-26T08:59:30Z
     short-description: Individual's State Pension Information
@@ -30,7 +30,7 @@ security:
   - oAuth2:
       - read:ltb-qualifying-years-and-contributions
 paths:
-  /long-term-benefits/{identifier}/contributions:
+  /long-term-benefits/{nino}/contributions:
     get:
       summary: "Retrieve Individual's State Pension Information, Number of Qualifying\
         \ Years, and Contributions by Tax Year"
@@ -49,6 +49,8 @@ paths:
          | 0.0.1 Draft | 12/12/2024 | NPS Development Team | Initial Draft |
          | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples     |
          | 0.0.3 | 26/01/2026 | NPS Development Team  | Added headers      |
+         | 0.0.4 | 26/01/2026 | NPS Development Team  | Removed class two payable fields x 4 |
+         | 0.0.5 | 26/01/2026 | NPS Development Team  | Changed Identifier to NINO |
       operationId: getNIRecordForIPF
       parameters:
         - $ref: '#/components/parameters/correlationId'
@@ -57,7 +59,7 @@ paths:
         - $ref: '#/components/parameters/govUkUserId'
         - $ref: '#/components/parameters/govUkUserName'
         - $ref: '#/components/parameters/govUkJobRole'
-        - $ref: '#/components/parameters/Identifier'
+        - $ref: '#/components/parameters/FullNationalInsuranceNumber'
       responses:
         "200":
           description: Successful Response
@@ -69,10 +71,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetNIRecordResponse'
               examples:
-                exampleResponse:
+                maximallyPopulatedResponse:
                   summary: Example Response
                   value:
-                    identifier: AA000001A
+                    nationalInsuranceNumber: AA000001A
                     numberOfQualifyingYears: 50
                     nonQualifyingYears: 0
                     yearsToFinalRelevantYear: 0
@@ -420,6 +422,15 @@ paths:
                         totalPrimaryContributions: 1947.32
                         underInvestigationFlag: false
                         totalPrimaryPaidEarnings: 36888.0
+                minimallyPopulatedResponse:
+                  summary: With only required properties
+                  value:
+                    nationalInsuranceNumber: AA000001A
+                    numberOfQualifyingYears: 50
+                    nonQualifyingYears: 0
+                    yearsToFinalRelevantYear: 0
+                    nonQualifyingYearsPayable: 0
+                    pre1975CCCount: 0
         "400":
           description: Bad Request
           headers:
@@ -516,10 +527,12 @@ components:
       minLength: 4
       type: string
       example: Social
-    identifier:
-      description: The identifier of which could be either a Temporary Reference Number
-        (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
-      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+    nationalInsuranceNumberAndSuffix:
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
+      maxLength: 9
+      minLength: 8
+      pattern: "^((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)$"
       type: string
       example: AA000001A
     EnumContributionCreditType:
@@ -604,22 +617,22 @@ components:
         - WFTC (NI)
         - STATUTORY MATERNITY PAY CREDIT
         - STATUTORY ADOPTION PAY CREDIT
-        - DISABLED TAX CREDIT (EMPLOYED)
-        - DISABLED TAX CREDIT (SELF-EMPLOYED)
-        - WORKING TAX CREDIT (EMPLOYED)
-        - WORKING TAX CREDIT (SELF-EMPLOYED)
+        - Disabled Tax Credit (Employed)
+        - Disabled Tax Credit (Self-Employed)
+        - Working Tax Credit (Employed)
+        - Working Tax Credit (Self-Employed)
         - EMPLOYMENT AND SUPPORT
         - HRP CONVERSION
         - CHILD BENEFIT
         - CARER'S CREDIT
         - FOSTER CARER
-        - MOD SPOUSE/CIVIL PARTNER'S CREDITS
+        - MoD Spouse/Civil Partner's Credits
         - ADDITTIONAL STATUTORY PATERNITY PAY
         - SPECIFIED ADULT CARER
         - UNIVERSAL CREDIT
         - SHARED PARENTAL PAY
-        - POST 75 SERVICE SPOUSES CREDIT
-        - STATUTORY PARENTAL BEREAVEMENT PAY
+        - Post 75 Service Spouses Credit
+        - Statutory Parental Bereavement Pay
       type: string
     errorResponse_400:
       title: Error Response
@@ -670,16 +683,16 @@ components:
     GetNIRecordResponse:
       description: Success response payload for this API.
       required:
-        - identifier
+        - nationalInsuranceNumber
+        - numberOfQualifyingYears
+        - nonQualifyingYears
+        - yearsToFinalRelevantYear
+        - nonQualifyingYearsPayable
+        - pre1975CCCount
       type: object
       properties:
-        identifier:
-          description: The identifier of which could be either a Temporary Reference
-            Number (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g.
-            AA000001A.
-          pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
-          type: string
-          example: AA000001A
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumberAndSuffix'
         numberOfQualifyingYears:
           description: Denotes the number of qualifying years an individual has for
             receiving their basic pension.
@@ -752,7 +765,7 @@ components:
             \ taxpayer may be required to pay tax on, for a given tax period."
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -9999999999999.99
+          minimum: 1
           type: number
           example: 10.56
         classThreePayable:
@@ -760,7 +773,7 @@ components:
             to make the year qualifying for a given tax year.
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -9999999999999.99
+          minimum: 1
           type: number
           example: 10.56
         classThreePayableBy:
@@ -776,46 +789,18 @@ components:
           pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
           type: string
           example: 2022-06-27
-        classTwoPayable:
-          description: The amount of voluntary class two payable for the tax year.
-          multipleOf: 0.01
-          maximum: 99999999999999.98
-          minimum: -9999999999999.99
-          type: number
-          example: 10.56
-        classTwoPayableBy:
-          format: date
-          description: The deadline for payment of Class 2 Contributions for a given
-            tax year.
-          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
-          type: string
-          example: 2022-06-27
-        classTwoPayableByPenalty:
-          format: date
-          description: "The deadline for payment of Class 2 Contributions for a given\
-            \ tax year, with a penalty."
-          pattern: "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
-          type: string
-          example: 2022-06-27
-        classTwoOutstandingWeeks:
-          description: The number of Class 2 credits that have not been paid with
-            a liability present.
-          maximum: 99
-          minimum: 0
-          type: integer
-          example: 3
         totalPrimaryContributions:
           description: The total amount of class 1 earnings paid.
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -9999999999999.99
+          minimum: 1
           type: number
           example: 10.56
         niEarnings:
           description: The total amount of NI earnings for non-qualifying years.
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -9999999999999.99
+          minimum: 1
           type: number
           example: 10.56
         coClassOnePaid:
@@ -823,7 +808,7 @@ components:
             towards qualifying status.
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -9999999999999.99
+          minimum: 1
           type: number
           example: 10.56
         coPrimaryPaidEarnings:
@@ -831,21 +816,21 @@ components:
             status.
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -9999999999999.99
+          minimum: 1
           type: number
           example: 10.56
         niEarningsSelfEmployed:
           description: Total number of self-employed credits that count towards qualifying
             status.
           maximum: 99
-          minimum: 0
+          minimum: 1
           type: integer
           example: 3
         niEarningsVoluntary:
           description: Total number of voluntary credits that count towards qualifying
             status.
           maximum: 99
-          minimum: 0
+          minimum: 1
           type: integer
           example: 3
         underInvestigationFlag:
@@ -857,7 +842,7 @@ components:
             towards qualifying status.
           multipleOf: 0.01
           maximum: 99999999999999.98
-          minimum: -99999999999999.98
+          minimum: 1
           type: number
           example: 10.56
         otherCredits:
@@ -969,14 +954,14 @@ components:
       description: A unique job role for the user.
       schema:
         $ref: '#/components/schemas/govUkJobRole'
-    Identifier:
-      name: identifier
+    FullNationalInsuranceNumber:
+      name: nino
       in: path
-      description: The identifier of which could be either a Temporary Reference Number
-        (TRN) or a National Insurance Number (NINO).
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
       required: true
       schema:
-        $ref: '#/components/schemas/identifier'
+        $ref: '#/components/schemas/nationalInsuranceNumberAndSuffix'
   headers:
     correlationId:
       required: true
