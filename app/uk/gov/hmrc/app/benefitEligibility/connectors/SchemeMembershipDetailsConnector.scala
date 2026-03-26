@@ -63,18 +63,17 @@ class SchemeMembershipDetailsConnector @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] = {
 
     val path =
-      s"${appConfig.baseUrl(apiName)}/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
-    fetchData(benefitType, path, List())
+      s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+    fetchData(benefitType, path)
   }
 
   def fetchData(
       benefitType: BenefitType,
-      path: String,
-      acc: List[SchemeMembershipDetailsSuccessResponse]
+      path: String
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] =
 
     npsClient
-      .get(path)
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

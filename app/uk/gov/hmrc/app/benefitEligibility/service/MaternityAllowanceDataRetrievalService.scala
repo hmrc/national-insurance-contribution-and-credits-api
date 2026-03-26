@@ -28,6 +28,7 @@ import uk.gov.hmrc.app.benefitEligibility.connectors.{
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
+  CorrelationId,
   DataRetrievalServiceError,
   PaginationType
 }
@@ -54,7 +55,10 @@ class MaternityAllowanceDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: MAEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] =
+  )(
+      implicit hc: HeaderCarrier,
+      correlationId: CorrelationId
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] =
     (
       class2MAReceiptsConnector.fetchClass2MAReceipts(
         eligibilityCheckDataRequest.benefitType,
@@ -99,11 +103,12 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           val liabilityPages = liabilityResult.flatMap {
             case NpsApiResult.FailureResult(apiName, result) => None
             case NpsApiResult.SuccessResult(apiName, result) =>
-              Some(PaginationSource(apiName, result.callback.flatMap(_.callbackURL.map(_.value))))
+              result.callback.flatMap(_.callbackURL.map(_.value)).map(url => PaginationSource(apiName, url))
           }
           paginationService
             .addTask(
               MaPageTask(
+                correlationId,
                 PageTaskId(uuidGenerator.generate),
                 liabilityPages,
                 eligibilityCheckDataRequest.nationalInsuranceNumber,

@@ -73,6 +73,8 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
     override def instantNow(): Instant = testInstant
   }
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   val underTest = new BereavementSupportPaymentDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
     mockMarriageDetailsConnector,
@@ -167,8 +169,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
   )
 
   val paging = BspPageTask(
+    correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
-    Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
+    Some(PaginationSource(ApiName.MarriageDetails, "")),
     None,
     identifier,
     testInstant

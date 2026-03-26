@@ -21,7 +21,7 @@ import cats.instances.future.*
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.BSPSearchlightEligibilityCheckDataRequest
@@ -35,7 +35,10 @@ class BspSearchlightDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: BSPSearchlightEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBspSearchLight] =
+  )(
+      implicit hc: HeaderCarrier,
+      correlationId: CorrelationId
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBspSearchLight] =
 
     niContributionsAndCreditsConnector
       .fetchContributionsAndCredits(

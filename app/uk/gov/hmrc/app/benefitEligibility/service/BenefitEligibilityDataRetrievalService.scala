@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.syntax.all.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.{
   BSPEligibilityCheckDataRequest,
@@ -44,10 +44,12 @@ class BenefitEligibilityDataRetrievalService @Inject() (
 )(implicit ec: ExecutionContext) {
 
   def getEligibilityData(
-      request: EligibilityCheckDataRequest
+      request: EligibilityCheckDataRequest,
+      correlationId: CorrelationId
   )(
       implicit hc: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult] =
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult] = {
+    implicit val cid: CorrelationId = correlationId
     request match {
       case request: MAEligibilityCheckDataRequest =>
         maternityAllowanceDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
@@ -62,5 +64,6 @@ class BenefitEligibilityDataRetrievalService @Inject() (
       case request: BSPSearchlightEligibilityCheckDataRequest =>
         bspSearchlightDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
     }
+  }
 
 }

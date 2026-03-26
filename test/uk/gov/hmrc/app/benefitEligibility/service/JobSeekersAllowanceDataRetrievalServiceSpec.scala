@@ -42,6 +42,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
   BenefitType,
+  CorrelationId,
   DateOfBirth,
   EndTaxYear,
   Identifier,
@@ -65,6 +66,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataR
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
+import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
@@ -79,6 +81,8 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     mock[NiContributionsAndCreditsConnector]
 
   val underTest = new JobSeekersAllowanceDataRetrievalService(mockNiContributionsAndCreditsConnector)
+
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
   private val niContributionsAndCreditsRequest = NiContributionsAndCreditsRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),

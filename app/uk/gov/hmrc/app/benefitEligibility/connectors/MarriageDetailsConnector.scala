@@ -59,7 +59,7 @@ class MarriageDetailsConnector @Inject() (
       identifier: Identifier
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
-    val path = s"${appConfig.baseUrl(apiName)}/individual/${identifier.value}/marriage-cp"
+    val path = s"/individual/${identifier.value}/marriage-cp"
 
     fetchMarriageDetailsData(path)
   }
@@ -68,7 +68,7 @@ class MarriageDetailsConnector @Inject() (
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] =
     npsClient
-      .get(path)
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName")
 

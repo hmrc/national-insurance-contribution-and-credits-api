@@ -93,6 +93,8 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
     override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
   }
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   implicit val defaultPatience: PatienceConfig = PatienceConfig(

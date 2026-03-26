@@ -141,11 +141,10 @@ object EnumLiabtp extends Enum[EnumLiabtp] with PlayJsonEnum[EnumLiabtp] {
   case object VoluntaryClass3AbroadbyEmployersSchedule
       extends EnumLiabtp("VOLUNTARY CLASS 3 ABROAD BY EMPLOYERS SCHEDULE")
 
-  case object VolunteerDevelopmentWorker            extends EnumLiabtp("VOLUNTEER DEVELOPMENT WORKER")
-  case object WftcGb                                extends EnumLiabtp("WFTC (GB)")
-  case object WftcNi                                extends EnumLiabtp("WFTC (NI)")
-  case object WorkingTaxCreditEmployed              extends EnumLiabtp("Working Tax Credit (Employed)")
-  case object WorkingTaxCreditSelfEmployed          extends EnumLiabtp("Working Tax Credit (Self-Employed)")
-  case object ReplacementCreditsForParentsAndCarers extends EnumLiabtp("Replacement Credits for Parents and Carers")
+  case object VolunteerDevelopmentWorker   extends EnumLiabtp("VOLUNTEER DEVELOPMENT WORKER")
+  case object WftcGb                       extends EnumLiabtp("WFTC (GB)")
+  case object WftcNi                       extends EnumLiabtp("WFTC (NI)")
+  case object WorkingTaxCreditEmployed     extends EnumLiabtp("Working Tax Credit (Employed)")
+  case object WorkingTaxCreditSelfEmployed extends EnumLiabtp("Working Tax Credit (Self-Employed)")
 
 }
