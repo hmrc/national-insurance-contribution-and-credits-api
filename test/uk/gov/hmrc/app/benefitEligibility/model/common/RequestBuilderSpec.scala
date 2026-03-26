@@ -25,7 +25,7 @@ class RequestBuilderSpec extends AnyFreeSpec {
 
   val optionBoolean: Option[Boolean]                 = Some(true)
   val optionInt: Option[Int]                         = Some(1)
-  val optionEnum: Option[MaternityAllowanceSortType] = Some(MaternityAllowanceSortType.NinoAscending)
+  val optionEnum: Option[MaternityAllowanceSortType] = Some(MaternityAllowanceSortType.DateOfFinalPaymentAscending)
   val optionEmpty: Option[String]                    = None
 
   "RequestBuilder" - {
@@ -38,7 +38,7 @@ class RequestBuilderSpec extends AnyFreeSpec {
           RequestOption("optionEnum", optionEnum.map(s => s.toString))
         )
 
-        val expectedPath: String = "host/api?optionBoolean=true&optionInt=1&optionEnum=NinoAscending"
+        val expectedPath: String = "host/api?optionBoolean=true&optionInt=1&optionEnum=DateOfFinalPaymentAscending"
 
         RequestBuilder.buildPath(requestPath, optionsList) shouldBe expectedPath
 

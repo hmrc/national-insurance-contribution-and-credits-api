@@ -26,8 +26,6 @@ object MaternityAllowanceSortType
     extends Enum[MaternityAllowanceSortType]
     with PlayJsonEnum[MaternityAllowanceSortType] {
   val values: immutable.IndexedSeq[MaternityAllowanceSortType] = findValues
-  case object NinoAscending                extends MaternityAllowanceSortType("NINO ASCENDING")
-  case object NinoDescending               extends MaternityAllowanceSortType("NINO DESCENDING")
-  case object DateOfFinalPaymentDescending extends MaternityAllowanceSortType("DATE OF FINAL PAYMENT DESCENDING")
-  case object DateOfFinalPaymentAscending  extends MaternityAllowanceSortType("DATE OF FINAL PAYMENT ASCENDING")
+  case object DateOfFinalPaymentDescending extends MaternityAllowanceSortType("DATE-OF-FINAL-PAYMENT-DESCENDING")
+  case object DateOfFinalPaymentAscending  extends MaternityAllowanceSortType("DATE-OF-FINAL-PAYMENT-ASCENDING")
 }

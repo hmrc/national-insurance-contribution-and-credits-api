@@ -27,60 +27,51 @@ import java.time.LocalDate
 class FilteredClass2MaReceiptsSpec extends AnyFreeSpec with Matchers {
 
   val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    Identifier("AA000001A"),
-    List(
-      Class2MAReceiptDetails(
-        initials = Some(Initials("JP")),
-        surname = Some(Surname("van Cholmondley-warner")),
-        receivablePeriodStartDate =
-          Some(Class2MAReceiptsSuccess.ReceivablePeriodStartDate(LocalDate.parse("2025-12-10"))),
-        receivablePeriodEndDate = Some(Class2MAReceiptsSuccess.ReceivablePeriodEndDate(LocalDate.parse("2025-12-10"))),
-        receivablePayment = Some(ReceivablePayment(10.56)),
-        receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
-        liabilityStartDate = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-        liabilityEndDate = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-        billAmount = Some(BillAmount(9999.98)),
-        billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
-        isClosedRecord = Some(IsClosedRecord(true)),
-        weeksPaid = Some(WeeksPaid(2))
-      ),
-      Class2MAReceiptDetails(
-        initials = Some(Initials("JP")),
-        surname = Some(Surname("van Cholmondley-warner")),
-        receivablePeriodStartDate =
-          Some(Class2MAReceiptsSuccess.ReceivablePeriodStartDate(LocalDate.parse("2025-12-10"))),
-        receivablePeriodEndDate = Some(Class2MAReceiptsSuccess.ReceivablePeriodEndDate(LocalDate.parse("2025-12-10"))),
-        receivablePayment = Some(ReceivablePayment(10.56)),
-        receiptDate = Some(ReceiptDate(LocalDate.parse("2026-11-10"))),
-        liabilityStartDate = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-        liabilityEndDate = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-        billAmount = Some(BillAmount(9999.98)),
-        billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
-        isClosedRecord = Some(IsClosedRecord(true)),
-        weeksPaid = Some(WeeksPaid(2))
-      ),
-      Class2MAReceiptDetails(
-        initials = Some(Initials("JP")),
-        surname = Some(Surname("van Cholmondley-warner")),
-        receivablePeriodStartDate =
-          Some(Class2MAReceiptsSuccess.ReceivablePeriodStartDate(LocalDate.parse("2025-12-10"))),
-        receivablePeriodEndDate = Some(Class2MAReceiptsSuccess.ReceivablePeriodEndDate(LocalDate.parse("2025-12-10"))),
-        receivablePayment = Some(ReceivablePayment(10.56)),
-        receiptDate = Some(ReceiptDate(LocalDate.parse("2025-08-23"))),
-        liabilityStartDate = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-        liabilityEndDate = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-        billAmount = Some(BillAmount(9999.98)),
-        billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
-        isClosedRecord = Some(IsClosedRecord(true)),
-        weeksPaid = Some(WeeksPaid(2))
+    Some(Identifier("AA000001A")),
+    Some(
+      List(
+        Class2MAReceiptDetails(
+          initials = Some(Initials("JP")),
+          surname = Some(Surname("van Cholmondley-warner")),
+          receivablePayment = Some(ReceivablePayment(10.56)),
+          receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
+          liabilityStart = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
+          liabilityEnd = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
+          billAmount = Some(BillAmount(9999.98)),
+          billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
+          isClosedRecord = Some(IsClosedRecord(true)),
+          weeksPaid = Some(WeeksPaid(2))
+        ),
+        Class2MAReceiptDetails(
+          initials = Some(Initials("JP")),
+          surname = Some(Surname("van Cholmondley-warner")),
+          receivablePayment = Some(ReceivablePayment(10.56)),
+          receiptDate = Some(ReceiptDate(LocalDate.parse("2026-11-10"))),
+          liabilityStart = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
+          liabilityEnd = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
+          billAmount = Some(BillAmount(9999.98)),
+          billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
+          isClosedRecord = Some(IsClosedRecord(true)),
+          weeksPaid = Some(WeeksPaid(2))
+        ),
+        Class2MAReceiptDetails(
+          initials = Some(Initials("JP")),
+          surname = Some(Surname("van Cholmondley-warner")),
+          receivablePayment = Some(ReceivablePayment(10.56)),
+          receiptDate = Some(ReceiptDate(LocalDate.parse("2025-08-23"))),
+          liabilityStart = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
+          liabilityEnd = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
+          billAmount = Some(BillAmount(9999.98)),
+          billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
+          isClosedRecord = Some(IsClosedRecord(true)),
+          weeksPaid = Some(WeeksPaid(2))
+        )
       )
-    )
+    ),
+    callBack = None
   )
 
-  val minimalClass2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    Identifier("AA000001A"),
-    Nil
-  )
+  val minimalClass2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(None, None, None)
 
   "FilteredClass2MaReceipts" - {
     ".from" - {

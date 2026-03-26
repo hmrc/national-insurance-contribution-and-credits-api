@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts
 
 import play.api.libs.json.*
 import Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.model.common.{Identifier, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, Identifier, ReceiptDate}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 import java.time.LocalDate
@@ -50,24 +50,6 @@ object Class2MAReceiptsSuccess {
 
   object BillAmount {
     implicit val billAmountFormats: Format[BillAmount] = Json.valueFormat[BillAmount]
-  }
-
-  case class ReceivablePeriodStartDate(value: LocalDate) extends AnyVal
-
-  object ReceivablePeriodStartDate {
-
-    implicit val receivablePeriodStartDateReads: Format[ReceivablePeriodStartDate] =
-      Json.valueFormat[ReceivablePeriodStartDate]
-
-  }
-
-  case class ReceivablePeriodEndDate(value: LocalDate) extends AnyVal
-
-  object ReceivablePeriodEndDate {
-
-    implicit val receivablePeriodEndDateReads: Format[ReceivablePeriodEndDate] =
-      Json.valueFormat[ReceivablePeriodEndDate]
-
   }
 
   case class LiabilityStartDate(value: LocalDate) extends AnyVal
@@ -103,12 +85,10 @@ object Class2MAReceiptsSuccess {
   case class Class2MAReceiptDetails(
       initials: Option[Initials],
       surname: Option[Surname],
-      receivablePeriodStartDate: Option[ReceivablePeriodStartDate],
-      receivablePeriodEndDate: Option[ReceivablePeriodEndDate],
       receivablePayment: Option[ReceivablePayment],
       receiptDate: Option[ReceiptDate],
-      liabilityStartDate: Option[LiabilityStartDate],
-      liabilityEndDate: Option[LiabilityEndDate],
+      liabilityStart: Option[LiabilityStartDate],
+      liabilityEnd: Option[LiabilityEndDate],
       billAmount: Option[BillAmount],
       billScheduleNumber: Option[BillScheduleNumber],
       isClosedRecord: Option[IsClosedRecord],
@@ -123,8 +103,9 @@ object Class2MAReceiptsSuccess {
   }
 
   case class Class2MAReceiptsSuccessResponse(
-      identifier: Identifier,
-      class2MAReceiptDetails: List[Class2MAReceiptDetails]
+      nationalInsuranceNumber: Option[Identifier],
+      class2MAReceiptDetails: Option[List[Class2MAReceiptDetails]],
+      callBack: Option[Callback]
   ) extends Class2MAReceiptsResponse
       with NpsSuccessfulApiResponse
 
