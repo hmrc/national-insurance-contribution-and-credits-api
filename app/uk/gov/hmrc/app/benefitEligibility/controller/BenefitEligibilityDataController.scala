@@ -36,12 +36,21 @@ class BenefitEligibilityDataController @Inject() (
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
-  def fetchBenefitEligibilityData: Action[AnyContent] =
+  def fetchBenefitEligibilityData(): Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
-        BenefitEligibilityRequestHandler.handleRequest(
+        BenefitEligibilityRequestHandler.handleStandardRequest(
           request,
-          benefitEligibilityDataRetrievalService.getEligibilityData,
+          benefitEligibilityDataRetrievalService.getEligibilityData
+        )
+      }
+    } else identity.async(_ => Future.successful(NotFound))
+
+  def getPaginateData(): Action[AnyContent] =
+    if (appConfig.benefitEligibilityInfoEndpointEnabled) {
+      identity.async { implicit request =>
+        BenefitEligibilityRequestHandler.handlePaginationRequest(
+          request,
           paginationService.paginate
         )
       }

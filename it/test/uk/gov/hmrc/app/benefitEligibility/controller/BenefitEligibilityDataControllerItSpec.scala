@@ -159,6 +159,7 @@ class BenefitEligibilityDataControllerItSpec
           PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
           PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
         ),
+        nationalInsuranceNumber,
         currentTimeSource.instantNow()
       ),
       BspPageTask(
@@ -172,6 +173,7 @@ class BenefitEligibilityDataControllerItSpec
             DateOfBirth(LocalDate.parse("2025-10-10"))
           )
         ),
+        nationalInsuranceNumber,
         currentTimeSource.instantNow()
       ),
       GyspPageTask(
@@ -191,6 +193,7 @@ class BenefitEligibilityDataControllerItSpec
             DateOfBirth(LocalDate.parse("2025-10-10"))
           )
         ),
+        nationalInsuranceNumber,
         currentTimeSource.instantNow()
       )
     ).foreach(pageTask => insert(pageTask).futureValue)
@@ -3066,28 +3069,18 @@ class BenefitEligibilityDataControllerItSpec
                 .withBody(liabilitySummaryDetailsSuccessResponseBody)
             )
         )
-        val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          ),
-          LiabilitiesRequestParams(List(Abroad), None, None, None)
-        )
 
         val request: FakeRequest[AnyContent] = FakeRequest(
-          "POST",
-          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
         )
-          .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+        val result: Future[Result] = underTest.getPaginateData()(request)
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
@@ -3149,28 +3142,18 @@ class BenefitEligibilityDataControllerItSpec
                 .withBody(npsStandardErrorResponse400Body)
             )
         )
-        val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          ),
-          LiabilitiesRequestParams(List(Abroad), None, None, None)
-        )
 
         val request: FakeRequest[AnyContent] = FakeRequest(
-          "POST",
-          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
         )
-          .withJsonBody(Json.toJson(maEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+        val result: Future[Result] = underTest.getPaginateData()(request)
 
         val expectedResult = BenefitEligibilityInfoErrorResponse(
           OverallResultStatus.Failure,
@@ -3256,27 +3239,17 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          )
-        )
-
         val request: FakeRequest[AnyContent] = FakeRequest(
-          "POST",
-          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
         )
-          .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+        val result: Future[Result] = underTest.getPaginateData()(request)
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber = nationalInsuranceNumber,
@@ -3347,27 +3320,17 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        val bspEligibilityCheckDataRequest = BSPEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          )
-        )
-
         val request: FakeRequest[AnyContent] = FakeRequest(
-          "POST",
-          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
         )
-          .withJsonBody(Json.toJson(bspEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+        val result: Future[Result] = underTest.getPaginateData()(request)
 
         status(result) shouldBe 502
         contentAsJson(result)
@@ -3515,28 +3478,17 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          ),
-          Some(LongTermBenefitCalculationRequestParams(None, None))
-        )
-
         val request: FakeRequest[AnyContent] = FakeRequest(
-          "POST",
-          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
         )
-          .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+        val result: Future[Result] = underTest.getPaginateData()(request)
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseGysp(
           nationalInsuranceNumber = nationalInsuranceNumber,
@@ -3637,28 +3589,17 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        val gypEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2024),
-            EndTaxYear(2025)
-          ),
-          Some(LongTermBenefitCalculationRequestParams(None, None))
-        )
-
         val request: FakeRequest[AnyContent] = FakeRequest(
-          "POST",
-          "/benefit-eligibility-info?nextCursor=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
         )
-          .withJsonBody(Json.toJson(gypEligibilityCheckDataRequest))
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+        val result: Future[Result] = underTest.getPaginateData()(request)
 
         status(result) shouldBe 502
         contentAsJson(result)

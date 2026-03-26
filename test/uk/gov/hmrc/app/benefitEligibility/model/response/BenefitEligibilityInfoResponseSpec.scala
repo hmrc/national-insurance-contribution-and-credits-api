@@ -2097,7 +2097,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val liabilityResult =
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)))
         val paginationResult: PaginationResult =
-          PaginationResult(PaginationType.MA, liabilityResult, None, creditsAndContributionsPagingResult, None, None)
+          PaginationResult(
+            PaginationType.MA,
+            nationalInsuranceNumber,
+            liabilityResult,
+            None,
+            creditsAndContributionsPagingResult,
+            None,
+            None
+          )
 
         val expectedResult = Right(
           BenefitEligibilityInfoSuccessResponseMa(
@@ -2109,7 +2117,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         )
 
-        BenefitEligibilityInfoResponse.from(nationalInsuranceNumber, paginationResult) shouldBe expectedResult
+        BenefitEligibilityInfoResponse.from(paginationResult) shouldBe expectedResult
       }
       "should return a success response if Pagination resul is all Ok (BSP)" in {
 
@@ -2117,7 +2125,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           ContributionCreditPagingResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
         val paginationResult: PaginationResult =
-          PaginationResult(PaginationType.BSP, liabilityResult, None, creditsAndContributionsPagingResult, None, None)
+          PaginationResult(
+            PaginationType.BSP,
+            nationalInsuranceNumber,
+            liabilityResult,
+            None,
+            creditsAndContributionsPagingResult,
+            None,
+            None
+          )
 
         val expectedResult = Right(
           BenefitEligibilityInfoSuccessResponseBsp(
@@ -2128,7 +2144,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         )
 
-        BenefitEligibilityInfoResponse.from(nationalInsuranceNumber, paginationResult) shouldBe expectedResult
+        BenefitEligibilityInfoResponse.from(paginationResult) shouldBe expectedResult
       }
       "should return a success response if Pagination resul is all Ok (GYSP)" in {
 
@@ -2136,7 +2152,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           ContributionCreditPagingResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
         val paginationResult: PaginationResult =
-          PaginationResult(PaginationType.GYSP, liabilityResult, None, creditsAndContributionsPagingResult, None, None)
+          PaginationResult(
+            PaginationType.GYSP,
+            nationalInsuranceNumber,
+            liabilityResult,
+            None,
+            creditsAndContributionsPagingResult,
+            None,
+            None
+          )
 
         val expectedResult = Right(
           value = BenefitEligibilityInfoSuccessResponseGysp(
@@ -2150,7 +2174,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         )
 
-        BenefitEligibilityInfoResponse.from(nationalInsuranceNumber, paginationResult) shouldBe expectedResult
+        BenefitEligibilityInfoResponse.from(paginationResult) shouldBe expectedResult
       }
     }
   }

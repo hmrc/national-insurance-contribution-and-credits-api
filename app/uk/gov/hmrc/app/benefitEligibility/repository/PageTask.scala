@@ -20,7 +20,14 @@ import cats.data.NonEmptyList
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, CursorId, DateOfBirth, PaginationType, TaxWindow}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  ApiName,
+  CursorId,
+  DateOfBirth,
+  Identifier,
+  PaginationType,
+  TaxWindow
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{LiabilityResult, MarriageDetailsResult}
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
@@ -112,6 +119,7 @@ object PageTaskId {
 sealed trait PageTask {
   def pageTaskId: PageTaskId
   def paginationType: PaginationType
+  def nationalInsuranceNumber: Identifier
   def createdAt: Instant
 }
 
@@ -119,6 +127,7 @@ final case class MaPageTask private (
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
+    nationalInsuranceNumber: Identifier,
     createdAt: Instant
 ) extends PageTask
 
@@ -129,12 +138,14 @@ object MaPageTask {
   def apply(
       pageTaskId: PageTaskId,
       liabilitiesPaging: List[PaginationSource],
+      nationalInsuranceNumber: Identifier,
       createdAt: Instant
   ) =
     new MaPageTask(
       pageTaskId,
       PaginationType.MA,
       liabilitiesPaging,
+      nationalInsuranceNumber,
       createdAt
     )
 
@@ -145,6 +156,7 @@ final case class BspPageTask private (
     paginationType: PaginationType,
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
+    nationalInsuranceNumber: Identifier,
     createdAt: Instant
 ) extends PageTask
 
@@ -156,6 +168,7 @@ object BspPageTask {
       pageTaskId: PageTaskId,
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
+      nationalInsuranceNumber: Identifier,
       createdAt: Instant
   ) =
     new BspPageTask(
@@ -163,6 +176,7 @@ object BspPageTask {
       PaginationType.BSP,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
+      nationalInsuranceNumber,
       createdAt
     )
 
@@ -174,6 +188,7 @@ final case class GyspPageTask private (
     benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
+    nationalInsuranceNumber: Identifier,
     createdAt: Instant
 ) extends PageTask
 
@@ -186,6 +201,7 @@ object GyspPageTask {
       benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
+      nationalInsuranceNumber: Identifier,
       createdAt: Instant
   ) =
     new GyspPageTask(
@@ -194,6 +210,7 @@ object GyspPageTask {
       benefitSchemeMembershipDetailsPaging,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
+      nationalInsuranceNumber,
       createdAt
     )
 
@@ -228,6 +245,7 @@ object PageTask {
           MaPageTask(
             pageTaskId = cursor.pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
+            paginationResult.nationalInsuranceNumber,
             now
           )
         case PaginationType.GYSP =>
@@ -238,6 +256,7 @@ object PageTask {
             ),
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
+            paginationResult.nationalInsuranceNumber,
             now
           )
         case PaginationType.BSP =>
@@ -245,6 +264,7 @@ object PageTask {
             pageTaskId = cursor.pageTaskId,
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
+            paginationResult.nationalInsuranceNumber,
             now
           )
       }

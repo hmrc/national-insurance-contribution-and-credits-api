@@ -49,12 +49,14 @@ class PaginationService @Inject() (
   def addTask(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     def createNewPageTask(pageTask: PageTask) = {
       val newPageTask: PageTask = pageTask match {
-        case m: MaPageTask => MaPageTask(PageTaskId(uuidGenerator.generate), m.liabilitiesPaging, m.createdAt)
+        case m: MaPageTask =>
+          MaPageTask(PageTaskId(uuidGenerator.generate), m.liabilitiesPaging, m.nationalInsuranceNumber, m.createdAt)
         case b: BspPageTask =>
           BspPageTask(
             PageTaskId(uuidGenerator.generate),
             b.marriageDetailsPaging,
             b.contributionAndCreditsPaging,
+            b.nationalInsuranceNumber,
             b.createdAt
           )
         case g: GyspPageTask =>
@@ -63,6 +65,7 @@ class PaginationService @Inject() (
             g.benefitSchemeMembershipDetailsPaging,
             g.marriageDetailsPaging,
             g.contributionAndCreditsPaging,
+            g.nationalInsuranceNumber,
             g.createdAt
           )
       }
@@ -81,8 +84,7 @@ class PaginationService @Inject() (
   }
 
   def paginate(
-      id: PageTaskId,
-      nationalInsuranceNumber: Identifier
+      id: PageTaskId
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginate has been called")
 
@@ -90,8 +92,8 @@ class PaginationService @Inject() (
       existingPageTask <- pageTaskRepo.getItem(id.value)
       paginationResult <- existingPageTask match {
         case task: MaPageTask   => processMaPageTask(task)
-        case task: BspPageTask  => processBspPageTask(task, nationalInsuranceNumber)
-        case task: GyspPageTask => processGyspPageTask(task, nationalInsuranceNumber)
+        case task: BspPageTask  => processBspPageTask(task)
+        case task: GyspPageTask => processGyspPageTask(task)
       }
       paginationResultWithCursor = paginationResult.setNextCursor(uuidGenerator.generate)
       _ <- PageTask
@@ -115,6 +117,7 @@ class PaginationService @Inject() (
       .map { result =>
         PaginationResult(
           paginationType = maPageTask.paginationType,
+          maPageTask.nationalInsuranceNumber,
           liabilitiesResult = result,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           marriageDetailsResult = None,
@@ -128,7 +131,7 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processBspPageTask(bspPageTask: BspPageTask, nationalInsuranceNumber: Identifier)(
+  private[service] def processBspPageTask(bspPageTask: BspPageTask)(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for BSP")
@@ -136,13 +139,14 @@ class PaginationService @Inject() (
       marriageDetailsConnectorFetchData(bspPageTask.marriageDetailsPaging),
       creditsAndContributionsFetchData(
         BenefitType.from(bspPageTask.paginationType),
-        nationalInsuranceNumber,
+        bspPageTask.nationalInsuranceNumber,
         bspPageTask.contributionAndCreditsPaging
       )
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult) =>
         PaginationResult(
           paginationType = bspPageTask.paginationType,
+          nationalInsuranceNumber = bspPageTask.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult = ContributionCreditPagingResult(
             contributionCreditResult,
@@ -159,14 +163,13 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processGyspPageTask(gyspPageTask: GyspPageTask, nationalInsuranceNumber: Identifier)(
+  private[service] def processGyspPageTask(gyspPageTask: GyspPageTask)(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for GYSP")
 
     def fetchBenefitSchemeMembershipDetailsData(
-        pageTask: GyspPageTask,
-        nationalInsuranceNumber: Identifier
+        pageTask: GyspPageTask
     )(
         implicit headerCarrier: HeaderCarrier
     ): EitherT[Future, BenefitEligibilityError, Option[BenefitSchemeMembershipDetailsData]] =
@@ -175,7 +178,7 @@ class PaginationService @Inject() (
           schemeMembershipDetailsConnector
             .fetchSchemeMembershipDetails(
               benefitType = BenefitType.from(pageTask.paginationType),
-              nationalInsuranceNumber = nationalInsuranceNumber
+              nationalInsuranceNumber = pageTask.nationalInsuranceNumber
             )
             .flatMap {
               case detailsResult @ NpsApiResult.FailureResult(apiName, result) =>
@@ -188,7 +191,7 @@ class PaginationService @Inject() (
                       .map { contractedOutNumberDetails =>
                         benefitSchemeDetailsConnector.fetchBenefitSchemeDetails(
                           BenefitType.from(pageTask.paginationType),
-                          nationalInsuranceNumber,
+                          pageTask.nationalInsuranceNumber,
                           SchemeContractedOutNumberDetails(contractedOutNumberDetails.value)
                         )
                       }
@@ -208,14 +211,15 @@ class PaginationService @Inject() (
       marriageDetailsConnectorFetchData(gyspPageTask.marriageDetailsPaging),
       creditsAndContributionsFetchData(
         BenefitType.from(gyspPageTask.paginationType),
-        nationalInsuranceNumber,
+        gyspPageTask.nationalInsuranceNumber,
         gyspPageTask.contributionAndCreditsPaging
       ),
-      fetchBenefitSchemeMembershipDetailsData(gyspPageTask, nationalInsuranceNumber)
+      fetchBenefitSchemeMembershipDetailsData(gyspPageTask)
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult, benefitSchemeMembershipDetailsData) =>
         PaginationResult(
           paginationType = gyspPageTask.paginationType,
+          gyspPageTask.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult = ContributionCreditPagingResult(
             contributionCreditResult,

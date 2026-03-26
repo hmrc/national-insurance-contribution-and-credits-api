@@ -641,6 +641,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     Some(PaginationSource(ApiName.SchemeMembershipDetails, Some("some-url"))),
     Some(PaginationSource(ApiName.MarriageDetails, Some(""))),
     None,
+    identifier,
     testInstant
   )
 
