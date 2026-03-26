@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, PaginationType}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, Identifier, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{
   ApiResult,
   ContributionCreditResult,
@@ -39,6 +39,7 @@ final case class ContributionCreditPagingResult(
 
 final case class PaginationResult(
     paginationType: PaginationType,
+    nationalInsuranceNumber: Identifier,
     liabilitiesResult: List[LiabilityResult],
     marriageDetailsResult: Option[MarriageDetailsResult],
     contributionCreditResult: ContributionCreditPagingResult,

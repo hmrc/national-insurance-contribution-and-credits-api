@@ -148,6 +148,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
                   benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
                   marriageDetailsPaging = marriageDetailsPaginate,
                   contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                  eligibilityCheckDataRequest.nationalInsuranceNumber,
                   currentTimeSource.instantNow()
                 )
               )

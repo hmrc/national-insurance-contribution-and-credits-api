@@ -39,9 +39,12 @@ class PaginationResultSpec
     with EitherValues
     with BeforeAndAfterAll {
 
+  val nationalInsuranceNumber = Identifier("AB123456C")
+
   "PaginationResult" - {
     val paginationResultWithNextCursor = PaginationResult(
       paginationType = PaginationType.MA,
+      nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(
           ApiName.Liabilities,
@@ -57,6 +60,7 @@ class PaginationResultSpec
 
     val paginationResultWithoutNextCursor = PaginationResult(
       paginationType = PaginationType.MA,
+      nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(
           ApiName.Liabilities,
@@ -71,6 +75,7 @@ class PaginationResultSpec
 
     val paginationResultNoPaging = PaginationResult(
       paginationType = PaginationType.MA,
+      nationalInsuranceNumber,
       liabilitiesResult = List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
@@ -80,6 +85,7 @@ class PaginationResultSpec
 
     val paginationResultWithFailure = PaginationResult(
       paginationType = PaginationType.MA,
+      nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)),
         FailureResult(

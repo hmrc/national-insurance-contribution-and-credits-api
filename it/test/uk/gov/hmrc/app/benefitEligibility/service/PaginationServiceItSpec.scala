@@ -117,50 +117,55 @@ class PaginationServiceItSpec
 
   override protected def checkTtlIndex = false
 
+  val listOfPages = List(
+    MaPageTask(
+      PageTaskId(uuidOne),
+      List(
+        PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
+        PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+      ),
+      nationalInsuranceNumber,
+      currentTimeSource.instantNow()
+    ),
+    BspPageTask(
+      PageTaskId(uuidTwo),
+      Some(
+        PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+      ),
+      Some(
+        ContributionAndCreditsPaging(
+          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+          DateOfBirth(LocalDate.parse("2025-10-10"))
+        )
+      ),
+      nationalInsuranceNumber,
+      currentTimeSource.instantNow()
+    ),
+    GyspPageTask(
+      PageTaskId(uuidThree),
+      Some(
+        PaginationSource(
+          ApiName.BenefitSchemeDetails,
+          Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+        )
+      ),
+      Some(
+        PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+      ),
+      Some(
+        ContributionAndCreditsPaging(
+          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+          DateOfBirth(LocalDate.parse("2025-10-10"))
+        )
+      ),
+      nationalInsuranceNumber,
+      currentTimeSource.instantNow()
+    )
+  )
+
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    List(
-      MaPageTask(
-        PageTaskId(uuidOne),
-        List(
-          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
-        ),
-        currentTimeSource.instantNow()
-      ),
-      BspPageTask(
-        PageTaskId(uuidTwo),
-        Some(
-          PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
-        ),
-        Some(
-          ContributionAndCreditsPaging(
-            NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-            DateOfBirth(LocalDate.parse("2025-10-10"))
-          )
-        ),
-        currentTimeSource.instantNow()
-      ),
-      GyspPageTask(
-        PageTaskId(uuidThree),
-        Some(
-          PaginationSource(
-            ApiName.BenefitSchemeDetails,
-            Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
-          )
-        ),
-        Some(
-          PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
-        ),
-        Some(
-          ContributionAndCreditsPaging(
-            NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-            DateOfBirth(LocalDate.parse("2025-10-10"))
-          )
-        ),
-        currentTimeSource.instantNow()
-      )
-    ).foreach(pageTask => insert(pageTask).futureValue)
+    listOfPages.foreach(pageTask => insert(pageTask).futureValue)
   }
 
   "PaginationService" - {
@@ -168,7 +173,12 @@ class PaginationServiceItSpec
       "should successfully add a new task" in {
         deleteAll().futureValue
         val pageTask: MaPageTask =
-          MaPageTask(PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")), List(), Instant.now)
+          MaPageTask(
+            PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
+            List(),
+            nationalInsuranceNumber,
+            Instant.now
+          )
 
         service.addTask(pageTask).value.futureValue shouldBe Right(
           UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
@@ -185,11 +195,23 @@ class PaginationServiceItSpec
             PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
             PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
           ),
+          nationalInsuranceNumber,
           currentTimeSource.instantNow()
         )
-
+        val newPageTask = MaPageTask(
+          uuidTwo,
+          List(
+            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
+            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+          ),
+          nationalInsuranceNumber,
+          currentTimeSource.instantNow()
+        )
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+
+        findAll().futureValue should contain theSameElementsAs listOfPages
         service.addTask(pageTask).value.futureValue shouldBe Right(uuidTwo.value)
+        findAll().futureValue should contain theSameElementsAs listOfPages :+ newPageTask
       }
 
     }
@@ -203,7 +225,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne), nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
@@ -251,10 +273,11 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne), nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           Right(
             PaginationResult(
               paginationType = PaginationType.MA,
+              nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
@@ -340,10 +363,11 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PageTaskId(uuidTwo), nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
           Right(
             PaginationResult(
               paginationType = PaginationType.BSP,
+              nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
@@ -599,10 +623,11 @@ class PaginationServiceItSpec
           List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
         )
 
-        service.paginate(PageTaskId(uuidThree), nationalInsuranceNumber).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidThree)).value.futureValue shouldBe
           Right(
             PaginationResult(
               paginationType = PaginationType.GYSP,
+              nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(

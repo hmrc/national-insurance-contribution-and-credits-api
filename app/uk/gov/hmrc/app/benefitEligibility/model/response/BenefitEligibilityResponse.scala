@@ -81,20 +81,23 @@ object BenefitEligibilityInfoResponse {
     }
 
   def from(
-      nationalInsuranceNumber: Identifier,
       paginationResult: PaginationResult
   ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponse] =
     if (paginationResult.allResults.exists(_.isFailure))
       Left(
         BenefitEligibilityInfoErrorResponse
-          .from(BenefitType.from(paginationResult.paginationType), nationalInsuranceNumber, paginationResult.allResults)
+          .from(
+            BenefitType.from(paginationResult.paginationType),
+            paginationResult.nationalInsuranceNumber,
+            paginationResult.allResults
+          )
       )
     else
       paginationResult.paginationType match {
         case PaginationType.MA =>
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
-              nationalInsuranceNumber,
+              paginationResult.nationalInsuranceNumber,
               FilteredClass2MaReceipts(Nil),
               paginationResult.liabilitiesResult.map(toFilteredLiabilitySummaryDetails),
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
@@ -109,7 +112,7 @@ object BenefitEligibilityInfoResponse {
 
           Right(
             BenefitEligibilityInfoSuccessResponseGysp(
-              nationalInsuranceNumber = nationalInsuranceNumber,
+              nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
               marriageDetailsResult = filteredMarriageDetails,
               longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails(Nil),
               schemeMembershipDetailsResult = filteredSchemeMembershipDetails,
@@ -124,7 +127,7 @@ object BenefitEligibilityInfoResponse {
 
           Right(
             BenefitEligibilityInfoSuccessResponseBsp(
-              nationalInsuranceNumber,
+              paginationResult.nationalInsuranceNumber,
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
               filteredMarriageDetails,
               paginationResult.getNextCursor.map(CursorId.from)
