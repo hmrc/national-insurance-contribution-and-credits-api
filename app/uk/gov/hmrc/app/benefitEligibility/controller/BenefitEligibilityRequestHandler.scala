@@ -123,7 +123,12 @@ object BenefitEligibilityRequestHandler {
                         }
                     }
                   case JsError(errors) =>
-                    val errorMessages = errors.flatMap(_._2.map(_.message)).mkString(", ")
+                    val errorMessages = errors
+                      .map { error =>
+                        if (error._1.toString.isEmpty) error._2.flatMap(_.messages).mkString(",")
+                        else s"${error._1.toString} ${error._2.flatMap(_.messages).mkString(",")}"
+                      }
+                      .mkString("[", ", ", "]")
                     logger.error(s"bad request ${errors.mkString(",")}")
                     EitherT.rightT[Future, BenefitEligibilityError](
                       BadRequest(
