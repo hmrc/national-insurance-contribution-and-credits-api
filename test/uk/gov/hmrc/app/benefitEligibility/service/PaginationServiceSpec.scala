@@ -29,7 +29,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeInhibitionStatus
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.{
   ActiveMarriage,
@@ -406,7 +405,6 @@ class PaginationServiceSpec
           BenefitSchemeDetails(
             currentOptimisticLock = CurrentOptimisticLock(4),
             schemeContractedOutNumberDetails = schemeContractedOutNumberDetails,
-            schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
             magneticTapeNumber = None,
             schemeName = None,
             schemeStartDate = None,
@@ -612,7 +610,6 @@ class PaginationServiceSpec
                     BenefitSchemeDetails(
                       CurrentOptimisticLock(4),
                       SchemeContractedOutNumberDetails("S2345678C"),
-                      SchemeInhibitionStatus.ConvertedStakeholderPension,
                       None,
                       None,
                       None,

@@ -4,7 +4,7 @@ info:
   description: |-
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 0.0.2 Draft
+  version: 0.0.3 Draft
   x-integration-catalogue:
     reviewed-date: 2026-01-13T16:47:25Z
     short-description: Benefit Scheme Details
@@ -30,7 +30,7 @@ security:
   - oAuth2:
       - read:retrieve-benefit-scheme
 paths:
-  /benefit-scheme/{identifier}/benefit-scheme-details/{scon}:
+  /benefit-scheme/benefit-scheme-details/{scon}:
     get:
       tags:
         - Benefit Scheme Provider
@@ -43,8 +43,9 @@ paths:
         | Version | Date | Author | Description |
         |---------|------|--------|-------------|
         | 0.0.1 | 10/12/2025 | NPS Development Team  | Initial Draft  |
-        | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples|
-      operationId: GetBenefitSchemeDetails
+        | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples |
+        | 0.0.3 | 02/03/2026 | NPS Development Team  | Removed Identifier from path |
+      operationId: getFullBenefitSchemeDetails
       parameters:
         - $ref: '#/components/parameters/correlationId'
         - $ref: '#/components/parameters/govUkOriginatorId'
@@ -52,7 +53,6 @@ paths:
         - $ref: '#/components/parameters/govUkUserId'
         - $ref: '#/components/parameters/govUkUserName'
         - $ref: '#/components/parameters/govUkJobRole'
-        - $ref: '#/components/parameters/Identifier'
         - $ref: '#/components/parameters/SchemeContractedOutNumberDetails'
       responses:
         "200":
@@ -63,14 +63,13 @@ paths:
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: '#/components/schemas/GetBenefitSchemeDetailsResponse'
+                $ref: '#/components/schemas/GetFullBenefitSchemeDetailsResponse'
               examples:
                 minimallyPopulatedResponse:
                   summary: Minimal populated response
                   value:
                     benefitSchemeDetails:
                       schemeContractedOutNumberDetails: S1234567A
-                      schemeInhibitionStatus: Stakeholder Pension
                       currentOptimisticLock: 1
                     schemeAddressDetailsList:
                       - schemeAddressSequenceNumber: 1
@@ -80,7 +79,6 @@ paths:
                   value:
                     benefitSchemeDetails:
                       schemeContractedOutNumberDetails: S2123456B
-                      schemeInhibitionStatus: Non-Stakeholder Pension
                       currentOptimisticLock: 2
                       schemeName: EXAMPLE WORKS PENSION
                       schemeStartDate: 2001-04-06
@@ -132,14 +130,12 @@ paths:
                       privatePensionSchemeSanctionDate: 1985-04-06
                       currentOptimisticLock: 4
                       schemeConversionDate: 2024-12-31
-                      schemeInhibitionStatus: Converted Stakeholder Pension
                       reconciliationDate: 2025-03-31
                       schemeContractedOutNumberDetails: S2345678C
                     schemeAddressDetailsList:
                       - schemeAddressType: GENERAL CORRESPONDENCE
                         schemeAddressSequenceNumber: 5
                         schemeAddressStartDate: 2010-01-01
-                        schemeAddressEndDate: 2024-12-31
                         country: SCOTLAND
                         areaDiallingCode: 0131 (99)
                         schemeTelephoneNumber: 0131 000 0000
@@ -1647,23 +1643,11 @@ components:
         - FORMALLY CERTIFIED
         - NO BLOCK ON PROVIDER
       type: string
-    EnumSchshptp:
-      enum:
-        - Converted Stakeholder Pension
-        - Non-Stakeholder Pension
-        - Stakeholder Pension
-      type: string
     EnumSendcess:
       enum:
         - NO RE-ROUTE
         - RE-ROUTE TO CESSATION
       type: string
-    identifier:
-      description: The identifier of which could be either a Temporary Reference Number
-        (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
-      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
-      type: string
-      example: AA000001A
     schemeContractedOutNumberDetails:
       description: Scheme Contracted-Out Numbers of Personal Pension (ASCN) or Occupational
         Pension (SCON) with prefix and suffix.
@@ -1803,7 +1787,7 @@ components:
           maxLength: 10
           minLength: 1
           type: string
-    GetBenefitSchemeDetailsResponse:
+    GetFullBenefitSchemeDetailsResponse:
       description: Success response payload for this API.
       required:
         - schemeAddressDetailsList
@@ -1821,7 +1805,6 @@ components:
       description: Contains details of a benefit scheme.
       required:
         - schemeContractedOutNumberDetails
-        - schemeInhibitionStatus
         - currentOptimisticLock
       type: object
       properties:
@@ -1948,8 +1931,6 @@ components:
           description: Denotes the conversion date for the stakeholder pension scheme.
           type: string
           example: 2022-06-27
-        schemeInhibitionStatus:
-          $ref: '#/components/schemas/EnumSchshptp'
         reconciliationDate:
           format: date
           description: The reconciliation date for the Scheme Contracted-Out Number
@@ -1966,7 +1947,7 @@ components:
           type: string
           example: S2123456B
     RetrieveSchemeAddressDetails:
-      description: Contains scheme address details.
+      description: Contains open scheme address details.
       required:
         - schemeAddressSequenceNumber
         - schemeContractedOutNumberDetails
@@ -1987,12 +1968,6 @@ components:
         schemeAddressStartDate:
           format: date
           description: The start date for the correspondence address for the benefit
-            scheme.
-          type: string
-          example: 2022-06-27
-        schemeAddressEndDate:
-          format: date
-          description: The end date for the correspondence address for the benefit
             scheme.
           type: string
           example: 2022-06-27
@@ -2141,14 +2116,6 @@ components:
       description: A unique job role for the user.
       schema:
         $ref: '#/components/schemas/govUkJobRole'
-    Identifier:
-      name: identifier
-      in: path
-      description: The identifier of which could be either a Temporary Reference Number
-        (TRN) or a National Insurance Number (NINO).
-      required: true
-      schema:
-        $ref: '#/components/schemas/identifier'
     SchemeContractedOutNumberDetails:
       name: scon
       in: path
