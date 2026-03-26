@@ -362,9 +362,9 @@ class BenefitEligibilityDataControllerItSpec
         )
       )
     ),
-    class2ContributionAndCredits = Some(
+    class2Or3ContributionAndCredits = Some(
       List(
-        Class2ContributionAndCredits(
+        Class2or3ContributionAndCredits(
           taxYear = Some(TaxYear(2022)),
           numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
           contributionCreditType = Some(NiContributionCreditType.C1),
@@ -791,7 +791,7 @@ class BenefitEligibilityDataControllerItSpec
             ),
             Some(
               List(
-                Class2ContributionAndCredits(
+                Class2or3ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCreditType = Some(NiContributionCreditType.C1),
@@ -822,7 +822,7 @@ class BenefitEligibilityDataControllerItSpec
               |      "latePaymentPeriod": "L"
               |    }
               |  ],
-              |  "class2ContributionAndCredits": [
+              |  "class2Or3ContributionAndCredits": [
               |    {
               |      "taxYear": 2022,
               |      "numberOfContributionsAndCredits": 53,
@@ -1002,7 +1002,7 @@ class BenefitEligibilityDataControllerItSpec
             ),
             Some(
               List(
-                Class2ContributionAndCredits(
+                Class2or3ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCreditType = Some(NiContributionCreditType.C1),
@@ -1033,7 +1033,7 @@ class BenefitEligibilityDataControllerItSpec
               |      "latePaymentPeriod": "L"
               |    }
               |  ],
-              |  "class2ContributionAndCredits": [
+              |  "class2Or3ContributionAndCredits": [
               |    {
               |      "taxYear": 2022,
               |      "numberOfContributionsAndCredits": 53,
@@ -1218,7 +1218,7 @@ class BenefitEligibilityDataControllerItSpec
             ),
             Some(
               List(
-                Class2ContributionAndCredits(
+                Class2or3ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCreditType = Some(NiContributionCreditType.C1),
@@ -1249,7 +1249,7 @@ class BenefitEligibilityDataControllerItSpec
               |      "latePaymentPeriod": "L"
               |    }
               |  ],
-              |  "class2ContributionAndCredits": [
+              |  "class2Or3ContributionAndCredits": [
               |    {
               |      "taxYear": 2022,
               |      "numberOfContributionsAndCredits": 53,
@@ -2946,7 +2946,7 @@ class BenefitEligibilityDataControllerItSpec
             |      "latePaymentPeriod": "L"
             |    }
             |  ],
-            |  "class2ContributionAndCredits": [
+            |  "class2Or3ContributionAndCredits": [
             |    {
             |      "taxYear": 2022,
             |      "numberOfContributionsAndCredits": 53,

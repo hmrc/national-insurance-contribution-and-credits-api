@@ -128,7 +128,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
             ),
             Some(
               List(
-                Class2ContributionAndCredits(
+                Class2or3ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCreditType = Some(NiContributionCreditType.C1),
@@ -160,7 +160,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
               |      "latePaymentPeriod": "L"
               |    }
               |  ],
-              |  "class2ContributionAndCredits": [
+              |  "class2Or3ContributionAndCredits": [
               |    {
               |      "taxYear": 2022,
               |      "numberOfContributionsAndCredits": 53,

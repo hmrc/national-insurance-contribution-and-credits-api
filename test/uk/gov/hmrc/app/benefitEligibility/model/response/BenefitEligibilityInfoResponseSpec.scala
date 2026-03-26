@@ -327,9 +327,9 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
       )
     ),
-    class2ContributionAndCredits = Some(
+    class2Or3ContributionAndCredits = Some(
       List(
-        Class2ContributionAndCredits(
+        Class2or3ContributionAndCredits(
           taxYear = Some(TaxYear(2022)),
           numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
           contributionCreditType = Some(NiContributionCreditType.C1),
@@ -346,7 +346,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
   val niContributionsAndCreditsSuccessResponseOptionalsExcluded = NiContributionsAndCreditsSuccessResponse(
     totalGraduatedPensionUnits = None,
     class1ContributionAndCredits = None,
-    class2ContributionAndCredits = None
+    class2Or3ContributionAndCredits = None
   )
 
   val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
@@ -820,7 +820,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "latePaymentPeriod":"L"
             |         }
             |      ],
-            |      "class2ContributionAndCredits":[
+            |      "class2Or3ContributionAndCredits":[
             |         {
             |            "taxYear":2022,
             |            "numberOfContributionsAndCredits":53,
@@ -944,7 +944,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "latePaymentPeriod":"L"
             |         }
             |      ],
-            |      "class2ContributionAndCredits":[
+            |      "class2Or3ContributionAndCredits":[
             |         {
             |            "taxYear":2022,
             |            "numberOfContributionsAndCredits":53,
@@ -1141,7 +1141,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "latePaymentPeriod":"L"
             |         }
             |      ],
-            |      "class2ContributionAndCredits":[
+            |      "class2Or3ContributionAndCredits":[
             |         {
             |            "taxYear":2022,
             |            "numberOfContributionsAndCredits":53,
@@ -1272,7 +1272,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "latePaymentPeriod":"L"
             |         }
             |      ],
-            |      "class2ContributionAndCredits":[
+            |      "class2Or3ContributionAndCredits":[
             |         {
             |            "taxYear":2022,
             |            "numberOfContributionsAndCredits":53,
@@ -1386,7 +1386,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "latePaymentPeriod":"L"
             |         }
             |      ],
-            |      "class2ContributionAndCredits":[
+            |      "class2Or3ContributionAndCredits":[
             |         {
             |            "taxYear":2022,
             |            "numberOfContributionsAndCredits":53,
@@ -1453,7 +1453,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "latePaymentPeriod":"L"
             |         }
             |      ],
-            |      "class2ContributionAndCredits":[
+            |      "class2Or3ContributionAndCredits":[
             |         {
             |            "taxYear":2022,
             |            "numberOfContributionsAndCredits":53,

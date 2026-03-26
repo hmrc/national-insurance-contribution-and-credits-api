@@ -338,7 +338,7 @@ components:
                   marriageDetails: [ ]
                 niContributionsAndCreditsResult:
                   class1ContributionAndCredits: [ ]
-                  class2ContributionAndCredits: [ ]
+                  class2Or3ContributionAndCredits: [ ]
 
             BSP_maximal_success:
               summary: BSP - Maximal response
@@ -380,12 +380,12 @@ components:
                       creditSource: "EMPLOYMENT SERVICES"
                       employerName: "CORP"
                       latePaymentPeriod: "ZZ"
-                  class2ContributionAndCredits:
+                  class2Or3ContributionAndCredits:
                     - taxYear: 2020
                       numberOfContributionsAndCredits: 52
                       contributionCreditType: "C2"
                       class2Or3EarningsFactor: 1.5
-                      class2NIContributonAmount: 150.0
+                      class2NIContributionAmount: 150.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "DIRECT DEBIT"
                       latePaymentPeriod: "ZZ"
@@ -393,7 +393,7 @@ components:
                       numberOfContributionsAndCredits: 30
                       contributionCreditType: "C2"
                       class2Or3EarningsFactor: 2.1
-                      class2NIContributonAmount: 120.0
+                      class2NIContributionAmount: 120.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "QUARTERLY BILLING"
                       latePaymentPeriod: "L"
@@ -414,7 +414,7 @@ components:
                   contributionsByTaxYear: [ ]
                 niContributionsAndCreditsResult:
                   class1ContributionAndCredits: [ ]
-                  class2ContributionAndCredits: [ ]
+                  class2Or3ContributionAndCredits: [ ]
 
             GYSP_maximal_success:
               summary: GYSP - Maximal response
@@ -473,7 +473,7 @@ components:
                       creditSource: "NOT KNOWN"
                       employerName: "ipOpMs"
                       latePaymentPeriod: "L"
-                  class2ContributionAndCredits:
+                  class2Or3ContributionAndCredits:
                     - taxYear: 2022
                       numberOfContributionsAndCredits: 53
                       contributionCreditType: "C1"
@@ -491,7 +491,7 @@ components:
                 nationalInsuranceNumber: "QR456789S"
                 niContributionsAndCreditsResult:
                   class1ContributionAndCredits: [ ]
-                  class2ContributionAndCredits: [ ]
+                  class2Or3ContributionAndCredits: [ ]
 
             ESA_maximal_success:
               summary: ESA - Maximal response
@@ -534,12 +534,12 @@ components:
                       creditSource: "EMPLOYMENT AND SUPPORT"
                       employerName: ""
                       latePaymentPeriod: "ZZ"
-                  class2ContributionAndCredits:
+                  class2Or3ContributionAndCredits:
                     - taxYear: 2023
                       numberOfContributionsAndCredits: 20
                       contributionCreditType: "2A"
                       class2Or3EarningsFactor: 1.3
-                      class2NIContributonAmount: 52.0
+                      class2NIContributionAmount: 52.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "EMPLOYMENT AND SUPPORT"
                       latePaymentPeriod: "ZZ"
@@ -547,7 +547,7 @@ components:
                       numberOfContributionsAndCredits: 15
                       contributionCreditType: "2A"
                       class2Or3EarningsFactor: 0.8
-                      class2NIContributonAmount: 30.0
+                      class2NIContributionAmount: 30.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "EMPLOYMENT AND SUPPORT"
                       latePaymentPeriod: "L"
@@ -559,7 +559,7 @@ components:
                 nationalInsuranceNumber: "AB234567C"
                 niContributionsAndCreditsResult:
                   class1ContributionAndCredits: [ ]
-                  class2ContributionAndCredits: [ ]
+                  class2Or3ContributionAndCredits: [ ]
 
             JSA_maximal_success:
               summary: JSA - Maximal response
@@ -602,12 +602,12 @@ components:
                       creditSource: "JSA TAPE INPUT"
                       employerName: ""
                       latePaymentPeriod: "ZZ"
-                  class2ContributionAndCredits:
+                  class2Or3ContributionAndCredits:
                     - taxYear: 2022
                       numberOfContributionsAndCredits: 30
                       contributionCreditType: "2B"
                       class2Or3EarningsFactor: 1.1
-                      class2NIContributonAmount: 44.0
+                      class2NIContributionAmount: 44.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "JSA TAPE INPUT"
                       latePaymentPeriod: "ZZ"
@@ -615,7 +615,7 @@ components:
                       numberOfContributionsAndCredits: 25
                       contributionCreditType: "2B"
                       class2Or3EarningsFactor: 0.9
-                      class2NIContributonAmount: 36.0
+                      class2NIContributionAmount: 36.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "JSA PAPER INPUT"
                       latePaymentPeriod: "L"
@@ -631,7 +631,7 @@ components:
                   - liabilityDetails: [ ]
                 niContributionsAndCreditsResult:
                   class1ContributionAndCredits: [ ]
-                  class2ContributionAndCredits: [ ]
+                  class2Or3ContributionAndCredits: [ ]
 
             MA_maximal_success:
               summary: MA - Maximal response
@@ -659,7 +659,7 @@ components:
                       creditSource: "NOT KNOWN"
                       employerName: "ipOpMs"
                       latePaymentPeriod: "L"
-                  class2ContributionAndCredits:
+                  class2Or3ContributionAndCredits:
                     - taxYear: 2022
                       numberOfContributionsAndCredits: 53
                       contributionCreditType: "C1"
@@ -1022,6 +1022,14 @@ components:
         - VDC
         - VDD
         - 2N
+        - 3PR
+        - 3A
+        - 3B
+        - 3C
+        - 3D
+        - CR1
+        - CR3
+        - 3N
       type: string
     PostNIContCredRequest:
       description: Request payload for this API.
@@ -1557,11 +1565,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Class1ContributionAndCredits'
-        class2ContributionAndCredits:
-          description: Contains an array of Class 2 records.
+        class2Or3ContributionAndCredits:
+          description: Contains an array of Class 2 and Class 3 records.
           type: array
           items:
-            $ref: '#/components/schemas/Class2ContributionAndCredits'
+            $ref: '#/components/schemas/Class2Or3ContributionAndCredits'
 
     Class1ContributionAndCredits:
       description: Contains details of a Class 1 record.
@@ -1593,8 +1601,8 @@ components:
         latePaymentPeriod:
           $ref: '#/components/schemas/EnumLpind'
 
-    Class2ContributionAndCredits:
-      description: Contains details of a Class 2 record.
+    Class2Or3ContributionAndCredits:
+      description: Contains details of a Class 2 and Class 3 record.
       type: object
       properties:
         taxYear:

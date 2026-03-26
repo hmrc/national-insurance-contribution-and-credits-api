@@ -36,9 +36,9 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
   Class1ContributionAndCredits,
-  Class2ContributionAndCredits,
   Class2NIContributionAmount,
   Class2Or3EarningsFactor,
+  Class2or3ContributionAndCredits,
   ContributionCategoryLetter,
   EmployerName,
   NiContributionsAndCreditsSuccessResponse,

@@ -28,9 +28,9 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.E
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
   Class1ContributionAndCredits,
-  Class2ContributionAndCredits,
   Class2NIContributionAmount,
   Class2Or3EarningsFactor,
+  Class2or3ContributionAndCredits,
   ContributionCategoryLetter,
   EmployerName,
   NiContributionsAndCreditsSuccessResponse,
@@ -121,7 +121,7 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
               )
             )
           ),
-          class2ContributionAndCredits = None
+          class2Or3ContributionAndCredits = None
         )
 
         (mockNiContributionsAndCreditsConnector
@@ -152,9 +152,9 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
           Some(TotalGraduatedPensionUnits(53)),
           class1ContributionAndCredits = None,
-          class2ContributionAndCredits = Some(
+          class2Or3ContributionAndCredits = Some(
             List(
-              Class2ContributionAndCredits(
+              Class2or3ContributionAndCredits(
                 taxYear = Some(TaxYear(2022)),
                 numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                 contributionCreditType = Some(NiContributionCreditType.C1),
@@ -196,7 +196,7 @@ class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
           totalGraduatedPensionUnits = None,
           class1ContributionAndCredits = None,
-          class2ContributionAndCredits = None
+          class2Or3ContributionAndCredits = None
         )
 
         (mockNiContributionsAndCreditsConnector

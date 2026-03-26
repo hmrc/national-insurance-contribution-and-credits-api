@@ -29,9 +29,9 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.E
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
   Class1ContributionAndCredits,
-  Class2ContributionAndCredits,
   Class2NIContributionAmount,
   Class2Or3EarningsFactor,
+  Class2or3ContributionAndCredits,
   ContributionCategoryLetter,
   EmployerName,
   NiContributionsAndCreditsSuccessResponse,
@@ -120,9 +120,9 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
               )
             )
           ),
-          class2ContributionAndCredits = Some(
+          class2Or3ContributionAndCredits = Some(
             List(
-              Class2ContributionAndCredits(
+              Class2or3ContributionAndCredits(
                 taxYear = Some(TaxYear(2022)),
                 numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                 contributionCreditType = Some(NiContributionCreditType.C1),
