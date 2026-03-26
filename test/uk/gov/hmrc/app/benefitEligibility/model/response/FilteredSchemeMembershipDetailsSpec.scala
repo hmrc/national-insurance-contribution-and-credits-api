@@ -30,7 +30,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.{
   BenefitSchemeStatus,
   RerouteToSchemeCessation,
   SchemeAddressType,
-  SchemeInhibitionStatus,
   StatementInhibitor
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
@@ -166,7 +165,6 @@ class FilteredSchemeMembershipDetailsSpec extends AnyFreeSpec with Matchers {
       privatePensionSchemeSanctionDate = Some(PrivatePensionSchemeSanctionDate("1985-04-06")),
       currentOptimisticLock = CurrentOptimisticLock(4),
       schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
-      schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
       reconciliationDate = Some(BenefitSchemeDetailsSuccess.ReconciliationDate("2025-03-31")),
       schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
     ),
@@ -175,7 +173,6 @@ class FilteredSchemeMembershipDetailsSpec extends AnyFreeSpec with Matchers {
         schemeAddressType = Some(SchemeAddressType.GeneralCorrespondence),
         schemeAddressSequenceNumber = SchemeAddressSequenceNumber(5),
         schemeAddressStartDate = Some(SchemeAddressStartDate("2010-01-01")),
-        schemeAddressEndDate = Some(SchemeAddressEndDate("2024-12-31")),
         country = Some(Country.Scotland),
         areaDiallingCode = Some(AreaDiallingCode.Code0131), // Note: This would need to be added to the enum
         schemeTelephoneNumber = Some(SchemeTelephoneNumber("0131 000 0000")),
@@ -219,7 +216,6 @@ class FilteredSchemeMembershipDetailsSpec extends AnyFreeSpec with Matchers {
       privatePensionSchemeSanctionDate = None,
       currentOptimisticLock = CurrentOptimisticLock(4),
       schemeConversionDate = None,
-      schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
       reconciliationDate = None,
       schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
     ),
@@ -228,7 +224,6 @@ class FilteredSchemeMembershipDetailsSpec extends AnyFreeSpec with Matchers {
         schemeAddressType = None,
         schemeAddressSequenceNumber = SchemeAddressSequenceNumber(5),
         schemeAddressStartDate = None,
-        schemeAddressEndDate = None,
         country = None,
         areaDiallingCode = None,
         schemeTelephoneNumber = None,

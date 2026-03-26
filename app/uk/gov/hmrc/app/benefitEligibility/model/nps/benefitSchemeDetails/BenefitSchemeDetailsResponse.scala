@@ -192,12 +192,6 @@ object BenefitSchemeDetailsSuccess {
     implicit val schemeAddressStartDateFormat: Format[SchemeAddressStartDate] = Json.valueFormat[SchemeAddressStartDate]
   }
 
-  case class SchemeAddressEndDate(value: String) extends AnyVal
-
-  object SchemeAddressEndDate {
-    implicit val schemeAddressEndDateFormat: Format[SchemeAddressEndDate] = Json.valueFormat[SchemeAddressEndDate]
-  }
-
   case class SchemeTelephoneNumber(value: String) extends AnyVal
 
   object SchemeTelephoneNumber {
@@ -257,7 +251,6 @@ object BenefitSchemeDetailsSuccess {
       schemeContractedOutNumberDetails: SchemeContractedOutNumberDetails,
       schemeAddressType: Option[SchemeAddressType],
       schemeAddressStartDate: Option[SchemeAddressStartDate],
-      schemeAddressEndDate: Option[SchemeAddressEndDate],
       country: Option[Country],
       areaDiallingCode: Option[AreaDiallingCode],
       schemeTelephoneNumber: Option[SchemeTelephoneNumber],
@@ -271,7 +264,6 @@ object BenefitSchemeDetailsSuccess {
   case class BenefitSchemeDetails(
       currentOptimisticLock: CurrentOptimisticLock,
       schemeContractedOutNumberDetails: SchemeContractedOutNumberDetails,
-      schemeInhibitionStatus: SchemeInhibitionStatus,
       magneticTapeNumber: Option[MagneticTapeNumber],
       schemeName: Option[BenefitSchemeName],
       schemeStartDate: Option[SchemeStartDate],
