@@ -66,15 +66,15 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
             )
           )
         ),
-        class2ContributionAndCredits = None
+        class2Or3ContributionAndCredits = None
       )
 
       val niContributionsAndCreditsSuccessResponse2 = NiContributionsAndCreditsSuccessResponse(
         Some(TotalGraduatedPensionUnits(53)),
         class1ContributionAndCredits = None,
-        class2ContributionAndCredits = Some(
+        class2Or3ContributionAndCredits = Some(
           List(
-            Class2ContributionAndCredits(
+            Class2or3ContributionAndCredits(
               taxYear = Some(TaxYear(2022)),
               numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
               contributionCreditType = Some(NiContributionCreditType.C1),
@@ -107,9 +107,9 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
             )
           )
         ),
-        class2ContributionAndCredits = Some(
+        class2Or3ContributionAndCredits = Some(
           List(
-            Class2ContributionAndCredits(
+            Class2or3ContributionAndCredits(
               taxYear = Some(TaxYear(2022)),
               numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
               contributionCreditType = Some(NiContributionCreditType.C1),
@@ -143,10 +143,10 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |  ]
           |}""".stripMargin
 
-      val jsonStringClass2ContributionAndCredits =
+      val jsonStringClass2Or3ContributionAndCredits =
         """{
           |  "totalGraduatedPensionUnits":53,
-          |  "class2ContributionAndCredits": [
+          |  "class2Or3ContributionAndCredits": [
           |    {
           |      "taxYear": 2022,
           |      "numberOfContributionsAndCredits": 53,
@@ -162,33 +162,34 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
 
       val jsonStringFullResponse =
         """{
-          |  "totalGraduatedPensionUnits":53,
-          |  "class1ContributionAndCredits": [
-          |    {
-          |      "taxYear": 2022,
-          |      "contributionCategoryLetter": "U",
-          |      "contributionCategory": "(NONE)",
-          |      "contributionCreditType": "C1",
-          |      "primaryContribution": 99999999999999.98,
-          |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
-          |      "primaryPaidEarnings": 99999999999999.98,
-          |      "creditSource": "NOT KNOWN",
-          |      "employerName": "ipOpMs",
-          |      "latePaymentPeriod": "L"
-          |    }
-          |  ],
-          |  "class2ContributionAndCredits": [
-          |    {
-          |      "taxYear": 2022,
-          |      "numberOfContributionsAndCredits": 53,
-          |      "contributionCreditType": "C1",
-          |      "class2Or3EarningsFactor": 99999999999999.98,
-          |      "class2NIContributionAmount": 99999999999999.98,
-          |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
-          |      "creditSource": "NOT KNOWN",
-          |      "latePaymentPeriod": "L"
-          |    }
-          |  ]
+          |   "totalGraduatedPensionUnits":53,
+          |   "class1ContributionAndCredits":[
+          |      {
+          |         "taxYear":2022,
+          |         "numberOfContributionsAndCredits":53,
+          |         "contributionCategoryLetter":"U",
+          |         "contributionCategory":"(NONE)",
+          |         "contributionCreditType":"C1",
+          |         "primaryContribution":99999999999999.98,
+          |         "class1ContributionStatus":"COMPLIANCE & YIELD INCOMPLETE",
+          |         "primaryPaidEarnings":99999999999999.98,
+          |         "creditSource":"NOT KNOWN",
+          |         "employerName":"ipOpMs",
+          |         "latePaymentPeriod":"L"
+          |      }
+          |   ],
+          |   "class2Or3ContributionAndCredits":[
+          |      {
+          |         "taxYear":2022,
+          |         "numberOfContributionsAndCredits":53,
+          |         "contributionCreditType":"C1",
+          |         "class2Or3EarningsFactor":99999999999999.98,
+          |         "class2NIContributionAmount":99999999999999.98,
+          |         "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
+          |         "creditSource":"NOT KNOWN",
+          |         "latePaymentPeriod":"L"
+          |      }
+          |   ]
           |}""".stripMargin
 
       "should match the openapi schema for a full response" in {
@@ -202,7 +203,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           jsonStringClass1ContributionAndCredits
         )
         Json.toJson(niContributionsAndCreditsSuccessResponse2) shouldBe Json.parse(
-          jsonStringClass2ContributionAndCredits
+          jsonStringClass2Or3ContributionAndCredits
         )
       }
 
@@ -210,7 +211,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
         val _: NiContributionsAndCreditsSuccessResponse =
           jsonFormat.reads(Json.parse(jsonStringClass1ContributionAndCredits)).get
         val _: NiContributionsAndCreditsSuccessResponse =
-          jsonFormat.reads(Json.parse(jsonStringClass2ContributionAndCredits)).get
+          jsonFormat.reads(Json.parse(jsonStringClass2Or3ContributionAndCredits)).get
       }
 
       "deserialises and reserialises to the same thing (class1ContributionAndCredits)" in {
@@ -222,8 +223,8 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
         writtenJson shouldBe jValue
       }
 
-      "deserialises and reserialises to the same thing (class2ContributionAndCredits)" in {
-        val jValue: JsValue = Json.parse(jsonStringClass2ContributionAndCredits)
+      "deserialises and reserialises to the same thing (class2Or3ContributionAndCredits)" in {
+        val jValue: JsValue = Json.parse(jsonStringClass2Or3ContributionAndCredits)
         val niContributionsAndCreditsSuccessResponse: NiContributionsAndCreditsSuccessResponse =
           jsonFormat.reads(jValue).get
         val writtenJson: JsValue = jsonFormat.writes(niContributionsAndCreditsSuccessResponse)

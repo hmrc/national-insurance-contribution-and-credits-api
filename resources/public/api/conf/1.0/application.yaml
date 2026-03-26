@@ -383,7 +383,7 @@ components:
                       numberOfContributionsAndCredits: 52
                       contributionCreditType: "C2"
                       class2Or3EarningsFactor: 1.5
-                      class2NIContributonAmount: 150.0
+                      class2NIContributionAmount: 150.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "DIRECT DEBIT"
                       latePaymentPeriod: "ZZ"
@@ -391,7 +391,7 @@ components:
                       numberOfContributionsAndCredits: 30
                       contributionCreditType: "C2"
                       class2Or3EarningsFactor: 2.1
-                      class2NIContributonAmount: 120.0
+                      class2NIContributionAmount: 120.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "QUARTERLY BILLING"
                       latePaymentPeriod: "L"
@@ -537,7 +537,7 @@ components:
                       numberOfContributionsAndCredits: 20
                       contributionCreditType: "2A"
                       class2Or3EarningsFactor: 1.3
-                      class2NIContributonAmount: 52.0
+                      class2NIContributionAmount: 52.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "EMPLOYMENT AND SUPPORT"
                       latePaymentPeriod: "ZZ"
@@ -545,7 +545,7 @@ components:
                       numberOfContributionsAndCredits: 15
                       contributionCreditType: "2A"
                       class2Or3EarningsFactor: 0.8
-                      class2NIContributonAmount: 30.0
+                      class2NIContributionAmount: 30.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "EMPLOYMENT AND SUPPORT"
                       latePaymentPeriod: "L"
@@ -605,7 +605,7 @@ components:
                       numberOfContributionsAndCredits: 30
                       contributionCreditType: "2B"
                       class2Or3EarningsFactor: 1.1
-                      class2NIContributonAmount: 44.0
+                      class2NIContributionAmount: 44.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "JSA TAPE INPUT"
                       latePaymentPeriod: "ZZ"
@@ -613,7 +613,7 @@ components:
                       numberOfContributionsAndCredits: 25
                       contributionCreditType: "2B"
                       class2Or3EarningsFactor: 0.9
-                      class2NIContributonAmount: 36.0
+                      class2NIContributionAmount: 36.0
                       class2Or3CreditStatus: "VALID"
                       creditSource: "JSA PAPER INPUT"
                       latePaymentPeriod: "L"

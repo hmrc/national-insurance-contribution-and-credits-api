@@ -159,7 +159,7 @@ object NiContributionsAndCreditsSuccess {
     implicit val nicClass1Format: Format[Class1ContributionAndCredits] = Json.format[Class1ContributionAndCredits]
   }
 
-  case class Class2ContributionAndCredits(
+  case class Class2or3ContributionAndCredits(
       taxYear: Option[TaxYear],
       numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions],
       contributionCreditType: Option[NiContributionCreditType],
@@ -170,14 +170,17 @@ object NiContributionsAndCreditsSuccess {
       latePaymentPeriod: Option[LatePaymentPeriod]
   )
 
-  object Class2ContributionAndCredits {
-    implicit val nicClass2Format: Format[Class2ContributionAndCredits] = Json.format[Class2ContributionAndCredits]
+  object Class2or3ContributionAndCredits {
+
+    implicit val class2or3ContributionAndCreditsFormat: Format[Class2or3ContributionAndCredits] =
+      Json.format[Class2or3ContributionAndCredits]
+
   }
 
   case class NiContributionsAndCreditsSuccessResponse(
       totalGraduatedPensionUnits: Option[TotalGraduatedPensionUnits],
       class1ContributionAndCredits: Option[List[Class1ContributionAndCredits]],
-      class2ContributionAndCredits: Option[List[Class2ContributionAndCredits]]
+      class2Or3ContributionAndCredits: Option[List[Class2or3ContributionAndCredits]]
   ) extends NiContributionsAndCreditsResponse
       with NpsSuccessfulApiResponse
 

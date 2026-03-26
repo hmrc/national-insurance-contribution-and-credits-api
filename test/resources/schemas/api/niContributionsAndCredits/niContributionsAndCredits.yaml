@@ -34,11 +34,11 @@ paths:
     post:
       tags:
         - Contributions-and-credits
-      summary: Retrieve Class 1 and Class 2 Contribution and Credits.
+      summary: "Retrieve Class 1, Class 2 and Class 3 Contribution and Credits."
       description: |-
         # Purpose
-        This API provides the capability to retrieve Class 1 and Class 2 data for an account.<br>
-        - This allows a search for Class 1 contributions and Class 2 credits for a given NINO (suffix optional) and range of tax years.
+        This API provides the capability to retrieve Class 1, Class 2 and Class 3 data for an account.<br>
+        - This allows a search for Class 1 contributions, Class 2 and Class 3 credits for a given NINO (suffix optional) and range of tax years.
         - Request payload will contain the NINO and date of birth.<br>
         - A start year for the tax year range, not before 1975 or after CY-1<br>
         - An end year for the tax year range, not before the start year or after CY-1, and no more than five years after the start year (thereby allowing a range of six years inclusive).
@@ -125,12 +125,12 @@ paths:
                   summary: Self-employed with Class 2 credits
                   value:
                     totalGraduatedPensionUnits: 0
-                    class2ContributionAndCredits:
+                    class2Or3ContributionAndCredits:
                       - taxYear: 2024
                         numberOfContributionsAndCredits: 52
                         contributionCreditType: C2
                         class2Or3EarningsFactor: 6500.0
-                        class2NIContributonAmount: 163.8
+                        class2NIContributionAmount: 163.8
                         class2Or3CreditStatus: VALID
                         creditSource: DIRECT DEBIT
                         latePaymentPeriod: LX
@@ -151,12 +151,12 @@ paths:
                         creditSource: EMPLOYMENT SERVICES
                         employerName: Fabrik
                         latePaymentPeriod: ZZ
-                    class2ContributionAndCredits:
+                    class2Or3ContributionAndCredits:
                       - taxYear: 2022
                         numberOfContributionsAndCredits: 26
                         contributionCreditType: C2
                         class2Or3EarningsFactor: 3250.0
-                        class2NIContributonAmount: 81.9
+                        class2NIContributionAmount: 81.9
                         class2Or3CreditStatus: POTENTIAL
                         creditSource: DIRECT DEBIT
                         latePaymentPeriod: L
@@ -373,11 +373,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Class1ContributionAndCredits'
-        class2ContributionAndCredits:
-          description: Contains an array of Class 2 records.
+        class2Or3ContributionAndCredits:
+          description: Contains an array of Class 2 and Class 3 records.
           type: array
           items:
-            $ref: '#/components/schemas/Class2ContributionAndCredits'
+            $ref: '#/components/schemas/Class2Or3ContributionAndCredits'
     Class1ContributionAndCredits:
       description: Contains details of a Class 1 record.
       type: object
@@ -407,8 +407,8 @@ components:
           $ref: '#/components/schemas/employerName'
         latePaymentPeriod:
           $ref: '#/components/schemas/EnumLpind'
-    Class2ContributionAndCredits:
-      description: Contains details of a Class 2 record.
+    Class2Or3ContributionAndCredits:
+      description: Contains details of a Class 2 and Class 3 record.
       type: object
       properties:
         taxYear:
@@ -419,7 +419,7 @@ components:
           $ref: '#/components/schemas/EnumCCType'
         class2Or3EarningsFactor:
           $ref: '#/components/schemas/unsignedMoney'
-        class2NIContributonAmount:
+        class2NIContributionAmount:
           $ref: '#/components/schemas/unsignedMoney'
         class2Or3CreditStatus:
           $ref: '#/components/schemas/EnumCl2Stat'
@@ -613,6 +613,14 @@ components:
         - VDC
         - VDD
         - 2N
+        - 3PR
+        - 3A
+        - 3B
+        - 3C
+        - 3D
+        - CR1
+        - CR3
+        - 3N
       type: string
     PostNIContributionCreditRequest:
       description: Request payload for this API.

@@ -231,7 +231,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
             ),
             Some(
               List(
-                Class2ContributionAndCredits(
+                Class2or3ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                   contributionCreditType = Some(NiContributionCreditType.C1),
@@ -1109,7 +1109,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           ),
           Some(
             List(
-              Class2ContributionAndCredits(
+              Class2or3ContributionAndCredits(
                 taxYear = Some(TaxYear(2022)),
                 numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                 contributionCreditType = Some(NiContributionCreditType.C1),
