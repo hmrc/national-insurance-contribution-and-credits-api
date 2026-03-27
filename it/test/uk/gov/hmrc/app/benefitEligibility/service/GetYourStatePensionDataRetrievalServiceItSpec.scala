@@ -319,7 +319,6 @@ class GetYourStatePensionDataRetrievalServiceItSpec
       privatePensionSchemeSanctionDate = Some(PrivatePensionSchemeSanctionDate("1985-04-06")),
       currentOptimisticLock = CurrentOptimisticLock(4),
       schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
-      schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
       reconciliationDate = Some(ReconciliationDate("2025-03-31")),
       schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
     ),
@@ -328,7 +327,6 @@ class GetYourStatePensionDataRetrievalServiceItSpec
         schemeAddressType = Some(SchemeAddressType.GeneralCorrespondence),
         schemeAddressSequenceNumber = SchemeAddressSequenceNumber(5),
         schemeAddressStartDate = Some(SchemeAddressStartDate("2010-01-01")),
-        schemeAddressEndDate = Some(SchemeAddressEndDate("2024-12-31")),
         country = Some(Country.Scotland),
         areaDiallingCode = Some(AreaDiallingCode.Code0131), // Note: This would need to be added to the enum
         schemeTelephoneNumber = Some(SchemeTelephoneNumber("0131 000 0000")),

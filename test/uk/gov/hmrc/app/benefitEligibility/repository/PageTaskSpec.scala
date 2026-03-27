@@ -30,7 +30,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.Benefit
   CurrentOptimisticLock,
   SchemeContractedOutNumberDetails
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeInhibitionStatus
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.{
   ActiveMarriage,
@@ -248,7 +247,6 @@ class PageTaskSpec
                     BenefitSchemeDetails(
                       CurrentOptimisticLock(4),
                       SchemeContractedOutNumberDetails("S2345678C"),
-                      SchemeInhibitionStatus.ConvertedStakeholderPension,
                       None,
                       None,
                       None,
@@ -444,7 +442,6 @@ class PageTaskSpec
                     BenefitSchemeDetails(
                       CurrentOptimisticLock(4),
                       SchemeContractedOutNumberDetails("S2345678C"),
-                      SchemeInhibitionStatus.ConvertedStakeholderPension,
                       None,
                       None,
                       None,
