@@ -204,7 +204,8 @@ class PaginationServiceSpec
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
-        val liabilitiesSuccessResponse = LiabilitySummaryDetailsSuccessResponse(None, None)
+        val liabilitiesSuccessResponse =
+          LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
         (mockBenefitEligibilityRepository
           .getItem(_: UUID))
           .expects(pageTask.pageTaskId.value)
@@ -215,14 +216,24 @@ class PaginationServiceSpec
           .expects(BenefitType.MA, liabilitiesCallBackUrl.toString, *)
           .returning(EitherT.rightT(NpsApiResult.SuccessResult(ApiName.Liabilities, liabilitiesSuccessResponse)))
 
+        (mockBenefitEligibilityRepository
+          .upsert(_: Option[UUID], _: PageTask))
+          .expects(Some(pageTask.pageTaskId.value), *)
+          .returning(EitherT.rightT(uuid))
+
         val expectedResult = PaginationResult(
           PaginationType.MA,
           nationalInsuranceNumber,
-          List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
+          List(
+            SuccessResult(
+              ApiName.Liabilities,
+              LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
+            )
+          ),
           None,
           ContributionCreditPagingResult(None, None),
           None,
-          None
+          Some(PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))))
         )
         underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(
           expectedResult

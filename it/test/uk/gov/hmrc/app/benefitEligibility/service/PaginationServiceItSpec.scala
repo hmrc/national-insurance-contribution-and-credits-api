@@ -117,7 +117,7 @@ class PaginationServiceItSpec
 
   override protected def checkTtlIndex = false
 
-  val listOfPages = List(
+  val listOfPages: List[PageTask] = List(
     MaPageTask(
       PageTaskId(uuidOne),
       List(
@@ -229,7 +229,7 @@ class PaginationServiceItSpec
           a[Left[BenefitEligibilityError, _]]
 
       }
-      "should process Ma pagination task successfully " in {
+      "should process Ma pagination task successfully" in {
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
         val paginationSource2 =
@@ -638,6 +638,511 @@ class PaginationServiceItSpec
               nextCursor = Some(PaginationCursor(PaginationType.GYSP, PageTaskId(uuidThree)))
             )
           )
+      }
+      "should process Ma pagination task successfully and delete MA page" in {
+        val newListOfPages = List(
+          BspPageTask(
+            PageTaskId(uuidTwo),
+            Some(
+              PaginationSource(
+                MarriageDetails,
+                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+              )
+            ),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            currentTimeSource.instantNow()
+          ),
+          GyspPageTask(
+            PageTaskId(uuidThree),
+            Some(
+              PaginationSource(
+                ApiName.BenefitSchemeDetails,
+                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+              )
+            ),
+            Some(
+              PaginationSource(
+                MarriageDetails,
+                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+              )
+            ),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            currentTimeSource.instantNow()
+          )
+        )
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidOne)
+        val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
+          Some(
+            List(
+              LiabilityDetailsList(
+                identifier = nationalInsuranceNumber,
+                `type` = EnumLiabtp.Abroad,
+                occurrenceNumber = OccurrenceNumber(1),
+                startDateStatus = None,
+                endDateStatus = None,
+                startDate = StartDate(LocalDate.parse("2026-01-01")),
+                endDate = None,
+                country = None,
+                trainingCreditApprovalStatus = None,
+                casepaperReferenceNumber = None,
+                homeResponsibilitiesProtectionBenefitReference = None,
+                homeResponsibilitiesProtectionRate = None,
+                lostCardNotificationReason = None,
+                lostCardRulingReason = None,
+                homeResponsibilityProtectionCalculationYear = None,
+                awardAmount = None,
+                resourceGroupIdentifier = None,
+                homeResponsibilitiesProtectionIndicator = None,
+                officeDetails = None
+              )
+            )
+          ),
+          None
+        )
+
+        server.stubFor(
+          get(urlEqualTo(npsLiabilitySummaryDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(liabilitySummaryDetailsSuccessResponse).toString)
+            )
+        )
+
+        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+          Right(
+            PaginationResult(
+              paginationType = PaginationType.MA,
+              nationalInsuranceNumber,
+              liabilitiesResult = List(
+                NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
+                NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
+              ),
+              marriageDetailsResult = None,
+              contributionCreditResult = ContributionCreditPagingResult(None, None),
+              benefitSchemeMembershipDetailsData = None,
+              nextCursor = None
+            )
+          )
+
+        findAll().futureValue should contain theSameElementsAs newListOfPages
+
+      }
+      "should process Bsp pagination task successfully and delete BSP page" in {
+        val newListOfPages = List(
+          MaPageTask(
+            PageTaskId(uuidOne),
+            List(
+              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
+              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+            ),
+            nationalInsuranceNumber,
+            currentTimeSource.instantNow()
+          ),
+          GyspPageTask(
+            PageTaskId(uuidThree),
+            Some(
+              PaginationSource(
+                ApiName.BenefitSchemeDetails,
+                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+              )
+            ),
+            Some(
+              PaginationSource(
+                MarriageDetails,
+                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+              )
+            ),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            currentTimeSource.instantNow()
+          )
+        )
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
+
+        val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
+          MarriageDetailsSuccess.MarriageDetails(
+            MarriageDetailsSuccess.ActiveMarriage(true),
+            None,
+            None
+          )
+        )
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          Some(TotalGraduatedPensionUnits(BigDecimal("100"))),
+          Some(
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          ),
+          Some(
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(niContributionsAndCreditsSuccessResponse).toString)
+            )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
+            )
+        )
+        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
+          Right(
+            PaginationResult(
+              paginationType = PaginationType.BSP,
+              nationalInsuranceNumber,
+              liabilitiesResult = List(),
+              marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
+              contributionCreditResult = ContributionCreditPagingResult(
+                Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
+                None
+              ),
+              benefitSchemeMembershipDetailsData = None,
+              nextCursor = None
+            )
+          )
+
+        findAll().futureValue should contain theSameElementsAs newListOfPages
+      }
+      "should process Gysp pagination task successfully and delete GYSP page" in {
+        val newListOfPages = List(
+          MaPageTask(
+            PageTaskId(uuidOne),
+            List(
+              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
+              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+            ),
+            nationalInsuranceNumber,
+            currentTimeSource.instantNow()
+          ),
+          BspPageTask(
+            PageTaskId(uuidTwo),
+            Some(
+              PaginationSource(
+                MarriageDetails,
+                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+              )
+            ),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            currentTimeSource.instantNow()
+          )
+        )
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidThree)
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
+          class1ContributionAndCredits = Some(
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings =
+                  Some(NiContributionsAndCreditsSuccess.PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          ),
+          class2Or3ContributionAndCredits = Some(
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
+          MarriageDetailsSuccess.MarriageDetails(
+            MarriageDetailsSuccess.ActiveMarriage(true),
+            Some(
+              List(
+                MarriageDetailsSuccess
+                  .MarriageDetailsListElement(
+                    sequenceNumber = MarriageDetailsSuccess.SequenceNumber(2),
+                    status = CivilPartner,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+              )
+            ),
+            None
+          )
+        )
+
+        val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
+          schemeMembershipDetailsSummaryList = Some(
+            List(
+              SchemeMembershipDetailsSummary(
+                stakeholderPensionSchemeType = StakeholderPensionSchemeType.NonStakeholderPension,
+                schemeMembershipDetails = SchemeMembershipDetails(
+                  nationalInsuranceNumber = Identifier("AA123456"),
+                  schemeMembershipSequenceNumber = SchemeMembershipSequenceNumber(123),
+                  schemeMembershipOccurrenceNumber = SchemeMembershipOccurrenceNumber(1),
+                  schemeMembershipStartDate = Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
+                  contractedOutEmployerIdentifier = Some(ContractedOutEmployerIdentifier(789)),
+                  schemeMembershipEndDate = Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
+                  methodOfPreservationType = Some(MethodOfPreservation.NotApplicable0),
+                  totalLinkedGuaranteedMinimumPensionContractedOutDeductions =
+                    Some(TotalLinkedGuaranteedMinimumPensionContractedOutDeductions(BigDecimal("10.56"))),
+                  accruedPensionContractedOutDeductionsValue =
+                    Some(AccruedPensionContractedOutDeductionsValue(BigDecimal("10.56"))),
+                  totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988 =
+                    Some(TotalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988(BigDecimal("10.56"))),
+                  accruedPensionContractedOutDeductionsValuePost1988 =
+                    Some(AccruedPensionContractedOutDeductionsValuePost1988(BigDecimal("10.56"))),
+                  revaluationRate = Some(RevaluationRate.None),
+                  guaranteedMinimumPensionReconciliationStatus =
+                    Some(GuaranteedMinimumPensionReconciliationStatus.NotApplicable),
+                  employeesReference = Some(EmployeesReference("123/456/ABC")),
+                  finalYearEarnings = Some(FinalYearEarnings(BigDecimal("10.56"))),
+                  penultimateYearEarnings = Some(PenultimateYearEarnings(BigDecimal("10.56"))),
+                  retrospectiveEarnings = Some(RetrospectiveEarnings(BigDecimal("10.56"))),
+                  furtherPaymentsConfirmation = Some(FurtherPaymentsConfirmation.FurtherPaymentAllowed),
+                  survivorStatus = Some(SurvivorStatus.NotApplicable),
+                  transferPremiumElectionDate = Some(TransferPremiumElectionDate(LocalDate.of(2022, 6, 27))),
+                  revaluationApplied = Some(RevaluationApplied(true)),
+                  stateEarningsRelatedPensionsSchemeNonRestorationValue =
+                    Some(StateEarningsRelatedPensionsSchemeNonRestorationValue(BigDecimal("10.56"))),
+                  stateEarningsRelatedPensionsSchemeValuePost1988 =
+                    Some(StateEarningsRelatedPensionsSchemeValuePost1988(BigDecimal("10.56"))),
+                  apparentUnnotifiedTerminationStatus =
+                    Some(ApparentUnnotifiedTerminationStatus.NoApparentUnnotifiedTermination),
+                  terminationMicrofilmNumber = Some(TerminationMicrofilmNumber(789)),
+                  debitVoucherMicrofilmNumber = Some(DebitVoucherMicrofilmNumber(40599123)),
+                  creationMicrofilmNumber = Some(CreationMicrofilmNumber(40599123)),
+                  inhibitSchemeProcessing = Some(InhibitSchemeProcessing(true)),
+                  extensionDate = Some(ExtensionDate(LocalDate.of(2022, 6, 27))),
+                  guaranteedMinimumPensionContractedOutDeductionsRevalued =
+                    Some(GuaranteedMinimumPensionContractedOutDeductionsRevalued(BigDecimal("10.56"))),
+                  clericalCalculationInvolved = Some(Clercalc.NoClericalCalculationInvolved),
+                  clericallyControlledTotal = Some(ClericallyControlledTotal(BigDecimal("10.56"))),
+                  clericallyControlledTotalPost1988 = Some(ClericallyControlledTotalPost1988(BigDecimal("10.56"))),
+                  certifiedAmount = Some(CertifiedAmount(BigDecimal("10.56"))),
+                  enforcementStatus = Some(Enfcment.NotEnforced),
+                  stateSchemePremiumDeemed = Some(SspDeem.SspTypeReceivablesToBeTreatAsDeemed),
+                  transferTakeUpDate = Some(TransferTakeUpDate(LocalDate.of(2022, 6, 27))),
+                  schemeMembershipTransferSequenceNumber = Some(SchemeMembershipTransferSequenceNumber(123)),
+                  contributionCategoryFinalYear = Some(ContCatLetter.A),
+                  contributionCategoryPenultimateYear = Some(ContCatLetter.A),
+                  contributionCategoryRetrospectiveYear = Some(ContCatLetter.A),
+                  protectedRightsStartDate = Some(ProtectedRightsStartDate(LocalDate.of(2022, 6, 27))),
+                  schemeMembershipDebitReason = Some(SchemeMembershipDebitReason.NotApplicable),
+                  technicalAmount = Some(TechnicalAmount(BigDecimal("10.56"))),
+                  minimumFundTransferAmount = Some(MinimumFundTransferAmount(BigDecimal("10.56"))),
+                  actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
+                  schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
+                  guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
+                  employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
+                  schemeCreatingContractedOutNumberDetails =
+                    Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+                  schemeTerminatingContractedOutNumberDetails =
+                    Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
+                  importingAppropriateSchemeNumberDetails = Some(ImportingAppropriateSchemeNumberDetails("S2123456B")),
+                  apparentUnnotifiedTerminationDestinationDetails =
+                    Some(ApparentUnnotifiedTerminationDestinationDetails("S2123456B"))
+                )
+              )
+            )
+          ),
+          callback = None
+        )
+
+        val benefitSchemeDetailsSuccessResponse = BenefitSchemeDetailsSuccessResponse(
+          benefitSchemeDetails = BenefitSchemeDetails(
+            magneticTapeNumber = Some(MagneticTapeNumber(54321)),
+            schemeName = Some(BenefitSchemeName("EXAMPLE PENSION SCHEME")),
+            schemeStartDate = Some(SchemeStartDate("1985-04-06")),
+            schemeCessationDate = Some(SchemeCessationDate("2024-12-31")),
+            contractedOutDeductionExtinguishedDate = Some(ContractedOutDeductionExtinguishedDate("2024-12-31")),
+            paymentSuspensionDate = Some(PaymentSuspensionDate("2024-10-01")),
+            recoveriesSuspendedDate = Some(RecoveriesSuspendedDate("2024-10-01")),
+            paymentRestartDate = Some(PaymentRestartDate("2024-10-01")),
+            recoveriesRestartedDate = Some(RecoveriesRestartedDate("2024-10-01")),
+            schemeNature = Some(UnitTrusts),
+            benefitSchemeInstitution = Some(BenefitSchemeInstitutionType.UnitTrust),
+            accruedGMPLiabilityServiceDate = Some(AccruedGMPLiabilityServiceDate("1990-04-06")),
+            rerouteToSchemeCessation = Some(RerouteToSchemeCessation.ReRouteToCessation),
+            statementInhibitor = Some(StatementInhibitor.Set),
+            certificateCancellationDate = Some(CertificateCancellationDate("2024-12-31")),
+            suspendedDate = Some(SuspendedDate("2024-10-01")),
+            isleOfManInterest = Some(IsleOfManInterest(false)),
+            schemeWindingUp = Some(SchemeWindingUp(true)),
+            revaluationRateSequenceNumber = Some(RevaluationRateSequenceNumber(12)),
+            benefitSchemeStatus = Some(BenefitSchemeStatus.BlockOnProvider),
+            dateFormallyCertified = Some(DateFormallyCertified("1985-04-06")),
+            privatePensionSchemeSanctionDate = Some(PrivatePensionSchemeSanctionDate("1985-04-06")),
+            currentOptimisticLock = CurrentOptimisticLock(4),
+            schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
+            schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
+            reconciliationDate = Some(ReconciliationDate("2025-03-31")),
+            schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
+          ),
+          schemeAddressDetailsList = List(
+            SchemeAddressDetails(
+              schemeAddressType = Some(SchemeAddressType.GeneralCorrespondence),
+              schemeAddressSequenceNumber = SchemeAddressSequenceNumber(5),
+              schemeAddressStartDate = Some(SchemeAddressStartDate("2010-01-01")),
+              schemeAddressEndDate = Some(SchemeAddressEndDate("2024-12-31")),
+              country = Some(Country.Scotland),
+              areaDiallingCode = Some(AreaDiallingCode.Code0131), // Note: This would need to be added to the enum
+              schemeTelephoneNumber = Some(SchemeTelephoneNumber("0131 000 0000")),
+              schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C"),
+              benefitSchemeAddressDetails = Some(
+                BenefitSchemeAddressDetails(
+                  schemeAddressLine1 = Some(SchemeAddressLine1("1 Sample Road")),
+                  schemeAddressLine2 = Some(SchemeAddressLine2("Unit 2")),
+                  schemeAddressLocality = Some(SchemeAddressLocality("Old Quarter")),
+                  schemeAddressPostalTown = Some(SchemeAddressPostalTown("Exampleburgh")),
+                  schemePostcode = Some(SchemePostcode("EX2 2EX"))
+                )
+              )
+            )
+          )
+        )
+
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(niContributionsAndCreditsSuccessResponse).toString)
+            )
+        )
+        server.stubFor(
+          get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
+            )
+        )
+        server.stubFor(
+          get(urlEqualTo(schemeMembershipDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(schemeMembershipDetailsSuccessResponse).toString)
+            )
+        )
+        server.stubFor(
+          get(urlEqualTo(benefitSchemeDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(benefitSchemeDetailsSuccessResponse).toString)
+            )
+        )
+
+        val benefitSchemeMembershipDetailsData = BenefitSchemeMembershipDetailsData(
+          NpsApiResult.SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse),
+          List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
+        )
+
+        service.paginate(PageTaskId(uuidThree)).value.futureValue shouldBe
+          Right(
+            PaginationResult(
+              paginationType = PaginationType.GYSP,
+              nationalInsuranceNumber,
+              liabilitiesResult = List(),
+              marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
+              contributionCreditResult = ContributionCreditPagingResult(
+                Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
+                None
+              ),
+              benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
+              nextCursor = None
+            )
+          )
+
+        findAll().futureValue should contain theSameElementsAs newListOfPages
       }
     }
   }
