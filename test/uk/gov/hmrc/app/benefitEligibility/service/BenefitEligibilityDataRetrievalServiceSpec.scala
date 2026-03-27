@@ -193,8 +193,9 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    identifier = Identifier("AB123456C"),
-    class2MAReceiptDetails = List()
+    nationalInsuranceNumber = Some(Identifier("AB123456C")),
+    class2MAReceiptDetails = None,
+    callBack = None
   )
 
   val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(

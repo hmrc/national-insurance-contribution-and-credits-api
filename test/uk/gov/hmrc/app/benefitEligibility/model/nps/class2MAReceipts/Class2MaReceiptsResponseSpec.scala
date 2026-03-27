@@ -21,12 +21,12 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{Identifier, NpsErrorReason, ReceiptDate}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, CallbackUrl, Identifier, NpsErrorReason, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 
 import java.time.LocalDate
 
@@ -50,44 +50,44 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       val jsonFormat = implicitly[Format[Class2MAReceiptsSuccessResponse]]
 
       val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-        Identifier("AA000001A"),
-        List(
-          Class2MAReceiptDetails(
-            initials = Some(Initials("JP")),
-            surname = Some(Surname("van Cholmondley-warner")),
-            receivablePeriodStartDate = Some(ReceivablePeriodStartDate(LocalDate.parse("2025-12-10"))),
-            receivablePeriodEndDate = Some(ReceivablePeriodEndDate(LocalDate.parse("2025-12-10"))),
-            receivablePayment = Some(ReceivablePayment(10.56)),
-            receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
-            liabilityStartDate = Some(LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-            liabilityEndDate = Some(LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-            billAmount = Some(BillAmount(9999.98)),
-            billScheduleNumber = Some(BillScheduleNumber(100)),
-            isClosedRecord = Some(IsClosedRecord(true)),
-            weeksPaid = Some(WeeksPaid(2))
+        Some(Identifier("AA000001A")),
+        Some(
+          List(
+            Class2MAReceiptDetails(
+              initials = Some(Initials("JP")),
+              surname = Some(Surname("van Cholmondley-warner")),
+              receivablePayment = Some(ReceivablePayment(10.56)),
+              receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
+              liabilityStart = Some(LiabilityStartDate(LocalDate.parse("2025-12-10"))),
+              liabilityEnd = Some(LiabilityEndDate(LocalDate.parse("2025-12-10"))),
+              billAmount = Some(BillAmount(9999.98)),
+              billScheduleNumber = Some(BillScheduleNumber(100)),
+              isClosedRecord = Some(IsClosedRecord(true)),
+              weeksPaid = Some(WeeksPaid(2))
+            )
           )
-        )
+        ),
+        callBack = Some(Callback(Some(CallbackUrl("/some-url"))))
       )
 
       val jsonString =
         """{
-          |  "identifier": "AA000001A",
+          |  "nationalInsuranceNumber": "AA000001A",
           |  "class2MAReceiptDetails": [
           |    {
           |      "initials": "JP",
           |      "surname": "van Cholmondley-warner",
-          |      "receivablePeriodStartDate": "2025-12-10",
-          |      "receivablePeriodEndDate": "2025-12-10",
           |      "receivablePayment": 10.56,
           |      "receiptDate": "2025-12-10",
-          |      "liabilityStartDate": "2025-12-10",
-          |      "liabilityEndDate": "2025-12-10",
+          |      "liabilityStart": "2025-12-10",
+          |      "liabilityEnd": "2025-12-10",
           |      "billAmount": 9999.98,
           |      "billScheduleNumber": 100,
           |      "isClosedRecord": true,
           |      "weeksPaid": 2
           |    }
-          |  ]
+          |  ],
+          |  "callBack":{"callbackURL":"/some-url"}
           |}""".stripMargin
 
       "should match the openapi schema for a full response" in {

@@ -29,7 +29,7 @@ object FilteredClass2MaReceipts {
 
   def from(class2MAReceiptsSuccessResponse: Class2MAReceiptsSuccessResponse): FilteredClass2MaReceipts =
     FilteredClass2MaReceipts(
-      class2MAReceiptsSuccessResponse.class2MAReceiptDetails.flatMap(_.receiptDate)
+      class2MAReceiptsSuccessResponse.class2MAReceiptDetails.map(_.flatMap(_.receiptDate)).getOrElse(Nil)
     )
 
 }

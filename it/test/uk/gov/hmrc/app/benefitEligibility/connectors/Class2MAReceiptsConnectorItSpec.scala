@@ -85,12 +85,13 @@ class Class2MAReceiptsConnectorItSpec
       "when the Class2MAReceipts endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
           val successResponse = Class2MAReceiptsSuccessResponse(
-            identifier = Identifier("AB123456C"),
-            class2MAReceiptDetails = List()
+            nationalInsuranceNumber = Some(Identifier("AB123456C")),
+            class2MAReceiptDetails = Some(List()),
+            callBack = None
           )
 
           val successResponseJson = """{
-                                      |"identifier":"AB123456C",
+                                      |"nationalInsuranceNumber":"AB123456C",
                                       |"class2MAReceiptDetails":[]
                                       |}""".stripMargin
 
@@ -448,29 +449,6 @@ class Class2MAReceiptsConnectorItSpec
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[InvalidJsonError]
-        }
-      }
-
-      "when the Class2MAReceipts endpoint returns valid JSON with missing required fields" - {
-        "should return validation error" in {
-
-          val incompleteResponse = """{"identifier":"AB123456C"}"""
-
-          server.stubFor(
-            get(urlEqualTo(testPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(incompleteResponse)
-              )
-          )
-
-          val result =
-            connector.fetchClass2MAReceipts(MA, identifier).value.futureValue
-
-          result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[JsonValidationError]
         }
       }
 
