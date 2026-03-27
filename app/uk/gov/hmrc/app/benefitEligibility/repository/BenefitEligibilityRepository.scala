@@ -35,6 +35,7 @@ trait BenefitEligibilityRepository {
   def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask]
   def upsert(id: Option[UUID], update: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
   def insert(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
+  def delete(id: UUID): EitherT[Future, BenefitEligibilityError, Long]
 }
 
 @Singleton
@@ -133,6 +134,14 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       .toFuture()
       .attemptT
       .map(_ => pageTask.pageTaskId.value)
+      .leftMap(error => DatabaseError(error))
+
+  def delete(id: UUID): EitherT[Future, BenefitEligibilityError, Long] =
+    collection
+      .deleteOne(Filters.equal("pageTaskId", id.toString))
+      .toFuture()
+      .attemptT
+      .map(_.getDeletedCount())
       .leftMap(error => DatabaseError(error))
 
 }

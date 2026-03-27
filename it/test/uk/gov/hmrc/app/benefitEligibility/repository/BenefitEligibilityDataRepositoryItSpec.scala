@@ -114,7 +114,6 @@ class BenefitEligibilityDataRepositoryItSpec
           repository.getItem(pageTask.pageTaskId.value).value.futureValue shouldBe Right(pageTask)
         }
       }
-
       "should return database error if there is an unexpected db failure" in {
         val pageTaskId = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
 
@@ -366,6 +365,88 @@ class BenefitEligibilityDataRepositoryItSpec
         find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(gyspPageTask)
 
       }
+    }
+    ".delete" - {
+      "should delete a PageTask" in {
+        val pageTaskId1 = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val pageTaskId2 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId3 = PageTaskId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
+
+        val paginationSource1 = PaginationSource(Class2MAReceipts, Some("SomeCallBackURLOne"))
+        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource3 = PaginationSource(MarriageDetails, Some("SomeCallBackURLThree"))
+
+        val pageTasksList = List(
+          MaPageTask(
+            pageTaskId1,
+            List(paginationSource2, paginationSource2),
+            nationalInsuranceNumber,
+            testInstant
+          ),
+          BspPageTask(
+            pageTaskId2,
+            Some(paginationSource2),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            testInstant
+          ),
+          GyspPageTask(
+            pageTaskId3,
+            Some(paginationSource3),
+            Some(paginationSource1),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            testInstant
+          )
+        )
+        val newPageTasksList = List(
+          BspPageTask(
+            pageTaskId2,
+            Some(paginationSource2),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            testInstant
+          ),
+          GyspPageTask(
+            pageTaskId3,
+            Some(paginationSource3),
+            Some(paginationSource1),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber,
+            testInstant
+          )
+        )
+
+        pageTasksList.foreach(insert)
+
+        repository.delete(pageTaskId1.value).value.futureValue shouldBe Right(1)
+        findAll().futureValue should contain theSameElementsAs newPageTasksList
+
+      }
+      "should try delete a PageTask that doesn't exist and return 0" in {
+        repository.delete(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")).value.futureValue shouldBe Right(0)
+      }
+
     }
   }
 

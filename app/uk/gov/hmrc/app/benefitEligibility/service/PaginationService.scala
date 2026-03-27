@@ -98,8 +98,9 @@ class PaginationService @Inject() (
       paginationResultWithCursor = paginationResult.setNextCursor(uuidGenerator.generate)
       _ <- PageTask
         .createPaginatingTask(paginationResultWithCursor, currentTime)
-        .map(newPageTask => pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask))
-        .sequence
+        .fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>
+          pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask).map(_ => ())
+        )
     } yield paginationResultWithCursor
   }
 
