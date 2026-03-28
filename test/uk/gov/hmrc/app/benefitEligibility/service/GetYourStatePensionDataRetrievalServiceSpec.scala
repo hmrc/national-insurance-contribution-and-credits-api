@@ -690,6 +690,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .returning(
             EitherT.rightT(benefitSchemeDetailsResult)
           )
+          .twice()
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
@@ -764,7 +765,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             niContributionAndCreditsResult,
             BenefitSchemeMembershipDetailsData(
               schemeMembershipDetailsResult,
-              List(benefitSchemeDetailsResult)
+              List(benefitSchemeDetailsResult, benefitSchemeDetailsResult)
             ),
             LongTermBenefitCalculationDetailsData(
               longTermBenefitCalculationDetailsResult,
@@ -824,6 +825,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .returning(
             EitherT.rightT(benefitSchemeDetailsResult)
           )
+          .twice()
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
@@ -879,7 +881,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             niContributionAndCreditsResult,
             BenefitSchemeMembershipDetailsData(
               schemeMembershipDetailsResult,
-              List(benefitSchemeDetailsResult)
+              List(benefitSchemeDetailsResult, benefitSchemeDetailsResult)
             ),
             LongTermBenefitCalculationDetailsData(
               longTermBenefitCalculationDetailsResult,

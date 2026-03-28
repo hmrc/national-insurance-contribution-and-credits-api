@@ -282,7 +282,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
             schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
             guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
             employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
-            schemeCreatingContractedOutNumberDetails = Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+            schemeCreatingContractedOutNumberDetails = Some(SchemeCreatingContractedOutNumberDetails("S2123456B")),
             schemeTerminatingContractedOutNumberDetails =
               Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
             importingAppropriateSchemeNumberDetails = Some(ImportingAppropriateSchemeNumberDetails("S2123456B")),
@@ -592,7 +592,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
     ".fetchEligibilityData" - {
 
       val npsCreditsAndContributionsPath        = "/national-insurance/contributions-and-credits"
-      val benefitSchemeDetailsPath              = "/benefit-scheme/GD379251T/benefit-scheme-details/S3123456B"
+      val benefitSchemeDetailsPath              = "/benefit-scheme/GD379251T/benefit-scheme-details/S2123456B"
       val marriageDetailsPath                   = "/individual/GD379251T/marriage-cp"
       val longTermBenefitCalculationDetailsPath = "/long-term-benefits/GD379251T/calculation"
       val longTermBenefitNotesPath              = "/long-term-benefits/GD379251T/calculation/ALL/notes/86"

@@ -167,11 +167,11 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       DataRetrievalServiceError()
     }
 
-  // TODO - generate aggregation/paginationId
   private[service] def fetchNiContributionsAndCreditsData(
       contributionsAndCredits: ContributionsAndCreditsRequestParams
   )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) = {
 
+    // we will always have at least one tax window on a valid request
     val window = ContributionCreditTaxWindowCalculator
       .createTaxWindows(
         contributionsAndCredits.startTaxYear,
@@ -179,7 +179,6 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       )
       .head
 
-    // taxWindows.map { window =>
     niContributionsAndCreditsConnector.fetchContributionsAndCredits(
       requestKey.benefitType,
       NiContributionsAndCreditsRequest(
@@ -189,7 +188,6 @@ class GetYourStatePensionDataRetrievalService @Inject() (
         window.endTaxYear
       )
     )
-    //  }.sequence
   }
 
   private[service] def fetchMarriageDetailsData(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
@@ -215,14 +213,19 @@ class GetYourStatePensionDataRetrievalService @Inject() (
           EitherT.pure[Future, BenefitEligibilityError]((detailsResult, Nil))
         case NpsApiResult.SuccessResult(apiName, successResponse) =>
           successResponse.schemeMembershipDetailsSummaryList
-            .map(_.flatMap(_.schemeMembershipDetails.employersContractedOutNumberDetails)) match {
+            .map(_.flatMap { summary =>
+              List(
+                summary.schemeMembershipDetails.schemeTerminatingContractedOutNumberDetails.map(_.value),
+                summary.schemeMembershipDetails.schemeCreatingContractedOutNumberDetails.map(_.value)
+              ).flatten.distinct
+            }) match {
             case Some(contractedOutNumberDetailsList) =>
               contractedOutNumberDetailsList
                 .map { contractedOutNumberDetails =>
                   benefitSchemeDetailsConnector.fetchBenefitSchemeDetails(
                     requestKey.benefitType,
                     requestKey.nationalInsuranceNumber,
-                    SchemeContractedOutNumberDetails(contractedOutNumberDetails.value)
+                    SchemeContractedOutNumberDetails(contractedOutNumberDetails)
                   )
                 }
                 .sequence
