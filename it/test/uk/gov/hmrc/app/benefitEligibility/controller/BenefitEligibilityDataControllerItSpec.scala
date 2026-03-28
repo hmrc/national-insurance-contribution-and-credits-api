@@ -155,22 +155,26 @@ class BenefitEligibilityDataControllerItSpec
   val schemeMembershipDetailsPath = s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
   val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   override protected def beforeEach(): Unit = {
     super.beforeEach()
     List(
       MaPageTask(
+        correlationId,
         PageTaskId(uuidOne),
         List(
-          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+          PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+          PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
         ),
         nationalInsuranceNumber,
         currentTimeSource.instantNow()
       ),
       BspPageTask(
+        correlationId,
         PageTaskId(uuidTwo),
         Some(
-          PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+          PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
         ),
         Some(
           ContributionAndCreditsPaging(
@@ -182,15 +186,16 @@ class BenefitEligibilityDataControllerItSpec
         currentTimeSource.instantNow()
       ),
       GyspPageTask(
+        correlationId,
         PageTaskId(uuidThree),
         Some(
           PaginationSource(
-            ApiName.BenefitSchemeDetails,
-            Some(benefitSchemeDetailsPath)
+            ApiName.SchemeMembershipDetails,
+            schemeMembershipDetailsPath
           )
         ),
         Some(
-          PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+          PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
         ),
         Some(
           ContributionAndCreditsPaging(
@@ -532,7 +537,7 @@ class BenefitEligibilityDataControllerItSpec
   )
 
   val individualStatePensionInformationSuccessResponse = IndividualStatePensionInformationSuccessResponse(
-    identifier = nationalInsuranceNumber,
+    nationalInsuranceNumber = nationalInsuranceNumber,
     numberOfQualifyingYears = Some(NumberOfQualifyingYears(35)),
     nonQualifyingYears = Some(NonQualifyingYears(5)),
     yearsToFinalRelevantYear = Some(YearsToFinalRelevantYear(3)),
@@ -549,10 +554,6 @@ class BenefitEligibilityDataControllerItSpec
           classThreePayable = Some(ClassThreePayable(BigDecimal("824.20"))),
           classThreePayableBy = Some(ClassThreePayableBy("2028-04-05")),
           classThreePayableByPenalty = Some(ClassThreePayableByPenalty("2030-04-05")),
-          classTwoPayable = Some(ClassTwoPayable(BigDecimal("164.25"))),
-          classTwoPayableBy = Some(ClassTwoPayableBy("2028-01-31")),
-          classTwoPayableByPenalty = Some(ClassTwoPayableByPenalty("2030-01-31")),
-          classTwoOutstandingWeeks = Some(ClassTwoOutstandingWeeks(12)),
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("3456.78"))),
           niEarnings = Some(NiEarnings(BigDecimal("45000.00"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("1234.56"))),
@@ -590,10 +591,6 @@ class BenefitEligibilityDataControllerItSpec
           classThreePayable = Some(ClassThreePayable(BigDecimal("876.80"))),
           classThreePayableBy = Some(ClassThreePayableBy("2029-04-05")),
           classThreePayableByPenalty = Some(ClassThreePayableByPenalty("2031-04-05")),
-          classTwoPayable = Some(ClassTwoPayable(BigDecimal("175.60"))),
-          classTwoPayableBy = Some(ClassTwoPayableBy("2029-01-31")),
-          classTwoPayableByPenalty = Some(ClassTwoPayableByPenalty("2031-01-31")),
-          classTwoOutstandingWeeks = Some(ClassTwoOutstandingWeeks(35)),
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("2987.45"))),
           niEarnings = Some(NiEarnings(BigDecimal("38500.25"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("987.65"))),

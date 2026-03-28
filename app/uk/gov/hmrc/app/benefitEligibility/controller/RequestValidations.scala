@@ -19,9 +19,11 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.Validated
 import cats.implicits.catsSyntaxTuple6Semigroupal
 import play.api.libs.json.JsonValidationError
+import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityRequestHandler.logger
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, Identifier, InvalidUUID}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier, InvalidUUID}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}
 
 import java.time.LocalDate
@@ -76,16 +78,17 @@ object RequestValidations {
       case Validated.Invalid(e) => Left(JsonValidationError(e.toList))
     }
 
-  def validateCorrelationId(correlationId: String): Either[InvalidUUID, SuccessfulResult.type] =
+  def validateCorrelationId(correlationId: String): Either[ErrorReason, CorrelationId] = {
+    val maybeCorrelationId = Try(UUID.fromString(correlationId)).toOption
     Validated
       .condNel(
-        Try(UUID.fromString(correlationId)).toOption.isDefined,
-        SuccessfulResult,
+        maybeCorrelationId.isDefined,
+        CorrelationId(maybeCorrelationId.get),
         "Invalid correlationId value found, expected a valid UUID"
-      )
-      .map(_ => SuccessfulResult) match {
-      case Validated.Valid(_)   => Right(SuccessfulResult)
-      case Validated.Invalid(e) => Left(InvalidUUID(e.toList))
+      ) match {
+      case Validated.Valid(id)      => Right(id)
+      case Validated.Invalid(error) => Left(ErrorReason(error.toList.mkString(",")))
     }
+  }
 
 }

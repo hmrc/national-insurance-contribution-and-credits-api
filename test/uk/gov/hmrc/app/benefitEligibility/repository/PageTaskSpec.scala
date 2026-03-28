@@ -83,6 +83,7 @@ class PageTaskSpec
     ".createPaginatingTask" - {
       "should return pageTask if MA pagination result with next cursor" in {
         val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.MA,
           nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult =
@@ -98,6 +99,7 @@ class PageTaskSpec
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           MaPageTask(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             List(),
             nationalInsuranceNumber,
@@ -108,6 +110,7 @@ class PageTaskSpec
       "should return pageTask if BSP pagination result with next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.BSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
@@ -135,6 +138,7 @@ class PageTaskSpec
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           BspPageTask(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             marriageDetailsPaging = None,
             contributionAndCreditsPaging = Some(
@@ -148,6 +152,7 @@ class PageTaskSpec
       "should return pageTask if GYSP pagination result with next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.GYSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
@@ -286,6 +291,7 @@ class PageTaskSpec
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe Some(
           GyspPageTask(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             benefitSchemeMembershipDetailsPaging = None,
             marriageDetailsPaging = None,
@@ -299,6 +305,7 @@ class PageTaskSpec
       }
       "should return None if MA pagination result without next cursor" in {
         val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.MA,
           nationalInsuranceNumber,
           liabilitiesResult =
@@ -315,6 +322,7 @@ class PageTaskSpec
       "should return None if BSP pagination result without next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.BSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
@@ -343,6 +351,7 @@ class PageTaskSpec
       "should return None if GYSP pagination result without next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.GYSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),

@@ -20,8 +20,9 @@ info:
     \ and Carers to EnumLiabtp, govUkJobRole removed maxLength: 20, govUkOriginatorId\
     \ minLength: 3,  errorResourceObj_400, maxLength: 128|\n| 2.0.5   | 12/12/2025\
     \ | NPS Development Team | Removed LiabilityEmploymentDetailsList not required\
-    \ for NI |"
-  version: 2.0.5
+    \ for NI |\n| 2.2.2   | 18/03/2026 | NPS Development Team | Removed Replacement\
+    \ Credits for Parents and Carers to EnumLiabtp |"
+  version: 2.2.2
   x-integration-catalogue:
     reviewed-date: 2025-01-20T11:00:01Z
     short-description: Liability Summary details associated with a person
@@ -627,7 +628,6 @@ components:
         - WFTC (NI)
         - Working Tax Credit (Employed)
         - Working Tax Credit (Self-Employed)
-        - Replacement Credits for Parents and Carers
       type: string
     EnumHyphenatedLiabtp:
       enum:
@@ -1173,7 +1173,9 @@ components:
     LiabilityStart:
       name: liabilityStartDate
       in: query
-      description: The date on which this liability started.
+      description: The date on which this liability started - this is a restart key.
+        This should only be populated if the previous call did not transfer all of
+        the data i.e. there are more rows marked to be collected
       required: false
       schema:
         $ref: '#/components/schemas/liabilityStart'
@@ -1187,7 +1189,9 @@ components:
     LiabilityTypeQuery:
       name: type
       in: query
-      description: The type of liability associated with the individual's tax affairs.
+      description: The type of liability associated with the individual's tax affairs
+        - this is a restart key. This should only be populated if the previous call
+        did not transfer all of the data i.e. there are more rows marked to be collected
       required: false
       schema:
         $ref: '#/components/schemas/liabilityType'
@@ -1195,7 +1199,9 @@ components:
       name: occurrenceNumber
       in: query
       description: Denotes the number of times a particular liability has occurred
-        on an individual's account.
+        on an individual's account - this is a restart key. This should only be populated
+        if the previous call did not transfer all of the data i.e. there are more
+        rows marked to be collected
       required: false
       schema:
         $ref: '#/components/schemas/liabilityOccurrenceNumber'

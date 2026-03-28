@@ -45,6 +45,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   Callback,
   CallbackUrl,
+  CorrelationId,
   Country,
   DateOfBirth,
   EndTaxYear,
@@ -119,6 +120,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 
 import java.time.LocalDate
+import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
@@ -394,7 +396,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val individualStatePensionInformationSuccessResponse = IndividualStatePensionInformationSuccessResponse(
-    identifier = Identifier("AA000001A"),
+    nationalInsuranceNumber = Identifier("AA000001A"),
     numberOfQualifyingYears = Some(NumberOfQualifyingYears(35)),
     nonQualifyingYears = Some(NonQualifyingYears(5)),
     yearsToFinalRelevantYear = Some(YearsToFinalRelevantYear(3)),
@@ -411,10 +413,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           classThreePayable = Some(ClassThreePayable(BigDecimal("824.20"))),
           classThreePayableBy = Some(ClassThreePayableBy("2028-04-05")),
           classThreePayableByPenalty = Some(ClassThreePayableByPenalty("2030-04-05")),
-          classTwoPayable = Some(ClassTwoPayable(BigDecimal("164.25"))),
-          classTwoPayableBy = Some(ClassTwoPayableBy("2028-01-31")),
-          classTwoPayableByPenalty = Some(ClassTwoPayableByPenalty("2030-01-31")),
-          classTwoOutstandingWeeks = Some(ClassTwoOutstandingWeeks(12)),
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("3456.78"))),
           niEarnings = Some(NiEarnings(BigDecimal("45000.00"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("1234.56"))),
@@ -452,10 +450,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           classThreePayable = Some(ClassThreePayable(BigDecimal("876.80"))),
           classThreePayableBy = Some(ClassThreePayableBy("2029-04-05")),
           classThreePayableByPenalty = Some(ClassThreePayableByPenalty("2031-04-05")),
-          classTwoPayable = Some(ClassTwoPayable(BigDecimal("175.60"))),
-          classTwoPayableBy = Some(ClassTwoPayableBy("2029-01-31")),
-          classTwoPayableByPenalty = Some(ClassTwoPayableByPenalty("2031-01-31")),
-          classTwoOutstandingWeeks = Some(ClassTwoOutstandingWeeks(35)),
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("2987.45"))),
           niEarnings = Some(NiEarnings(BigDecimal("38500.25"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("987.65"))),
@@ -726,13 +720,15 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     individualStatePensionInformationSuccessResponse
   )
 
+  val correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   "BenefitEligibilityDataRetrievalService" - {
     ".getEligibilityData" - {
       "should retrieve eligibility data for MA" in {
 
         (mockMaternityAllowanceDataRetrievalService
-          .fetchEligibilityData(_: MAEligibilityCheckDataRequest)(_: HeaderCarrier))
-          .expects(maEligibilityCheckDataRequest, *)
+          .fetchEligibilityData(_: MAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .expects(maEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultMA(
@@ -744,7 +740,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
-        underTest.getEligibilityData(maEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+        underTest.getEligibilityData(maEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
@@ -756,8 +752,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should retrieve eligibility data for JSA" in {
         (mockJobSeekersAllowanceDataRetrievalService
-          .fetchEligibilityData(_: JSAEligibilityCheckDataRequest)(_: HeaderCarrier))
-          .expects(jsaEligibilityCheckDataRequest, *)
+          .fetchEligibilityData(_: JSAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .expects(jsaEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultJSA(
@@ -766,7 +762,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
-        underTest.getEligibilityData(jsaEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+        underTest.getEligibilityData(jsaEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultJSA(
             niContributionAndCreditsResult
           )
@@ -775,8 +771,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should retrieve eligibility data for ESA" in {
         (mockEmploymentSupportAllowanceDataRetrievalService
-          .fetchEligibilityData(_: ESAEligibilityCheckDataRequest)(_: HeaderCarrier))
-          .expects(esaEligibilityCheckDataRequest, *)
+          .fetchEligibilityData(_: ESAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .expects(esaEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultESA(
@@ -785,7 +781,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
-        underTest.getEligibilityData(esaEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+        underTest.getEligibilityData(esaEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultESA(
             niContributionAndCreditsResult
           )
@@ -794,8 +790,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should retrieve eligibility data for BSP Searchlight" in {
         (mockBspSearchlightDataRetrievalService
-          .fetchEligibilityData(_: BSPSearchlightEligibilityCheckDataRequest)(_: HeaderCarrier))
-          .expects(bspSearchlightEligibilityCheckDataRequest, *)
+          .fetchEligibilityData(_: BSPSearchlightEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .expects(bspSearchlightEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultBspSearchLight(
@@ -805,7 +801,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
-        underTest.getEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+        underTest
+          .getEligibilityData(bspSearchlightEligibilityCheckDataRequest, correlationId)
+          .value
+          .futureValue shouldBe Right(
           EligibilityCheckDataResultBspSearchLight(
             niContributionAndCreditsResult,
             None
@@ -815,8 +814,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should retrieve eligibility data for GYSP" in {
         (mockGetYourStatePensionDataRetrievalService
-          .fetchEligibilityData(_: GYSPEligibilityCheckDataRequest)(_: HeaderCarrier))
-          .expects(gyspEligibilityCheckDataRequest, *)
+          .fetchEligibilityData(_: GYSPEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .expects(gyspEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultGYSP(
@@ -833,7 +832,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
-        underTest.getEligibilityData(gyspEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+        underTest.getEligibilityData(gyspEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultGYSP(
             niContributionAndCreditsResult,
             BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, List(benefitSchemeDetailsResult)),
@@ -849,15 +848,15 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
       "should retrieve eligibility data for BSP" in {
         (mockBereavementSupportPaymentDataRetrievalService
-          .fetchEligibilityData(_: BSPEligibilityCheckDataRequest)(_: HeaderCarrier))
-          .expects(bspEligibilityCheckDataRequest, *)
+          .fetchEligibilityData(_: BSPEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .expects(bspEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
             )
           )
 
-        underTest.getEligibilityData(bspEligibilityCheckDataRequest).value.futureValue shouldBe Right(
+        underTest.getEligibilityData(bspEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
         )
       }

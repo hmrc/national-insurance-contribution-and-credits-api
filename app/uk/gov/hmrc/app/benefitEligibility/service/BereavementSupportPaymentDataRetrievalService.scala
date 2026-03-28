@@ -24,6 +24,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
+  CorrelationId,
   DataRetrievalServiceError,
   PaginationType
 }
@@ -54,7 +55,10 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: BSPEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] =
+  )(
+      implicit hc: HeaderCarrier,
+      correlationId: CorrelationId
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] =
 
     (
       niContributionsAndCreditsConnector.fetchContributionsAndCredits(
@@ -90,7 +94,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
 
         if (shouldPage) {
           val marriageDetailsPaginate: Option[PaginationSource] = marriageDetailsResult.getSuccess.flatMap(
-            _.marriageDetails._links.flatMap(_.self.href).map(url => PaginationSource(MarriageDetails, Some(url.value)))
+            _.marriageDetails._links.flatMap(_.self.href).map(url => PaginationSource(MarriageDetails, url.value))
           )
 
           val niContributionsCreditsPaginate = taxWindows.safeTailNel.map { remainingWindows =>
@@ -103,6 +107,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
           paginationService
             .addTask(
               BspPageTask(
+                correlationId,
                 PageTaskId(uuidGenerator.generate),
                 marriageDetailsPaging = marriageDetailsPaginate,
                 contributionAndCreditsPaging = niContributionsCreditsPaginate,

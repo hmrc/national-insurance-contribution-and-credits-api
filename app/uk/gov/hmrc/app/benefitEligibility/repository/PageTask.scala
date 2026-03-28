@@ -22,6 +22,7 @@ import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
+  CorrelationId,
   CursorId,
   DateOfBirth,
   Identifier,
@@ -48,6 +49,9 @@ case class PaginationCursor(paginationType: PaginationType, pageTaskId: PageTask
 object PaginationCursor {
   implicit val format: Format[PaginationCursor] = Json.format[PaginationCursor]
 
+  def from(paginationType: PaginationType, shouldPage: Boolean, uuid: UUID): Option[PaginationCursor] =
+    if (shouldPage) Some(PaginationCursor(paginationType, PageTaskId(uuid))) else None
+
   def from(cursorId: CursorId): Try[PaginationCursor] = {
     val maybePaginationCursor = new String(Base64.getDecoder.decode(cursorId.value))
     scala.util.Try(Json.parse(maybePaginationCursor).as[PaginationCursor])
@@ -57,7 +61,7 @@ object PaginationCursor {
 
 final case class PaginationSource(
     apiName: ApiName,
-    callBackURL: Option[String]
+    callBackURL: String
 )
 
 object PaginationSource {
@@ -69,7 +73,9 @@ object PaginationSource {
     benefitSchemeMembershipDetailsData.flatMap {
       _.schemeMembershipDetailsResult.getSuccess
         .flatMap(_.callback)
-        .map(c => PaginationSource(BenefitSchemeDetails, c.callbackURL.map(_.value)))
+        .flatMap {
+          _.callbackURL.map(url => PaginationSource(BenefitSchemeDetails, url.value))
+        }
     }
 
   def fromMarriageDetails(marriageDetailsResult: Option[MarriageDetailsResult]): Option[PaginationSource] =
@@ -77,11 +83,16 @@ object PaginationSource {
       _.getSuccess
         .map(_.marriageDetails)
         .flatMap(m => m._links.flatMap(_.self.href.map(_.value)))
-        .map(url => PaginationSource(MarriageDetails, Some(url)))
+        .map(url => PaginationSource(MarriageDetails, url))
     }
 
   def fromLiabilities(liabilitiesResult: List[LiabilityResult]): List[PaginationSource] = liabilitiesResult.flatMap {
-    _.getSuccess.flatMap(_.callback).map(c => PaginationSource(Liabilities, c.callbackURL.map(_.value)))
+    _.getSuccess
+      .flatMap(_.callback)
+      .flatMap {
+        _.callbackURL.map(url => PaginationSource(Liabilities, url.value))
+      }
+
   }
 
 }
@@ -117,6 +128,7 @@ object PageTaskId {
 }
 
 sealed trait PageTask {
+  def correlationId: CorrelationId
   def pageTaskId: PageTaskId
   def paginationType: PaginationType
   def nationalInsuranceNumber: Identifier
@@ -124,6 +136,7 @@ sealed trait PageTask {
 }
 
 final case class MaPageTask private (
+    correlationId: CorrelationId,
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
@@ -136,12 +149,14 @@ object MaPageTask {
   implicit val maPageTaskformat: OFormat[MaPageTask] = Json.format[MaPageTask]
 
   def apply(
+      correlationId: CorrelationId,
       pageTaskId: PageTaskId,
       liabilitiesPaging: List[PaginationSource],
       nationalInsuranceNumber: Identifier,
       createdAt: Instant
   ) =
     new MaPageTask(
+      correlationId,
       pageTaskId,
       PaginationType.MA,
       liabilitiesPaging,
@@ -152,6 +167,7 @@ object MaPageTask {
 }
 
 final case class BspPageTask private (
+    correlationId: CorrelationId,
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
     marriageDetailsPaging: Option[PaginationSource],
@@ -165,6 +181,7 @@ object BspPageTask {
   implicit val bspPageTaskformat: OFormat[BspPageTask] = Json.format[BspPageTask]
 
   def apply(
+      correlationId: CorrelationId,
       pageTaskId: PageTaskId,
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
@@ -172,6 +189,7 @@ object BspPageTask {
       createdAt: Instant
   ) =
     new BspPageTask(
+      correlationId,
       pageTaskId,
       PaginationType.BSP,
       marriageDetailsPaging,
@@ -183,6 +201,7 @@ object BspPageTask {
 }
 
 final case class GyspPageTask private (
+    correlationId: CorrelationId,
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
     benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
@@ -197,6 +216,7 @@ object GyspPageTask {
   implicit val gyspPageTaskformat: OFormat[GyspPageTask] = Json.format[GyspPageTask]
 
   def apply(
+      correlationId: CorrelationId,
       pageTaskId: PageTaskId,
       benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
       marriageDetailsPaging: Option[PaginationSource],
@@ -205,6 +225,7 @@ object GyspPageTask {
       createdAt: Instant
   ) =
     new GyspPageTask(
+      correlationId,
       pageTaskId,
       PaginationType.GYSP,
       benefitSchemeMembershipDetailsPaging,
@@ -243,6 +264,7 @@ object PageTask {
       paginationResult.paginationType match {
         case PaginationType.MA =>
           MaPageTask(
+            correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
             paginationResult.nationalInsuranceNumber,
@@ -250,6 +272,7 @@ object PageTask {
           )
         case PaginationType.GYSP =>
           GyspPageTask(
+            correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
             benefitSchemeMembershipDetailsPaging = PaginationSource.fromBenefitSchemeMembershipDetails(
               paginationResult.benefitSchemeMembershipDetailsData
@@ -261,6 +284,7 @@ object PageTask {
           )
         case PaginationType.BSP =>
           BspPageTask(
+            correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,

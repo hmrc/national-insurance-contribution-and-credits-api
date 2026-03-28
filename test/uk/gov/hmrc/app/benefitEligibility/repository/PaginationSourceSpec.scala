@@ -199,7 +199,7 @@ class PaginationSourceSpec
         )
 
         val result = fromBenefitSchemeMembershipDetails(Some(benefitSchemeMembershipDetailsData))
-        result shouldBe Some(PaginationSource(ApiName.BenefitSchemeDetails, Some("SomeURL")))
+        result shouldBe Some(PaginationSource(ApiName.BenefitSchemeDetails, "SomeURL"))
       }
       "should return None if successful BenefitSchemeMembershipDetailsData with No callback url" in {
         val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
@@ -473,7 +473,7 @@ class PaginationSourceSpec
         )
 
         val result = fromMarriageDetails(Some(marriageDetailsResult))
-        result shouldBe Some(PaginationSource(ApiName.MarriageDetails, Some("SomeUrl")))
+        result shouldBe Some(PaginationSource(ApiName.MarriageDetails, "SomeUrl"))
       }
       "should return None if successful MarriageDetailsResult with no callback url" in {
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
@@ -532,7 +532,7 @@ class PaginationSourceSpec
         )
 
         val result = fromLiabilities(liabilitiesResult)
-        result shouldBe List(PaginationSource(Liabilities, Some("SomeUrl")))
+        result shouldBe List(PaginationSource(Liabilities, "SomeUrl"))
       }
       "should return EmptyList if successful LiabilityResult with no callback url" in {
         val liabilitiesResult =

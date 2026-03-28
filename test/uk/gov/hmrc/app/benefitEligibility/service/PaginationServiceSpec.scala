@@ -107,9 +107,10 @@ class PaginationServiceSpec
     ".addTask" - {
       "should return a UUID" in {
         val pageTaskId1       = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, Some("SomeCallBackURLThree")))
+        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val pageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId1,
           liabilitiesPaging = paginationSource3,
           nationalInsuranceNumber,
@@ -127,9 +128,10 @@ class PaginationServiceSpec
       }
       "should return a Benefit eligibility error if upsert fails" in {
         val pageTaskId1       = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, Some("SomeCallBackURLThree")))
+        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val pageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId1,
           liabilitiesPaging = paginationSource3,
           nationalInsuranceNumber,
@@ -148,15 +150,17 @@ class PaginationServiceSpec
       "should return a new uuid if current uuid already exists in database" in {
         val uuidOne           = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, Some("SomeCallBackURLThree")))
+        val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val pageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = uuidOne,
           liabilitiesPaging = paginationSource3,
           nationalInsuranceNumber,
           createdAt = currentTimeSource.instantNow()
         )
         val newPageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = uuidTwo,
           liabilitiesPaging = paginationSource3,
           nationalInsuranceNumber,
@@ -190,12 +194,13 @@ class PaginationServiceSpec
         val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         val pageTaskId              = PageTaskId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val paginationSource1       = List(PaginationSource(ApiName.Liabilities, Some(liabilitiesCallBackUrl)))
+        val paginationSource1       = List(PaginationSource(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val pageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId,
           liabilitiesPaging = paginationSource1,
           nationalInsuranceNumber,
@@ -221,6 +226,7 @@ class PaginationServiceSpec
           .returning(EitherT.rightT(uuid))
 
         val expectedResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           PaginationType.MA,
           nationalInsuranceNumber,
           List(
@@ -245,7 +251,7 @@ class PaginationServiceSpec
         val nationalInsuranceNumber            = Identifier("GD379251T")
         val dob                                = DateOfBirth(LocalDate.parse("2025-10-10"))
 
-        val paginationSource1 = PaginationSource(ApiName.MarriageDetails, Some(marriageDetailsCallBackUrl))
+        val paginationSource1 = PaginationSource(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
         val paginationSource2 =
           ContributionAndCreditsPaging(
             NonEmptyList
@@ -262,6 +268,7 @@ class PaginationServiceSpec
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(None, None, None)
 
         val pageTask = BspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId,
           marriageDetailsPaging = Some(paginationSource1),
           contributionAndCreditsPaging = Some(paginationSource2),
@@ -296,6 +303,7 @@ class PaginationServiceSpec
           )
 
         val expected = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.BSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
@@ -331,9 +339,9 @@ class PaginationServiceSpec
 
         val schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
 
-        val paginationSource1 = PaginationSource(ApiName.MarriageDetails, Some(marriageDetailsCallBackUrl))
+        val paginationSource1 = PaginationSource(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
 
-        val paginationSource3 = PaginationSource(ApiName.BenefitSchemeDetails, Some(BenefitSchemeCallBackUrl))
+        val paginationSource3 = PaginationSource(ApiName.BenefitSchemeDetails, BenefitSchemeCallBackUrl)
 
         val marriageDetailsSuccessResponse =
           MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
@@ -459,6 +467,7 @@ class PaginationServiceSpec
           BenefitSchemeDetailsSuccessResponse(benefitSchemeDetails, List())
 
         val pageTask = GyspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId,
           benefitSchemeMembershipDetailsPaging = Some(paginationSource3),
           marriageDetailsPaging = Some(paginationSource1),
@@ -500,10 +509,10 @@ class PaginationServiceSpec
           )
 
         (mockSchemeMembershipDetailsConnector
-          .fetchSchemeMembershipDetails(_: BenefitType, _: Identifier)(
+          .fetchData(_: BenefitType, _: String)(
             _: HeaderCarrier
           ))
-          .expects(BenefitType.GYSP, nationalInsuranceNumber, *)
+          .expects(BenefitType.GYSP, *, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, schemeMembershipDetailsSuccessResponse)
@@ -522,6 +531,7 @@ class PaginationServiceSpec
           )
 
         val expected = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.GYSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
@@ -661,12 +671,13 @@ class PaginationServiceSpec
         val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         val pageTaskId              = PageTaskId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val paginationSource1       = List(PaginationSource(ApiName.Liabilities, Some(liabilitiesCallBackUrl)))
+        val paginationSource1       = List(PaginationSource(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val pageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId,
           liabilitiesPaging = paginationSource1,
           nationalInsuranceNumber,

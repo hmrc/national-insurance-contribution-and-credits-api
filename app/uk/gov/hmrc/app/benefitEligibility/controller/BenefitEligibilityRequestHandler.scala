@@ -44,11 +44,15 @@ object BenefitEligibilityRequestHandler {
 
   def handleStandardRequest(
       request: Request[AnyContent],
-      fn: EligibilityCheckDataRequest => EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult]
+      fn: (EligibilityCheckDataRequest, CorrelationId) => EitherT[
+        Future,
+        BenefitEligibilityError,
+        EligibilityCheckDataResult
+      ]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (
-      processHeaders(request) match {
-        case Right(_) =>
+      getCorrelationId(request) match {
+        case Right(correlationId) =>
           request.body.asJson match {
             case Some(requestJson) =>
               requestJson.validate[EligibilityCheckDataRequest] match {
@@ -67,7 +71,7 @@ object BenefitEligibilityRequestHandler {
                         )
                       )
                     case Right(value) =>
-                      fn(eligibilityCheckDataRequest).map { result =>
+                      fn(eligibilityCheckDataRequest, correlationId).map { result =>
                         BenefitEligibilityInfoResponse.from(
                           eligibilityCheckDataRequest.nationalInsuranceNumber,
                           result
@@ -124,7 +128,7 @@ object BenefitEligibilityRequestHandler {
       request: Request[AnyContent],
       paginationFunction: (PageTaskId) => EitherT[Future, BenefitEligibilityError, PaginationResult]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
-    (processHeaders(request) match {
+    (getCorrelationId(request) match {
       case Right(_) =>
         val maybeNextCursor =
           request.queryString
@@ -182,24 +186,22 @@ object BenefitEligibilityRequestHandler {
       case Right(response) => response
     }
 
-  private[controller] def processHeaders(request: Request[AnyContent])(
+  private[controller] def getCorrelationId(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier,
       executionContext: ExecutionContext
-  ): Either[ErrorReason, SuccessfulResult.type] =
+  ): Either[ErrorReason, CorrelationId] =
     request.headers.get("CorrelationId") match {
       case None =>
         logger.error("Missing header CorrelationID")
         Left(
           ErrorReason("Missing Header CorrelationId")
         )
-      case Some(value) =>
-        RequestValidations.validateCorrelationId(value) match {
-          case Right(success) => Right(success)
+      case Some(correlationId) =>
+        RequestValidations.validateCorrelationId(correlationId) match {
+          case Right(id) => Right(id)
           case Left(error) =>
             logger.error("Correlation Id is not a valid UUID")
-            Left(
-              ErrorReason(error.errors.mkString(","))
-            )
+            Left(error)
         }
     }
 

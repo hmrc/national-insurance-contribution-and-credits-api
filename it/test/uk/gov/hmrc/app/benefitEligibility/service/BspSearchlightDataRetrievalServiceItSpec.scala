@@ -46,7 +46,6 @@ import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
-
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
@@ -69,6 +68,7 @@ import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMock
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class BspSearchlightDataRetrievalServiceItSpec
@@ -86,6 +86,8 @@ class BspSearchlightDataRetrievalServiceItSpec
     timeout = Span(10, Seconds),
     interval = Span(100, Millis)
   )
+
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

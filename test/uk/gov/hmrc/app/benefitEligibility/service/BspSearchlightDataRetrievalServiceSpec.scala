@@ -43,6 +43,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
   BenefitType,
+  CorrelationId,
   DateOfBirth,
   EndTaxYear,
   Identifier,
@@ -66,6 +67,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.BSPSearchlightEligibilit
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
+import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
@@ -75,6 +77,8 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]

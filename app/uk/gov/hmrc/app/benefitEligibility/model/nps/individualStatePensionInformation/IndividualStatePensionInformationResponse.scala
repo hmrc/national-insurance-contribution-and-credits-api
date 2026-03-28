@@ -103,30 +103,6 @@ object IndividualStatePensionInformationSuccess {
     implicit val reads: Format[ClassThreePayableByPenalty] = Json.valueFormat[ClassThreePayableByPenalty]
   }
 
-  case class ClassTwoPayable(value: BigDecimal) extends AnyVal
-
-  object ClassTwoPayable {
-    implicit val reads: Format[ClassTwoPayable] = Json.valueFormat[ClassTwoPayable]
-  }
-
-  case class ClassTwoPayableBy(value: String) extends AnyVal
-
-  object ClassTwoPayableBy {
-    implicit val reads: Format[ClassTwoPayableBy] = Json.valueFormat[ClassTwoPayableBy]
-  }
-
-  case class ClassTwoPayableByPenalty(value: String) extends AnyVal
-
-  object ClassTwoPayableByPenalty {
-    implicit val reads: Format[ClassTwoPayableByPenalty] = Json.valueFormat[ClassTwoPayableByPenalty]
-  }
-
-  case class ClassTwoOutstandingWeeks(value: Int) extends AnyVal
-
-  object ClassTwoOutstandingWeeks {
-    implicit val reads: Format[ClassTwoOutstandingWeeks] = Json.valueFormat[ClassTwoOutstandingWeeks]
-  }
-
   case class TotalPrimaryContributions(value: BigDecimal) extends AnyVal
 
   object TotalPrimaryContributions {
@@ -199,10 +175,6 @@ object IndividualStatePensionInformationSuccess {
       classThreePayable: Option[ClassThreePayable],
       classThreePayableBy: Option[ClassThreePayableBy],
       classThreePayableByPenalty: Option[ClassThreePayableByPenalty],
-      classTwoPayable: Option[ClassTwoPayable],
-      classTwoPayableBy: Option[ClassTwoPayableBy],
-      classTwoPayableByPenalty: Option[ClassTwoPayableByPenalty],
-      classTwoOutstandingWeeks: Option[ClassTwoOutstandingWeeks],
       totalPrimaryContributions: Option[TotalPrimaryContributions],
       niEarnings: Option[NiEarnings],
       coClassOnePaid: Option[CoClassOnePaid],
@@ -219,7 +191,7 @@ object IndividualStatePensionInformationSuccess {
   }
 
   case class IndividualStatePensionInformationSuccessResponse(
-      identifier: Identifier,
+      nationalInsuranceNumber: Identifier,
       numberOfQualifyingYears: Option[NumberOfQualifyingYears],
       nonQualifyingYears: Option[NonQualifyingYears],
       yearsToFinalRelevantYear: Option[YearsToFinalRelevantYear],

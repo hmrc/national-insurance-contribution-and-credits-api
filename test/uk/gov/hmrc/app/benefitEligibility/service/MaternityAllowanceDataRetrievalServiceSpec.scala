@@ -86,6 +86,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
     override def instantNow(): Instant = testInstant
   }
@@ -196,8 +198,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val paging = MaPageTask(
+    correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
-    List(PaginationSource(ApiName.Liabilities, Some("/some/url"))),
+    List(PaginationSource(ApiName.Liabilities, "/some/url")),
     identifier,
     testInstant
   )

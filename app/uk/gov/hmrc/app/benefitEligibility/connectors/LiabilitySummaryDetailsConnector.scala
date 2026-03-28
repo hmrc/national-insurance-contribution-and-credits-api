@@ -85,7 +85,7 @@ class LiabilitySummaryDetailsConnector @Inject() (
 
     val path =
       RequestBuilder.buildPath(
-        s"${appConfig.baseUrl(apiName)}/person/${identifier.value}/liability-summary/${liabilitySearchCategoryHyphenated.entryName}",
+        s"/person/${identifier.value}/liability-summary/${liabilitySearchCategoryHyphenated.entryName}",
         options
       )
 
@@ -96,8 +96,9 @@ class LiabilitySummaryDetailsConnector @Inject() (
       benefitType: BenefitType,
       path: String
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, LiabilityResult] =
+
     npsClient
-      .get(path)
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

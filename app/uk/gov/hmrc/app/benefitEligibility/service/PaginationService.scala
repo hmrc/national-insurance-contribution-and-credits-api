@@ -19,7 +19,13 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, DatabaseError, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  BenefitType,
+  CorrelationId,
+  DatabaseError,
+  Identifier
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
@@ -50,9 +56,16 @@ class PaginationService @Inject() (
     def createNewPageTask(pageTask: PageTask) = {
       val newPageTask: PageTask = pageTask match {
         case m: MaPageTask =>
-          MaPageTask(PageTaskId(uuidGenerator.generate), m.liabilitiesPaging, m.nationalInsuranceNumber, m.createdAt)
+          MaPageTask(
+            m.correlationId,
+            PageTaskId(uuidGenerator.generate),
+            m.liabilitiesPaging,
+            m.nationalInsuranceNumber,
+            m.createdAt
+          )
         case b: BspPageTask =>
           BspPageTask(
+            b.correlationId,
             PageTaskId(uuidGenerator.generate),
             b.marriageDetailsPaging,
             b.contributionAndCreditsPaging,
@@ -61,6 +74,7 @@ class PaginationService @Inject() (
           )
         case g: GyspPageTask =>
           GyspPageTask(
+            g.correlationId,
             PageTaskId(uuidGenerator.generate),
             g.benefitSchemeMembershipDetailsPaging,
             g.marriageDetailsPaging,
@@ -95,13 +109,12 @@ class PaginationService @Inject() (
         case task: BspPageTask  => processBspPageTask(task)
         case task: GyspPageTask => processGyspPageTask(task)
       }
-      paginationResultWithCursor = paginationResult.setNextCursor(uuidGenerator.generate)
       _ <- PageTask
-        .createPaginatingTask(paginationResultWithCursor, currentTime)
+        .createPaginatingTask(paginationResult, currentTime)
         .fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>
           pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask).map(_ => ())
         )
-    } yield paginationResultWithCursor
+    } yield paginationResult
   }
 
   private[service] def processMaPageTask(
@@ -109,22 +122,22 @@ class PaginationService @Inject() (
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for MA")
     maPageTask.liabilitiesPaging
-      .flatMap(_.callBackURL)
-      .map { callBackURL =>
+      .map { pageSource =>
         liabilitySummaryDetailsConnector
-          .fetchData(BenefitType.from(maPageTask.paginationType), callBackURL)
+          .fetchData(BenefitType.from(maPageTask.paginationType), pageSource.callBackURL)
       }
       .sequence
       .map { result =>
         PaginationResult(
+          correlationId = maPageTask.correlationId,
           paginationType = maPageTask.paginationType,
-          maPageTask.nationalInsuranceNumber,
+          nationalInsuranceNumber = maPageTask.nationalInsuranceNumber,
           liabilitiesResult = result,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
-          None
-        )
+          nextCursor = None
+        ).setNextCursor(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process MA task with $error")
@@ -146,6 +159,7 @@ class PaginationService @Inject() (
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult) =>
         PaginationResult(
+          correlationId = bspPageTask.correlationId,
           paginationType = bspPageTask.paginationType,
           nationalInsuranceNumber = bspPageTask.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
@@ -156,7 +170,7 @@ class PaginationService @Inject() (
           liabilitiesResult = Nil,
           benefitSchemeMembershipDetailsData = None,
           None
-        )
+        ).setNextCursor(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process BSP task with $error")
@@ -177,9 +191,9 @@ class PaginationService @Inject() (
       pageTask.benefitSchemeMembershipDetailsPaging
         .map { page =>
           schemeMembershipDetailsConnector
-            .fetchSchemeMembershipDetails(
+            .fetchData(
               benefitType = BenefitType.from(pageTask.paginationType),
-              nationalInsuranceNumber = pageTask.nationalInsuranceNumber
+              path = page.callBackURL
             )
             .flatMap {
               case detailsResult @ NpsApiResult.FailureResult(apiName, result) =>
@@ -219,6 +233,7 @@ class PaginationService @Inject() (
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult, benefitSchemeMembershipDetailsData) =>
         PaginationResult(
+          correlationId = gyspPageTask.correlationId,
           paginationType = gyspPageTask.paginationType,
           gyspPageTask.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
@@ -229,7 +244,7 @@ class PaginationService @Inject() (
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
           liabilitiesResult = Nil,
           None
-        )
+        ).setNextCursor(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process GYSP task with $error")
@@ -242,8 +257,7 @@ class PaginationService @Inject() (
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
     marriageDetailsPaging
-      .flatMap(_.callBackURL)
-      .map(callBackURL => marriageDetailsConnector.fetchMarriageDetailsData(callBackURL))
+      .map(paginationSource => marriageDetailsConnector.fetchMarriageDetailsData(paginationSource.callBackURL))
       .sequence
   }
 

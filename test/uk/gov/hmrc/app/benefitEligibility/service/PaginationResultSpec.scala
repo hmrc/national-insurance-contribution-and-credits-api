@@ -41,8 +41,11 @@ class PaginationResultSpec
 
   val nationalInsuranceNumber = Identifier("AB123456C")
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   "PaginationResult" - {
     val paginationResultWithNextCursor = PaginationResult(
+      correlationId,
       paginationType = PaginationType.MA,
       nationalInsuranceNumber,
       liabilitiesResult = List(
@@ -59,6 +62,7 @@ class PaginationResultSpec
     )
 
     val paginationResultWithoutNextCursor = PaginationResult(
+      correlationId,
       paginationType = PaginationType.MA,
       nationalInsuranceNumber,
       liabilitiesResult = List(
@@ -74,6 +78,7 @@ class PaginationResultSpec
     )
 
     val paginationResultNoPaging = PaginationResult(
+      correlationId,
       paginationType = PaginationType.MA,
       nationalInsuranceNumber,
       liabilitiesResult = List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
@@ -84,6 +89,7 @@ class PaginationResultSpec
     )
 
     val paginationResultWithFailure = PaginationResult(
+      correlationId,
       paginationType = PaginationType.MA,
       nationalInsuranceNumber,
       liabilitiesResult = List(

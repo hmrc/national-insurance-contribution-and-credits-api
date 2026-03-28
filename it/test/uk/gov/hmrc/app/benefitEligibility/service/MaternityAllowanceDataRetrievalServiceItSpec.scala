@@ -101,6 +101,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
     interval = Span(100, Millis)
   )
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   lazy val app: Application =
     GuiceApplicationBuilder()
       .overrides(
