@@ -90,6 +90,7 @@ import uk.gov.hmrc.app.benefitEligibility.service.{
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 
 import java.time.LocalDate
+import java.util.UUID
 import scala.util.Random
 
 class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with MockFactory with EitherValues {
@@ -518,7 +519,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
   )
 
   val individualStatePensionInformationSuccessResponse = IndividualStatePensionInformationSuccessResponse(
-    identifier = Identifier("AA000001A"),
+    nationalInsuranceNumber = Identifier("AA000001A"),
     numberOfQualifyingYears = Some(NumberOfQualifyingYears(35)),
     nonQualifyingYears = Some(NonQualifyingYears(5)),
     yearsToFinalRelevantYear = Some(YearsToFinalRelevantYear(3)),
@@ -535,10 +536,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           classThreePayable = Some(ClassThreePayable(BigDecimal("824.20"))),
           classThreePayableBy = Some(ClassThreePayableBy("2028-04-05")),
           classThreePayableByPenalty = Some(ClassThreePayableByPenalty("2030-04-05")),
-          classTwoPayable = Some(ClassTwoPayable(BigDecimal("164.25"))),
-          classTwoPayableBy = Some(ClassTwoPayableBy("2028-01-31")),
-          classTwoPayableByPenalty = Some(ClassTwoPayableByPenalty("2030-01-31")),
-          classTwoOutstandingWeeks = Some(ClassTwoOutstandingWeeks(12)),
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("3456.78"))),
           niEarnings = Some(NiEarnings(BigDecimal("45000.00"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("1234.56"))),
@@ -576,10 +573,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           classThreePayable = Some(ClassThreePayable(BigDecimal("876.80"))),
           classThreePayableBy = Some(ClassThreePayableBy("2029-04-05")),
           classThreePayableByPenalty = Some(ClassThreePayableByPenalty("2031-04-05")),
-          classTwoPayable = Some(ClassTwoPayable(BigDecimal("175.60"))),
-          classTwoPayableBy = Some(ClassTwoPayableBy("2029-01-31")),
-          classTwoPayableByPenalty = Some(ClassTwoPayableByPenalty("2031-01-31")),
-          classTwoOutstandingWeeks = Some(ClassTwoOutstandingWeeks(35)),
           totalPrimaryContributions = Some(TotalPrimaryContributions(BigDecimal("2987.45"))),
           niEarnings = Some(NiEarnings(BigDecimal("38500.25"))),
           coClassOnePaid = Some(CoClassOnePaid(BigDecimal("987.65"))),
@@ -2096,6 +2089,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)))
         val paginationResult: PaginationResult =
           PaginationResult(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PaginationType.MA,
             nationalInsuranceNumber,
             liabilityResult,
@@ -2124,6 +2118,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val liabilityResult: List[LiabilityResult] = List()
         val paginationResult: PaginationResult =
           PaginationResult(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PaginationType.BSP,
             nationalInsuranceNumber,
             liabilityResult,
@@ -2151,6 +2146,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val liabilityResult: List[LiabilityResult] = List()
         val paginationResult: PaginationResult =
           PaginationResult(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PaginationType.GYSP,
             nationalInsuranceNumber,
             liabilityResult,

@@ -71,8 +71,9 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
 
   def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     val updates = pageTask match {
-      case MaPageTask(id, paginationType, liabilitiesPaging, nationalInsuranceNumber, createdAt) =>
+      case MaPageTask(correlationId, id, paginationType, liabilitiesPaging, nationalInsuranceNumber, createdAt) =>
         Updates.combine(
+          Updates.set("correlationId", Codecs.toBson(correlationId)),
           Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
@@ -80,6 +81,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
       case BspPageTask(
+            correlationId,
             id,
             paginationType,
             marriageDetailsPaging,
@@ -88,6 +90,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
             createdAt
           ) =>
         Updates.combine(
+          Updates.set("correlationId", Codecs.toBson(correlationId)),
           Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
@@ -96,6 +99,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
       case GyspPageTask(
+            correlationId,
             id,
             paginationType,
             benefitSchemeMembershipDetailsPaging,
@@ -105,6 +109,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
             createdAt
           ) =>
         Updates.combine(
+          Updates.set("correlationId", Codecs.toBson(correlationId)),
           Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("benefitSchemeMembershipDetailsPaging", Codecs.toBson(benefitSchemeMembershipDetailsPaging)),

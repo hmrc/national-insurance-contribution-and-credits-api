@@ -89,6 +89,8 @@ class PaginationServiceItSpec
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   lazy val app: Application =
     GuiceApplicationBuilder()
       .overrides(
@@ -119,18 +121,20 @@ class PaginationServiceItSpec
 
   val listOfPages: List[PageTask] = List(
     MaPageTask(
+      correlationId,
       PageTaskId(uuidOne),
       List(
-        PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-        PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+        PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+        PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
       ),
       nationalInsuranceNumber,
       currentTimeSource.instantNow()
     ),
     BspPageTask(
+      correlationId,
       PageTaskId(uuidTwo),
       Some(
-        PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+        PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
       ),
       Some(
         ContributionAndCreditsPaging(
@@ -142,15 +146,16 @@ class PaginationServiceItSpec
       currentTimeSource.instantNow()
     ),
     GyspPageTask(
+      correlationId,
       PageTaskId(uuidThree),
       Some(
         PaginationSource(
-          ApiName.BenefitSchemeDetails,
-          Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+          ApiName.SchemeMembershipDetails,
+          schemeMembershipDetailsPath
         )
       ),
       Some(
-        PaginationSource(MarriageDetails, Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath"))
+        PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
       ),
       Some(
         ContributionAndCreditsPaging(
@@ -174,6 +179,7 @@ class PaginationServiceItSpec
         deleteAll().futureValue
         val pageTask: MaPageTask =
           MaPageTask(
+            correlationId,
             PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
             List(),
             nationalInsuranceNumber,
@@ -190,19 +196,21 @@ class PaginationServiceItSpec
         val uuidTwo = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
 
         val pageTask = MaPageTask(
+          correlationId,
           PageTaskId(uuidOne),
           List(
-            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
           ),
           nationalInsuranceNumber,
           currentTimeSource.instantNow()
         )
         val newPageTask = MaPageTask(
+          correlationId,
           uuidTwo,
           List(
-            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-            PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
           ),
           nationalInsuranceNumber,
           currentTimeSource.instantNow()
@@ -233,7 +241,7 @@ class PaginationServiceItSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
         val paginationSource2 =
-          PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+          PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
         val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
           Some(
             List(
@@ -276,6 +284,7 @@ class PaginationServiceItSpec
         service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           Right(
             PaginationResult(
+              correlationId,
               paginationType = PaginationType.MA,
               nationalInsuranceNumber,
               liabilitiesResult = List(
@@ -293,7 +302,7 @@ class PaginationServiceItSpec
       "should process Bsp pagination task successfully" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
 
-        val paginationSource1 = PaginationSource(MarriageDetails, Some("CallBackUrl1"))
+        val paginationSource1 = PaginationSource(MarriageDetails, "/CallBackUrl1")
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -366,6 +375,7 @@ class PaginationServiceItSpec
         service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
           Right(
             PaginationResult(
+              correlationId,
               paginationType = PaginationType.BSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
@@ -624,6 +634,7 @@ class PaginationServiceItSpec
         service.paginate(PageTaskId(uuidThree)).value.futureValue shouldBe
           Right(
             PaginationResult(
+              correlationId,
               paginationType = PaginationType.GYSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
@@ -640,11 +651,12 @@ class PaginationServiceItSpec
       "should process Ma pagination task successfully and delete MA page" in {
         val newListOfPages = List(
           BspPageTask(
+            correlationId,
             PageTaskId(uuidTwo),
             Some(
               PaginationSource(
                 MarriageDetails,
-                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+                npsIndividualMarriageDetailsPath
               )
             ),
             Some(
@@ -657,17 +669,18 @@ class PaginationServiceItSpec
             currentTimeSource.instantNow()
           ),
           GyspPageTask(
+            correlationId,
             PageTaskId(uuidThree),
             Some(
               PaginationSource(
-                ApiName.BenefitSchemeDetails,
-                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+                ApiName.SchemeMembershipDetails,
+                schemeMembershipDetailsPath
               )
             ),
             Some(
               PaginationSource(
                 MarriageDetails,
-                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+                npsIndividualMarriageDetailsPath
               )
             ),
             Some(
@@ -724,6 +737,7 @@ class PaginationServiceItSpec
         service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           Right(
             PaginationResult(
+              correlationId,
               paginationType = PaginationType.MA,
               nationalInsuranceNumber,
               liabilitiesResult = List(
@@ -743,26 +757,28 @@ class PaginationServiceItSpec
       "should process Bsp pagination task successfully and delete BSP page" in {
         val newListOfPages = List(
           MaPageTask(
+            correlationId,
             PageTaskId(uuidOne),
             List(
-              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
             nationalInsuranceNumber,
             currentTimeSource.instantNow()
           ),
           GyspPageTask(
+            correlationId,
             PageTaskId(uuidThree),
             Some(
               PaginationSource(
-                ApiName.BenefitSchemeDetails,
-                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+                ApiName.SchemeMembershipDetails,
+                schemeMembershipDetailsPath
               )
             ),
             Some(
               PaginationSource(
                 MarriageDetails,
-                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+                npsIndividualMarriageDetailsPath
               )
             ),
             Some(
@@ -843,6 +859,7 @@ class PaginationServiceItSpec
         service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
           Right(
             PaginationResult(
+              correlationId,
               paginationType = PaginationType.BSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
@@ -861,20 +878,22 @@ class PaginationServiceItSpec
       "should process Gysp pagination task successfully and delete GYSP page" in {
         val newListOfPages = List(
           MaPageTask(
+            correlationId,
             PageTaskId(uuidOne),
             List(
-              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath")),
-              PaginationSource(Liabilities, Some(s"http://localhost:${server.port}$npsLiabilitySummaryDetailsPath"))
+              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
             nationalInsuranceNumber,
             currentTimeSource.instantNow()
           ),
           BspPageTask(
+            correlationId,
             PageTaskId(uuidTwo),
             Some(
               PaginationSource(
                 MarriageDetails,
-                Some(s"http://localhost:${server.port}$npsIndividualMarriageDetailsPath")
+                npsIndividualMarriageDetailsPath
               )
             ),
             Some(
@@ -1055,7 +1074,6 @@ class PaginationServiceItSpec
             privatePensionSchemeSanctionDate = Some(PrivatePensionSchemeSanctionDate("1985-04-06")),
             currentOptimisticLock = CurrentOptimisticLock(4),
             schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
-            schemeInhibitionStatus = SchemeInhibitionStatus.ConvertedStakeholderPension,
             reconciliationDate = Some(ReconciliationDate("2025-03-31")),
             schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
           ),
@@ -1064,7 +1082,6 @@ class PaginationServiceItSpec
               schemeAddressType = Some(SchemeAddressType.GeneralCorrespondence),
               schemeAddressSequenceNumber = SchemeAddressSequenceNumber(5),
               schemeAddressStartDate = Some(SchemeAddressStartDate("2010-01-01")),
-              schemeAddressEndDate = Some(SchemeAddressEndDate("2024-12-31")),
               country = Some(Country.Scotland),
               areaDiallingCode = Some(AreaDiallingCode.Code0131), // Note: This would need to be added to the enum
               schemeTelephoneNumber = Some(SchemeTelephoneNumber("0131 000 0000")),
@@ -1127,6 +1144,7 @@ class PaginationServiceItSpec
         service.paginate(PageTaskId(uuidThree)).value.futureValue shouldBe
           Right(
             PaginationResult(
+              correlationId,
               paginationType = PaginationType.GYSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),

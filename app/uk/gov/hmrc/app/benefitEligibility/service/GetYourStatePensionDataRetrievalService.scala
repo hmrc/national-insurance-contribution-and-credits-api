@@ -82,7 +82,10 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: GYSPEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultGYSP] = {
+  )(
+      implicit hc: HeaderCarrier,
+      correlationId: CorrelationId
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultGYSP] = {
 
     implicit val requestKey: RequestKey =
       RequestKey(eligibilityCheckDataRequest.benefitType, eligibilityCheckDataRequest.nationalInsuranceNumber)
@@ -126,12 +129,12 @@ class GetYourStatePensionDataRetrievalService @Inject() (
             val marriageDetailsPaginate = marriageDetailsResult.getSuccess.flatMap(
               _.marriageDetails._links
                 .flatMap(_.self.href)
-                .map(url => PaginationSource(MarriageDetails, Some(url.value)))
+                .map(url => PaginationSource(MarriageDetails, url.value))
             )
 
             val benefitSchemeDetailsPaginate =
               benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.flatMap(
-                _.callback.flatMap(_.callbackURL).map(url => PaginationSource(SchemeMembershipDetails, Some(url.value)))
+                _.callback.flatMap(_.callbackURL).map(url => PaginationSource(SchemeMembershipDetails, url.value))
               )
 
             val niContributionsCreditsPaginate = taxWindows.safeTailNel.map { remainingWindows =>
@@ -144,6 +147,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
             paginationService
               .addTask(
                 GyspPageTask(
+                  correlationId,
                   PageTaskId(uuidGenerator.generate),
                   benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
                   marriageDetailsPaging = marriageDetailsPaginate,

@@ -21,7 +21,7 @@ import cats.instances.future.*
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataRequest
@@ -37,7 +37,10 @@ class JobSeekersAllowanceDataRetrievalService @Inject() (
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: JSAEligibilityCheckDataRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultJSA] =
+  )(
+      implicit hc: HeaderCarrier,
+      correlationId: CorrelationId
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultJSA] =
 
     niContributionsAndCreditsConnector
       .fetchContributionsAndCredits(

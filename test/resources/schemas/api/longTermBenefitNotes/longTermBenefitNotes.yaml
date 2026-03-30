@@ -4,7 +4,7 @@ info:
   description: |
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 0.0.3 Draft
+  version: 0.0.4 Draft
   x-integration-catalogue:
     reviewed-date: 2026-01-13T08:46:54Z
     short-description: Long Term Benefit Notes
@@ -30,7 +30,7 @@ security:
   - oAuth2:
       - read:retrieve-ltb-notes
 paths:
-  /long-term-benefits/{identifier}/calculation/{type}/notes/{seqNo}:
+  /long-term-benefits/{nino}/calculation/{type}/notes/{seqNo}:
     get:
       tags:
         - Long term Benefit
@@ -46,7 +46,7 @@ paths:
         - $ref: '#/components/parameters/govUkUserId'
         - $ref: '#/components/parameters/govUkUserName'
         - $ref: '#/components/parameters/govUkJobRole'
-        - $ref: '#/components/parameters/Identifier'
+        - $ref: '#/components/parameters/FullNationalInsuranceNumber'
         - $ref: '#/components/parameters/AssociatedCalculationSequenceNumber'
         - $ref: '#/components/parameters/BenefitType'
       responses:
@@ -389,11 +389,14 @@ components:
       minLength: 4
       type: string
       example: Social
-    identifier:
-      description: |
-        NINO (with optional suffix A?D) or TRN (2 digits + 1 uppercase letter + 5 digits).
-      pattern: "^(((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)|([0-9]{2}[A-Z]{1}[0-9]{5}))$"
+    nationalInsuranceNumberAndSuffix:
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
+      maxLength: 9
+      minLength: 8
+      pattern: "^((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)$"
       type: string
+      example: AA000001A
     associatedCalculationSequenceNumber:
       description: Unique sequence number representing the position in the associated
         calculation history (i.e. row) of the associated calculation details entry
@@ -627,26 +630,26 @@ components:
       description: A unique job role for the user.
       schema:
         $ref: '#/components/schemas/govUkJobRole'
-    Identifier:
-      name: identifier
+    FullNationalInsuranceNumber:
+      name: nino
       in: path
-      description: |
-        The identifier of which could be either a Temporary Reference Number (TRN) or a National Insurance Number (NINO).
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
       required: true
       schema:
-        $ref: '#/components/schemas/identifier'
+        $ref: '#/components/schemas/nationalInsuranceNumberAndSuffix'
     AssociatedCalculationSequenceNumber:
       name: seqNo
       in: path
       description: |
-        Unique sequence number representing the position in the associated calculation history (i.e. row) of the associated calculation details entry for this individual - this would only be populated if the previous call did not transfer all of the data i.e. there are more rows marked to be collected still.
+        Unique sequence number representing the position in the associated calculation history (i.e. row) of the associated calculation details entry for this individual.
       required: true
       schema:
         $ref: '#/components/schemas/associatedCalculationSequenceNumber'
     BenefitType:
       name: type
       in: path
-      description: Denotes the benefit type.
+      description: Denotes the type of benefit that is being claimed by the individual.
       required: true
       schema:
         $ref: '#/components/schemas/benefitType'

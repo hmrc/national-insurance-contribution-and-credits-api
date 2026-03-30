@@ -51,6 +51,7 @@ paths:
         - $ref: '#/components/parameters/govUkUserId'
         - $ref: '#/components/parameters/govUkUserName'
         - $ref: '#/components/parameters/govUkJobRole'
+        - $ref: '#/components/parameters/resourceGroupId'
         - $ref: '#/components/parameters/NationalInsuranceNumber'
         - $ref: '#/components/parameters/SchemeMembershipSequenceNumberQuery'
         - $ref: '#/components/parameters/SchemeMembershipTransferSequenceNumberQuery'
@@ -66,92 +67,78 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetSchemeMembershipDetailsResponse'
               examples:
-                minimallyPopulatedResponse:
-                  summary: Minimally populated response
-                  value:
-                    schemeMembershipDetailsSummaryList:
-                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
-                        schemeMembershipDetails:
-                          nationalInsuranceNumber: AA000001
-                          schemeMembershipSequenceNumber: 1
-                          schemeMembershipStartDate: 1993-11-01
-                          furtherPaymentsConfirmation: FURTHER PAYMENT ALLOWED
-                          survivorStatus: NOT APPLICABLE
-                          revaluationApplied: false
-                          stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
-                          stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
-                          apparentUnnotifiedTerminationStatus: No Apparent Unnotified
-                            Termination
-                          inhibitSchemeProcessing: false
-                          clericalCalculationInvolved: NO CLERICAL CALCULATION INVOLVED
-                          clericallyControlledTotal: 0.0
-                          clericallyControlledTotalPost1988: 0.0
-                          enforcementStatus: NOT ENFORCED
-                          stateSchemePremiumDeemed: SSP TYPE RECEIVABLES TO BE TREAT
-                            AS DEEMED
-                          schemeMembershipOccurrenceNumber: 9
-                          schemeMembershipTransferSequenceNumber: 2
-                          employersContractedOutNumberDetails: E3900000M
-                          schemeTerminatingContractedOutNumberDetails: S4200091P
-                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
-                        schemeMembershipDetails:
-                          nationalInsuranceNumber: AA000001
-                          schemeMembershipSequenceNumber: 1
-                          schemeMembershipStartDate: 1993-04-06
-                          methodOfPreservationType: TRANSFER FROM COSR TO COSR (3)
-                          totalLinkedGuaranteedMinimumPensionContractedOutDeductions: 0.14
-                          accruedPensionContractedOutDeductionsValue: 0.14
-                          totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988: 0.14
-                          accruedPensionContractedOutDeductionsValuePost1988: 0.14
-                          revaluationRate: LIMITED
-                          guaranteedMinimumPensionReconciliationStatus: RECONCILIATION
-                            ACTION NOT TAKEN
-                          finalYearEarnings: 1733.0
-                          retrospectiveEarnings: 0.0
-                          furtherPaymentsConfirmation: FURTHER PAYMENT ALLOWED
-                          survivorStatus: NOT APPLICABLE
-                          revaluationApplied: false
-                          stateEarningsRelatedPensionsSchemeNonRestorationValue: 0.0
-                          stateEarningsRelatedPensionsSchemeValuePost1988: 0.0
-                          apparentUnnotifiedTerminationStatus: No Apparent Unnotified
-                            Termination
-                          terminationMicrofilmNumber: 44012399
-                          inhibitSchemeProcessing: false
-                          clericalCalculationInvolved: NO CLERICAL CALCULATION INVOLVED
-                          clericallyControlledTotal: 0.0
-                          clericallyControlledTotalPost1988: 0.0
-                          enforcementStatus: NOT ENFORCED
-                          stateSchemePremiumDeemed: SSP TYPE RECEIVABLES TO BE TREAT
-                            AS DEEMED
-                          schemeMembershipOccurrenceNumber: 4
-                          schemeMembershipTransferSequenceNumber: 2
-                          employersContractedOutNumberDetails: E3022666E
-                          schemeTerminatingContractedOutNumberDetails: S4002629K
-                          importingAppropriateSchemeNumberDetails: S4200091P
                 maximallyPopulatedResponse:
-                  summary: Maximally populated response. Converted Scheme.
+                  summary: With all response properties
                   value:
-                    schemeMembershipDetailsSummaryList:
-                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
-                        schemeMembershipDetails:
-                          nationalInsuranceNumber: AA000001
-                          schemeMembershipSequenceNumber: 1
-                          schemeMembershipOccurrenceNumber: 4
-                          schemeMembershipTransferSequenceNumber: 10
-                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
-                        schemeMembershipDetails:
-                          nationalInsuranceNumber: AA000001
-                          schemeMembershipSequenceNumber: 1
-                          schemeMembershipOccurrenceNumber: 4
-                          schemeMembershipTransferSequenceNumber: 9
-                      - stakeholderPensionSchemeType: Non-Stakeholder Pension
-                        schemeMembershipDetails:
-                          nationalInsuranceNumber: AA000001
-                          schemeMembershipSequenceNumber: 1
-                          schemeMembershipOccurrenceNumber: 4
-                          schemeMembershipTransferSequenceNumber: 8
                     callback:
                       callbackURL: /benefit-scheme/AA000001/scheme-membership-details?seqNo=1&occurrenceNo=4&transferSeqNo=8
+                    schemeMembershipDetailsSummaryList:
+                      - schemeMembershipDetails:
+                          accruedPensionContractedOutDeductionsValue: 10.56
+                          accruedPensionContractedOutDeductionsValuePost1988: 10.56
+                          actualTransferValue: 10.56
+                          apparentUnnotifiedTerminationStatus: No Apparent Unnotified
+                            Termination
+                          apparentUnnotifiedTerminationDestinationDetails: S2123456B
+                          certifiedAmount: 10.56
+                          clericalCalculationInvolved: NO CLERICAL CALCULATION INVOLVED
+                          clericallyControlledTotal: 10.56
+                          clericallyControlledTotalPost1988: 10.56
+                          contractedOutEmployerIdentifier: 789
+                          contributionCategoryFinalYear: A
+                          contributionCategoryPenultimateYear: A
+                          contributionCategoryRetrospectiveYear: A
+                          creationMicrofilmNumber: 40599123
+                          debitVoucherMicrofilmNumber: 40599123
+                          employeesReference: 123/456/ABC
+                          employersContractedOutNumberDetails: S3123456B
+                          enforcementStatus: NOT ENFORCED
+                          extensionDate: 2022-06-27
+                          finalYearEarnings: 10.56
+                          furtherPaymentsConfirmation: FURTHER PAYMENT ALLOWED
+                          guaranteedMinimumPensionContractedOutDeductionsRevalued: 10.56
+                          guaranteedMinimumPensionConversionApplied: true
+                          guaranteedMinimumPensionReconciliationStatus: NOT APPLICABLE
+                          importingAppropriateSchemeNumberDetails: S2123456B
+                          inhibitSchemeProcessing: true
+                          methodOfPreservationType: NOT APPLICABLE (0)
+                          minimumFundTransferAmount: 10.56
+                          nationalInsuranceNumber: AA123456
+                          penultimateYearEarnings: 10.56
+                          protectedRightsStartDate: 2022-06-27
+                          retrospectiveEarnings: 10.56
+                          revaluationApplied: true
+                          revaluationRate: (NONE)
+                          schemeCreatingContractedOutNumberDetails: A7123456Q
+                          schemeMembershipDebitReason: NOT APPLICABLE
+                          schemeMembershipEndDate: 2022-06-27
+                          schemeMembershipOccurrenceNumber: 1
+                          schemeMembershipSequenceNumber: 123
+                          schemeMembershipStartDate: 2022-06-27
+                          schemeMembershipTransferSequenceNumber: 123
+                          schemeSuspensionType: NO SUSPENSION
+                          stateEarningsRelatedPensionsSchemeNonRestorationValue: 10.56
+                          stateEarningsRelatedPensionsSchemeValuePost1988: 10.56
+                          stateSchemePremiumDeemed: SSP TYPE RECEIVABLES TO BE TREAT
+                            AS DEEMED
+                          survivorStatus: NOT APPLICABLE
+                          technicalAmount: 10.56
+                          schemeTerminatingContractedOutNumberDetails: S2123456B
+                          terminationMicrofilmNumber: 789
+                          totalLinkedGuaranteedMinimumPensionContractedOutDeductions: 10.56
+                          totalLinkedGuaranteedMinimumPensionContractedOutDeductionsPost1988: 10.56
+                          transferPremiumElectionDate: 2022-06-27
+                          transferTakeUpDate: 2022-06-27
+                        stakeholderPensionSchemeType: Non-Stakeholder Pension
+                minimallyPopulatedResponse:
+                  summary: With only required properties
+                  value:
+                    schemeMembershipDetailsSummaryList:
+                      - schemeMembershipDetails:
+                          nationalInsuranceNumber: AA123456
+                          schemeMembershipOccurrenceNumber: 1
+                          schemeMembershipSequenceNumber: 123
+                        stakeholderPensionSchemeType: Non-Stakeholder Pension
         "400":
           description: Bad Request Response
           headers:
@@ -200,7 +187,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse_403'
               examples:
-                Actual_Response:
+                UserNotAuthorised_Response:
+                  value:
+                    reason: User Not Authorised
+                    code: "403.1"
+                Forbidden_Response:
                   value:
                     reason: Forbidden
                     code: "403.2"
@@ -588,6 +579,12 @@ components:
       minLength: 4
       type: string
       example: Social
+    resourceGroupIdentifier:
+      description: A unique identifier for a HMRC Resource Group.
+      maximum: 99999999
+      minimum: 0
+      type: integer
+      example: 11111111
     errorResponse_400:
       title: Error Response
       description: Array of Error Response Failure Object in Error Response.
@@ -1154,6 +1151,13 @@ components:
       description: A unique job role for the user.
       schema:
         $ref: '#/components/schemas/govUkJobRole'
+    resourceGroupId:
+      name: resource-group-id
+      in: header
+      description: A unique identifier for a HMRC Resource Group.
+      required: false
+      schema:
+        $ref: '#/components/schemas/resourceGroupIdentifier'
     NationalInsuranceNumber:
       name: nino
       in: path

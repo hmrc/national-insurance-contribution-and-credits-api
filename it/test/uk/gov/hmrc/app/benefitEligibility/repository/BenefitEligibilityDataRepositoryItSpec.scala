@@ -60,6 +60,8 @@ class BenefitEligibilityDataRepositoryItSpec
 
   val nationalInsuranceNumber = Identifier("AB123456C")
 
+  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
   "BenefitEligibilityRepository" - {
     ".getItem" - {
       "should successfully return an item by id" in {
@@ -68,18 +70,20 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId2 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val pageTaskId3 = PageTaskId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val paginationSource1 = PaginationSource(Class2MAReceipts, Some("SomeCallBackURLOne"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
-        val paginationSource3 = PaginationSource(MarriageDetails, Some("SomeCallBackURLThree"))
+        val paginationSource1 = PaginationSource(Class2MAReceipts, "SomeCallBackURLOne")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val paginationSource3 = PaginationSource(MarriageDetails, "SomeCallBackURLThree")
 
         val pageTasksList = List(
           MaPageTask(
+            correlationId,
             pageTaskId1,
             List(paginationSource2, paginationSource2),
             nationalInsuranceNumber,
             testInstant
           ),
           BspPageTask(
+            correlationId,
             pageTaskId2,
             Some(paginationSource2),
             Some(
@@ -92,6 +96,7 @@ class BenefitEligibilityDataRepositoryItSpec
             testInstant
           ),
           GyspPageTask(
+            correlationId,
             pageTaskId3,
             Some(paginationSource3),
             Some(paginationSource1),
@@ -125,9 +130,10 @@ class BenefitEligibilityDataRepositoryItSpec
     ".upsert" - {
       "should insert a new BspPageTask" in {
         val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val bspPageTask = BspPageTask(
+          correlationId,
           pageTaskId,
           Some(paginationSource1),
           Some(
@@ -144,9 +150,10 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new MaPageTask" in {
         val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val maPageTask = MaPageTask(
+          correlationId,
           pageTaskId,
           List(paginationSource1, paginationSource1),
           nationalInsuranceNumber,
@@ -157,10 +164,11 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new GyspPageTask" in {
         val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val gyspPageTask = GyspPageTask(
+          correlationId,
           pageTaskId,
           Some(paginationSource1),
           Some(paginationSource2),
@@ -178,10 +186,11 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should return a failure if mongo database fails" in {
         val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val gyspPageTask = GyspPageTask(
+          correlationId,
           pageTaskId,
           Some(paginationSource1),
           Some(paginationSource2),
@@ -203,10 +212,11 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val maPageTask1 = MaPageTask(
+          correlationId,
           pageTaskId1,
           List(paginationSource1, paginationSource1),
           nationalInsuranceNumber,
@@ -217,6 +227,7 @@ class BenefitEligibilityDataRepositoryItSpec
         insert(maPageTask1).futureValue
 
         val maPageTask2 = MaPageTask(
+          correlationId,
           pageTaskId2,
           List(paginationSource2, paginationSource2),
           nationalInsuranceNumber,
@@ -231,8 +242,8 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTask1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val pageTask2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val contributionAndCreditsPaging1 = ContributionAndCreditsPaging(
           NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
@@ -244,6 +255,7 @@ class BenefitEligibilityDataRepositoryItSpec
         )
 
         val bspPageTask1 = BspPageTask(
+          correlationId,
           pageTask1,
           Some(paginationSource1),
           Some(contributionAndCreditsPaging1),
@@ -255,6 +267,7 @@ class BenefitEligibilityDataRepositoryItSpec
         insert(bspPageTask1).futureValue
 
         val bspPageTask2 = BspPageTask(
+          correlationId,
           pageTask2,
           Some(paginationSource2),
           Some(contributionAndCreditsPaging2),
@@ -270,8 +283,8 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTask1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val pageTask2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLOne"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val contributionAndCreditsPaging1 = ContributionAndCreditsPaging(
           NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
@@ -282,6 +295,7 @@ class BenefitEligibilityDataRepositoryItSpec
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
         val gyspPageTask1 = GyspPageTask(
+          correlationId,
           pageTask1,
           Some(paginationSource1),
           Some(paginationSource1),
@@ -294,6 +308,7 @@ class BenefitEligibilityDataRepositoryItSpec
         insert(gyspPageTask1).futureValue
 
         val gyspPageTask2 = GyspPageTask(
+          correlationId,
           pageTask2,
           Some(paginationSource2),
           Some(paginationSource2),
@@ -309,9 +324,10 @@ class BenefitEligibilityDataRepositoryItSpec
     ".insert" - {
       "should insert a new BspPageTask" in {
         val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val bspPageTask = BspPageTask(
+          correlationId,
           pageTaskId1,
           Some(paginationSource1),
           Some(
@@ -329,9 +345,10 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new MaPageTask" in {
         val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val maPageTask = MaPageTask(
+          correlationId,
           pageTaskId1,
           List(paginationSource1, paginationSource1),
           nationalInsuranceNumber,
@@ -344,10 +361,11 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new GyspPageTask" in {
         val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
+        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
         val gyspPageTask = GyspPageTask(
+          correlationId,
           pageTaskId1,
           Some(paginationSource1),
           Some(paginationSource2),
@@ -372,18 +390,20 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId2 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val pageTaskId3 = PageTaskId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val paginationSource1 = PaginationSource(Class2MAReceipts, Some("SomeCallBackURLOne"))
-        val paginationSource2 = PaginationSource(Liabilities, Some("SomeCallBackURLTwo"))
-        val paginationSource3 = PaginationSource(MarriageDetails, Some("SomeCallBackURLThree"))
+        val paginationSource1 = PaginationSource(Class2MAReceipts, "SomeCallBackURLOne")
+        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val paginationSource3 = PaginationSource(MarriageDetails, "SomeCallBackURLThree")
 
         val pageTasksList = List(
           MaPageTask(
+            correlationId,
             pageTaskId1,
             List(paginationSource2, paginationSource2),
             nationalInsuranceNumber,
             testInstant
           ),
           BspPageTask(
+            correlationId,
             pageTaskId2,
             Some(paginationSource2),
             Some(
@@ -396,6 +416,7 @@ class BenefitEligibilityDataRepositoryItSpec
             testInstant
           ),
           GyspPageTask(
+            correlationId,
             pageTaskId3,
             Some(paginationSource3),
             Some(paginationSource1),
@@ -411,6 +432,7 @@ class BenefitEligibilityDataRepositoryItSpec
         )
         val newPageTasksList = List(
           BspPageTask(
+            correlationId,
             pageTaskId2,
             Some(paginationSource2),
             Some(
@@ -423,6 +445,7 @@ class BenefitEligibilityDataRepositoryItSpec
             testInstant
           ),
           GyspPageTask(
+            correlationId,
             pageTaskId3,
             Some(paginationSource3),
             Some(paginationSource1),
