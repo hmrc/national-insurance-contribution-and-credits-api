@@ -23,6 +23,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   BenefitType,
   CorrelationId,
+  CursorId,
   DatabaseError,
   Identifier
 }
@@ -98,12 +99,12 @@ class PaginationService @Inject() (
   }
 
   def paginate(
-      id: PageTaskId
+      paginationCursor: PaginationCursor
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginate has been called")
 
     for {
-      existingPageTask <- pageTaskRepo.getItem(id.value)
+      existingPageTask <- pageTaskRepo.getItem(paginationCursor)
       paginationResult <- existingPageTask match {
         case task: MaPageTask   => processMaPageTask(task)
         case task: BspPageTask  => processBspPageTask(task)

@@ -30,6 +30,7 @@ object ErrorCode extends Enum[ErrorCode] with PlayJsonEnum[ErrorCode] {
   case object Forbidden           extends ErrorCode("FORBIDDEN")
   case object UnprocessableEntity extends ErrorCode("UNPROCESSABLE_ENTITY")
   case object InternalServerError extends ErrorCode("INTERNAL_SERVER_ERROR")
+  case object NotFound            extends ErrorCode("NOT_FOUND")
 }
 
 final case class ErrorReason(value: String) extends AnyVal

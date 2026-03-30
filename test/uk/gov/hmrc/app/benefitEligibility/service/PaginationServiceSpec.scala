@@ -211,8 +211,8 @@ class PaginationServiceSpec
         val liabilitiesSuccessResponse =
           LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
         (mockBenefitEligibilityRepository
-          .getItem(_: UUID))
-          .expects(pageTask.pageTaskId.value)
+          .getItem(_: PaginationCursor))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
           .returning(EitherT.rightT(pageTask))
 
         (mockLiabilitySummaryDetailsConnector
@@ -240,7 +240,10 @@ class PaginationServiceSpec
           None,
           Some(PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))))
         )
-        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(
+        underTest
+          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .value
+          .futureValue shouldBe Right(
           expectedResult
         )
       }
@@ -278,8 +281,8 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: UUID))
-          .expects(pageTask.pageTaskId.value)
+          .getItem(_: PaginationCursor))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: PageTask))
@@ -326,7 +329,10 @@ class PaginationServiceSpec
           nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(uuid)))
         )
 
-        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(expected)
+        underTest
+          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .value
+          .futureValue shouldBe Right(expected)
       }
       "should return pagination result for GYSP" in {
         val uuid       = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
@@ -484,8 +490,8 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: UUID))
-          .expects(pageTask.pageTaskId.value)
+          .getItem(_: PaginationCursor))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: PageTask))
@@ -665,7 +671,10 @@ class PaginationServiceSpec
           nextCursor = Some(PaginationCursor(PaginationType.GYSP, pageTaskId))
         )
 
-        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Right(expected)
+        underTest
+          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .value
+          .futureValue shouldBe Right(expected)
       }
       "should error if connector call fails" in {
         val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
@@ -686,8 +695,8 @@ class PaginationServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: UUID))
-          .expects(pageTask.pageTaskId.value)
+          .getItem(_: PaginationCursor))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
           .returning(EitherT.rightT(pageTask))
 
         (mockLiabilitySummaryDetailsConnector
@@ -695,22 +704,26 @@ class PaginationServiceSpec
           .expects(BenefitType.MA, liabilitiesCallBackUrl, *)
           .returning(EitherT.leftT(NpsClientError(error)))
 
-        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Left(
+        underTest
+          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .value
+          .futureValue shouldBe Left(
           NpsClientError(error)
         )
       }
       "should error if database returns error" in {
-        val pageTaskId1 = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val paginationCursor =
+          PaginationCursor(PaginationType.BSP, PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")))
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: UUID))
-          .expects(pageTaskId1.value)
+          .getItem(_: PaginationCursor))
+          .expects(paginationCursor)
           .returning(EitherT.leftT(DatabaseError(error)))
 
-        underTest.paginate(pageTaskId1).value.futureValue shouldBe Left(
+        underTest.paginate(paginationCursor).value.futureValue shouldBe Left(
           DatabaseError(error)
         )
       }

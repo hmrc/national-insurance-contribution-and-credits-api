@@ -55,14 +55,6 @@ case class JsonValidationError(errors: List[String]) extends BenefitEligibilityE
   override def getMessage: String = errors.mkString(",")
 } //TODO - should return as a 500 to DWP
 
-case class InvalidRequest(errors: List[String]) extends BenefitEligibilityError {
-  override def getMessage: String = errors.mkString(",")
-}
-
-case class InvalidUUID(errors: List[String]) extends BenefitEligibilityError {
-  override def getMessage: String = errors.mkString(",")
-}
-
 case class InvalidJsonError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage
 } //TODO - should return as a 500 to DWP
@@ -73,7 +65,7 @@ case class NpsClientError(throwable: Throwable) extends BenefitEligibilityError 
 
 case class DataRetrievalServiceError() extends BenefitEligibilityError
 
-case class RecordNotFound(id: UUID) extends BenefitEligibilityError
+case class RecordNotFound(cursorId: CursorId) extends BenefitEligibilityError
 
 case class DatabaseError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage

@@ -19,9 +19,8 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.Validated
 import cats.implicits.catsSyntaxTuple6Semigroupal
 import play.api.libs.json.JsonValidationError
-import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityRequestHandler.logger
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier, InvalidUUID}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}

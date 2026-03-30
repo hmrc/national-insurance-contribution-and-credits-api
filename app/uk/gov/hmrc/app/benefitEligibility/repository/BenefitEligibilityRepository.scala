@@ -21,7 +21,12 @@ import cats.implicits.catsSyntaxApplicativeError
 import com.google.inject.{ImplementedBy, Inject}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, DatabaseError, RecordNotFound}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  CursorId,
+  DatabaseError,
+  RecordNotFound
+}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -32,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[BenefitEligibilityRepositoryImpl])
 trait BenefitEligibilityRepository {
-  def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask]
+  def getItem(paginationCursor: PaginationCursor): EitherT[Future, BenefitEligibilityError, PageTask]
   def upsert(id: Option[UUID], update: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
   def insert(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
   def delete(id: UUID): EitherT[Future, BenefitEligibilityError, Long]
@@ -58,16 +63,16 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
     )
     with BenefitEligibilityRepository {
 
-  def getItem(id: UUID): EitherT[Future, BenefitEligibilityError, PageTask] =
+  def getItem(paginationCursor: PaginationCursor): EitherT[Future, BenefitEligibilityError, PageTask] =
     collection
-      .find(Filters.equal("pageTaskId", id.toString))
+      .find(Filters.equal("pageTaskId", Codecs.toBson(paginationCursor.pageTaskId)))
       .headOption()
       .attemptT
+      .leftMap(error => DatabaseError(error))
       .flatMap {
-        case None           => EitherT.leftT(RecordNotFound(id))
+        case None           => EitherT.leftT(RecordNotFound(CursorId.from(paginationCursor)))
         case Some(pageTask) => EitherT.rightT(pageTask)
       }
-      .leftMap(error => DatabaseError(error))
 
   def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     val updates = pageTask match {
