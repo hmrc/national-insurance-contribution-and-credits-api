@@ -151,7 +151,7 @@ class BenefitEligibilityDataControllerItSpec
   val npsLiabilitySummaryDetailsPath: String = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
   val npsCreditsAndContributionsPath         = "/national-insurance/contributions-and-credits"
   val npsIndividualMarriageDetailsPath       = s"/individual/${nationalInsuranceNumber.value}/marriage-cp"
-  val benefitSchemeDetailsPath    = s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"
+  val benefitSchemeDetailsPath    = s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"
   val schemeMembershipDetailsPath = s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
   val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
 
@@ -260,7 +260,7 @@ class BenefitEligibilityDataControllerItSpec
         None,
         Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
         Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
-        Some(EmployersContractedOutNumberDetails("S3123456B"))
+        Some(EmployersContractedOutNumberDetails("S2123456B"))
       )
     )
   )
@@ -471,8 +471,8 @@ class BenefitEligibilityDataControllerItSpec
             actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
             schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
             guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
-            employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
-            schemeCreatingContractedOutNumberDetails = Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+            employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S2123456B")),
+            schemeCreatingContractedOutNumberDetails = Some(SchemeCreatingContractedOutNumberDetails("S2123456B")),
             schemeTerminatingContractedOutNumberDetails =
               Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
             importingAppropriateSchemeNumberDetails = Some(ImportingAppropriateSchemeNumberDetails("S2123456B")),
@@ -2199,7 +2199,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2362,9 +2362,9 @@ class BenefitEligibilityDataControllerItSpec
                     actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
                     schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
                     guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
-                    employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
+                    employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S2123456B")),
                     schemeCreatingContractedOutNumberDetails =
-                      Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+                      Some(SchemeCreatingContractedOutNumberDetails("S2123456B")),
                     schemeTerminatingContractedOutNumberDetails =
                       Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
                     importingAppropriateSchemeNumberDetails =
@@ -2416,7 +2416,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2551,7 +2551,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2710,7 +2710,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"))
+              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -3519,9 +3519,9 @@ class BenefitEligibilityDataControllerItSpec
                   actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
                   schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
                   guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
-                  employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
+                  employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S2123456B")),
                   schemeCreatingContractedOutNumberDetails =
-                    Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+                    Some(SchemeCreatingContractedOutNumberDetails("S2123456B")),
                   schemeTerminatingContractedOutNumberDetails =
                     Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
                   importingAppropriateSchemeNumberDetails = Some(ImportingAppropriateSchemeNumberDetails("S2123456B")),
