@@ -154,7 +154,7 @@ object MaPageTask {
     new MaPageTask(
       correlationId,
       pageTaskId,
-      PaginationType.MA,
+      PaginationType.MaPagination,
       liabilitiesPaging,
       class2MaReceipts,
       nationalInsuranceNumber,
@@ -188,13 +188,26 @@ object BspPageTask {
     new BspPageTask(
       correlationId,
       pageTaskId,
-      PaginationType.BSP,
+      PaginationType.BspPagination,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
       nationalInsuranceNumber,
       createdAt
     )
 
+}
+
+final case class SearchLightPageTask(
+    correlationId: CorrelationId,
+    pageTaskId: PageTaskId,
+    paginationType: PaginationType,
+    contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
+    nationalInsuranceNumber: Identifier,
+    createdAt: Instant
+) extends PageTask
+
+object SearchLightPageTask {
+  implicit val searchLightPageTaskFormat: OFormat[SearchLightPageTask] = Json.format[SearchLightPageTask]
 }
 
 final case class GyspPageTask private (
@@ -224,7 +237,7 @@ object GyspPageTask {
     new GyspPageTask(
       correlationId,
       pageTaskId,
-      PaginationType.GYSP,
+      PaginationType.GyspPagination,
       benefitSchemeMembershipDetailsPaging,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
@@ -238,9 +251,9 @@ object PageTask {
 
   private val pageTaskReads: Reads[PageTask] = Reads { json =>
     (json \ "paginationType").validate[PaginationType].flatMap {
-      case PaginationType.BSP  => BspPageTask.bspPageTaskformat.reads(json)
-      case PaginationType.MA   => MaPageTask.maPageTaskformat.reads(json)
-      case PaginationType.GYSP => GyspPageTask.gyspPageTaskformat.reads(json)
+      case PaginationType.BspPagination  => BspPageTask.bspPageTaskformat.reads(json)
+      case PaginationType.MaPagination   => MaPageTask.maPageTaskformat.reads(json)
+      case PaginationType.GyspPagination => GyspPageTask.gyspPageTaskformat.reads(json)
     }
   }
 
@@ -259,7 +272,7 @@ object PageTask {
     paginationResult.getNextCursor.map { cursor =>
       val now = currentTime.instantNow()
       paginationResult.paginationType match {
-        case PaginationType.MA =>
+        case PaginationType.MaPagination =>
           MaPageTask(
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
@@ -268,7 +281,7 @@ object PageTask {
             nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
             createdAt = now
           )
-        case PaginationType.GYSP =>
+        case PaginationType.GyspPagination =>
           GyspPageTask(
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
@@ -280,7 +293,7 @@ object PageTask {
             paginationResult.nationalInsuranceNumber,
             now
           )
-        case PaginationType.BSP =>
+        case PaginationType.BspPagination =>
           BspPageTask(
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,

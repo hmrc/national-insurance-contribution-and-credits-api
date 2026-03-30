@@ -43,7 +43,7 @@ import play.api.test.Helpers.{
 }
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BSP
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BspPagination
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -252,7 +252,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
               ),
               Some(
                 PaginationCursor(
-                  PaginationType.BSP,
+                  PaginationType.BspPagination,
                   PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
                 )
               )

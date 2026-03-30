@@ -19,8 +19,8 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.Validated
 import cats.implicits.catsSyntaxTuple6Semigroupal
 import play.api.libs.json.JsonValidationError
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}
@@ -33,7 +33,18 @@ object RequestValidations {
 
   def validateRequest(
       request: EligibilityCheckDataRequest
-  ): Either[JsonValidationError, SuccessfulResult.type] =
+  ): Either[JsonValidationError, SuccessfulResult.type] = {
+
+    val shouldPageForContributionsAndCredits =
+      PaginationType.from(request.benefitType).toList.diff(List(PaginationType.MaPagination)).nonEmpty
+
+    val hasOneTaxWindow = ContributionCreditTaxWindowCalculator
+      .createTaxWindows(
+        request.niContributionsAndCredits.startTaxYear,
+        request.niContributionsAndCredits.endTaxYear
+      )
+      .exists(_.size == 1)
+
     (
       Validated.condNel(
         Identifier.pattern.matches(request.nationalInsuranceNumber.value),
@@ -56,14 +67,7 @@ object RequestValidations {
         "Start tax year after end tax year"
       ),
       Validated.condNel(
-        (Set(MA, ESA, JSA).contains(request.benefitType) &&
-          (ContributionCreditTaxWindowCalculator
-            .createTaxWindows(
-              request.niContributionsAndCredits.startTaxYear,
-              request.niContributionsAndCredits.endTaxYear
-            )
-            .size == 1)) ||
-          Set(BSP, GYSP, BSP_SEARCHLIGHT).contains(request.benefitType),
+        (!shouldPageForContributionsAndCredits && hasOneTaxWindow) || shouldPageForContributionsAndCredits,
         SuccessfulResult,
         "Tax year range greater than six years"
       ),
@@ -76,6 +80,7 @@ object RequestValidations {
       case Validated.Valid(_)   => Right(SuccessfulResult)
       case Validated.Invalid(e) => Left(JsonValidationError(e.toList))
     }
+  }
 
   def validateCorrelationId(correlationId: String): Either[ErrorReason, CorrelationId] = {
     val maybeCorrelationId = Try(UUID.fromString(correlationId)).toOption

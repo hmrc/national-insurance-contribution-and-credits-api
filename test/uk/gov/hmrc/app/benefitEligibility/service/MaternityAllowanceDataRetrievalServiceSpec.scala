@@ -271,7 +271,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
-            Some(PaginationCursor(PaginationType.MA, paging.pageTaskId))
+            Some(PaginationCursor(PaginationType.MaPagination, paging.pageTaskId))
           )
         )
 
@@ -400,6 +400,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for a subset the NPS APIs called" in {
 
+        val error1 = NpsClientError(new RuntimeException("error_2"))
+        val error2 = NpsClientError(new RuntimeException("error_2"))
+
         val niContributionAndCreditsResult = SuccessResult(
           ApiName.NiContributionAndCredits,
           niContributionsAndCreditsSuccessResponse
@@ -418,9 +421,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: Identifier
           )(_: HeaderCarrier))
           .expects(BenefitType.MA, identifier, *)
-          .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
-          )
+          .returning(EitherT.leftT(error1))
 
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
@@ -432,26 +433,21 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             _: Option[LocalDate]
           )(_: HeaderCarrier))
           .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
-          .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
-          )
+          .returning(EitherT.leftT(error2))
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          DataRetrievalServiceError()
+          DataRetrievalServiceError(List(error1, error2))
         )
       }
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for all the NPS APIs called" in {
 
-        (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
-          .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
-          )
+        val error1 = NpsClientError(new RuntimeException("error_1"))
+        val error2 = NpsClientError(new RuntimeException("error_2"))
+        val error3 = NpsClientError(new RuntimeException("error_3"))
 
         (mockClass2MAReceiptsConnector
           .fetchClass2MAReceipts(
@@ -460,7 +456,14 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           )(_: HeaderCarrier))
           .expects(BenefitType.MA, identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error1)
+          )
+
+        (mockNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
+          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
+          .returning(
+            EitherT.leftT(error2)
           )
 
         (mockLiabilitySummaryDetailsConnector
@@ -474,14 +477,14 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           )(_: HeaderCarrier))
           .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error3)
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          DataRetrievalServiceError()
+          DataRetrievalServiceError(List(error1, error2, error3))
         )
       }
     }

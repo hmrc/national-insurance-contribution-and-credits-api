@@ -17,12 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.{EitherT, NonEmptyList}
-import com.mongodb.{ServerAddress, WriteConcernResult, WriteError}
+import com.mongodb.{ServerAddress, WriteConcernResult}
 import org.mongodb.scala.bson.BsonDocument
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers.{a, shouldBe}
+import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
@@ -52,10 +52,10 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.StakeholderPensionSchemeType.NonStakeholderPension
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.SurvivorStatus.NotApplicable
 import uk.gov.hmrc.app.benefitEligibility.repository.*
-import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTime, CurrentTimeSource}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Instant, LocalDate, LocalDateTime}
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
@@ -250,7 +250,7 @@ class PaginationServiceSpec
 
         val expectedResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          PaginationType.MA,
+          PaginationType.MaPagination,
           nationalInsuranceNumber,
           List(
             SuccessResult(
@@ -271,7 +271,12 @@ class PaginationServiceSpec
           None,
           ContributionCreditPagingResult(None, None),
           None,
-          Some(PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))))
+          Some(
+            PaginationCursor(
+              PaginationType.MaPagination,
+              PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+            )
+          )
         )
         underTest
           .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
@@ -340,7 +345,7 @@ class PaginationServiceSpec
 
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BSP,
+          paginationType = PaginationType.BspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           None,
@@ -360,7 +365,7 @@ class PaginationServiceSpec
             Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
-          nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(uuid)))
+          nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuid)))
         )
 
         underTest
@@ -572,7 +577,7 @@ class PaginationServiceSpec
 
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.GYSP,
+          paginationType = PaginationType.GyspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           None,
@@ -703,7 +708,7 @@ class PaginationServiceSpec
               )
             )
           ),
-          nextCursor = Some(PaginationCursor(PaginationType.GYSP, pageTaskId))
+          nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, pageTaskId))
         )
 
         underTest
@@ -749,7 +754,10 @@ class PaginationServiceSpec
       }
       "should error if database returns error" in {
         val paginationCursor =
-          PaginationCursor(PaginationType.BSP, PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")))
+          PaginationCursor(
+            PaginationType.BspPagination,
+            PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+          )
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 

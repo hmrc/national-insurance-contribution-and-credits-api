@@ -45,7 +45,10 @@ object BenefitEligibilityError {
     new Semigroup[BenefitEligibilityError] {
       override def combine(x: BenefitEligibilityError, y: BenefitEligibilityError): BenefitEligibilityError =
         (x, y) match {
-          case (_, _) => DataRetrievalServiceError()
+          case (DataRetrievalServiceError(a), DataRetrievalServiceError(b)) => DataRetrievalServiceError(a ++ b)
+          case (DataRetrievalServiceError(errors), b)                       => DataRetrievalServiceError(b +: errors)
+          case (a, DataRetrievalServiceError(errors))                       => DataRetrievalServiceError(a +: errors)
+          case (a, b)                                                       => DataRetrievalServiceError(List(a, b))
         }
     }
 
@@ -63,10 +66,12 @@ case class NpsClientError(throwable: Throwable) extends BenefitEligibilityError 
   override def getMessage: String = throwable.getMessage
 } //TODO - should return as a 500 to DWP
 
-case class DataRetrievalServiceError() extends BenefitEligibilityError
+case class DataRetrievalServiceError(errors: List[BenefitEligibilityError]) extends BenefitEligibilityError
 
 case class RecordNotFound(cursorId: CursorId) extends BenefitEligibilityError
 
 case class DatabaseError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage
 }
+
+case class ContributionCreditTaxWindowCalculatorError(message: String) extends BenefitEligibilityError

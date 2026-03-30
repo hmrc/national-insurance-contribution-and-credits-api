@@ -20,22 +20,9 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 
-sealed abstract class BenefitType(override val entryName: String) extends EnumEntry
+sealed abstract class CallSystem(override val entryName: String) extends EnumEntry
 
-object BenefitType extends Enum[BenefitType] with PlayJsonEnum[BenefitType] {
-  val values: immutable.IndexedSeq[BenefitType] = findValues
-
-  case object MA   extends BenefitType("MA")
-  case object ESA  extends BenefitType("ESA")
-  case object JSA  extends BenefitType("JSA")
-  case object GYSP extends BenefitType("GYSP")
-  case object BSP  extends BenefitType("BSP")
-
-  def from(paginationType: PaginationType) =
-    paginationType match {
-      case PaginationType.MaPagination   => MA
-      case PaginationType.GyspPagination => GYSP
-      case PaginationType.BspPagination  => BSP
-    }
-
+object CallSystem extends Enum[CallSystem] with PlayJsonEnum[CallSystem] {
+  val values: immutable.IndexedSeq[CallSystem] = findValues
+  case object SEARCHLIGHT extends CallSystem("SEARCHLIGHT")
 }

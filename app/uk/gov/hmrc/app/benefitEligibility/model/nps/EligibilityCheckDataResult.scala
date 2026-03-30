@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.model.nps
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CallSystem}
+import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
@@ -87,13 +88,27 @@ object EligibilityCheckDataResult {
 
   }
 
-  case class EligibilityCheckDataResultBspSearchLight(
+  case class EligibilityCheckDataResultSearchLight private (
+      callSystem: CallSystem,
+      benefitType: BenefitType,
       contributionCreditResult: ContributionCreditResult,
       nextCursor: Option[PaginationCursor]
   ) extends EligibilityCheckDataResult {
-    def benefitType: BenefitType = BenefitType.BSP_SEARCHLIGHT
-
     override def allResults: List[ApiResult] = List(contributionCreditResult)
+  }
+
+  object EligibilityCheckDataResultSearchLight {
+
+    def apply(
+        benefitType: BenefitType,
+        contributionCreditResult: ContributionCreditResult,
+        nextCursor: Option[PaginationCursor]
+    ) = new EligibilityCheckDataResultSearchLight(
+      CallSystem.SEARCHLIGHT,
+      benefitType,
+      contributionCreditResult,
+      nextCursor
+    )
 
   }
 

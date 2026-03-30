@@ -24,8 +24,9 @@ import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
   Class1ContributionAndCredits,
@@ -63,15 +64,16 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.en
   LatePaymentPeriod,
   NiContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.model.request.BSPSearchlightEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
-class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
+class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
   implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
@@ -83,7 +85,21 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
-  val underTest = new BspSearchlightDataRetrievalService(mockNiContributionsAndCreditsConnector)
+  val mockPaginationService: PaginationService = mock[PaginationService]
+  val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
+
+  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = testInstant
+  }
+
+  val underTest = new SearchlightDataRetrievalService(
+    mockNiContributionsAndCreditsConnector,
+    mockPaginationService,
+    mockUUIDService,
+    currentTimeSource
+  )
 
   private val niContributionsAndCreditsRequest = NiContributionsAndCreditsRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),
@@ -92,7 +108,8 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
     endTaxYear = EndTaxYear(2025)
   )
 
-  private val eligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+  private val eligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
+    benefitType = BSP,
     nationalInsuranceNumber = Identifier("GD379251T"),
     niContributionsAndCredits = ContributionsAndCreditsRequestParams(
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
@@ -101,7 +118,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
     )
   )
 
-  "BspSearchlightDataRetrievalService" - {
+  "SearchlightDataRetrievalService" - {
     ".fetchEligibilityData" - {
       "should return an EligibilityCheckDataResult (successful nps call)" in {
 
@@ -142,7 +159,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
 
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP_SEARCHLIGHT, niContributionsAndCreditsRequest, *)
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
           .returning(
             EitherT.rightT(
               SuccessResult(
@@ -156,7 +173,8 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Right(
-          EligibilityCheckDataResultBspSearchLight(
+          EligibilityCheckDataResultSearchLight(
+            BenefitType.BSP,
             NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse),
             None
           )
@@ -172,7 +190,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
 
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP_SEARCHLIGHT, niContributionsAndCreditsRequest, *)
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
           .returning(
             EitherT.rightT(result)
           )
@@ -181,7 +199,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Right(
-          EligibilityCheckDataResultBspSearchLight(result, None)
+          EligibilityCheckDataResultSearchLight(BenefitType.BSP, result, None)
         )
 
       }
@@ -189,7 +207,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
       "should propagate the error returned from the connector (ValidationError)" in {
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP_SEARCHLIGHT, niContributionsAndCreditsRequest, *)
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
           .returning(
             EitherT.leftT(JsonValidationError(List.empty))
           )
@@ -207,7 +225,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP_SEARCHLIGHT, niContributionsAndCreditsRequest, *)
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
           .returning(
             EitherT.leftT(InvalidJsonError(error))
           )
@@ -224,7 +242,7 @@ class BspSearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactor
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP_SEARCHLIGHT, niContributionsAndCreditsRequest, *)
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
           .returning(
             EitherT.leftT(NpsClientError(error))
           )

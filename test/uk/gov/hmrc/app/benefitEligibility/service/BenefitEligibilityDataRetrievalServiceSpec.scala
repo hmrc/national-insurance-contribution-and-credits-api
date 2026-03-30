@@ -22,6 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
@@ -43,6 +44,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
   AssociatedCalculationSequenceNumber,
   BenefitEligibilityError,
+  BenefitType,
   Callback,
   CallbackUrl,
   CorrelationId,
@@ -110,11 +112,11 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.{
   BSPEligibilityCheckDataRequest,
-  BSPSearchlightEligibilityCheckDataRequest,
   ESAEligibilityCheckDataRequest,
   GYSPEligibilityCheckDataRequest,
   JSAEligibilityCheckDataRequest,
-  MAEligibilityCheckDataRequest
+  MAEligibilityCheckDataRequest,
+  SearchlightEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
@@ -141,8 +143,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   private val mockBereavementSupportPaymentDataRetrievalService: BereavementSupportPaymentDataRetrievalService =
     mock[BereavementSupportPaymentDataRetrievalService]
 
-  private val mockBspSearchlightDataRetrievalService: BspSearchlightDataRetrievalService =
-    mock[BspSearchlightDataRetrievalService]
+  private val mockBspSearchlightDataRetrievalService: SearchlightDataRetrievalService =
+    mock[SearchlightDataRetrievalService]
 
   private val underTest = new BenefitEligibilityDataRetrievalService(
     mockMaternityAllowanceDataRetrievalService,
@@ -647,7 +649,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     )
   )
 
-  val bspSearchlightEligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+  val bspSearchlightEligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
+    benefitType = BSP,
     nationalInsuranceNumber = Identifier("GD379251T"),
     niContributionsAndCredits = ContributionsAndCreditsRequestParams(
       dateOfBirth = DateOfBirth(LocalDate.parse("2025-10-10")),
@@ -790,11 +793,12 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should retrieve eligibility data for BSP Searchlight" in {
         (mockBspSearchlightDataRetrievalService
-          .fetchEligibilityData(_: BSPSearchlightEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
+          .fetchEligibilityData(_: SearchlightEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
           .expects(bspSearchlightEligibilityCheckDataRequest, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
-              EligibilityCheckDataResultBspSearchLight(
+              EligibilityCheckDataResultSearchLight(
+                BenefitType.BSP,
                 niContributionAndCreditsResult,
                 None
               )
@@ -805,7 +809,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .getEligibilityData(bspSearchlightEligibilityCheckDataRequest, correlationId)
           .value
           .futureValue shouldBe Right(
-          EligibilityCheckDataResultBspSearchLight(
+          EligibilityCheckDataResultSearchLight(
+            BenefitType.BSP,
             niContributionAndCreditsResult,
             None
           )

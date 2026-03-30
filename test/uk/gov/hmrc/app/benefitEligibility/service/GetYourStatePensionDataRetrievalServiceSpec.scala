@@ -773,7 +773,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             ),
             marriageDetailsResult,
             individualStatePensionInformationResult,
-            Some(PaginationCursor(PaginationType.GYSP, paging.pageTaskId))
+            Some(PaginationCursor(PaginationType.GyspPagination, paging.pageTaskId))
           )
         )
 
@@ -997,6 +997,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for a subset of the NPS APIs called" in {
 
+        val error1 = NpsClientError(new RuntimeException("error_1"))
+        val error2 = NpsClientError(new RuntimeException("error_2"))
+        val error3 = NpsClientError(new RuntimeException("error_3"))
+
         val marriageDetailsResult = SuccessResult(
           ApiName.MarriageDetails,
           marriageDetailsSuccessResponse
@@ -1016,7 +1020,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error1)
           )
 
         (mockLongTermBenefitNotesConnector
@@ -1065,7 +1069,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           )(_: HeaderCarrier))
           .expects(BenefitType.GYSP, identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error2)
           )
 
         (mockIndividualStatePensionInformationConnector
@@ -1074,21 +1078,28 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           ))
           .expects(BenefitType.GYSP, identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error3)
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Left(DataRetrievalServiceError())
+          .futureValue shouldBe Left(DataRetrievalServiceError(List(error1, error2, error3)))
       }
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for all the NPS APIs called" in {
+
+        val error1 = NpsClientError(new RuntimeException("error_1"))
+        val error2 = NpsClientError(new RuntimeException("error_2"))
+        val error3 = NpsClientError(new RuntimeException("error_3"))
+        val error4 = NpsClientError(new RuntimeException("error_4"))
+        val error5 = NpsClientError(new RuntimeException("error_5"))
+
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error1)
           )
 
         (mockMarriageDetailsConnector
@@ -1097,7 +1108,17 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           )(_: HeaderCarrier))
           .expects(identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error2)
+          )
+
+        (mockSchemeMembershipDetailsConnector
+          .fetchSchemeMembershipDetails(
+            _: BenefitType,
+            _: Identifier
+          )(_: HeaderCarrier))
+          .expects(BenefitType.GYSP, identifier, *)
+          .returning(
+            EitherT.leftT(error3)
           )
 
         (mockLongTermBenefitCalculationDetailsConnector
@@ -1115,17 +1136,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             *
           )
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
-          )
-
-        (mockSchemeMembershipDetailsConnector
-          .fetchSchemeMembershipDetails(
-            _: BenefitType,
-            _: Identifier
-          )(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, identifier, *)
-          .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error4)
           )
 
         (mockIndividualStatePensionInformationConnector
@@ -1134,13 +1145,13 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           ))
           .expects(BenefitType.GYSP, identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error5)
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Left(DataRetrievalServiceError())
+          .futureValue shouldBe Left(DataRetrievalServiceError(List(error1, error2, error3, error4, error5)))
       }
     }
   }

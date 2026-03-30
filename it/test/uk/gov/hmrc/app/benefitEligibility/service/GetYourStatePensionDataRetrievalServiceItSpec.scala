@@ -719,7 +719,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
               ),
               Some(
                 PaginationCursor(
-                  PaginationType.GYSP,
+                  PaginationType.GyspPagination,
                   PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
                 )
               )
