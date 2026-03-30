@@ -16,31 +16,36 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import cats.data.{EitherT, NonEmptyList}
+import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
-import com.mongodb.{ServerAddress, WriteConcernResult}
-import org.mongodb.scala.bson.BsonDocument
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.http.Status.OK
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.test.Helpers.OK
 import play.api.test.Injecting
 import play.api.{Application, inject}
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails, NiContributionAndCredits}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.MA
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
+  Class2MAReceipts,
+  Liabilities,
+  MarriageDetails,
+  NiContributionAndCredits
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.EnumLiabtp
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
@@ -86,6 +91,7 @@ class PaginationServiceItSpec
   val npsIndividualMarriageDetailsPath       = s"/individual/${nationalInsuranceNumber.value}/marriage-cp"
   val benefitSchemeDetailsPath    = s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"
   val schemeMembershipDetailsPath = s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+  val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
@@ -99,6 +105,7 @@ class PaginationServiceItSpec
         play.api.inject.bind[CurrentTimeSource].toInstance(currentTimeSource)
       )
       .configure(
+        "microservice.services.hip.nps.class2MaReceipts.port"         -> server.port,
         "microservice.services.hip.nps.liabilities.port"              -> server.port,
         "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port,
         "microservice.services.hip.nps.schemeMembershipDetails.port"  -> server.port,
@@ -127,6 +134,7 @@ class PaginationServiceItSpec
         PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
         PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
       ),
+      Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
       nationalInsuranceNumber,
       currentTimeSource.instantNow()
     ),
@@ -182,6 +190,7 @@ class PaginationServiceItSpec
             correlationId,
             PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
             List(),
+            None,
             nationalInsuranceNumber,
             Instant.now
           )
@@ -202,6 +211,7 @@ class PaginationServiceItSpec
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
           ),
+          Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
           nationalInsuranceNumber,
           currentTimeSource.instantNow()
         )
@@ -212,6 +222,7 @@ class PaginationServiceItSpec
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
           ),
+          Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
           nationalInsuranceNumber,
           currentTimeSource.instantNow()
         )
@@ -232,8 +243,15 @@ class PaginationServiceItSpec
                 .withFault(Fault.RANDOM_DATA_THEN_CLOSE)
             )
         )
+        server.stubFor(
+          get(urlEqualTo(npsClass2MaReceiptsPath))
+            .willReturn(
+              aResponse()
+                .withFault(Fault.RANDOM_DATA_THEN_CLOSE)
+            )
+        )
 
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.MA, PageTaskId(uuidOne))).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
@@ -268,7 +286,27 @@ class PaginationServiceItSpec
               )
             )
           ),
-          Some(Callback(Some(CallbackUrl(paginationSource2.callBackURL.toString))))
+          Some(Callback(Some(CallbackUrl(paginationSource2.callBackURL))))
+        )
+        val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
+          Some(nationalInsuranceNumber),
+          Some(
+            List(
+              Class2MAReceiptDetails(
+                initials = None,
+                surname = None,
+                receivablePayment = None,
+                receiptDate = None,
+                liabilityStart = None,
+                liabilityEnd = None,
+                billAmount = None,
+                billScheduleNumber = None,
+                isClosedRecord = None,
+                weeksPaid = None
+              )
+            )
+          ),
+          callBack = Some(Callback(Some(CallbackUrl(paginationSource2.callBackURL))))
         )
 
         server.stubFor(
@@ -278,6 +316,15 @@ class PaginationServiceItSpec
                 .withStatus(OK)
                 .withHeader("Content-Type", "application/json")
                 .withBody(Json.toJson(liabilitySummaryDetailsSuccessResponse).toString)
+            )
+        )
+        server.stubFor(
+          get(urlEqualTo(npsClass2MaReceiptsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(class2MAReceiptsSuccessResponse).toString)
             )
         )
 
@@ -291,6 +338,7 @@ class PaginationServiceItSpec
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
+              Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
@@ -379,6 +427,7 @@ class PaginationServiceItSpec
               paginationType = PaginationType.BSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
+              None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -638,6 +687,7 @@ class PaginationServiceItSpec
               paginationType = PaginationType.GYSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
+              None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -723,6 +773,26 @@ class PaginationServiceItSpec
           ),
           None
         )
+        val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
+          Some(nationalInsuranceNumber),
+          Some(
+            List(
+              Class2MAReceiptDetails(
+                initials = None,
+                surname = None,
+                receivablePayment = None,
+                receiptDate = None,
+                liabilityStart = None,
+                liabilityEnd = None,
+                billAmount = None,
+                billScheduleNumber = None,
+                isClosedRecord = None,
+                weeksPaid = None
+              )
+            )
+          ),
+          callBack = None
+        )
 
         server.stubFor(
           get(urlEqualTo(npsLiabilitySummaryDetailsPath))
@@ -731,6 +801,16 @@ class PaginationServiceItSpec
                 .withStatus(OK)
                 .withHeader("Content-Type", "application/json")
                 .withBody(Json.toJson(liabilitySummaryDetailsSuccessResponse).toString)
+            )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(npsClass2MaReceiptsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(class2MAReceiptsSuccessResponse).toString)
             )
         )
 
@@ -744,6 +824,7 @@ class PaginationServiceItSpec
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
+              Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
@@ -763,6 +844,7 @@ class PaginationServiceItSpec
               PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
               PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
+            Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
             nationalInsuranceNumber,
             currentTimeSource.instantNow()
           ),
@@ -863,6 +945,7 @@ class PaginationServiceItSpec
               paginationType = PaginationType.BSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
+              None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -884,6 +967,7 @@ class PaginationServiceItSpec
               PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
               PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
+            Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
             nationalInsuranceNumber,
             currentTimeSource.instantNow()
           ),
@@ -1148,6 +1232,7 @@ class PaginationServiceItSpec
               paginationType = PaginationType.GYSP,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
+              None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),

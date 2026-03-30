@@ -22,7 +22,6 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   AccessForbidden,
@@ -34,6 +33,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.Class2MaReceiptsResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponse400,
   NpsErrorResponseHipOrigin,
@@ -64,10 +64,18 @@ class Class2MAReceiptsConnector @Inject() (
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] = {
 
-    val path = s"${appConfig.baseUrl(apiName)}/class-2/${identifier.value}/maternity-allowance/receipts"
+    val path = s"/class-2/${identifier.value}/maternity-allowance/receipts"
+    fetchData(benefitType, path)
+  }
 
+  def fetchData(
+      benefitType: BenefitType,
+      path: String
+  )(
+      implicit hc: HeaderCarrier
+  ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] =
     npsClient
-      .get(path)
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 
@@ -130,6 +138,5 @@ class Class2MAReceiptsConnector @Inject() (
           logger.error(s"call to downstream service $apiName failed: ${error.toString}")
           error
       }
-  }
 
 }

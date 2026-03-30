@@ -19,14 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  BenefitEligibilityError,
-  BenefitType,
-  CorrelationId,
-  CursorId,
-  DatabaseError,
-  Identifier
-}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, DatabaseError, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
@@ -42,6 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PaginationService @Inject() (
     liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
+    class2MAReceiptsConnector: Class2MAReceiptsConnector,
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
     marriageDetailsConnector: MarriageDetailsConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
@@ -61,6 +55,7 @@ class PaginationService @Inject() (
             m.correlationId,
             PageTaskId(uuidGenerator.generate),
             m.liabilitiesPaging,
+            m.class2MaReceipts,
             m.nationalInsuranceNumber,
             m.createdAt
           )
@@ -122,18 +117,23 @@ class PaginationService @Inject() (
       maPageTask: MaPageTask
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for MA")
-    maPageTask.liabilitiesPaging
-      .map { pageSource =>
+    (
+      maPageTask.liabilitiesPaging.map { pageSource =>
         liabilitySummaryDetailsConnector
           .fetchData(BenefitType.from(maPageTask.paginationType), pageSource.callBackURL)
-      }
-      .sequence
-      .map { result =>
+      }.sequence,
+      maPageTask.class2MaReceipts.map { pageSource =>
+        class2MAReceiptsConnector
+          .fetchData(BenefitType.from(maPageTask.paginationType), pageSource.callBackURL)
+      }.sequence
+    ).parTupled
+      .map { case (liabilityResult, class2MaReceiptsResult) =>
         PaginationResult(
           correlationId = maPageTask.correlationId,
           paginationType = maPageTask.paginationType,
           nationalInsuranceNumber = maPageTask.nationalInsuranceNumber,
-          liabilitiesResult = result,
+          liabilitiesResult = liabilityResult,
+          class2MaReceiptsResult = class2MaReceiptsResult,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
@@ -162,13 +162,14 @@ class PaginationService @Inject() (
         PaginationResult(
           correlationId = bspPageTask.correlationId,
           paginationType = bspPageTask.paginationType,
+          liabilitiesResult = Nil,
+          None,
           nationalInsuranceNumber = bspPageTask.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult = ContributionCreditPagingResult(
             contributionCreditResult,
             bspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
           ),
-          liabilitiesResult = Nil,
           benefitSchemeMembershipDetailsData = None,
           None
         ).setNextCursor(uuidGenerator.generate)
@@ -237,13 +238,14 @@ class PaginationService @Inject() (
           correlationId = gyspPageTask.correlationId,
           paginationType = gyspPageTask.paginationType,
           gyspPageTask.nationalInsuranceNumber,
+          liabilitiesResult = Nil,
+          None,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult = ContributionCreditPagingResult(
             contributionCreditResult,
             gyspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
-          liabilitiesResult = Nil,
           None
         ).setNextCursor(uuidGenerator.generate)
       }

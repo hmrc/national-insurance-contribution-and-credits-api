@@ -19,12 +19,12 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.{
   Class2MAReceiptsConnector,
   LiabilitySummaryDetailsConnector,
   NiContributionsAndCreditsConnector
 }
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
@@ -32,14 +32,14 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   DataRetrievalServiceError,
   PaginationType
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.*
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
+import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Instant, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 class MaternityAllowanceDataRetrievalService @Inject() (
@@ -97,7 +97,8 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           if (result.allResults.exists(_.isFailure))
             false
           else
-            liabilityResult.forall(_.getSuccess.get.callback.isDefined)
+            liabilityResult.exists(_.getSuccess.get.callback.isDefined) ||
+            class2MaReceiptsResult.getSuccess.get.callBack.isDefined
 
         if (shouldPaginate) {
           val liabilityPages = liabilityResult.flatMap {
@@ -105,12 +106,16 @@ class MaternityAllowanceDataRetrievalService @Inject() (
             case NpsApiResult.SuccessResult(apiName, result) =>
               result.callback.flatMap(_.callbackURL.map(_.value)).map(url => PaginationSource(apiName, url))
           }
+          val class2MAReceiptsPage = class2MaReceiptsResult.getSuccess.flatMap {
+            _.callBack.flatMap(_.callbackURL).map(url => PaginationSource(Class2MAReceipts, url.value))
+          }
           paginationService
             .addTask(
               MaPageTask(
                 correlationId,
                 PageTaskId(uuidGenerator.generate),
                 liabilityPages,
+                class2MAReceiptsPage,
                 eligibilityCheckDataRequest.nationalInsuranceNumber,
                 currentTimeSource.instantNow()
               )
