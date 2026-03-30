@@ -4,7 +4,7 @@ ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.3.6"
 
 lazy val microservice = Project("national-insurance-contribution-and-credits-api", file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, SwaggerPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
@@ -16,11 +16,11 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
       "-Wconf:cat=unused-imports&src=routes/.*:s",
       "-Wconf:cat=unused-imports&src=html/.*:s",
       "-Wconf:cat=unused&src=routes/.*:s"
-    ),
+    )
   )
   .settings(
     resolvers ++= Seq(
-      MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2"),
+      MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2")
     )
   )
   .settings(CodeCoverageSettings.settings *)
@@ -28,9 +28,16 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources"
   )
   .settings(PlayKeys.playDefaultPort := 16105)
+  .settings(JsonToYaml.settings *)
+  .settings(Validate.settings *)
+  .settings(PublishTestOnlyOas.settings *)
+  .settings(PlaySwagger.settings *)
 
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
   .settings(DefaultBuildSettings.itSettings())
   .settings(libraryDependencies ++= AppDependencies.it)
+
+addCommandAlias("createOpenAPISpec", ";clean;routesToYamlOas; validateOas")
+addCommandAlias("publishTestOnlyOas", ";createOpenAPISpec; publishOas")

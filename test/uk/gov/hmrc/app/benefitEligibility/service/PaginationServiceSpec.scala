@@ -27,6 +27,7 @@ import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
+import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -110,7 +111,7 @@ class PaginationServiceSpec
 
   "PaginationService" - {
     ".addTask" - {
-      "should return a UUID" in {
+      "should successfully add a new pageTask" in {
         val pageTaskId1       = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
@@ -250,15 +251,15 @@ class PaginationServiceSpec
 
         val expectedResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          PaginationType.MaPagination,
-          nationalInsuranceNumber,
-          List(
+          paginationType = PaginationType.MaPagination,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          liabilitiesResult = List(
             SuccessResult(
               ApiName.Liabilities,
               LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
             )
           ),
-          Some(
+          class2MaReceiptsResult = Some(
             SuccessResult(
               ApiName.Class2MAReceipts,
               Class2MAReceiptsSuccessResponse(
@@ -268,10 +269,11 @@ class PaginationServiceSpec
               )
             )
           ),
-          None,
-          ContributionCreditPagingResult(None, None),
-          None,
-          Some(
+          marriageDetailsResult = None,
+          contributionCreditResult = ContributionCreditPagingResult(None, None),
+          benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
+          nextCursor = Some(
             PaginationCursor(
               PaginationType.MaPagination,
               PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
@@ -346,9 +348,9 @@ class PaginationServiceSpec
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.BspPagination,
-          nationalInsuranceNumber,
+          nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult = List(),
-          None,
+          class2MaReceiptsResult = None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -365,6 +367,79 @@ class PaginationServiceSpec
             Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
+          nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuid)))
+        )
+
+        underTest
+          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .value
+          .futureValue shouldBe Right(expected)
+      }
+      "should return pagination result for SEARCHLIGHT" in {
+        val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val pageTaskId              = PageTaskId(uuid)
+        val nationalInsuranceNumber = Identifier("GD379251T")
+        val dob                     = DateOfBirth(LocalDate.parse("2025-10-10"))
+
+        val paginationSource =
+          ContributionAndCreditsPaging(
+            NonEmptyList
+              .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
+            dob
+          )
+
+        val niContributionsAndCreditsRequest: NiContributionsAndCreditsRequest =
+          NiContributionsAndCreditsRequest(nationalInsuranceNumber, dob, StartTaxYear(2015), EndTaxYear(2020))
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(None, None, None)
+
+        val pageTask = SearchLightPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = pageTaskId,
+          paginationType = PaginationType.BspPagination,
+          contributionAndCreditsPaging = Some(paginationSource),
+          nationalInsuranceNumber,
+          Instant.now
+        )
+
+        (() => mockUuidGenerator.generate).expects().returning(uuid)
+        (mockBenefitEligibilityRepository
+          .getItem(_: PaginationCursor))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .returning(EitherT.rightT(pageTask))
+        (mockBenefitEligibilityRepository
+          .upsert(_: Option[UUID], _: PageTask))
+          .expects(Some(pageTask.pageTaskId.value), *)
+          .returning(EitherT.rightT(uuid))
+
+        (mockNiContributionsAndCreditsConnector
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .returning(
+            EitherT.rightT(
+              NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
+            )
+          )
+
+        val expected = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          paginationType = PaginationType.BspPagination,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          liabilitiesResult = List(),
+          class2MaReceiptsResult = None,
+          marriageDetailsResult = None,
+          contributionCreditResult = ContributionCreditPagingResult(
+            Some(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                NiContributionsAndCreditsSuccessResponse(None, None, None)
+              )
+            ),
+            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
+          ),
+          benefitSchemeMembershipDetailsData = None,
+          callSystem = Some(SEARCHLIGHT),
           nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuid)))
         )
 
@@ -578,9 +653,9 @@ class PaginationServiceSpec
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.GyspPagination,
-          nationalInsuranceNumber,
+          nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult = List(),
-          None,
+          class2MaReceiptsResult = None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -708,6 +783,7 @@ class PaginationServiceSpec
               )
             )
           ),
+          callSystem = None,
           nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, pageTaskId))
         )
 

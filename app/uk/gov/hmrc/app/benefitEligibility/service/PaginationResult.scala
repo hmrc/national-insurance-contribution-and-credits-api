@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{CorrelationId, Identifier, PaginationType}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{CallSystem, CorrelationId, Identifier, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.repository.{
   ContributionAndCreditsPaging,
@@ -41,6 +41,7 @@ final case class PaginationResult(
     marriageDetailsResult: Option[MarriageDetailsResult],
     contributionCreditResult: ContributionCreditPagingResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
+    callSystem: Option[CallSystem],
     nextCursor: Option[PaginationCursor]
 ) {
 

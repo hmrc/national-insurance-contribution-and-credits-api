@@ -19,6 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, DatabaseError, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
@@ -78,6 +79,15 @@ class PaginationService @Inject() (
             g.nationalInsuranceNumber,
             g.createdAt
           )
+        case s: SearchLightPageTask =>
+          SearchLightPageTask(
+            s.correlationId,
+            PageTaskId(uuidGenerator.generate),
+            s.paginationType,
+            s.contributionAndCreditsPaging,
+            s.nationalInsuranceNumber,
+            s.createdAt
+          )
       }
       addTask(newPageTask)
     }
@@ -101,15 +111,15 @@ class PaginationService @Inject() (
     for {
       existingPageTask <- pageTaskRepo.getItem(paginationCursor)
       paginationResult <- existingPageTask match {
-        case task: MaPageTask   => processMaPageTask(task)
-        case task: BspPageTask  => processBspPageTask(task)
-        case task: GyspPageTask => processGyspPageTask(task)
+        case task: MaPageTask          => processMaPageTask(task)
+        case task: BspPageTask         => processBspPageTask(task)
+        case task: GyspPageTask        => processGyspPageTask(task)
+        case task: SearchLightPageTask => processSearchlightPageTask(task)
       }
-      _ <- PageTask
-        .createPaginatingTask(paginationResult, currentTime)
-        .fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>
-          pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask).map(_ => ())
-        )
+      pageTask = PageTask.createPaginatingTask(paginationResult, currentTime)
+      _ <- pageTask.fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>
+        pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask).map(_ => ())
+      )
     } yield paginationResult
   }
 
@@ -137,6 +147,7 @@ class PaginationService @Inject() (
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
           nextCursor = None
         ).setNextCursor(uuidGenerator.generate)
       }
@@ -152,7 +163,7 @@ class PaginationService @Inject() (
     logger.info("Paginating for BSP")
     (
       marriageDetailsConnectorFetchData(bspPageTask.marriageDetailsPaging),
-      creditsAndContributionsFetchData(
+      fetchContributionsAndCreditsData(
         BenefitType.from(bspPageTask.paginationType),
         bspPageTask.nationalInsuranceNumber,
         bspPageTask.contributionAndCreditsPaging
@@ -171,11 +182,45 @@ class PaginationService @Inject() (
             bspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = None,
-          None
+          callSystem = None,
+          nextCursor = None
         ).setNextCursor(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process BSP task with $error")
+        error
+      }
+  }
+
+  private[service] def processSearchlightPageTask(searchLightPageTask: SearchLightPageTask)(
+      implicit headerCarrier: HeaderCarrier
+  ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
+    logger.info("Paginating for BSP")
+
+    fetchContributionsAndCreditsData(
+      BenefitType.from(searchLightPageTask.paginationType),
+      searchLightPageTask.nationalInsuranceNumber,
+      searchLightPageTask.contributionAndCreditsPaging
+    )
+      .map { contributionCreditResult =>
+        PaginationResult(
+          correlationId = searchLightPageTask.correlationId,
+          paginationType = searchLightPageTask.paginationType,
+          liabilitiesResult = Nil,
+          None,
+          nationalInsuranceNumber = searchLightPageTask.nationalInsuranceNumber,
+          marriageDetailsResult = None,
+          contributionCreditResult = ContributionCreditPagingResult(
+            contributionCreditResult,
+            searchLightPageTask.contributionAndCreditsPaging.flatMap(_.tail)
+          ),
+          benefitSchemeMembershipDetailsData = None,
+          callSystem = Some(SEARCHLIGHT),
+          nextCursor = None
+        ).setNextCursor(uuidGenerator.generate)
+      }
+      .leftMap { error =>
+        logger.error(s"Failed to process ${searchLightPageTask.paginationType} searchlight task with $error")
         error
       }
   }
@@ -226,7 +271,7 @@ class PaginationService @Inject() (
 
     (
       marriageDetailsConnectorFetchData(gyspPageTask.marriageDetailsPaging),
-      creditsAndContributionsFetchData(
+      fetchContributionsAndCreditsData(
         BenefitType.from(gyspPageTask.paginationType),
         gyspPageTask.nationalInsuranceNumber,
         gyspPageTask.contributionAndCreditsPaging
@@ -246,7 +291,8 @@ class PaginationService @Inject() (
             gyspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
-          None
+          callSystem = None,
+          nextCursor = None
         ).setNextCursor(uuidGenerator.generate)
       }
       .leftMap { error =>
@@ -264,7 +310,7 @@ class PaginationService @Inject() (
       .sequence
   }
 
-  private def creditsAndContributionsFetchData(
+  private def fetchContributionsAndCreditsData(
       benefitType: BenefitType,
       nationInsuranceNumber: Identifier,
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging]

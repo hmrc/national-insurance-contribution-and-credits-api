@@ -282,7 +282,7 @@ components:
       description: The date of birth of the individual.
       format: date
       type: string
-      pattern: yyyy-MM-dd
+      pattern: yyyy-mm-dd
     nationalInsuranceNumber:
       description: NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix.
       maxLength: 9

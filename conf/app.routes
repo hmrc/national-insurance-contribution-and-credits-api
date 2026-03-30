@@ -1,5 +1,168 @@
-# microservice specific routes
+###
+# summary: microservice specific routes
+# parameters:
+#  - description: Correlation ID - used for traceability purposes - note that this
+#      value in the response matches that received in the request to allow correlation.
+#    in: header
+#    name: correlationId
+#    required: true
+#    schema:
+#     format: uuid
+#     type: string
+#  - description: Identity of the Originating System that made the API call.
+#    in: header
+#    name: Authorization
+#    required: true
+#    schema:
+#     type: string
+#  - description: Request the version of the API you want to use by including an Accept header with a media type of.
+#    in: header
+#    name: Accept
+#    required: true
+#    schema:
+#     type: string
+#     pattern: application/vnd.hmrc.[version]+[content-type]
+#     example: application/vnd.hmrc.1.0+json
+# requestBody:
+#  required: true
+#  content:
+#    application/json:
+#      schema:
+#        oneOf:
+#          - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.request.ESAEligibilityCheckDataRequest'
+#          - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataRequest'
+#          - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataRequest'
+#          - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest'
+#          - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest'
+#          - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest'
+# responses:
+#   '200':
+#     description: Successful response
+#     content:
+#       application/json:
+#         schema:
+#           oneOf:
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa'
+#   '400':
+#     description: Bad Request
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '403':
+#     description: Forbidden
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '422':
+#     description: Unprocessable Entity
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '500':
+#     description: Internal Server Error
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '502':
+#     description: Partial or complete failure from downstream services
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
+###
+POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.fetchBenefitEligibilityData()
 
-POST        /contribution-and-credits                             uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.NICCController.postContributionsAndCredits
-POST        /benefit-eligibility-info                             uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.fetchBenefitEligibilityData()
-GET         /benefit-eligibility-info                             uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextPage()
+
+###
+# summary: get for microservice specific routes
+#
+# parameters:
+#  - name: correlationId
+#    description: Correlation ID - used for traceability purposes - note that this
+#      value in the response matches that received in the request to allow correlation.
+#    in: header
+#    required: true
+#    schema:
+#     format: uuid
+#     type: string
+#  - name: Authorization
+#    description: Identity of the Originating System that made the API call.
+#    in: header
+#    required: true
+#    schema:
+#     type: string
+#  - name: Accept
+#    description: Request the version of the API you want to use by including an Accept header with a media type of.
+#    in: header
+#    required: true
+#    schema:
+#     type: string
+#     pattern: application/vnd.hmrc.[version]+[content-type]
+#     example: application/vnd.hmrc.1.0+json
+#  - name: nextCursor
+#    description: Used for pagination restart
+#    in: query
+#    required: true
+#    schema:
+#      type: string
+# responses:
+#   '200':
+#     description: Successful response
+#     content:
+#       application/json:
+#         schema:
+#           oneOf:
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa'
+#   '400':
+#     description: Bad Request
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '403':
+#     description: Forbidden
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '404':
+#     description: Not Found
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '422':
+#     description: Unprocessable Entity
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '500':
+#     description: Internal Server Error
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#   '502':
+#     description: Partial or complete failure from downstream services
+#     content:
+#       application/json:
+#         schema:
+#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
+###
+GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextPage()
+
+
+POST /contribution-and-credits  uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.NICCController.postContributionsAndCredits

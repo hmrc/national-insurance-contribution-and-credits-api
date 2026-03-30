@@ -6,8 +6,16 @@ resolvers += Resolver.url("HMRC-open-artefacts-ivy2", url("https://open.artefact
 
 resolvers += Resolver.typesafeRepo("releases")
 
-addSbtPlugin("uk.gov.hmrc"       % "sbt-auto-build"     % "3.24.0")
-addSbtPlugin("uk.gov.hmrc"       % "sbt-distributables" % "2.6.0")
-addSbtPlugin("org.playframework" % "sbt-plugin"         % "3.0.10")
-addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.3.1")
-addSbtPlugin("org.scalameta"     % "sbt-scalafmt"       % "2.5.4")
+libraryDependencies ++= Seq(
+  "com.fasterxml.jackson.module"    %% "jackson-module-scala"    % "2.20.0",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.20.0",
+  "io.swagger.parser.v3"             % "swagger-parser"          % "2.1.34",
+  "org.playframework"               %% "play-json"               % "3.0.5"
+)
+
+addSbtPlugin("uk.gov.hmrc"            % "sbt-auto-build"     % "3.24.0")
+addSbtPlugin("uk.gov.hmrc"            % "sbt-distributables" % "2.6.0")
+addSbtPlugin("org.playframework"      % "sbt-plugin"         % "3.0.10")
+addSbtPlugin("org.scoverage"          % "sbt-scoverage"      % "2.3.1")
+addSbtPlugin("org.scalameta"          % "sbt-scalafmt"       % "2.5.4")
+addSbtPlugin("io.github.play-swagger" % "sbt-play-swagger"   % "3.0.0")

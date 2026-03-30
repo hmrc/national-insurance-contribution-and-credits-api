@@ -58,6 +58,7 @@ class PaginationResultSpec
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
+      callSystem = None,
       nextCursor = Some(
         PaginationCursor(
           PaginationType.MaPagination,
@@ -80,6 +81,7 @@ class PaginationResultSpec
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
+      callSystem = None,
       nextCursor = None
     )
 
@@ -92,6 +94,7 @@ class PaginationResultSpec
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
+      callSystem = None,
       nextCursor = None
     )
 
@@ -110,6 +113,7 @@ class PaginationResultSpec
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
+      callSystem = None,
       nextCursor = None
     )
 

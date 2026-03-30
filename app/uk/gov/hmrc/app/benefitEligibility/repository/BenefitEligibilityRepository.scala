@@ -132,6 +132,25 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
           Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
+
+      case SearchLightPageTask(
+            callSystem,
+            correlationId,
+            id,
+            paginationType,
+            contributionAndCreditsPaging,
+            nationalInsuranceNumber,
+            createdAt
+          ) =>
+        Updates.combine(
+          Updates.set("callSystem", Codecs.toBson(callSystem)),
+          Updates.set("correlationId", Codecs.toBson(correlationId)),
+          Updates.set("pageTaskId", Codecs.toBson(id)),
+          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
+          Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
+          Updates.set("paginationType", Codecs.toBson(paginationType)),
+          Updates.set("createdAt", Codecs.toBson(createdAt))
+        )
     }
     collection
       .findOneAndUpdate(

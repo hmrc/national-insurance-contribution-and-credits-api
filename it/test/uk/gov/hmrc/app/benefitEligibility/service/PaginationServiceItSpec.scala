@@ -36,7 +36,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
   MarriageDetails,
   NiContributionAndCredits
 }
-import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.MaPagination
+import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.{BspPagination, MaPagination}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -79,6 +80,7 @@ class PaginationServiceItSpec
   val uuidOne: UUID   = UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
   val uuidTwo: UUID   = UUID.fromString("f678d869-7922-4a11-82e2-5cf4e235cfee")
   val uuidThree: UUID = UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")
+  val uuidFour: UUID  = UUID.fromString("e8a00a25-beec-4fc1-aeea-4a03c8dc55ac")
 
   val mockUuidGenerator: UuidGenerator = mock[UuidGenerator]
 
@@ -127,54 +129,76 @@ class PaginationServiceItSpec
 
   override protected def checkTtlIndex = false
 
+  val maPageTask = MaPageTask(
+    correlationId,
+    PageTaskId(uuidOne),
+    List(
+      PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+      PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+    ),
+    Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
+    nationalInsuranceNumber,
+    currentTimeSource.instantNow()
+  )
+
+  val bspPageTask = BspPageTask(
+    correlationId,
+    PageTaskId(uuidTwo),
+    Some(
+      PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+    ),
+    Some(
+      ContributionAndCreditsPaging(
+        NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+        DateOfBirth(LocalDate.parse("2025-10-10"))
+      )
+    ),
+    nationalInsuranceNumber,
+    currentTimeSource.instantNow()
+  )
+
+  val gyspPageTask = GyspPageTask(
+    correlationId,
+    PageTaskId(uuidThree),
+    Some(
+      PaginationSource(
+        ApiName.SchemeMembershipDetails,
+        schemeMembershipDetailsPath
+      )
+    ),
+    Some(
+      PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+    ),
+    Some(
+      ContributionAndCreditsPaging(
+        NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+        DateOfBirth(LocalDate.parse("2025-10-10"))
+      )
+    ),
+    nationalInsuranceNumber,
+    currentTimeSource.instantNow()
+  )
+
+  val searchLightPageTask = SearchLightPageTask(
+    correlationId,
+    PageTaskId(uuidFour),
+    PaginationType.BspPagination,
+    Some(
+      ContributionAndCreditsPaging(
+        NonEmptyList
+          .one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+        DateOfBirth(LocalDate.parse("2025-10-10"))
+      )
+    ),
+    nationalInsuranceNumber,
+    currentTimeSource.instantNow()
+  )
+
   val listOfPages: List[PageTask] = List(
-    MaPageTask(
-      correlationId,
-      PageTaskId(uuidOne),
-      List(
-        PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-        PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-      ),
-      Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
-      nationalInsuranceNumber,
-      currentTimeSource.instantNow()
-    ),
-    BspPageTask(
-      correlationId,
-      PageTaskId(uuidTwo),
-      Some(
-        PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
-      ),
-      Some(
-        ContributionAndCreditsPaging(
-          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-          DateOfBirth(LocalDate.parse("2025-10-10"))
-        )
-      ),
-      nationalInsuranceNumber,
-      currentTimeSource.instantNow()
-    ),
-    GyspPageTask(
-      correlationId,
-      PageTaskId(uuidThree),
-      Some(
-        PaginationSource(
-          ApiName.SchemeMembershipDetails,
-          schemeMembershipDetailsPath
-        )
-      ),
-      Some(
-        PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
-      ),
-      Some(
-        ContributionAndCreditsPaging(
-          NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-          DateOfBirth(LocalDate.parse("2025-10-10"))
-        )
-      ),
-      nationalInsuranceNumber,
-      currentTimeSource.instantNow()
-    )
+    maPageTask,
+    bspPageTask,
+    gyspPageTask,
+    searchLightPageTask
   )
 
   override protected def beforeEach(): Unit = {
@@ -332,17 +356,19 @@ class PaginationServiceItSpec
         service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
           Right(
             PaginationResult(
-              correlationId,
+              correlationId = correlationId,
               paginationType = PaginationType.MaPagination,
-              nationalInsuranceNumber,
+              nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
-              Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
+              class2MaReceiptsResult =
+                Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
+              callSystem = None,
               nextCursor = Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(uuidOne)))
             )
           )
@@ -424,18 +450,113 @@ class PaginationServiceItSpec
         service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo))).value.futureValue shouldBe
           Right(
             PaginationResult(
-              correlationId,
+              correlationId = correlationId,
               paginationType = PaginationType.BspPagination,
-              nationalInsuranceNumber,
+              nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              None,
+              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = None,
+              callSystem = None,
               nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo)))
+            )
+          )
+      }
+      "should process Searchlight pagination task successfully" in {
+        deleteAll().futureValue
+
+        val searchLightPageTask = SearchLightPageTask(
+          correlationId,
+          PageTaskId(uuidFour),
+          PaginationType.BspPagination,
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList
+                .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2020), EndTaxYear(2022))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          nationalInsuranceNumber,
+          currentTimeSource.instantNow()
+        )
+        List(maPageTask, bspPageTask, searchLightPageTask, gyspPageTask).foreach(pageTask =>
+          insert(pageTask).futureValue
+        )
+        (() => mockUuidGenerator.generate).expects().returning(uuidFour)
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          Some(TotalGraduatedPensionUnits(BigDecimal("100"))),
+          Some(
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          ),
+          Some(
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(niContributionsAndCreditsSuccessResponse).toString)
+            )
+        )
+
+        service
+          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidFour)))
+          .value
+          .futureValue shouldBe
+          Right(
+            PaginationResult(
+              correlationId = correlationId,
+              paginationType = PaginationType.BspPagination,
+              nationalInsuranceNumber = nationalInsuranceNumber,
+              liabilitiesResult = List(),
+              class2MaReceiptsResult = None,
+              marriageDetailsResult = None,
+              contributionCreditResult = ContributionCreditPagingResult(
+                Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
+                Some(
+                  ContributionAndCreditsPaging(
+                    NonEmptyList(TaxWindow(StartTaxYear(2020), EndTaxYear(2022)), List()),
+                    DateOfBirth(LocalDate.parse("2025-10-10"))
+                  )
+                )
+              ),
+              benefitSchemeMembershipDetailsData = None,
+              callSystem = Some(SEARCHLIGHT),
+              nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidFour)))
             )
           )
       }
@@ -687,65 +808,27 @@ class PaginationServiceItSpec
           .futureValue shouldBe
           Right(
             PaginationResult(
-              correlationId,
+              correlationId = correlationId,
               paginationType = PaginationType.GyspPagination,
-              nationalInsuranceNumber,
+              nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              None,
+              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
+              callSystem = None,
               nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, PageTaskId(uuidThree)))
             )
           )
       }
       "should process Ma pagination task successfully and delete MA page" in {
         val newListOfPages = List(
-          BspPageTask(
-            correlationId,
-            PageTaskId(uuidTwo),
-            Some(
-              PaginationSource(
-                MarriageDetails,
-                npsIndividualMarriageDetailsPath
-              )
-            ),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
-              )
-            ),
-            nationalInsuranceNumber,
-            currentTimeSource.instantNow()
-          ),
-          GyspPageTask(
-            correlationId,
-            PageTaskId(uuidThree),
-            Some(
-              PaginationSource(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsPath
-              )
-            ),
-            Some(
-              PaginationSource(
-                MarriageDetails,
-                npsIndividualMarriageDetailsPath
-              )
-            ),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
-              )
-            ),
-            nationalInsuranceNumber,
-            currentTimeSource.instantNow()
-          )
+          bspPageTask,
+          gyspPageTask,
+          searchLightPageTask
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
@@ -821,17 +904,19 @@ class PaginationServiceItSpec
         service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
           Right(
             PaginationResult(
-              correlationId,
+              correlationId = correlationId,
               paginationType = PaginationType.MaPagination,
-              nationalInsuranceNumber,
+              nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
-              Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
+              class2MaReceiptsResult =
+                Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
+              callSystem = None,
               nextCursor = None
             )
           )
@@ -841,41 +926,9 @@ class PaginationServiceItSpec
       }
       "should process Bsp pagination task successfully and delete BSP page" in {
         val newListOfPages = List(
-          MaPageTask(
-            correlationId,
-            PageTaskId(uuidOne),
-            List(
-              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-            ),
-            Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
-            nationalInsuranceNumber,
-            currentTimeSource.instantNow()
-          ),
-          GyspPageTask(
-            correlationId,
-            PageTaskId(uuidThree),
-            Some(
-              PaginationSource(
-                ApiName.SchemeMembershipDetails,
-                schemeMembershipDetailsPath
-              )
-            ),
-            Some(
-              PaginationSource(
-                MarriageDetails,
-                npsIndividualMarriageDetailsPath
-              )
-            ),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
-              )
-            ),
-            nationalInsuranceNumber,
-            currentTimeSource.instantNow()
-          )
+          maPageTask,
+          gyspPageTask,
+          searchLightPageTask
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
@@ -945,17 +998,18 @@ class PaginationServiceItSpec
         service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo))).value.futureValue shouldBe
           Right(
             PaginationResult(
-              correlationId,
+              correlationId = correlationId,
               paginationType = PaginationType.BspPagination,
-              nationalInsuranceNumber,
+              nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              None,
+              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = None,
+              callSystem = None,
               nextCursor = None
             )
           )
@@ -964,35 +1018,9 @@ class PaginationServiceItSpec
       }
       "should process Gysp pagination task successfully and delete GYSP page" in {
         val newListOfPages = List(
-          MaPageTask(
-            correlationId,
-            PageTaskId(uuidOne),
-            List(
-              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-            ),
-            Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
-            nationalInsuranceNumber,
-            currentTimeSource.instantNow()
-          ),
-          BspPageTask(
-            correlationId,
-            PageTaskId(uuidTwo),
-            Some(
-              PaginationSource(
-                MarriageDetails,
-                npsIndividualMarriageDetailsPath
-              )
-            ),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
-              )
-            ),
-            nationalInsuranceNumber,
-            currentTimeSource.instantNow()
-          )
+          bspPageTask,
+          maPageTask,
+          searchLightPageTask
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuidThree)
@@ -1235,17 +1263,98 @@ class PaginationServiceItSpec
           .futureValue shouldBe
           Right(
             PaginationResult(
-              correlationId,
+              correlationId = correlationId,
               paginationType = PaginationType.GyspPagination,
-              nationalInsuranceNumber,
+              nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              None,
+              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
+              callSystem = None,
+              nextCursor = None
+            )
+          )
+
+        findAll().futureValue should contain theSameElementsAs newListOfPages
+      }
+      "should process Searchlight pagination task successfully and delete old Searchlight page" in {
+        val newListOfPages = List(
+          maPageTask,
+          gyspPageTask,
+          bspPageTask
+        )
+
+        val newId = UUID.fromString("27d18297-bfc9-47b6-b2ab-4ac8964e6027")
+        (() => mockUuidGenerator.generate).expects().returning(newId)
+
+        val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
+          Some(TotalGraduatedPensionUnits(BigDecimal("100"))),
+          Some(
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          ),
+          Some(
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
+              )
+            )
+          )
+        )
+
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(Json.toJson(niContributionsAndCreditsSuccessResponse).toString)
+            )
+        )
+
+        service
+          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidFour)))
+          .value
+          .futureValue shouldBe
+          Right(
+            PaginationResult(
+              correlationId = correlationId,
+              paginationType = PaginationType.BspPagination,
+              nationalInsuranceNumber = nationalInsuranceNumber,
+              liabilitiesResult = List(),
+              class2MaReceiptsResult = None,
+              marriageDetailsResult = None,
+              contributionCreditResult = ContributionCreditPagingResult(
+                contributionCreditResult =
+                  Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
+                contributionAndCreditsPaging = None
+              ),
+              benefitSchemeMembershipDetailsData = None,
+              callSystem = Some(SEARCHLIGHT),
               nextCursor = None
             )
           )
