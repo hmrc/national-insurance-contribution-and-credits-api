@@ -233,7 +233,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidOne))).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
@@ -281,7 +281,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidOne))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
@@ -372,7 +372,7 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidTwo))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
@@ -631,7 +631,7 @@ class PaginationServiceItSpec
           List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
         )
 
-        service.paginate(PageTaskId(uuidThree)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidThree))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
@@ -734,7 +734,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidOne))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
@@ -856,7 +856,7 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidTwo))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
@@ -1141,7 +1141,7 @@ class PaginationServiceItSpec
           List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
         )
 
-        service.paginate(PageTaskId(uuidThree)).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidThree))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,

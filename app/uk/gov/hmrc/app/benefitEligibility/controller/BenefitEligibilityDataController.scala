@@ -46,7 +46,7 @@ class BenefitEligibilityDataController @Inject() (
       }
     } else identity.async(_ => Future.successful(NotFound))
 
-  def getPaginateData(): Action[AnyContent] =
+  def getNextPage(): Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
         BenefitEligibilityRequestHandler.handlePaginationRequest(

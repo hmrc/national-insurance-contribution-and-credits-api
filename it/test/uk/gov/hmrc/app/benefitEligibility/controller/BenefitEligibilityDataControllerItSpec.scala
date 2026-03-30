@@ -3123,7 +3123,8 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(InternalServerError, ErrorReason("unexpected internal failure"))
         )
       }
-
+    }
+    ".getNextPage" - {
       "should handle a MA request containing nextCursor successfully (200)" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
         val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
@@ -3196,7 +3197,7 @@ class BenefitEligibilityDataControllerItSpec
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.getPaginateData()(request)
+        val result: Future[Result] = underTest.getNextPage()(request)
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
@@ -3269,7 +3270,7 @@ class BenefitEligibilityDataControllerItSpec
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.getPaginateData()(request)
+        val result: Future[Result] = underTest.getNextPage()(request)
 
         val expectedResult = BenefitEligibilityInfoErrorResponse(
           OverallResultStatus.Failure,
@@ -3365,7 +3366,7 @@ class BenefitEligibilityDataControllerItSpec
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.getPaginateData()(request)
+        val result: Future[Result] = underTest.getNextPage()(request)
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber = nationalInsuranceNumber,
@@ -3446,7 +3447,7 @@ class BenefitEligibilityDataControllerItSpec
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.getPaginateData()(request)
+        val result: Future[Result] = underTest.getNextPage()(request)
 
         status(result) shouldBe 502
         contentAsJson(result)
@@ -3604,7 +3605,7 @@ class BenefitEligibilityDataControllerItSpec
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.getPaginateData()(request)
+        val result: Future[Result] = underTest.getNextPage()(request)
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseGysp(
           nationalInsuranceNumber = nationalInsuranceNumber,
@@ -3624,6 +3625,7 @@ class BenefitEligibilityDataControllerItSpec
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
 
       }
+
       "should handle a GYSP request containing nextCursor successfully (502)" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidThree)
 
@@ -3715,13 +3717,50 @@ class BenefitEligibilityDataControllerItSpec
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
 
-        val result: Future[Result] = underTest.getPaginateData()(request)
+        val result: Future[Result] = underTest.getNextPage()(request)
 
         status(result) shouldBe 502
         contentAsJson(result)
           .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
       }
 
+      "should return a 404 if the nextCursor value sent does not exist in the db" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val paginationCursor =
+          PaginationCursor(PaginationType.GYSP, PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02")))
+
+        val cursorId = CursorId.from(paginationCursor)
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          s"/benefit-eligibility-info?cursorId=${cursorId.value}"
+        )
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 404
+        contentAsJson(result) shouldBe Json.parse(
+          s"""{
+             |   "code":"NOT_FOUND",
+             |   "reason":"record not found for cursorId: ${cursorId.value}"
+             |}""".stripMargin
+        )
+      }
     }
   }
 

@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.EitherT
 import play.api.libs.json.*
-import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, Ok, UnprocessableEntity}
+import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, NotFound, Ok, UnprocessableEntity}
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
@@ -29,10 +29,9 @@ import uk.gov.hmrc.app.benefitEligibility.model.response.{
   ErrorReason,
   ErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.repository.{PageTaskId, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
-import uk.gov.hmrc.app.benefitEligibility.util.SuccessfulResult.SuccessfulResult
-import uk.gov.hmrc.app.benefitEligibility.util.{RequestAwareLogger, SuccessfulResult}
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -126,7 +125,7 @@ object BenefitEligibilityRequestHandler {
 
   def handlePaginationRequest(
       request: Request[AnyContent],
-      paginationFunction: (PageTaskId) => EitherT[Future, BenefitEligibilityError, PaginationResult]
+      paginationFunction: PaginationCursor => EitherT[Future, BenefitEligibilityError, PaginationResult]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (getCorrelationId(request) match {
       case Right(_) =>
@@ -149,7 +148,7 @@ object BenefitEligibilityRequestHandler {
             )
           case Some(Success(nextCursor)) =>
             paginationFunction(
-              nextCursor.pageTaskId
+              nextCursor
             )
               .map { paginationResult =>
                 BenefitEligibilityInfoResponse.from(
@@ -179,10 +178,19 @@ object BenefitEligibilityRequestHandler {
         )
     }).value.map {
       case Left(error) =>
-        logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
-        InternalServerError(
-          Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
-        )
+        error match {
+          case RecordNotFound(id) =>
+            logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
+            NotFound(
+              Json.toJson(ErrorResponse(ErrorCode.NotFound, ErrorReason(s"record not found for cursorId: ${id.value}")))
+            )
+          case _ =>
+            logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
+            InternalServerError(
+              Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
+            )
+        }
+
       case Right(response) => response
     }
 
