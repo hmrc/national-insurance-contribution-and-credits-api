@@ -79,6 +79,7 @@ class BenefitEligibilityDataRepositoryItSpec
             correlationId,
             pageTaskId1,
             List(paginationSource2, paginationSource2),
+            Some(paginationSource1),
             nationalInsuranceNumber,
             testInstant
           ),
@@ -161,6 +162,7 @@ class BenefitEligibilityDataRepositoryItSpec
           correlationId,
           pageTaskId,
           List(paginationSource1, paginationSource1),
+          Some(paginationSource1),
           nationalInsuranceNumber,
           testInstant
         )
@@ -224,6 +226,7 @@ class BenefitEligibilityDataRepositoryItSpec
           correlationId,
           pageTaskId1,
           List(paginationSource1, paginationSource1),
+          Some(paginationSource1),
           nationalInsuranceNumber,
           testInstant
         )
@@ -235,6 +238,7 @@ class BenefitEligibilityDataRepositoryItSpec
           correlationId,
           pageTaskId2,
           List(paginationSource2, paginationSource2),
+          Some(paginationSource1),
           nationalInsuranceNumber,
           testInstant
         )
@@ -356,6 +360,7 @@ class BenefitEligibilityDataRepositoryItSpec
           correlationId,
           pageTaskId1,
           List(paginationSource1, paginationSource1),
+          Some(paginationSource1),
           nationalInsuranceNumber,
           testInstant
         )
@@ -404,6 +409,7 @@ class BenefitEligibilityDataRepositoryItSpec
             correlationId,
             pageTaskId1,
             List(paginationSource2, paginationSource2),
+            Some(paginationSource1),
             nationalInsuranceNumber,
             testInstant
           ),

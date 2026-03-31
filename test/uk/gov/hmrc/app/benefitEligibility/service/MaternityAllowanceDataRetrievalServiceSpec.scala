@@ -33,6 +33,7 @@ import uk.gov.hmrc.app.benefitEligibility.connectors.{
   NiContributionsAndCreditsConnector
 }
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.UnprocessableEntity
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
@@ -158,7 +159,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
     nationalInsuranceNumber = Some(Identifier("AB123456C")),
     class2MAReceiptDetails = None,
-    callBack = None
+    callBack = Some(Callback(Some(CallbackUrl("/some/url"))))
   )
 
   val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
@@ -201,6 +202,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     List(PaginationSource(ApiName.Liabilities, "/some/url")),
+    Some(PaginationSource(Class2MAReceipts, "/some/url")),
     identifier,
     testInstant
   )

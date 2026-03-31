@@ -16,13 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier, PaginationType}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{
-  ApiResult,
-  ContributionCreditResult,
-  LiabilityResult,
-  MarriageDetailsResult
-}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{CorrelationId, Identifier, PaginationType}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.repository.{
   ContributionAndCreditsPaging,
   PageTaskId,
@@ -42,6 +37,7 @@ final case class PaginationResult(
     paginationType: PaginationType,
     nationalInsuranceNumber: Identifier,
     liabilitiesResult: List[LiabilityResult],
+    class2MaReceiptsResult: Option[Class2MaReceiptsResult],
     marriageDetailsResult: Option[MarriageDetailsResult],
     contributionCreditResult: ContributionCreditPagingResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
@@ -49,11 +45,11 @@ final case class PaginationResult(
 ) {
 
   private def shouldPage: Boolean =
-    List(
-      PaginationSource.fromLiabilities(liabilitiesResult),
+    (PaginationSource.fromLiabilities(liabilitiesResult) ++ List(
       PaginationSource.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
-      PaginationSource.fromMarriageDetails(marriageDetailsResult)
-    ).flatten.nonEmpty || contributionCreditResult.contributionAndCreditsPaging.isDefined
+      PaginationSource.fromMarriageDetails(marriageDetailsResult),
+      PaginationSource.fromClass2MAReceipts(class2MaReceiptsResult)
+    ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsPaging.isDefined
 
   def setNextCursor(uuid: UUID): PaginationResult = {
     val cursor = if (shouldPage) {
@@ -67,6 +63,7 @@ final case class PaginationResult(
 
   def allResults: List[ApiResult] = liabilitiesResult ++ List(
     marriageDetailsResult,
+    class2MaReceiptsResult,
     contributionCreditResult.contributionCreditResult,
     benefitSchemeMembershipDetailsData.map(_.schemeMembershipDetailsResult)
   ).flatten ++ benefitSchemeMembershipDetailsData.map(_.benefitSchemeDetailsResults).getOrElse(Nil)

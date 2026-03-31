@@ -2094,6 +2094,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             nationalInsuranceNumber,
             liabilityResult,
             None,
+            None,
             creditsAndContributionsPagingResult,
             None,
             None
@@ -2123,6 +2124,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             nationalInsuranceNumber,
             liabilityResult,
             None,
+            None,
             creditsAndContributionsPagingResult,
             None,
             None
@@ -2150,6 +2152,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             PaginationType.GYSP,
             nationalInsuranceNumber,
             liabilityResult,
+            None,
             None,
             creditsAndContributionsPagingResult,
             None,

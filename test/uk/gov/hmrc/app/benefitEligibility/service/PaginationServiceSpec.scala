@@ -26,9 +26,11 @@ import org.scalatest.matchers.should.Matchers.{a, shouldBe}
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.{
   ActiveMarriage,
@@ -79,6 +81,8 @@ class PaginationServiceSpec
   val mockUuidGenerator: UuidGenerator                                       = mock[UuidGenerator]
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
+  val mockClass2MAReceiptsConnector: Class2MAReceiptsConnector = mock[Class2MAReceiptsConnector]
+
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
@@ -94,6 +98,7 @@ class PaginationServiceSpec
 
   val underTest = new PaginationService(
     liabilitySummaryDetailsConnector = mockLiabilitySummaryDetailsConnector,
+    class2MAReceiptsConnector = mockClass2MAReceiptsConnector,
     niContributionsAndCreditsConnector = mockNiContributionsAndCreditsConnector,
     marriageDetailsConnector = mockMarriageDetailsConnector,
     schemeMembershipDetailsConnector = mockSchemeMembershipDetailsConnector,
@@ -113,6 +118,7 @@ class PaginationServiceSpec
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId1,
           liabilitiesPaging = paginationSource3,
+          None,
           nationalInsuranceNumber,
           Instant.now
         )
@@ -134,6 +140,7 @@ class PaginationServiceSpec
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId1,
           liabilitiesPaging = paginationSource3,
+          None,
           nationalInsuranceNumber,
           Instant.now
         )
@@ -156,6 +163,7 @@ class PaginationServiceSpec
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = uuidOne,
           liabilitiesPaging = paginationSource3,
+          None,
           nationalInsuranceNumber,
           createdAt = currentTimeSource.instantNow()
         )
@@ -163,6 +171,7 @@ class PaginationServiceSpec
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = uuidTwo,
           liabilitiesPaging = paginationSource3,
+          None,
           nationalInsuranceNumber,
           createdAt = currentTimeSource.instantNow()
         )
@@ -191,11 +200,13 @@ class PaginationServiceSpec
     }
     ".paginate" - {
       "should return pagination result for MA" in {
-        val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val pageTaskId              = PageTaskId(uuid)
-        val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val paginationSource1       = List(PaginationSource(ApiName.Liabilities, liabilitiesCallBackUrl))
-        val nationalInsuranceNumber = Identifier("GD379251T")
+        val uuid                        = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val pageTaskId                  = PageTaskId(uuid)
+        val liabilitiesCallBackUrl      = "SomeCallBackURL1"
+        val class2MAReceiptsCallBackUrl = "SomeCallBackURL2"
+        val paginationSource1           = List(PaginationSource(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val paginationSource2           = PaginationSource(Class2MAReceipts, class2MAReceiptsCallBackUrl)
+        val nationalInsuranceNumber     = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -203,13 +214,18 @@ class PaginationServiceSpec
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId,
           liabilitiesPaging = paginationSource1,
-          nationalInsuranceNumber,
-          Instant.now
+          class2MaReceipts = Some(paginationSource2),
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = Instant.now
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         val liabilitiesSuccessResponse =
           LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
+
+        val class2MAReceiptsSuccessResponse =
+          Class2MAReceiptsSuccessResponse(None, None, Some(Callback(Some(CallbackUrl(class2MAReceiptsCallBackUrl)))))
+
         (mockBenefitEligibilityRepository
           .getItem(_: PaginationCursor))
           .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
@@ -217,8 +233,15 @@ class PaginationServiceSpec
 
         (mockLiabilitySummaryDetailsConnector
           .fetchData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.MA, liabilitiesCallBackUrl.toString, *)
+          .expects(BenefitType.MA, liabilitiesCallBackUrl, *)
           .returning(EitherT.rightT(NpsApiResult.SuccessResult(ApiName.Liabilities, liabilitiesSuccessResponse)))
+
+        (mockClass2MAReceiptsConnector
+          .fetchData(_: BenefitType, _: String)(_: HeaderCarrier))
+          .expects(BenefitType.MA, class2MAReceiptsCallBackUrl, *)
+          .returning(
+            EitherT.rightT(NpsApiResult.SuccessResult(ApiName.Class2MAReceipts, class2MAReceiptsSuccessResponse))
+          )
 
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: PageTask))
@@ -233,6 +256,16 @@ class PaginationServiceSpec
             SuccessResult(
               ApiName.Liabilities,
               LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
+            )
+          ),
+          Some(
+            SuccessResult(
+              ApiName.Class2MAReceipts,
+              Class2MAReceiptsSuccessResponse(
+                None,
+                None,
+                Some(Callback(Some(CallbackUrl(class2MAReceiptsCallBackUrl))))
+              )
             )
           ),
           None,
@@ -310,6 +343,7 @@ class PaginationServiceSpec
           paginationType = PaginationType.BSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
+          None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -541,6 +575,7 @@ class PaginationServiceSpec
           paginationType = PaginationType.GYSP,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
+          None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -689,6 +724,7 @@ class PaginationServiceSpec
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           pageTaskId = pageTaskId,
           liabilitiesPaging = paginationSource1,
+          None,
           nationalInsuranceNumber,
           Instant.now
         )

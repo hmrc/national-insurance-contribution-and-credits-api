@@ -31,7 +31,7 @@ import play.api.mvc.{AnyContent, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResponseStatus
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -167,6 +167,7 @@ class BenefitEligibilityDataControllerItSpec
           PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
           PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
         ),
+        Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
         nationalInsuranceNumber,
         currentTimeSource.instantNow()
       ),
@@ -3165,6 +3166,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val liabilitySummaryDetailsSuccessResponseBody =
           Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
+        val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
@@ -3184,6 +3186,17 @@ class BenefitEligibilityDataControllerItSpec
                 .withStatus(OK)
                 .withHeader("Content-Type", "application/json")
                 .withBody(liabilitySummaryDetailsSuccessResponseBody)
+            )
+        )
+
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsClass2MaReceiptsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(class2MAReceiptsSuccessResponseBody)
             )
         )
 
@@ -3260,6 +3273,17 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsClass2MaReceiptsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_REQUEST)
+                .withHeader("Content-Type", "application/json")
+                .withBody(npsStandardErrorResponse400Body)
+            )
+        )
+
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
           "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
@@ -3276,10 +3300,15 @@ class BenefitEligibilityDataControllerItSpec
           OverallResultStatus.Failure,
           nationalInsuranceNumber,
           BenefitType.MA,
-          OverallResultSummary(2, 0, 2),
+          OverallResultSummary(3, 0, 3),
           List(
             SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest)),
-            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest))
+            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest)),
+            SanitizedApiResult(
+              ApiName.Class2MAReceipts,
+              NpsApiResponseStatus.Failure,
+              Some(NpsNormalizedError.BadRequest)
+            )
           )
         )
 

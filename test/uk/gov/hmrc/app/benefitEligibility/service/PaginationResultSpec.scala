@@ -54,6 +54,7 @@ class PaginationResultSpec
           LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl("SomeUrl")))))
         )
       ),
+      None,
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
@@ -71,6 +72,7 @@ class PaginationResultSpec
           LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl("SomeUrl")))))
         )
       ),
+      None,
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
@@ -82,6 +84,7 @@ class PaginationResultSpec
       paginationType = PaginationType.MA,
       nationalInsuranceNumber,
       liabilitiesResult = List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
+      None,
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
@@ -99,6 +102,7 @@ class PaginationResultSpec
           ErrorReport(NpsNormalizedError.BadRequest, None)
         )
       ),
+      None,
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,

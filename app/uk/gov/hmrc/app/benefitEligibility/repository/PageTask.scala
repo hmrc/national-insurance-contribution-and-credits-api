@@ -20,27 +20,13 @@ import cats.data.NonEmptyList
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  ApiName,
-  CorrelationId,
-  CursorId,
-  DateOfBirth,
-  Identifier,
-  PaginationType,
-  TaxWindow
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{LiabilityResult, MarriageDetailsResult}
-import uk.gov.hmrc.app.benefitEligibility.service.{
-  BenefitSchemeMembershipDetailsData,
-  ContributionCreditPagingResult,
-  PaginationResult,
-  UuidGenerator
-}
-import uk.gov.hmrc.app.benefitEligibility.util.NonEmptyListFormat
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{Class2MaReceiptsResult, LiabilityResult, MarriageDetailsResult}
+import uk.gov.hmrc.app.benefitEligibility.service.{BenefitSchemeMembershipDetailsData, PaginationResult}
+import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, NonEmptyListFormat}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
-import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import java.util.{Base64, UUID}
 import scala.util.Try
 
@@ -92,8 +78,16 @@ object PaginationSource {
       .flatMap {
         _.callbackURL.map(url => PaginationSource(Liabilities, url.value))
       }
-
   }
+
+  def fromClass2MAReceipts(class2MaReceiptsResult: Option[Class2MaReceiptsResult]): Option[PaginationSource] =
+    class2MaReceiptsResult.flatMap(
+      _.getSuccess
+        .flatMap(_.callBack)
+        .flatMap {
+          _.callbackURL.map(url => PaginationSource(Liabilities, url.value))
+        }
+    )
 
 }
 
@@ -140,6 +134,7 @@ final case class MaPageTask private (
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
+    class2MaReceipts: Option[PaginationSource],
     nationalInsuranceNumber: Identifier,
     createdAt: Instant
 ) extends PageTask
@@ -152,6 +147,7 @@ object MaPageTask {
       correlationId: CorrelationId,
       pageTaskId: PageTaskId,
       liabilitiesPaging: List[PaginationSource],
+      class2MaReceipts: Option[PaginationSource],
       nationalInsuranceNumber: Identifier,
       createdAt: Instant
   ) =
@@ -160,6 +156,7 @@ object MaPageTask {
       pageTaskId,
       PaginationType.MA,
       liabilitiesPaging,
+      class2MaReceipts,
       nationalInsuranceNumber,
       createdAt
     )
@@ -267,8 +264,9 @@ object PageTask {
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
-            paginationResult.nationalInsuranceNumber,
-            now
+            class2MaReceipts = PaginationSource.fromClass2MAReceipts(paginationResult.class2MaReceiptsResult),
+            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
+            createdAt = now
           )
         case PaginationType.GYSP =>
           GyspPageTask(

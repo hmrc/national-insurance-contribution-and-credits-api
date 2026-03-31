@@ -76,12 +76,21 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
 
   def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
     val updates = pageTask match {
-      case MaPageTask(correlationId, id, paginationType, liabilitiesPaging, nationalInsuranceNumber, createdAt) =>
+      case MaPageTask(
+            correlationId,
+            id,
+            paginationType,
+            liabilitiesPaging,
+            class2MaReceipts,
+            nationalInsuranceNumber,
+            createdAt
+          ) =>
         Updates.combine(
           Updates.set("correlationId", Codecs.toBson(correlationId)),
           Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
+          Updates.set("class2MaReceipts", Codecs.toBson(class2MaReceipts)),
           Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )
