@@ -1176,7 +1176,10 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               niContributionsAndCreditsSuccessResponse
             ),
             Some(
-              PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+              PaginationCursor(
+                PaginationType.MaPagination,
+                PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
+              )
             )
           )
         )

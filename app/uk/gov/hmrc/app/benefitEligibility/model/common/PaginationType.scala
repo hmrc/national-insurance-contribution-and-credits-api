@@ -25,10 +25,18 @@ sealed abstract class PaginationType(override val entryName: String) extends Enu
 object PaginationType extends Enum[PaginationType] with PlayJsonEnum[PaginationType] {
   val values: immutable.IndexedSeq[PaginationType] = findValues
 
-  case object MA extends PaginationType("MA")
+  case object MaPagination extends PaginationType("MA")
 
-  case object GYSP extends PaginationType("GYSP")
+  case object GyspPagination extends PaginationType("GYSP")
 
-  case object BSP extends PaginationType("BSP")
+  case object BspPagination extends PaginationType("BSP")
+
+  def from(benefitType: BenefitType): Option[PaginationType] =
+    benefitType match {
+      case BenefitType.MA   => Some(PaginationType.MaPagination)
+      case BenefitType.GYSP => Some(PaginationType.GyspPagination)
+      case BenefitType.BSP  => Some(PaginationType.BspPagination)
+      case _                => None
+    }
 
 }

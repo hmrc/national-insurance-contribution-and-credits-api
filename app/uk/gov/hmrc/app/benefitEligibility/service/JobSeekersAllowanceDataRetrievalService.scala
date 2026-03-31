@@ -21,7 +21,11 @@ import cats.instances.future.*
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  CorrelationId,
+  DataRetrievalServiceError
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataRequest
@@ -53,5 +57,9 @@ class JobSeekersAllowanceDataRetrievalService @Inject() (
         )
       )
       .map(EligibilityCheckDataResultJSA(_))
+      .leftMap { error =>
+        // TODO add logging
+        DataRetrievalServiceError(List(error))
+      }
 
 }

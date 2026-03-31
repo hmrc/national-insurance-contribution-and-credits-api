@@ -19,7 +19,10 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.{
+  EligibilityCheckDataResultBSP,
+  EligibilityCheckDataResultGYSP
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
@@ -89,106 +92,109 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
     implicit val requestKey: RequestKey =
       RequestKey(eligibilityCheckDataRequest.benefitType, eligibilityCheckDataRequest.nationalInsuranceNumber)
+    val maybeTaxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
+      eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
+      eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
+    )
 
-    (
-      fetchNiContributionsAndCreditsData(eligibilityCheckDataRequest.niContributionsAndCredits),
-      fetchMarriageDetailsData(),
-      fetchBenefitSchemeMembershipDetailsData(),
-      fetchLongTermBenefitCalculationDetailsData(eligibilityCheckDataRequest.longTermBenefitCalculation),
-      fetchIndividualStatePensionInformation()
-    ).parTupled
-      .flatMap {
-        case (
-              contributionsAndCreditResult,
-              marriageDetailsResult,
-              benefitSchemeMembershipDetailsData,
-              longTermBenefitCalculationDetailsData,
-              individualStatePensionResult
-            ) =>
-          val result = EligibilityCheckDataResultGYSP(
-            contributionsAndCreditResult,
-            benefitSchemeMembershipDetailsData,
-            longTermBenefitCalculationDetailsData,
-            marriageDetailsResult,
-            individualStatePensionResult,
-            None
-          )
-          val taxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
-            eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
-            eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
-          )
-
-          val shouldPage =
-            if (result.allResults.exists(_.isFailure)) false
-            else {
-              marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined ||
-              benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get.callback.isDefined || taxWindows.length > 1
-            }
-
-          if (shouldPage) {
-            val marriageDetailsPaginate = marriageDetailsResult.getSuccess.flatMap(
-              _.marriageDetails._links
-                .flatMap(_.self.href)
-                .map(url => PaginationSource(MarriageDetails, url.value))
-            )
-
-            val benefitSchemeDetailsPaginate =
-              benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.flatMap(
-                _.callback.flatMap(_.callbackURL).map(url => PaginationSource(SchemeMembershipDetails, url.value))
+    maybeTaxWindows match {
+      case Left(error) => EitherT.leftT[Future, EligibilityCheckDataResultGYSP](error)
+      case Right(taxWindows) =>
+        (
+          fetchNiContributionsAndCreditsData(
+            eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
+            taxWindows.head.startTaxYear,
+            taxWindows.head.endTaxYear
+          ),
+          fetchMarriageDetailsData(),
+          fetchBenefitSchemeMembershipDetailsData(),
+          fetchLongTermBenefitCalculationDetailsData(eligibilityCheckDataRequest.longTermBenefitCalculation),
+          fetchIndividualStatePensionInformation()
+        ).parTupled
+          .flatMap {
+            case (
+                  contributionsAndCreditResult,
+                  marriageDetailsResult,
+                  benefitSchemeMembershipDetailsData,
+                  longTermBenefitCalculationDetailsData,
+                  individualStatePensionResult
+                ) =>
+              val result = EligibilityCheckDataResultGYSP(
+                contributionsAndCreditResult,
+                benefitSchemeMembershipDetailsData,
+                longTermBenefitCalculationDetailsData,
+                marriageDetailsResult,
+                individualStatePensionResult,
+                None
               )
 
-            val niContributionsCreditsPaginate = taxWindows.safeTailNel.map { remainingWindows =>
-              ContributionAndCreditsPaging(
-                remainingWindows,
-                eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
-              )
-            }
+              val shouldPage =
+                if (result.allResults.exists(_.isFailure)) false
+                else {
+                  marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined ||
+                  benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get.callback.isDefined || taxWindows.length > 1
+                }
 
-            paginationService
-              .addTask(
-                GyspPageTask(
-                  correlationId,
-                  PageTaskId(uuidGenerator.generate),
-                  benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
-                  marriageDetailsPaging = marriageDetailsPaginate,
-                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
-                  eligibilityCheckDataRequest.nationalInsuranceNumber,
-                  currentTimeSource.instantNow()
+              if (shouldPage) {
+                val marriageDetailsPaginate = marriageDetailsResult.getSuccess.flatMap(
+                  _.marriageDetails._links
+                    .flatMap(_.self.href)
+                    .map(url => PaginationSource(MarriageDetails, url.value))
                 )
-              )
-              .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.GYSP, PageTaskId(id)))))
 
-          } else EitherT.rightT[Future, BenefitEligibilityError](result)
-      }
+                val benefitSchemeDetailsPaginate =
+                  benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.flatMap(
+                    _.callback.flatMap(_.callbackURL).map(url => PaginationSource(SchemeMembershipDetails, url.value))
+                  )
 
-  }
-    .leftMap { error =>
-      // TODO add logging
-      DataRetrievalServiceError()
+                val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
+                  ContributionAndCreditsPaging(
+                    remainingWindows,
+                    eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
+                  )
+                }
+
+                paginationService
+                  .addTask(
+                    GyspPageTask(
+                      correlationId,
+                      PageTaskId(uuidGenerator.generate),
+                      benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
+                      marriageDetailsPaging = marriageDetailsPaginate,
+                      contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                      eligibilityCheckDataRequest.nationalInsuranceNumber,
+                      currentTimeSource.instantNow()
+                    )
+                  )
+                  .map(id =>
+                    result.copy(nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, PageTaskId(id))))
+                  )
+
+              } else EitherT.rightT[Future, BenefitEligibilityError](result)
+
+          }
+
     }
+  }.leftMap {
+    case error @ DataRetrievalServiceError(_) => error
+    case error                                => DataRetrievalServiceError(List(error))
+  }
 
   private[service] def fetchNiContributionsAndCreditsData(
-      contributionsAndCredits: ContributionsAndCreditsRequestParams
-  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) = {
-
-    // we will always have at least one tax window on a valid request
-    val window = ContributionCreditTaxWindowCalculator
-      .createTaxWindows(
-        contributionsAndCredits.startTaxYear,
-        contributionsAndCredits.endTaxYear
-      )
-      .head
+      dateOfBirth: DateOfBirth,
+      startTaxYear: StartTaxYear,
+      endTaxYear: EndTaxYear
+  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
 
     niContributionsAndCreditsConnector.fetchContributionsAndCredits(
       requestKey.benefitType,
       NiContributionsAndCreditsRequest(
         requestKey.nationalInsuranceNumber,
-        contributionsAndCredits.dateOfBirth,
-        window.startTaxYear,
-        window.endTaxYear
+        dateOfBirth,
+        startTaxYear,
+        endTaxYear
       )
     )
-  }
 
   private[service] def fetchMarriageDetailsData(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
     marriageDetailsConnector.fetchMarriageDetails(

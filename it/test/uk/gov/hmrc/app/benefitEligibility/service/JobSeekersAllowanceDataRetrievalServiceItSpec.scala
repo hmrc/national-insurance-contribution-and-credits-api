@@ -534,7 +534,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
       }
 
       "when the NiContributionsAndCredits endpoint returns malformed JSON" - {
-        "should return parsing error" in {
+        "should return a DataRetrievalServiceError" in {
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
@@ -549,12 +549,12 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
             service.fetchEligibilityData(jsaEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[InvalidJsonError]
+          result.left.value shouldBe a[DataRetrievalServiceError]
         }
       }
 
       "when the request to the downstream fails unexpectedly" - {
-        "should return downstream error" in {
+        "should return a DataRetrievalServiceError" in {
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
@@ -568,7 +568,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
             service.fetchEligibilityData(jsaEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[NpsClientError]
+          result.left.value shouldBe a[DataRetrievalServiceError]
         }
       }
 

@@ -16,17 +16,27 @@
 
 package uk.gov.hmrc.app.benefitEligibility.util
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{EndTaxYear, StartTaxYear, TaxWindow}
+import cats.data.{NonEmptyList, Validated}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  ContributionCreditTaxWindowCalculatorError,
+  EndTaxYear,
+  StartTaxYear,
+  TaxWindow
+}
 
 object ContributionCreditTaxWindowCalculator {
 
   private final case class NormalizedTaxYear(start: Int, end: Int)
 
-  def createTaxWindows(startTaxYear: StartTaxYear, endTaxYear: EndTaxYear): List[TaxWindow] = {
+  def createTaxWindows(
+      startTaxYear: StartTaxYear,
+      endTaxYear: EndTaxYear
+  ): Either[BenefitEligibilityError, NonEmptyList[TaxWindow]] = {
 
     val normalizedTaxYears = (startTaxYear.value to endTaxYear.value).map(year => NormalizedTaxYear(year, year + 1))
 
-    normalizedTaxYears.zipWithIndex
+    val taxWindows = normalizedTaxYears.zipWithIndex
       .foldLeft(List(List.empty[NormalizedTaxYear])) { case (windows, (year, index)) =>
         if (index > 0 && index % 6 == 0) {
           List(year) :: windows
@@ -40,6 +50,11 @@ object ContributionCreditTaxWindowCalculator {
         case group if group.nonEmpty =>
           TaxWindow(StartTaxYear(group.map(_.start).min), EndTaxYear(group.map(_.start).max))
       }
+
+    NonEmptyList.fromList(taxWindows) match {
+      case Some(windows) => Right(windows)
+      case None          => Left(ContributionCreditTaxWindowCalculatorError("Invalid tax year range"))
+    }
 
   }
 

@@ -16,9 +16,15 @@
 
 package uk.gov.hmrc.app.benefitEligibility.util
 
+import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.model.common.{EndTaxYear, StartTaxYear, TaxWindow}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  ContributionCreditTaxWindowCalculatorError,
+  EndTaxYear,
+  StartTaxYear,
+  TaxWindow
+}
 
 class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matchers {
 
@@ -31,7 +37,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2025),
           EndTaxYear(2020)
         )
-        result shouldBe List.empty
+        result shouldBe Left(ContributionCreditTaxWindowCalculatorError("Invalid tax year range"))
       }
 
       "should create single window when start year equals end year" in {
@@ -39,7 +45,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2020)
         )
-        result shouldBe List(TaxWindow(StartTaxYear(2020), EndTaxYear(2020)))
+        result shouldBe Right(NonEmptyList.one(TaxWindow(StartTaxYear(2020), EndTaxYear(2020))))
       }
 
       "should create single window when range is less than 6 tax years" in {
@@ -47,7 +53,7 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2024)
         )
-        result shouldBe List(TaxWindow(StartTaxYear(2020), EndTaxYear(2024)))
+        result shouldBe Right(NonEmptyList.one(TaxWindow(StartTaxYear(2020), EndTaxYear(2024))))
       }
 
       "should create single window when range is exactly 6 tax years" in {
@@ -55,8 +61,10 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2025)
         )
-        result shouldBe List(
-          TaxWindow(StartTaxYear(2020), EndTaxYear(2025))
+        result shouldBe Right(
+          NonEmptyList.one(
+            TaxWindow(StartTaxYear(2020), EndTaxYear(2025))
+          )
         )
       }
 
@@ -65,9 +73,11 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2030)
         )
-        result shouldBe List(
-          TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
-          TaxWindow(StartTaxYear(2026), EndTaxYear(2030))
+        result shouldBe Right(
+          NonEmptyList.of(
+            TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
+            TaxWindow(StartTaxYear(2026), EndTaxYear(2030))
+          )
         )
       }
 
@@ -76,9 +86,11 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2031)
         )
-        result shouldBe List(
-          TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
-          TaxWindow(StartTaxYear(2026), EndTaxYear(2031))
+        result shouldBe Right(
+          NonEmptyList.of(
+            TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
+            TaxWindow(StartTaxYear(2026), EndTaxYear(2031))
+          )
         )
       }
 
@@ -87,10 +99,12 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2033)
         )
-        result shouldBe List(
-          TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
-          TaxWindow(StartTaxYear(2026), EndTaxYear(2031)),
-          TaxWindow(StartTaxYear(2032), EndTaxYear(2033))
+        result shouldBe Right(
+          NonEmptyList.of(
+            TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
+            TaxWindow(StartTaxYear(2026), EndTaxYear(2031)),
+            TaxWindow(StartTaxYear(2032), EndTaxYear(2033))
+          )
         )
       }
 
@@ -99,10 +113,12 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2020),
           EndTaxYear(2037)
         )
-        result shouldBe List(
-          TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
-          TaxWindow(StartTaxYear(2026), EndTaxYear(2031)),
-          TaxWindow(StartTaxYear(2032), EndTaxYear(2037))
+        result shouldBe Right(
+          NonEmptyList.of(
+            TaxWindow(StartTaxYear(2020), EndTaxYear(2025)),
+            TaxWindow(StartTaxYear(2026), EndTaxYear(2031)),
+            TaxWindow(StartTaxYear(2032), EndTaxYear(2037))
+          )
         )
       }
 
@@ -111,12 +127,14 @@ class ContributionCreditTaxWindowCalculatorSpec extends AnyFreeSpec with Matcher
           StartTaxYear(2000),
           EndTaxYear(2025)
         )
-        result shouldBe List(
-          TaxWindow(StartTaxYear(2000), EndTaxYear(2005)),
-          TaxWindow(StartTaxYear(2006), EndTaxYear(2011)),
-          TaxWindow(StartTaxYear(2012), EndTaxYear(2017)),
-          TaxWindow(StartTaxYear(2018), EndTaxYear(2023)),
-          TaxWindow(StartTaxYear(2024), EndTaxYear(2025))
+        result shouldBe Right(
+          NonEmptyList.of(
+            TaxWindow(StartTaxYear(2000), EndTaxYear(2005)),
+            TaxWindow(StartTaxYear(2006), EndTaxYear(2011)),
+            TaxWindow(StartTaxYear(2012), EndTaxYear(2017)),
+            TaxWindow(StartTaxYear(2018), EndTaxYear(2023)),
+            TaxWindow(StartTaxYear(2024), EndTaxYear(2025))
+          )
         )
       }
     }

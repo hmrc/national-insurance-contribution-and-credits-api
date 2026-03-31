@@ -24,6 +24,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
+  ContributionCreditTaxWindowCalculatorError,
   CorrelationId,
   DataRetrievalServiceError,
   PaginationType
@@ -58,72 +59,78 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
   )(
       implicit hc: HeaderCarrier,
       correlationId: CorrelationId
-  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] =
+  ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] = {
 
-    (
-      niContributionsAndCreditsConnector.fetchContributionsAndCredits(
-        eligibilityCheckDataRequest.benefitType,
-        NiContributionsAndCreditsRequest(
-          eligibilityCheckDataRequest.nationalInsuranceNumber,
-          eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
-          eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
-          eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
-        )
-      ),
-      marriageDetailsConnector.fetchMarriageDetails(
-        eligibilityCheckDataRequest.nationalInsuranceNumber
-      )
-    ).parTupled
-      .flatMap { case (contributionsAndCreditResult, marriageDetailsResult) =>
-        val result = EligibilityCheckDataResultBSP(
-          contributionsAndCreditResult,
-          marriageDetailsResult,
-          None
-        )
+    val maybeTaxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
+      eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
+      eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
+    )
 
-        val taxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
-          eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
-          eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
-        )
-
-        val shouldPage =
-          if (result.allResults.exists(_.isFailure)) false
-          else {
-            marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined || taxWindows.length > 1
-          }
-
-        if (shouldPage) {
-          val marriageDetailsPaginate: Option[PaginationSource] = marriageDetailsResult.getSuccess.flatMap(
-            _.marriageDetails._links.flatMap(_.self.href).map(url => PaginationSource(MarriageDetails, url.value))
+    maybeTaxWindows match {
+      case Left(error) => EitherT.leftT[Future, EligibilityCheckDataResultBSP](error)
+      case Right(taxWindows) =>
+        (
+          niContributionsAndCreditsConnector.fetchContributionsAndCredits(
+            eligibilityCheckDataRequest.benefitType,
+            NiContributionsAndCreditsRequest(
+              eligibilityCheckDataRequest.nationalInsuranceNumber,
+              eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
+              taxWindows.head.startTaxYear,
+              taxWindows.head.endTaxYear
+            )
+          ),
+          marriageDetailsConnector.fetchMarriageDetails(
+            eligibilityCheckDataRequest.nationalInsuranceNumber
           )
-
-          val niContributionsCreditsPaginate = taxWindows.safeTailNel.map { remainingWindows =>
-            ContributionAndCreditsPaging(
-              remainingWindows,
-              eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
+        ).parTupled
+          .flatMap { case (contributionsAndCreditResult, marriageDetailsResult) =>
+            val result = EligibilityCheckDataResultBSP(
+              contributionsAndCreditResult,
+              marriageDetailsResult,
+              None
             )
-          }
 
-          paginationService
-            .addTask(
-              BspPageTask(
-                correlationId,
-                PageTaskId(uuidGenerator.generate),
-                marriageDetailsPaging = marriageDetailsPaginate,
-                contributionAndCreditsPaging = niContributionsCreditsPaginate,
-                eligibilityCheckDataRequest.nationalInsuranceNumber,
-                currentTimeSource.instantNow()
+            val shouldPage =
+              if (result.allResults.exists(_.isFailure)) false
+              else {
+                marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined || taxWindows.length > 1
+              }
+
+            if (shouldPage) {
+              val marriageDetailsPaginate: Option[PaginationSource] = marriageDetailsResult.getSuccess.flatMap(
+                _.marriageDetails._links.flatMap(_.self.href).map(url => PaginationSource(MarriageDetails, url.value))
               )
-            )
-            .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(id)))))
-        } else {
-          EitherT
-            .rightT[Future, BenefitEligibilityError](result)
-        }
-      }
-      .leftMap {
-        // TODO add logging
-        error => DataRetrievalServiceError()
-      }
+
+              val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
+                ContributionAndCreditsPaging(
+                  remainingWindows,
+                  eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
+                )
+              }
+
+              paginationService
+                .addTask(
+                  BspPageTask(
+                    correlationId,
+                    PageTaskId(uuidGenerator.generate),
+                    marriageDetailsPaging = marriageDetailsPaginate,
+                    contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                    eligibilityCheckDataRequest.nationalInsuranceNumber,
+                    currentTimeSource.instantNow()
+                  )
+                )
+                .map(id =>
+                  result.copy(nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(id))))
+                )
+            } else {
+              EitherT
+                .rightT[Future, BenefitEligibilityError](result)
+            }
+          }
+    }
+  }.leftMap {
+    case error @ DataRetrievalServiceError(_) => error
+    case error                                => DataRetrievalServiceError(List(error))
+  }
 
 }

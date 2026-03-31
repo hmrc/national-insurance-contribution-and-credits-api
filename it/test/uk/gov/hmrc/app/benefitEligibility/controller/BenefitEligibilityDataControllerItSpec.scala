@@ -1277,7 +1277,8 @@ class BenefitEligibilityDataControllerItSpec
                   .withBody(successResponseJson)
               )
           )
-          val bspSearchlightEligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+          val bspSearchlightEligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
+            BenefitType.BSP,
             nationalInsuranceNumber,
             ContributionsAndCreditsRequestParams(
               DateOfBirth(LocalDate.parse("2025-10-10")),
@@ -1301,7 +1302,12 @@ class BenefitEligibilityDataControllerItSpec
           println("====================")
 
           val expectedResult =
-            BenefitEligibilityInfoSuccessResponseBspSearchLight(nationalInsuranceNumber, successResponse, None)
+            BenefitEligibilityInfoSuccessResponseSearchLight(
+              BenefitType.BSP,
+              nationalInsuranceNumber,
+              successResponse,
+              None
+            )
 
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
@@ -1325,7 +1331,8 @@ class BenefitEligibilityDataControllerItSpec
                   .withHeader("Content-Type", "application/json")
               )
           )
-          val bspSearchlightEligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+          val bspSearchlightEligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
+            BenefitType.BSP,
             nationalInsuranceNumber,
             ContributionsAndCreditsRequestParams(
               DateOfBirth(LocalDate.parse("2025-10-10")),
@@ -1347,7 +1354,7 @@ class BenefitEligibilityDataControllerItSpec
             """{
               |   "status":"FAILURE",
               |   "nationalInsuranceNumber":"AB123456C",
-              |   "benefitType":"BSP_SEARCHLIGHT",
+              |   "benefitType":"BSP",
               |   "summary":{
               |      "totalCalls":1,
               |      "successful":0,
@@ -3766,7 +3773,10 @@ class BenefitEligibilityDataControllerItSpec
         )
 
         val paginationCursor =
-          PaginationCursor(PaginationType.GYSP, PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02")))
+          PaginationCursor(
+            PaginationType.GyspPagination,
+            PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
+          )
 
         val cursorId = CursorId.from(paginationCursor)
 

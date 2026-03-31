@@ -36,6 +36,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
   MarriageDetails,
   NiContributionAndCredits
 }
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.MaPagination
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -251,7 +252,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PaginationCursor(PaginationType.MA, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
@@ -328,11 +329,11 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
-              paginationType = PaginationType.MA,
+              paginationType = PaginationType.MaPagination,
               nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
@@ -342,7 +343,7 @@ class PaginationServiceItSpec
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
-              nextCursor = Some(PaginationCursor(PaginationType.MA, PageTaskId(uuidOne)))
+              nextCursor = Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(uuidOne)))
             )
           )
 
@@ -420,11 +421,11 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidTwo))).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
-              paginationType = PaginationType.BSP,
+              paginationType = PaginationType.BspPagination,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
               None,
@@ -434,7 +435,7 @@ class PaginationServiceItSpec
                 None
               ),
               benefitSchemeMembershipDetailsData = None,
-              nextCursor = Some(PaginationCursor(PaginationType.BSP, PageTaskId(uuidTwo)))
+              nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo)))
             )
           )
       }
@@ -680,11 +681,14 @@ class PaginationServiceItSpec
           List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
         )
 
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidThree))).value.futureValue shouldBe
+        service
+          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidThree)))
+          .value
+          .futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
-              paginationType = PaginationType.GYSP,
+              paginationType = PaginationType.GyspPagination,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
               None,
@@ -694,7 +698,7 @@ class PaginationServiceItSpec
                 None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
-              nextCursor = Some(PaginationCursor(PaginationType.GYSP, PageTaskId(uuidThree)))
+              nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, PageTaskId(uuidThree)))
             )
           )
       }
@@ -814,11 +818,11 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
-              paginationType = PaginationType.MA,
+              paginationType = PaginationType.MaPagination,
               nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
@@ -938,11 +942,11 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidTwo))).value.futureValue shouldBe
+        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo))).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
-              paginationType = PaginationType.BSP,
+              paginationType = PaginationType.BspPagination,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
               None,
@@ -1225,11 +1229,14 @@ class PaginationServiceItSpec
           List(NpsApiResult.SuccessResult(ApiName.BenefitSchemeDetails, benefitSchemeDetailsSuccessResponse))
         )
 
-        service.paginate(PaginationCursor(PaginationType.BSP, PageTaskId(uuidThree))).value.futureValue shouldBe
+        service
+          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidThree)))
+          .value
+          .futureValue shouldBe
           Right(
             PaginationResult(
               correlationId,
-              paginationType = PaginationType.GYSP,
+              paginationType = PaginationType.GyspPagination,
               nationalInsuranceNumber,
               liabilitiesResult = List(),
               None,

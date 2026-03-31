@@ -46,7 +46,7 @@ class PaginationResultSpec
   "PaginationResult" - {
     val paginationResultWithNextCursor = PaginationResult(
       correlationId,
-      paginationType = PaginationType.MA,
+      paginationType = PaginationType.MaPagination,
       nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(
@@ -58,13 +58,17 @@ class PaginationResultSpec
       marriageDetailsResult = None,
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
-      nextCursor =
-        Some(PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))))
+      nextCursor = Some(
+        PaginationCursor(
+          PaginationType.MaPagination,
+          PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+        )
+      )
     )
 
     val paginationResultWithoutNextCursor = PaginationResult(
       correlationId,
-      paginationType = PaginationType.MA,
+      paginationType = PaginationType.MaPagination,
       nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(
@@ -81,7 +85,7 @@ class PaginationResultSpec
 
     val paginationResultNoPaging = PaginationResult(
       correlationId,
-      paginationType = PaginationType.MA,
+      paginationType = PaginationType.MaPagination,
       nationalInsuranceNumber,
       liabilitiesResult = List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
       None,
@@ -93,7 +97,7 @@ class PaginationResultSpec
 
     val paginationResultWithFailure = PaginationResult(
       correlationId,
-      paginationType = PaginationType.MA,
+      paginationType = PaginationType.MaPagination,
       nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)),
@@ -127,7 +131,10 @@ class PaginationResultSpec
         val nextCursor = paginationResultWithNextCursor.getNextCursor
 
         nextCursor shouldBe Some(
-          PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          PaginationCursor(
+            PaginationType.MaPagination,
+            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+          )
         )
       }
       "should return none if no next cursor" in {

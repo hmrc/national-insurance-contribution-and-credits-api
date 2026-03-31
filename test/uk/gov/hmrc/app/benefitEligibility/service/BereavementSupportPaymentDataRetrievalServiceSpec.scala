@@ -64,8 +64,8 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
   val mockMarriageDetailsConnector: MarriageDetailsConnector =
     mock[MarriageDetailsConnector]
 
-  val mockPaginationService = mock[PaginationService]
-  val mockUUIDService       = mock[UuidGeneratorService]
+  val mockPaginationService: PaginationService = mock[PaginationService]
+  val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
@@ -220,7 +220,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           EligibilityCheckDataResultBSP(
             niContributionAndCreditsResult,
             marriageDetailsResult,
-            Some(PaginationCursor(PaginationType.BSP, paging.pageTaskId))
+            Some(PaginationCursor(PaginationType.BspPagination, paging.pageTaskId))
           )
         )
 
@@ -299,6 +299,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
       }
       "should return a DataRetrievalServiceError if the service fails to retrieve results for a subset of the NPS APIs called" in {
 
+        val error = NpsClientError(new RuntimeException("error"))
         val niContributionAndCreditsResult: SuccessResult[Nothing, NiContributionsAndCreditsSuccessResponse] =
           SuccessResult(
             ApiName.NiContributionAndCredits,
@@ -318,24 +319,27 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           )(_: HeaderCarrier))
           .expects(identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error)
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          DataRetrievalServiceError()
+          DataRetrievalServiceError(List(error))
         )
       }
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for all the NPS APIs called" in {
 
+        val error1 = NpsClientError(new RuntimeException("error_1"))
+        val error2 = NpsClientError(new RuntimeException("error_2"))
+
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
           .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error1)
           )
 
         (mockMarriageDetailsConnector
@@ -344,14 +348,14 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           )(_: HeaderCarrier))
           .expects(identifier, *)
           .returning(
-            EitherT.leftT(NpsClientError(new RuntimeException("error")))
+            EitherT.leftT(error2)
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          DataRetrievalServiceError()
+          DataRetrievalServiceError(List(error1, error2))
         )
       }
     }

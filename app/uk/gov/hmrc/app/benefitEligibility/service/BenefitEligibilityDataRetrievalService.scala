@@ -22,12 +22,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError,
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.{
   BSPEligibilityCheckDataRequest,
-  BSPSearchlightEligibilityCheckDataRequest,
   ESAEligibilityCheckDataRequest,
   EligibilityCheckDataRequest,
   GYSPEligibilityCheckDataRequest,
   JSAEligibilityCheckDataRequest,
-  MAEligibilityCheckDataRequest
+  MAEligibilityCheckDataRequest,
+  SearchlightEligibilityCheckDataRequest
 }
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -40,7 +40,7 @@ class BenefitEligibilityDataRetrievalService @Inject() (
     jobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService,
     getYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService,
     bspDataRetrievalService: BereavementSupportPaymentDataRetrievalService,
-    bspSearchlightDataRetrievalService: BspSearchlightDataRetrievalService
+    searchlightDataRetrievalService: SearchlightDataRetrievalService
 )(implicit ec: ExecutionContext) {
 
   def getEligibilityData(
@@ -61,8 +61,8 @@ class BenefitEligibilityDataRetrievalService @Inject() (
         getYourStatePensionDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
       case request: BSPEligibilityCheckDataRequest =>
         bspDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
-      case request: BSPSearchlightEligibilityCheckDataRequest =>
-        bspSearchlightDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
+      case request: SearchlightEligibilityCheckDataRequest =>
+        searchlightDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
     }
   }
 

@@ -90,7 +90,7 @@ class PageTaskSpec
       "should return pageTask if MA pagination result with next cursor" in {
         val paginationResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.MA,
+          paginationType = PaginationType.MaPagination,
           nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult = List(
             SuccessResult(
@@ -108,7 +108,10 @@ class PageTaskSpec
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           nextCursor = Some(
-            PaginationCursor(PaginationType.MA, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+            PaginationCursor(
+              PaginationType.MaPagination,
+              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+            )
           )
         )
 
@@ -128,7 +131,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BSP,
+          paginationType = PaginationType.BspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           class2MaReceiptsResult = None,
@@ -151,7 +154,10 @@ class PageTaskSpec
           ),
           benefitSchemeMembershipDetailsData = None,
           nextCursor = Some(
-            PaginationCursor(PaginationType.BSP, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+            PaginationCursor(
+              PaginationType.BspPagination,
+              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+            )
           )
         )
 
@@ -173,7 +179,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.GYSP,
+          paginationType = PaginationType.GyspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           None,
@@ -307,7 +313,10 @@ class PageTaskSpec
             )
           ),
           nextCursor = Some(
-            PaginationCursor(PaginationType.GYSP, PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+            PaginationCursor(
+              PaginationType.GyspPagination,
+              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+            )
           )
         )
 
@@ -329,7 +338,7 @@ class PageTaskSpec
       "should return None if MA pagination result without next cursor" in {
         val paginationResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.MA,
+          paginationType = PaginationType.MaPagination,
           nationalInsuranceNumber,
           liabilitiesResult =
             List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
@@ -347,7 +356,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BSP,
+          paginationType = PaginationType.BspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           None,
@@ -377,7 +386,7 @@ class PageTaskSpec
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
         val paginationResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.GYSP,
+          paginationType = PaginationType.GyspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           None,

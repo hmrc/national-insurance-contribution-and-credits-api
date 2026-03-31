@@ -43,10 +43,11 @@ import play.api.test.Helpers.{
   UNPROCESSABLE_ENTITY
 }
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
   Class1ContributionStatus,
@@ -62,7 +63,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsSingleErrorResponse,
   NpsStandardErrorResponse400
 }
-import uk.gov.hmrc.app.benefitEligibility.model.request.BSPSearchlightEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -71,7 +72,7 @@ import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 
-class BspSearchlightDataRetrievalServiceItSpec
+class SearchlightDataRetrievalServiceItSpec
     extends AnyFreeSpec
     with EitherValues
     with GuiceOneAppPerSuite
@@ -98,8 +99,8 @@ class BspSearchlightDataRetrievalServiceItSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
 
-  private lazy val service: BspSearchlightDataRetrievalService =
-    inject[BspSearchlightDataRetrievalService]
+  private lazy val service: SearchlightDataRetrievalService =
+    inject[SearchlightDataRetrievalService]
 
   "BspSearchlightDataRetrievalService" - {
 
@@ -107,7 +108,8 @@ class BspSearchlightDataRetrievalServiceItSpec
 
       val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
 
-      val bspSearchlightEligibilityCheckDataRequest = BSPSearchlightEligibilityCheckDataRequest(
+      val bspSearchlightEligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
+        BenefitType.BSP,
         Identifier("GD379251T"),
         ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
@@ -200,7 +202,8 @@ class BspSearchlightDataRetrievalServiceItSpec
           val result = service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 successResponse
@@ -255,7 +258,8 @@ class BspSearchlightDataRetrievalServiceItSpec
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.BadRequest, Some(response))
@@ -309,7 +313,8 @@ class BspSearchlightDataRetrievalServiceItSpec
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.BadRequest, Some(response))
@@ -352,7 +357,8 @@ class BspSearchlightDataRetrievalServiceItSpec
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
@@ -383,7 +389,8 @@ class BspSearchlightDataRetrievalServiceItSpec
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.NotFound, None)
@@ -430,7 +437,8 @@ class BspSearchlightDataRetrievalServiceItSpec
           val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
@@ -459,7 +467,8 @@ class BspSearchlightDataRetrievalServiceItSpec
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.InternalServerError, None)
@@ -507,7 +516,8 @@ class BspSearchlightDataRetrievalServiceItSpec
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
 
           result shouldBe Right(
-            EligibilityCheckDataResultBspSearchLight(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
                 ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
@@ -537,7 +547,8 @@ class BspSearchlightDataRetrievalServiceItSpec
               service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
             result shouldBe Right(
-              EligibilityCheckDataResultBspSearchLight(
+              EligibilityCheckDataResultSearchLight(
+                BenefitType.BSP,
                 FailureResult(
                   ApiName.NiContributionAndCredits,
                   ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)

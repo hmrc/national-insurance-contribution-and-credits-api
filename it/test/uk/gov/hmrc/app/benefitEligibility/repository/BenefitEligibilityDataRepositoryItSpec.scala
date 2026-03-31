@@ -125,7 +125,10 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should return a RecordNotFound error if the record being retrieved does not exist in the db" in {
         val unknownPaginationCursor =
-          PaginationCursor(PaginationType.GYSP, PageTaskId(UUID.fromString("cc7df9a9-ce5b-4a51-8402-01108c88a9df")))
+          PaginationCursor(
+            PaginationType.GyspPagination,
+            PageTaskId(UUID.fromString("cc7df9a9-ce5b-4a51-8402-01108c88a9df"))
+          )
 
         val cursorId = CursorId.from(unknownPaginationCursor)
         repository.getItem(unknownPaginationCursor).value.futureValue shouldBe Left(

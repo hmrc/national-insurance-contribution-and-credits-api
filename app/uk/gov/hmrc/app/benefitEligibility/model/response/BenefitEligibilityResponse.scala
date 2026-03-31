@@ -19,24 +19,17 @@ package uk.gov.hmrc.app.benefitEligibility.model.response
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.findValues
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.npsNormalizedErrorWrites
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.findValues
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, BSP_SEARCHLIGHT, ESA, GYSP, JSA, MA}
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.npsNormalizedErrorWrites
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{
-  ApiResult,
-  ContributionCreditResult,
-  EligibilityCheckDataResult,
-  LiabilityResult,
-  NpsApiResponseStatus,
-  NpsApiResult
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
 
@@ -57,8 +50,8 @@ object BenefitEligibilityInfoSuccessResponse {
       BenefitEligibilityInfoSuccessResponseJsa.benefitEligibilityInfoResponseJsaWrites.writes(r)
     case r: BenefitEligibilityInfoSuccessResponseGysp =>
       BenefitEligibilityInfoSuccessResponseGysp.benefitEligibilityInfoResponseGyspWrites.writes(r)
-    case r: BenefitEligibilityInfoSuccessResponseBspSearchLight =>
-      BenefitEligibilityInfoSuccessResponseBspSearchLight.benefitEligibilityInfoResponseBspSearchlightWrites.writes(r)
+    case r: BenefitEligibilityInfoSuccessResponseSearchLight =>
+      BenefitEligibilityInfoSuccessResponseSearchLight.benefitEligibilityInfoResponseBspSearchlightWrites.writes(r)
   }
 
 }
@@ -94,7 +87,7 @@ object BenefitEligibilityInfoResponse {
       )
     else
       paginationResult.paginationType match {
-        case PaginationType.MA =>
+        case PaginationType.MaPagination =>
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
               paginationResult.nationalInsuranceNumber,
@@ -105,7 +98,7 @@ object BenefitEligibilityInfoResponse {
             )
           )
 
-        case PaginationType.GYSP =>
+        case PaginationType.GyspPagination =>
 
           val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(paginationResult)
           val filteredSchemeMembershipDetails                  = getFilteredSchemeMembershipDetails(paginationResult)
@@ -122,7 +115,7 @@ object BenefitEligibilityInfoResponse {
               paginationResult.getNextCursor.map(CursorId.from)
             )
           )
-        case PaginationType.BSP =>
+        case PaginationType.BspPagination =>
           val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(paginationResult)
 
           Right(
@@ -185,8 +178,8 @@ object BenefitEligibilityInfoResponse {
         BenefitEligibilityInfoSuccessResponseGysp.from(nationalInsuranceNumber, r)
       case r: EligibilityCheckDataResult.EligibilityCheckDataResultBSP =>
         BenefitEligibilityInfoSuccessResponseBsp.from(nationalInsuranceNumber, r)
-      case r: EligibilityCheckDataResult.EligibilityCheckDataResultBspSearchLight =>
-        BenefitEligibilityInfoSuccessResponseBspSearchLight.from(nationalInsuranceNumber, r)
+      case r: EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight =>
+        BenefitEligibilityInfoSuccessResponseSearchLight.from(nationalInsuranceNumber, r)
     }
 
 }
@@ -302,7 +295,7 @@ object BenefitEligibilityInfoSuccessResponseBsp {
 
 }
 
-final case class BenefitEligibilityInfoSuccessResponseBspSearchLight private (
+final case class BenefitEligibilityInfoSuccessResponseSearchLight(
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
@@ -310,34 +303,24 @@ final case class BenefitEligibilityInfoSuccessResponseBspSearchLight private (
 ) extends BenefitEligibilityInfoResponse
     with BenefitEligibilityInfoSuccessResponse
 
-object BenefitEligibilityInfoSuccessResponseBspSearchLight {
+object BenefitEligibilityInfoSuccessResponseSearchLight {
 
   implicit val benefitEligibilityInfoResponseBspSearchlightWrites
-      : Writes[BenefitEligibilityInfoSuccessResponseBspSearchLight] =
-    Json.writes[BenefitEligibilityInfoSuccessResponseBspSearchLight]
-
-  def apply(
-      nationalInsuranceNumber: Identifier,
-      niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
-      nextCursor: Option[CursorId]
-  ) = new BenefitEligibilityInfoSuccessResponseBspSearchLight(
-    BSP_SEARCHLIGHT,
-    nationalInsuranceNumber,
-    niContributionsAndCreditsResult,
-    nextCursor
-  )
+      : Writes[BenefitEligibilityInfoSuccessResponseSearchLight] =
+    Json.writes[BenefitEligibilityInfoSuccessResponseSearchLight]
 
   def from(
       nationalInsuranceNumber: Identifier,
-      result: EligibilityCheckDataResultBspSearchLight
-  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseBspSearchLight] =
+      result: EligibilityCheckDataResultSearchLight
+  ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponseSearchLight] =
 
     result.contributionCreditResult match {
       case (
             NpsApiResult.SuccessResult(_, contributionsAndCreditsSuccessResponse)
           ) =>
         Right(
-          BenefitEligibilityInfoSuccessResponseBspSearchLight(
+          BenefitEligibilityInfoSuccessResponseSearchLight(
+            result.benefitType,
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult = contributionsAndCreditsSuccessResponse,
             result.nextCursor.map(CursorId.from)

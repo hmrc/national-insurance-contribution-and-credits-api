@@ -120,12 +120,12 @@ class MaternityAllowanceDataRetrievalService @Inject() (
                 currentTimeSource.instantNow()
               )
             )
-            .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.MA, PageTaskId(id)))))
+            .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(id)))))
         } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }
-      .leftMap { error =>
-        // TODO ADD LOGGING
-        DataRetrievalServiceError()
+      .leftMap {
+        case error @ DataRetrievalServiceError(_) => error
+        case error                                => DataRetrievalServiceError(List(error))
       }
 
 }

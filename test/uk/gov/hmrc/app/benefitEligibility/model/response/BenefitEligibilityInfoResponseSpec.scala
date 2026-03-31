@@ -1331,15 +1331,17 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     ".from" - {
       "should convert to a BenefitEligibilityInfoSuccessResponseBspSearchlight" in {
 
-        val result = BenefitEligibilityInfoSuccessResponseBspSearchLight.from(
+        val result = BenefitEligibilityInfoSuccessResponseSearchLight.from(
           nationalInsuranceNumber,
-          EligibilityCheckDataResultBspSearchLight(
+          EligibilityCheckDataResultSearchLight(
+            BenefitType.BSP,
             NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse),
             None
           )
         )
 
-        val expected = BenefitEligibilityInfoSuccessResponseBspSearchLight(
+        val expected = BenefitEligibilityInfoSuccessResponseSearchLight(
+          BenefitType.BSP,
           nationalInsuranceNumber,
           niContributionsAndCreditsSuccessResponse,
           None
@@ -1350,7 +1352,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should serialize to json correctly" in {
 
-        val benefitEligibilityInfoSuccessResponseBspSearchlight = BenefitEligibilityInfoSuccessResponseBspSearchLight(
+        val benefitEligibilityInfoSuccessResponseBspSearchlight = BenefitEligibilityInfoSuccessResponseSearchLight(
+          BenefitType.BSP,
           nationalInsuranceNumber,
           niContributionsAndCreditsSuccessResponse,
           None
@@ -1358,7 +1361,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expectedJson =
           """{
-            |   "benefitType":"BSP_SEARCHLIGHT",
+            |   "benefitType":"BSP",
             |   "nationalInsuranceNumber":"AB123456C",
             |   "niContributionsAndCreditsResult":{
             |      "totalGraduatedPensionUnits":53,
@@ -2090,7 +2093,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val paginationResult: PaginationResult =
           PaginationResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PaginationType.MA,
+            PaginationType.MaPagination,
             nationalInsuranceNumber,
             liabilityResult,
             None,
@@ -2120,7 +2123,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val paginationResult: PaginationResult =
           PaginationResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PaginationType.BSP,
+            PaginationType.BspPagination,
             nationalInsuranceNumber,
             liabilityResult,
             None,
@@ -2149,7 +2152,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val paginationResult: PaginationResult =
           PaginationResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PaginationType.GYSP,
+            PaginationType.GyspPagination,
             nationalInsuranceNumber,
             liabilityResult,
             None,
