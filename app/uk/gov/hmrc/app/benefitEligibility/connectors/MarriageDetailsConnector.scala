@@ -59,7 +59,7 @@ class MarriageDetailsConnector @Inject() (
       identifier: Identifier
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
-    val path = s"/individual/${identifier.value}/marriage-cp"
+    val path = s"/paye/individual/${identifier.value}/marriage-cp"
 
     fetchMarriageDetailsData(path)
   }

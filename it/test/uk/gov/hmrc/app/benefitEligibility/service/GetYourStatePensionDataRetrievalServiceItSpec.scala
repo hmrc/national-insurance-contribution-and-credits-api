@@ -592,12 +592,12 @@ class GetYourStatePensionDataRetrievalServiceItSpec
     ".fetchEligibilityData" - {
 
       val npsCreditsAndContributionsPath        = "/national-insurance/contributions-and-credits"
-      val benefitSchemeDetailsPath              = "/benefit-scheme/GD379251T/benefit-scheme-details/S2123456B"
-      val marriageDetailsPath                   = "/individual/GD379251T/marriage-cp"
+      val benefitSchemeDetailsPath              = "/ni/benefit-scheme/GD379251T/benefit-scheme-details/S2123456B"
+      val marriageDetailsPath                   = "/paye/individual/GD379251T/marriage-cp"
       val longTermBenefitCalculationDetailsPath = "/long-term-benefits/GD379251T/calculation"
       val longTermBenefitNotesPath              = "/long-term-benefits/GD379251T/calculation/ALL/notes/86"
-      val schemeMembershipDetailsPath           = "/benefit-scheme/GD379251T/scheme-membership-details"
-      val individualStatePensionInformationPath = "/long-term-benefits/GD379251T/contributions"
+      val schemeMembershipDetailsPath           = "/ni/benefit-scheme/GD379251T/scheme-membership-details"
+      val individualStatePensionInformationPath = "/ni/national-insurance/GD379251T/benefits/long-term/contributions"
 
       val gyspEligibilityCheckDataRequest = GYSPEligibilityCheckDataRequest(
         Identifier("GD379251T"),

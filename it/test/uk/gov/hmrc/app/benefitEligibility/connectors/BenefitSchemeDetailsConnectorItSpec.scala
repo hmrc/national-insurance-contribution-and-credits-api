@@ -81,7 +81,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
     ".fetchBenefitSchemeDetails" - {
 
-      val testPath               = "/benefit-scheme/AB123456C/benefit-scheme-details/S2345678C"
+      val testPath               = "/ni/benefit-scheme/AB123456C/benefit-scheme-details/S2345678C"
       val identifier: Identifier = Identifier("AB123456C")
 
       "when the BenefitSchemeDetails endpoint returns OK (200) with valid response" - {

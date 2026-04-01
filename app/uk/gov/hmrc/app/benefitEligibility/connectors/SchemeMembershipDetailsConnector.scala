@@ -63,7 +63,7 @@ class SchemeMembershipDetailsConnector @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] = {
 
     val path =
-      s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+      s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
     fetchData(benefitType, path)
   }
 
