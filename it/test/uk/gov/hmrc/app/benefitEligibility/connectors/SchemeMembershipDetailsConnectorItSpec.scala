@@ -92,7 +92,7 @@ class SchemeMembershipDetailsConnectorItSpec
 
     ".fetchSchemeMembershipDetails" - {
 
-      val testPath = "/benefit-scheme/AB123456C/scheme-membership-details"
+      val testPath = "/ni/benefit-scheme/AB123456C/scheme-membership-details"
 
       "when the SchemeMembershipDetails endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
@@ -248,7 +248,7 @@ class SchemeMembershipDetailsConnectorItSpec
 
           val responseBody = Json.toJson(schemeMembershipDetailsSuccessResponse).toString()
 
-          val testPath = "/benefit-scheme/AB123456C/scheme-membership-details"
+          val testPath = "/ni/benefit-scheme/AB123456C/scheme-membership-details"
 
           server.stubFor(
             get(urlEqualTo(testPath))

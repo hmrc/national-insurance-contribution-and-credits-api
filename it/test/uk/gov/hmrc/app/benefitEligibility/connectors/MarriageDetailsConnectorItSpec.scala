@@ -144,7 +144,7 @@ class MarriageDetailsConnectorItSpec
 
     ".fetchMarriageDetails" - {
 
-      val testPath               = "/individual/AB123456C/marriage-cp"
+      val testPath               = "/paye/individual/AB123456C/marriage-cp"
       val identifier: Identifier = Identifier("AB123456C")
 
       "when the MarriageDetails endpoint returns OK (200) with valid response" - {

@@ -148,11 +148,11 @@ class BenefitEligibilityDataControllerItSpec
   private val nationalInsuranceNumber: Identifier  = Identifier("AB123456C")
   private val nationalInsuranceNumber2: Identifier = Identifier("CD345678E")
 
-  val npsLiabilitySummaryDetailsPath: String = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+  val npsLiabilitySummaryDetailsPath: String = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
   val npsCreditsAndContributionsPath         = "/national-insurance/contributions-and-credits"
-  val npsIndividualMarriageDetailsPath       = s"/individual/${nationalInsuranceNumber.value}/marriage-cp"
-  val benefitSchemeDetailsPath    = s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"
-  val schemeMembershipDetailsPath = s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+  val npsIndividualMarriageDetailsPath       = s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"
+  val benefitSchemeDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"
+  val schemeMembershipDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
   val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
@@ -1381,7 +1381,7 @@ class BenefitEligibilityDataControllerItSpec
         "should Fetch MA Correctly" in {
 
           val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+          val npsLiabilitySummaryDetailsPath = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
 
           val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
           val liabilitySummaryDetailsSuccessResponseBody =
@@ -1501,7 +1501,7 @@ class BenefitEligibilityDataControllerItSpec
             callback = Some(Callback(Some(CallbackUrl("someUrl"))))
           )
           val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-          val npsLiabilitySummaryDetailsPath = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+          val npsLiabilitySummaryDetailsPath = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
 
           val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
           val liabilitySummaryDetailsSuccessResponseBody =
@@ -2024,7 +2024,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2103,7 +2103,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2207,7 +2207,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2218,7 +2218,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2249,7 +2249,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2259,7 +2259,9 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .get(
+                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+              )
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2424,7 +2426,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2435,7 +2437,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2466,7 +2468,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2476,7 +2478,9 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .get(
+                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+              )
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2559,7 +2563,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2570,7 +2574,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2601,7 +2605,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2611,7 +2615,9 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .get(
+                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+              )
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2718,7 +2724,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2729,7 +2735,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2760,7 +2766,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2770,7 +2776,9 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/contributions"))
+              .get(
+                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+              )
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)

@@ -85,7 +85,7 @@ class LiabilitySummaryDetailsConnector @Inject() (
 
     val path =
       RequestBuilder.buildPath(
-        s"/person/${identifier.value}/liability-summary/${liabilitySearchCategoryHyphenated.entryName}",
+        s"/ni/person/${identifier.value}/liability-summary/${liabilitySearchCategoryHyphenated.entryName}",
         options
       )
 

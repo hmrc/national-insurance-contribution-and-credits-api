@@ -87,7 +87,7 @@ class LiabilitySummaryDetailsConnectorItSpec
 
     ".fetchLiabilitySummaryDetails" - {
 
-      val testPath                              = "/person/AB123456C/liability-summary/ABROAD"
+      val testPath                              = "/ni/person/AB123456C/liability-summary/ABROAD"
       val identifier: Identifier                = Identifier("AB123456C")
       val liabilitySearchCategoryHyphenated     = LiabilitySearchCategoryHyphenated.Abroad
       val earliestStartDate: Option[LocalDate]  = None
@@ -147,7 +147,7 @@ class LiabilitySummaryDetailsConnectorItSpec
               Callback(
                 Some(
                   CallbackUrl(
-                    s"http://localhost:${server.port}/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"
+                    s"http://localhost:${server.port}/ni/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"
                   )
                 )
               )
@@ -170,12 +170,12 @@ class LiabilitySummaryDetailsConnectorItSpec
                |   "startDate": "2021-11-03"
                | }
                |],
-               |"callback": {"callbackURL": "http://localhost:${server.port}/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"}
+               |"callback": {"callbackURL": "http://localhost:${server.port}/ni/person/AB123456C/liability-summary/ABROAD?occurrenceNumber=2"}
                |}""".stripMargin
 
           val responseBodyWithCallback = Json.parse(successResponseJsonWithCallback).toString()
 
-          val testPath = "/person/AB123456C/liability-summary/ABROAD"
+          val testPath = "/ni/person/AB123456C/liability-summary/ABROAD"
 
           server.stubFor(
             get(urlEqualTo(testPath))

@@ -136,7 +136,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
       val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
       val npsClass2MaReceiptsPath        = "/class-2/GD379251T/maternity-allowance/receipts"
-      val npsLiabilitySummaryDetailsPath = "/person/GD379251T/liability-summary/ABROAD"
+      val npsLiabilitySummaryDetailsPath = "/ni/person/GD379251T/liability-summary/ABROAD"
 
       val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
         Some(Identifier("AA000001A")),

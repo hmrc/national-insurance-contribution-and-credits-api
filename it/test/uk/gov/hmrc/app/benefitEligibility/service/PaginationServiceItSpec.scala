@@ -87,11 +87,11 @@ class PaginationServiceItSpec
   }
 
   val nationalInsuranceNumber                = Identifier("GD379251T")
-  val npsLiabilitySummaryDetailsPath: String = s"/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
+  val npsLiabilitySummaryDetailsPath: String = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
   val npsCreditsAndContributionsPath         = "/national-insurance/contributions-and-credits"
-  val npsIndividualMarriageDetailsPath       = s"/individual/${nationalInsuranceNumber.value}/marriage-cp"
-  val benefitSchemeDetailsPath    = s"/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"
-  val schemeMembershipDetailsPath = s"/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
+  val npsIndividualMarriageDetailsPath       = s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"
+  val benefitSchemeDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"
+  val schemeMembershipDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
   val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
 
   implicit val ec: ExecutionContext = ExecutionContext.global
