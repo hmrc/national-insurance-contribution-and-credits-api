@@ -23,16 +23,19 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.Benefit
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.{
   EmployersContractedOutNumberDetails,
+  SchemeCreatingContractedOutNumberDetails,
   SchemeMembershipDetailsSuccessResponse,
   SchemeMembershipEndDate,
-  SchemeMembershipStartDate
+  SchemeMembershipStartDate,
+  SchemeTerminatingContractedOutNumberDetails
 }
 
 case class FilteredSchemeMembershipDetailsItem(
     schemeName: Option[BenefitSchemeName],
     schemeMembershipStartDate: Option[SchemeMembershipStartDate],
     schemeMembershipEndDate: Option[SchemeMembershipEndDate],
-    employersContractedOutNumberDetails: Option[EmployersContractedOutNumberDetails]
+    schemeCreatingContractedOutNumberDetails: Option[SchemeCreatingContractedOutNumberDetails],
+    schemeTerminatingContractedOutNumberDetails: Option[SchemeTerminatingContractedOutNumberDetails]
 )
 
 object FilteredSchemeMembershipDetailsItem {
@@ -69,7 +72,8 @@ object FilteredSchemeMembershipDetails {
               ),
               item.schemeMembershipDetails.schemeMembershipStartDate,
               item.schemeMembershipDetails.schemeMembershipEndDate,
-              item.schemeMembershipDetails.employersContractedOutNumberDetails
+              item.schemeMembershipDetails.schemeCreatingContractedOutNumberDetails,
+              item.schemeMembershipDetails.schemeTerminatingContractedOutNumberDetails
             )
           }
         case None => Nil

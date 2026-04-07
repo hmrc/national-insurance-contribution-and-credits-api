@@ -197,7 +197,8 @@ object BspPageTask {
 
 }
 
-final case class SearchLightPageTask(
+final case class SearchLightPageTask private (
+    system: CallSystem,
     correlationId: CorrelationId,
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
@@ -208,6 +209,25 @@ final case class SearchLightPageTask(
 
 object SearchLightPageTask {
   implicit val searchLightPageTaskFormat: OFormat[SearchLightPageTask] = Json.format[SearchLightPageTask]
+
+  def apply(
+      correlationId: CorrelationId,
+      pageTaskId: PageTaskId,
+      paginationType: PaginationType,
+      contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
+      nationalInsuranceNumber: Identifier,
+      createdAt: Instant
+  ) =
+    new SearchLightPageTask(
+      CallSystem.SEARCHLIGHT,
+      correlationId,
+      pageTaskId,
+      paginationType,
+      contributionAndCreditsPaging,
+      nationalInsuranceNumber,
+      createdAt
+    )
+
 }
 
 final case class GyspPageTask private (
@@ -250,17 +270,23 @@ object GyspPageTask {
 object PageTask {
 
   private val pageTaskReads: Reads[PageTask] = Reads { json =>
-    (json \ "paginationType").validate[PaginationType].flatMap {
-      case PaginationType.BspPagination  => BspPageTask.bspPageTaskformat.reads(json)
-      case PaginationType.MaPagination   => MaPageTask.maPageTaskformat.reads(json)
-      case PaginationType.GyspPagination => GyspPageTask.gyspPageTaskformat.reads(json)
+    (json \ "system").toOption match {
+      case Some(value) => SearchLightPageTask.searchLightPageTaskFormat.reads(json)
+      case None =>
+        (json \ "paginationType").validate[PaginationType].flatMap {
+          case PaginationType.BspPagination  => BspPageTask.bspPageTaskformat.reads(json)
+          case PaginationType.MaPagination   => MaPageTask.maPageTaskformat.reads(json)
+          case PaginationType.GyspPagination => GyspPageTask.gyspPageTaskformat.reads(json)
+        }
     }
+
   }
 
   private val pageTaskWrites: OWrites[PageTask] = OWrites {
-    case task: MaPageTask   => MaPageTask.maPageTaskformat.writes(task)
-    case task: BspPageTask  => BspPageTask.bspPageTaskformat.writes(task)
-    case task: GyspPageTask => GyspPageTask.gyspPageTaskformat.writes(task)
+    case task: MaPageTask          => MaPageTask.maPageTaskformat.writes(task)
+    case task: BspPageTask         => BspPageTask.bspPageTaskformat.writes(task)
+    case task: GyspPageTask        => GyspPageTask.gyspPageTaskformat.writes(task)
+    case task: SearchLightPageTask => SearchLightPageTask.searchLightPageTaskFormat.writes(task)
   }
 
   implicit val pageTaskFormat: OFormat[PageTask] = OFormat(pageTaskReads, pageTaskWrites)
@@ -271,8 +297,18 @@ object PageTask {
   ): Option[PageTask] =
     paginationResult.getNextCursor.map { cursor =>
       val now = currentTime.instantNow()
-      paginationResult.paginationType match {
-        case PaginationType.MaPagination =>
+      (paginationResult.callSystem, paginationResult.paginationType) match {
+        case (Some(callSystem), paginationType) =>
+          SearchLightPageTask(
+            correlationId = paginationResult.correlationId,
+            pageTaskId = cursor.pageTaskId,
+            contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
+            paginationType = paginationType,
+            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
+            createdAt = now
+          )
+
+        case (_, PaginationType.MaPagination) =>
           MaPageTask(
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
@@ -281,7 +317,7 @@ object PageTask {
             nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
             createdAt = now
           )
-        case PaginationType.GyspPagination =>
+        case (_, PaginationType.GyspPagination) =>
           GyspPageTask(
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
@@ -293,7 +329,7 @@ object PageTask {
             paginationResult.nationalInsuranceNumber,
             now
           )
-        case PaginationType.BspPagination =>
+        case (_, PaginationType.BspPagination) =>
           BspPageTask(
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,

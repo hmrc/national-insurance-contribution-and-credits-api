@@ -1,0 +1,1325 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: National Insurance Contribution and Credits Interface
+  description: |-
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+  contact: {}
+servers:
+  - url: https://test-api.service.hmrc.gov.uk
+    description: Sandbox
+  - url: https://api.service.hmrc.gov.uk
+    description: Production
+paths:
+  /contribution-and-credits:
+    post:
+      tags:
+        - Contributions-and-credits
+      summary: |
+        NICC Interface Specification to retrieve Class 1 and Class 2 data.
+      description: |-
+        # Purpose
+        This API provides the capability to retrieve Class 1 and Class 2 data for an account.<br>
+        - This allows a search for Class 1 contributions and Class 2 credits for a given NINO (suffix optional) and range of tax years.
+        - Request payload will contain the start tax year, end tax year, national insurance number and date of birth.<br>
+        - This endpoint requires Mutual Authentication over TLS 1.2. <br><p>
+      security:
+        - applicationRestricted:
+            - write:protect-connect
+      operationId: PostNIContCreds
+      parameters:
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/accept"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostNIContCredRequest"
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: "#/components/headers/correlationId"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/PostNIContCredResponse"
+        "400":
+          description: Bad Request
+          headers:
+            correlationId:
+              $ref: "#/components/headers/correlationId"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/errorResponse_400"
+              examples:
+                Failed to parse request body:
+                  value:
+                    failures:
+                      - reason: Bad request
+                        code: "BAD_REQUEST"
+        403:
+          description: "Forbidden"
+          headers:
+            correlationId:
+              $ref: "#/components/headers/correlationId"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/errorResourceObj_403_Forbidden"
+              examples:
+                example response 1:
+                  value:
+                    reason: Unauthorized
+                    code: "FORBIDDEN"
+                example response 2:
+                  value:
+                    reason: Incorrect Access Token Type
+                    code: "FORBIDDEN"
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: "#/components/headers/correlationId"
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/errorResponse_422"
+              examples:
+                422_StartYearAfterEndYear:
+                  $ref: "#/components/examples/422_StartYearAfterEndYear"
+                422_StartYearPre1975:
+                  $ref: "#/components/examples/422_StartYearPre1975"
+                422_StartYearPostCY-1:
+                  $ref: "#/components/examples/422_StartYearPostCY-1"
+                422_EndYearPostCY-1:
+                  $ref: "#/components/examples/422_EndYearPostCY-1"
+                422_TaxYearRangeOver6:
+                  $ref: "#/components/examples/422_TaxYearRangeOver6"
+        "404":
+          $ref: "#/components/responses/notFoundErrorResponse"
+        "500":
+          $ref: "#/components/responses/internalServerErrorResponse"
+  /benefit-eligibility-info:
+    post:
+      tags:
+        - Benefit-eligibility-info
+      summary: Request information that can be used to determine benefit eligibility
+      description: retrieves data for that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
+      security:
+        - applicationRestricted:
+            - write:protect-connect
+      operationId: PostBenefitEligibilityInformation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            examples:
+              SearchlightRequest:
+                summary: Searchlight request
+                value:
+                  system: SEARCHLIGHT
+                  benefitType: BSP
+                  nationalInsuranceNumber: CD789012E
+                  niContributionsAndCredits:
+                    dateOfBirth: "1958-03-22"
+                    startTaxYear: 2018
+                    endTaxYear: 2024
+              BSP_request:
+                summary: BSP request
+                value:
+                  benefitType: BSP
+                  nationalInsuranceNumber: CD789012E
+                  niContributionsAndCredits:
+                    dateOfBirth: "1958-03-22"
+                    startTaxYear: 2018
+                    endTaxYear: 2024
+              GYSP_full_request:
+                summary: GYSP request - optional fields included
+                value:
+                  benefitType: GYSP
+                  nationalInsuranceNumber: GH567890J
+                  niContributionsAndCredits:
+                    dateOfBirth: "1955-06-20"
+                    startTaxYear: 2018
+                    endTaxYear: 2023
+                  longTermBenefitCalculation:
+                    longTermBenefitType: GUARDIAN'S ALLOWANCE
+                    pensionProcessingArea: Job Centre+ Electronic Enabled Pension Processing
+              GYSP_minimal_request:
+                summary: GYSP request - Minimal required fields
+                value:
+                  benefitType: GYSP
+                  nationalInsuranceNumber: GH567890J
+                  niContributionsAndCredits:
+                    dateOfBirth: "1955-06-20"
+                    startTaxYear: 2018
+                    endTaxYear: 2023
+              ESA_request:
+                summary: ESA request
+                value:
+                  benefitType: ESA
+                  nationalInsuranceNumber: QR456789S
+                  niContributionsAndCredits:
+                    dateOfBirth: "1975-09-14"
+                    startTaxYear: 2020
+                    endTaxYear: 2023
+              JSA_request:
+                summary: JSA request
+                value:
+                  benefitType: JSA
+                  nationalInsuranceNumber: AB234567C
+                  niContributionsAndCredits:
+                    dateOfBirth: "1982-12-03"
+                    startTaxYear: 2021
+                    endTaxYear: 2023
+              MA_minimal_request:
+                summary: MA request - Minimal required fields
+                value:
+                  benefitType: MA
+                  nationalInsuranceNumber: KL890123M
+                  niContributionsAndCredits:
+                    dateOfBirth: "1985-04-18"
+                    startTaxYear: 2022
+                    endTaxYear: 2023
+                  liabilities:
+                    searchCategories:
+                      - CLASS-2-LIABILITY-UK
+              MA_full_request:
+                summary: MA request - All fields including optional
+                value:
+                  benefitType: MA
+                  nationalInsuranceNumber: NP012345Q
+                  niContributionsAndCredits:
+                    dateOfBirth: "1988-07-25"
+                    startTaxYear: 2021
+                    endTaxYear: 2023
+                  liabilities:
+                    searchCategories:
+                      - CLASS-2-LIABILITY-UK
+                    earliestLiabilityStartDate: "2021-01-01"
+                    liabilityStart: "2021-06-15"
+                    liabilityEnd: "2022-06-14"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                BSP_minimal_success:
+                  summary: BSP - Minimal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: AB123456C
+                    marriageDetailsResult:
+                      marriageDetails: []
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: []
+                      class2Or3ContributionAndCredits: []
+                BSP_maximal_success:
+                  summary: BSP - Maximal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: AB123456C
+                    marriageDetailsResult:
+                      marriageDetails:
+                        - status: CIVIL PARTNER
+                          startDate: "1999-01-01"
+                          startDateStatus: VERIFIED
+                          endDate: "2001-01-01"
+                          endDateStatus: VERIFIED
+                          spouseIdentifier: AB123456C
+                          spouseForename: Skywalker
+                          spouseSurname: Luke
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 9.5
+                      class1ContributionAndCredits:
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 52
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: C1
+                          primaryContribution: 3000
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 25000
+                          creditSource: EMPLOYMENT SERVICES
+                          employerName: ACME
+                          latePaymentPeriod: L
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 48
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: C1
+                          primaryContribution: 2880
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 24000
+                          creditSource: EMPLOYMENT SERVICES
+                          employerName: CORP
+                          latePaymentPeriod: ZZ
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 52
+                          contributionCreditType: C2
+                          class2Or3EarningsFactor: 1.5
+                          class2NIContributionAmount: 150
+                          class2Or3CreditStatus: VALID
+                          creditSource: DIRECT DEBIT
+                          latePaymentPeriod: ZZ
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 30
+                          contributionCreditType: C2
+                          class2Or3EarningsFactor: 2.1
+                          class2NIContributionAmount: 120
+                          class2Or3CreditStatus: VALID
+                          creditSource: QUARTERLY BILLING
+                          latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                GYSP_minimal_success:
+                  summary: GYSP - Minimal response
+                  value:
+                    benefitType: GYSP
+                    nationalInsuranceNumber: GH567890J
+                    marriageDetailsResult:
+                      marriageDetails: []
+                    longTermBenefitCalculationDetailsResult:
+                      benefitCalculationDetails: []
+                    schemeMembershipDetailsResult:
+                      schemeMembershipDetails: []
+                    individualStatePensionInfoResult:
+                      contributionsByTaxYear: []
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: []
+                      class2Or3ContributionAndCredits: []
+                GYSP_maximal_success:
+                  summary: GYSP - Maximal response
+                  value:
+                    benefitType: GYSP
+                    nationalInsuranceNumber: AB123456C
+                    marriageDetailsResult:
+                      marriageDetails:
+                        - status: CIVIL PARTNER
+                          startDate: "1999-01-01"
+                          startDateStatus: VERIFIED
+                          endDate: "2001-01-01"
+                          endDateStatus: VERIFIED
+                          spouseIdentifier: AB123456C
+                          spouseForename: Skywalker
+                          spouseSurname: Luke
+                    longTermBenefitCalculationDetailsResult:
+                      benefitCalculationDetails:
+                        - guaranteedMinimumPensionContractedOutDeductionsPre1988: 10.56
+                          guaranteedMinimumPensionContractedOutDeductionsPost1988: 10.56
+                          contractedOutDeductionsPre1988: 10.56
+                          contractedOutDeductionsPost1988: 10.56
+                          longTermBenefitNotes:
+                            - Invalid Note Type Encountered.
+                            - Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025.
+                            - Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025
+                            - Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025.
+                            - Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025.
+                            - Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025.
+                            - Retirement Position of UNKNOWN recorded on this account from 07/04/2025.
+                            - Retirement Position of UNKNOWN recorded on this account between NOT KNOWN.
+                    schemeMembershipDetailsResult:
+                      schemeMembershipDetails:
+                        - schemeName: ACME PENSION SCHEME
+                          schemeMembershipStartDate: "2022-06-27"
+                          schemeMembershipEndDate: "2022-06-27"
+                          schemeCreatingContractedOutNumberDetails: S3123456B
+                          schemeTerminatingContractedOutNumberDetails: S3123456B
+                    individualStatePensionInfoResult:
+                      numberOfQualifyingYears: 35
+                      contributionsByTaxYear:
+                        - totalPrimaryPaidEarnings: 48500.75
+                          qualifyingTaxYear: true
+                        - totalPrimaryPaidEarnings: 39875.9
+                          qualifyingTaxYear: false
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 53
+                      class1ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 53
+                          contributionCategoryLetter: U
+                          contributionCategory: (NONE)
+                          contributionCreditType: C1
+                          primaryContribution: 9.999999999999998E13
+                          class1ContributionStatus: COMPLIANCE & YIELD INCOMPLETE
+                          primaryPaidEarnings: 9.999999999999998E13
+                          creditSource: NOT KNOWN
+                          employerName: ipOpMs
+                          latePaymentPeriod: L
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 53
+                          contributionCreditType: C1
+                          class2Or3EarningsFactor: 9.999999999999998E13
+                          class2NIContributionAmount: 9.999999999999998E13
+                          class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
+                          creditSource: NOT KNOWN
+                          latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                ESA_minimal_success:
+                  summary: ESA - Minimal response
+                  value:
+                    benefitType: ESA
+                    nationalInsuranceNumber: QR456789S
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: []
+                      class2Or3ContributionAndCredits: []
+                ESA_maximal_success:
+                  summary: ESA - Maximal response
+                  value:
+                    benefitType: ESA
+                    nationalInsuranceNumber: QR456789S
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 2.5
+                      class1ContributionAndCredits:
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 39
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: 2A
+                          primaryContribution: 1800
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 15000
+                          creditSource: EMPLOYMENT AND SUPPORT
+                          employerName: Widget
+                          latePaymentPeriod: ZZ
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 26
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: 2A
+                          primaryContribution: 2160
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 18000
+                          creditSource: EMPLOYMENT AND SUPPORT
+                          employerName: Widget
+                          latePaymentPeriod: ZZ
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 20
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: CR1
+                          primaryContribution: 0
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 0
+                          creditSource: EMPLOYMENT AND SUPPORT
+                          employerName: ""
+                          latePaymentPeriod: ZZ
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2023
+                          numberOfContributionsAndCredits: 20
+                          contributionCreditType: 2A
+                          class2Or3EarningsFactor: 1.3
+                          class2NIContributionAmount: 52
+                          class2Or3CreditStatus: VALID
+                          creditSource: EMPLOYMENT AND SUPPORT
+                          latePaymentPeriod: ZZ
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 15
+                          contributionCreditType: 2A
+                          class2Or3EarningsFactor: 0.8
+                          class2NIContributionAmount: 30
+                          class2Or3CreditStatus: VALID
+                          creditSource: EMPLOYMENT AND SUPPORT
+                          latePaymentPeriod: L
+                JSA_minimal_success:
+                  summary: JSA - Minimal response
+                  value:
+                    benefitType: JSA
+                    nationalInsuranceNumber: AB234567C
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: []
+                      class2Or3ContributionAndCredits: []
+                JSA_maximal_success:
+                  summary: JSA - Maximal response
+                  value:
+                    benefitType: JSA
+                    nationalInsuranceNumber: AB234567C
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 1.2
+                      class1ContributionAndCredits:
+                        - taxYear: 2019
+                          numberOfContributionsAndCredits: 15
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: 2B
+                          primaryContribution: 1200
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 10000
+                          creditSource: JSA TAPE INPUT
+                          employerName: Temp
+                          latePaymentPeriod: L
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 20
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: 2B
+                          primaryContribution: 1440
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 12000
+                          creditSource: JSA TAPE INPUT
+                          employerName: Temp
+                          latePaymentPeriod: L
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 30
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: CR1
+                          primaryContribution: 0
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 0
+                          creditSource: JSA TAPE INPUT
+                          employerName: ""
+                          latePaymentPeriod: ZZ
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 30
+                          contributionCreditType: 2B
+                          class2Or3EarningsFactor: 1.1
+                          class2NIContributionAmount: 44
+                          class2Or3CreditStatus: VALID
+                          creditSource: JSA TAPE INPUT
+                          latePaymentPeriod: ZZ
+                        - taxYear: 2023
+                          numberOfContributionsAndCredits: 25
+                          contributionCreditType: 2B
+                          class2Or3EarningsFactor: 0.9
+                          class2NIContributionAmount: 36
+                          class2Or3CreditStatus: VALID
+                          creditSource: JSA PAPER INPUT
+                          latePaymentPeriod: L
+                MA_minimal_success:
+                  summary: MA - Minimal response
+                  value:
+                    benefitType: MA
+                    nationalInsuranceNumber: KL890123M
+                    class2MAReceiptsResult:
+                      receiptDates: []
+                    liabilitySummaryDetailsResult:
+                      - liabilityDetails: []
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: []
+                      class2Or3ContributionAndCredits: []
+                MA_maximal_success:
+                  summary: MA - Maximal response
+                  value:
+                    benefitType: MA
+                    nationalInsuranceNumber: AB123456C
+                    class2MAReceiptsResult:
+                      receiptDates:
+                        - "2025-12-10"
+                    liabilitySummaryDetailsResult:
+                      - liabilityDetails:
+                          - startDate: "2026-01-01"
+                            endDate: "2027-01-01"
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 53
+                      class1ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 53
+                          contributionCategoryLetter: U
+                          contributionCategory: (NONE)
+                          contributionCreditType: C1
+                          primaryContribution: 9.999999999999998E13
+                          class1ContributionStatus: COMPLIANCE & YIELD INCOMPLETE
+                          primaryPaidEarnings: 9.999999999999998E13
+                          creditSource: NOT KNOWN
+                          employerName: ipOpMs
+                          latePaymentPeriod: L
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 53
+                          contributionCreditType: C1
+                          class2Or3EarningsFactor: 9.999999999999998E13
+                          class2NIContributionAmount: 9.999999999999998E13
+                          class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
+                          creditSource: NOT KNOWN
+                          latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                missing_type:
+                  summary: Missing benefit type
+                  value:
+                    code: "BAD_REQUEST"
+                    reason: "type field is required"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              examples:
+                missing_auth_token:
+                  summary: Missing authentication token
+                  value:
+                    code: "FORBIDDEN"
+                    reason: "authentication token is required"
+                invalid_auth_token:
+                  summary: Invalid authentication token
+                  value:
+                    code: "FORBIDDEN"
+                    reason: "invalid or expired authentication token"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              examples:
+                invalid_ni_number_format:
+                  summary: Invalid National Insurance number format
+                  value:
+                    code: "UNPROCESSABLE_ENTITY"
+                    reason: "invalid national insurance number format"
+                invalid_date_format:
+                  summary: Invalid date format
+                  value:
+                    code: "UNPROCESSABLE_ENTITY"
+                    reason: "dateOfBirth must be in YYYY-MM-DD format"
+                "422_StartYearAfterEndYear":
+                  summary: Start Year After End Year
+                  value:
+                    code: "UNPROCESSABLE_ENTITY"
+                    reason: "Start tax year after end tax year"
+                "422_StartYearPre1975":
+                  summary: Start Year Pre 1975
+                  value:
+                    code: "UNPROCESSABLE_ENTITY"
+                    reason: "Start tax year before 1975"
+                "422_StartYearPostCY-1":
+                  summary: Start Year Post CY-1
+                  value:
+                    code: "UNPROCESSABLE_ENTITY"
+                    reason: "Start tax year after CY-1"
+                "422_EndYearPostCY-1":
+                  summary: End Year Post CY-1
+                  value:
+                    code: "UNPROCESSABLE_ENTITY"
+                    reason: "End tax year after CY-1"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              examples:
+                unexpected_error:
+                  summary: Unexpected error
+                  value:
+                    code: "INTERNAL_SERVER_ERROR"
+                    reason: "an unexpected error occurred while processing the request"
+        '502':
+          description: Partial or complete failure from downstream services
+          content:
+            application/json:
+              examples:
+                partial_failure:
+                  summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
+                  value:
+                    status: "PARTIAL_FAILURE"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "KL890123M"
+                    summary:
+                      totalCalls: 3
+                      successful: 2
+                      failed: 1
+                    downStreams:
+                      - apiName: "NiContributionsAndCredits"
+                        status: "SUCCESS"
+                      - apiName: "Class2MAReceipts"
+                        status: "SUCCESS"
+                      - apiName: "Liabilities"
+                        status: "FAILURE"
+                        error:
+                          code: "TIMEOUT"
+                          message: "liability calculation service timeout"
+                          downstreamStatus: 408
+                complete_failure:
+                  summary: Complete failure - every downstream called for a given benefit responds with a failure
+                  value:
+                    status: "FAILURE"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "NP012345Q"
+                    summary:
+                      totalCalls: 3
+                      successful: 0
+                      failed: 3
+                    downStreams:
+                      - apiName: "NiContributionsAndCredits"
+                        status: "FAILURE"
+                        error:
+                          code: "FORBIDDEN"
+                          message: "access denied to maternity allowance service"
+                          downstreamStatus: 403
+                      - apiName: "Class2MAReceipts"
+                        status: "FAILURE"
+                        error:
+                          code: "INTERNAL_SERVER_ERROR"
+                          message: "class 2 MA receipts service internal error"
+                          downstreamStatus: 500
+                      - apiName: "Liabilities"
+                        status: "FAILURE"
+                        error:
+                          code: "BAD_REQUEST"
+                          message: "invalid liability calculation parameters"
+                          downstreamStatus: 400
+
+    get:
+      tags:
+        - Benefit-eligibility-info
+      summary: Request information that can be used to determine benefit eligibility
+      description: retrieves data for that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
+      security:
+        - applicationRestricted:
+            - write:protect-connect
+      operationId: GetBenefitEligibilityInformation
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                BSP_maximal_success:
+                  summary: BSP - Maximal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: AB123456C
+                    marriageDetailsResult:
+                      marriageDetails:
+                        - status: CIVIL PARTNER
+                          startDate: "1999-01-01"
+                          startDateStatus: VERIFIED
+                          endDate: "2001-01-01"
+                          endDateStatus: VERIFIED
+                          spouseIdentifier: AB123456C
+                          spouseForename: Skywalker
+                          spouseSurname: Luke
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 9.5
+                      class1ContributionAndCredits:
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 52
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: C1
+                          primaryContribution: 3000
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 25000
+                          creditSource: EMPLOYMENT SERVICES
+                          employerName: ACME
+                          latePaymentPeriod: L
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 48
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: C1
+                          primaryContribution: 2880
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 24000
+                          creditSource: EMPLOYMENT SERVICES
+                          employerName: CORP
+                          latePaymentPeriod: ZZ
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 52
+                          contributionCreditType: C2
+                          class2Or3EarningsFactor: 1.5
+                          class2NIContributionAmount: 150
+                          class2Or3CreditStatus: VALID
+                          creditSource: DIRECT DEBIT
+                          latePaymentPeriod: ZZ
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 30
+                          contributionCreditType: C2
+                          class2Or3EarningsFactor: 2.1
+                          class2NIContributionAmount: 120
+                          class2Or3CreditStatus: VALID
+                          creditSource: QUARTERLY BILLING
+                          latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                GYSP_maximal_success:
+                  summary: GYSP - Maximal response
+                  value:
+                    benefitType: GYSP
+                    nationalInsuranceNumber: AB123456C
+                    marriageDetailsResult:
+                      marriageDetails:
+                        - status: CIVIL PARTNER
+                          startDate: "1999-01-01"
+                          startDateStatus: VERIFIED
+                          endDate: "2001-01-01"
+                          endDateStatus: VERIFIED
+                          spouseIdentifier: AB123456C
+                          spouseForename: Skywalker
+                          spouseSurname: Luke
+                    longTermBenefitCalculationDetailsResult: {}
+                    schemeMembershipDetailsResult:
+                      schemeMembershipDetails:
+                        - schemeName: ACME PENSION SCHEME
+                          schemeMembershipStartDate: "2022-06-27"
+                          schemeMembershipEndDate: "2022-06-27"
+                          schemeCreatingContractedOutNumberDetails: S3123456B
+                    individualStatePensionInfoResult: {}
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 53
+                      class1ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 53
+                          contributionCategoryLetter: U
+                          contributionCategory: (NONE)
+                          contributionCreditType: C1
+                          primaryContribution: 9.999999999999998E13
+                          class1ContributionStatus: COMPLIANCE & YIELD INCOMPLETE
+                          primaryPaidEarnings: 9.999999999999998E13
+                          creditSource: NOT KNOWN
+                          employerName: ipOpMs
+                          latePaymentPeriod: L
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 53
+                          contributionCreditType: C1
+                          class2Or3EarningsFactor: 9.999999999999998E13
+                          class2NIContributionAmount: 9.999999999999998E13
+                          class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
+                          creditSource: NOT KNOWN
+                          latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                MA_maximal_success:
+                  summary: MA - Maximal response
+                  value:
+                    benefitType: MA
+                    nationalInsuranceNumber: AB123456C
+                    class2MAReceiptsResult:
+                      receiptDates:
+                        - "2025-12-10"
+                    liabilitySummaryDetailsResult:
+                      - liabilityDetails:
+                          - startDate: "2026-01-01"
+                            endDate: "2027-01-01"
+                    niContributionsAndCreditsResult: {}
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                missing_type:
+                  summary: Missing benefit type
+                  value:
+                    code: BAD_REQUEST
+                    reason: type field is required
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              examples:
+                missing_auth_token:
+                  summary: Missing authentication token
+                  value:
+                    code: FORBIDDEN
+                    reason: authentication token is required
+                invalid_auth_token:
+                  summary: Invalid authentication token
+                  value:
+                    code: FORBIDDEN
+                    reason: invalid or expired authentication token
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              examples:
+                missing_record:
+                  summary: Missing pagination record
+                  value:
+                    code: NOT_FOUND
+                    reason: pagination record not found
+        "422":
+          description: Unprocessable Entity
+          content:
+            application/json:
+              examples:
+                invalid_ni_number_format:
+                  summary: Invalid National Insurance number format
+                  value:
+                    code: UNPROCESSABLE_ENTITY
+                    reason: invalid national insurance number format
+                invalid_date_format:
+                  summary: Invalid date format
+                  value:
+                    code: UNPROCESSABLE_ENTITY
+                    reason: dateOfBirth must be in YYYY-MM-DD format
+                "422_StartYearAfterEndYear":
+                  summary: Start Year After End Year
+                  value:
+                    code: UNPROCESSABLE_ENTITY
+                    reason: Start tax year after end tax year
+                "422_StartYearPre1975":
+                  summary: Start Year Pre 1975
+                  value:
+                    code: UNPROCESSABLE_ENTITY
+                    reason: Start tax year before 1975
+                "422_StartYearPostCY-1":
+                  summary: Start Year Post CY-1
+                  value:
+                    code: UNPROCESSABLE_ENTITY
+                    reason: Start tax year after CY-1
+                "422_EndYearPostCY-1":
+                  summary: End Year Post CY-1
+                  value:
+                    code: UNPROCESSABLE_ENTITY
+                    reason: End tax year after CY-1
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              examples:
+                unexpected_error:
+                  summary: Unexpected error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    reason: an unexpected error occurred while processing the request
+        "502":
+          description: Partial or complete failure from downstream services
+          content:
+            application/json:
+              examples:
+                partial_failure:
+                  summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
+                  value:
+                    status: PARTIAL_FAILURE
+                    benefitType: MA
+                    nationalInsuranceNumber: KL890123M
+                    summary:
+                      totalCalls: 3
+                      successful: 2
+                      failed: 1
+                    downStreams:
+                      - apiName: NiContributionsAndCredits
+                        status: SUCCESS
+                      - apiName: Class2MAReceipts
+                        status: SUCCESS
+                      - apiName: Liabilities
+                        status: FAILURE
+                        error:
+                          code: TIMEOUT
+                          message: liability calculation service timeout
+                          downstreamStatus: 408
+                complete_failure:
+                  summary: Complete failure - every downstream called for a given benefit responds with a failure
+                  value:
+                    status: FAILURE
+                    benefitType: MA
+                    nationalInsuranceNumber: NP012345Q
+                    summary:
+                      totalCalls: 3
+                      successful: 0
+                      failed: 3
+                    downStreams:
+                      - apiName: NiContributionsAndCredits
+                        status: FAILURE
+                        error:
+                          code: FORBIDDEN
+                          message: access denied to maternity allowance service
+                          downstreamStatus: 403
+                      - apiName: Class2MAReceipts
+                        status: FAILURE
+                        error:
+                          code: INTERNAL_SERVER_ERROR
+                          message: class 2 MA receipts service internal error
+                          downstreamStatus: 500
+                      - apiName: Liabilities
+                        status: FAILURE
+                        error:
+                          code: BAD_REQUEST
+                          message: invalid liability calculation parameters
+                          downstreamStatus: 400
+
+
+components:
+  securitySchemes:
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes:
+            write:protect-connect: protect-connect
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: "#/components/schemas/correlationId"
+    Authorization:
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authorization"
+    Accept:
+      required: true
+      schema:
+        $ref: "#/components/schemas/Accept"
+  examples:
+    422_StartYearAfterEndYear:
+      summary: Start Year After End Year
+      value:
+        failures:
+          - reason: Start tax year after end tax year
+            code: "63496"
+    422_StartYearPre1975:
+      summary: Start Year Pre 1975
+      value:
+        failures:
+          - reason: Start tax year before 1975
+            code: "63497"
+    422_StartYearPostCY-1:
+      summary: Start Year Post CY-1
+      value:
+        failures:
+          - reason: Start tax year after CY-1
+            code: "63498"
+    422_EndYearPostCY-1:
+      summary: End Year Post CY-1
+      value:
+        failures:
+          - reason: End tax year after CY-1
+            code: "63499"
+    422_TaxYearRangeOver6:
+      summary: Tax Year Range Over 6 Years
+      value:
+        failures:
+          - reason: Tax year range greater than six years
+            code: "63500"
+  parameters:
+    authorization:
+      description: Identity of the Originating System that made the API call.
+      in: header
+      name: Authorization
+      required: true
+      schema:
+        $ref: "#/components/schemas/Authorization"
+    accept:
+      description: Request the version of the API you want to use by including an Accept header with a media type of.
+      in: header
+      name: Accept
+      required: true
+      schema:
+        $ref: "#/components/schemas/Accept"
+  responses:
+    notFoundErrorResponse:
+      headers:
+        correlationId:
+          $ref: "#/components/headers/correlationId"
+      description: The requested resource could not be found
+    internalServerErrorResponse:
+      description: Internal Server Error
+      headers:
+        correlationId:
+          $ref: "#/components/headers/correlationId"
+  schemas:
+    correlationId:
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+      format: uuid
+      type: string
+    Authorization:
+      description: Authorization token used to contact api
+      type: string
+      example: Bearer <token>
+    Accept:
+      description: Request the version of the API you want to use by including an Accept header with a media type of
+      type: string
+      example: application/vnd.hmrc.1.0+json
+    taxYear:
+      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+      type: integer
+    PostNIContCredResponse:
+      description: Success response payload for this API.
+      properties:
+        niClass1:
+          description: Contains an array of Class 1 records.
+          items:
+            $ref: "#/components/schemas/niClass1"
+          type: array
+        niClass2:
+          description: Contains an array of Class 2 Credits.
+          items:
+            $ref: "#/components/schemas/niClass2"
+          type: array
+      type: object
+    niClass1:
+      description: Contains details of a Class 1 Contribution
+      properties:
+        taxYear:
+          $ref: "#/components/schemas/taxYear"
+        niContributionCategory:
+          $ref: "#/components/schemas/niContributionCategory"
+        niContributionCategoryName:
+          $ref: "#/components/schemas/EnumContCat"
+        niContributionType:
+          $ref: "#/components/schemas/EnumCCType"
+        totalPrimaryContribution:
+          $ref: "#/components/schemas/unsignedMoney"
+        contributionStatus:
+          $ref: "#/components/schemas/EnumCl1stat"
+        totalEarningsFactor:
+          $ref: "#/components/schemas/unsignedMoney"
+      type: object
+    niClass2:
+      description: Contains details of a Class 2 Credit
+      properties:
+        taxYear:
+          $ref: "#/components/schemas/taxYear"
+        numberOfWeeks:
+          $ref: "#/components/schemas/numberOfWeeks"
+        niContributionType:
+          $ref: "#/components/schemas/EnumCCType"
+        totalEarningsFactor:
+          $ref: "#/components/schemas/unsignedMoney"
+        totalPrimaryContribution:
+          $ref: "#/components/schemas/unsignedMoney"
+        contributionStatus:
+          $ref: "#/components/schemas/EnumCl2Stat"
+      type: object
+    startTaxYear:
+      description: Denotes a start year for the tax year range (e.g. 2018 for a 2018/2019 tax period) to retrieve data from.
+      type: string
+      format: year
+      example: 2016
+    endTaxYear:
+      description: Denotes a end year for the tax year range (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.
+      type: string
+      format: year
+      example: 2021
+    dateOfBirth:
+      description: The date of birth of the individual.
+      format: date
+      type: string
+    nationalInsuranceNumber:
+      description: NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix.
+      maxLength: 9
+      minLength: 8
+      pattern: ^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$
+      type: string
+      example: AB123456A
+    customerCorrelationID:
+      description: Correlation Id sent by customer.
+      format: string
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    unsignedMoney:
+      description: Positive or zero monetary value.
+      maximum: 99999999999999.98
+      minimum: 0
+      multipleOf: 0.01
+      type: number
+    niContributionCategory:
+      description: Letter associated with the contribution category.
+      maxLength: 1
+      minLength: 1
+      pattern: ^[A-Z]$
+      type: string
+    numberOfWeeks:
+      description: Number of weekly credits that apply to the credit record.
+      minimum: 0
+      maximum: 53
+      type: integer
+    EnumContCat:
+      description: Denotes the contribution category.
+      enum:
+        - (NONE)
+        - CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS
+        - CONVERTED ACCOUNT - CONTRACTED OUT
+        - MARINER FOREIGN GOING REBATE ( REDUCED  CONTRACTED-OUT )
+        - MARINER FOREIGN GOING REBATE ( STANDARD CONTRACTED-OUT )
+        - MARINER FOREIGN GOING REBATE EQUIVALENT (REDUCED)
+        - MARINER FOREIGN GOING REBATE EQUIVALENT (SECONDARY ONLY)
+        - MARINER FOREIGN GOING REBATE EQUIVALENT (STANDARD)
+        - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( REDUCED C-OUT)
+        - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( STANDARD C-OUT)
+        - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE EQUIV.(SECONDARY ONLY)
+        - MARINER REDUNDANCY FUND & FRGN GNG REBATE EQUIV.(STD)
+        - MARINER REDUNDANCY FUND & FRGN GOING REBATE EQUIV.(RDCD)
+        - MARINER REDUNDANCY FUND REBATE ( REDUCED CONTRACTED-OUT )
+        - MARINER REDUNDANCY FUND REBATE ( STANDARD CONTRACTED-OUT )
+        - MARINER REDUNDANCY FUND REBATE EQUIV. (RDCD)
+        - MARINER REDUNDANCY FUND REBATE EQUIVALENT (SECONDARY ONLY)
+        - MARINER REDUNDANCY FUND REBATE EQUIVALENT (STANDARD)
+        - MARRIED WOMAN'S REDUCED RATE ELECTION
+        - NO LIABILITY
+        - OFFICE HOLDERS
+        - REDUCED RATE
+        - REDUCED RATE CONTRACTED-OUT
+        - STANDARD RATE
+        - STANDARD RATE CONTRACTED-OUT
+        - UNALLOCATED
+        - ZERO RATE
+      type: string
+    EnumCl1stat:
+      description: Denotes the status for the contribution.
+      enum:
+        - COMPLIANCE & YIELD INCOMPLETE
+        - CURRENT
+        - HISTORIC AMENDED
+        - HISTORIC CANCELLED
+        - INVALID - NO RCF
+        - INVALID - RCF
+        - INVALID COMPATIBILITY CHECK
+        - NOT KNOWN / NOT APPLICABLE
+        - POTENTIAL
+        - VALID
+        - VALID RCF
+      type: string
+    EnumCl2Stat:
+      description: Denotes the status for the credit.
+      enum:
+        - NOT KNOWN/NOT APPLICABLE
+        - VALID
+        - INVALID
+        - POTENTIAL
+        - INVALID COMPATIBILITY CHECK
+      type: string
+    EnumCCType:
+      description: Short code relating to the type of class 2 credit.
+      enum:
+        - C1
+        - HMF
+        - MAR
+        - CS
+        - EON
+        - CR1
+        - C2
+        - C2W
+        - SF
+        - 2A
+        - 2B
+        - 2C
+        - 2D
+        - SFA
+        - SFB
+        - SFC
+        - SFD
+        - VDA
+        - VDB
+        - VDC
+        - VDD
+        - 2N
+        - 3PR
+        - 3A
+        - 3B
+        - 3C
+        - 3D
+        - CR1
+        - CR3
+        - 3N
+      type: string
+    PostNIContCredRequest:
+      description: Request payload for this API.
+      properties:
+        startTaxYear:
+          $ref: "#/components/schemas/startTaxYear"
+        endTaxYear:
+          $ref: "#/components/schemas/endTaxYear"
+        dateOfBirth:
+          $ref: "#/components/schemas/dateOfBirth"
+        nationalInsuranceNumber:
+          $ref: "#/components/schemas/nationalInsuranceNumber"
+        customerCorrelationID:
+          $ref: "#/components/schemas/customerCorrelationID"
+      required:
+        - startTaxYear
+        - endTaxYear
+        - dateOfBirth
+        - nationalInsuranceNumber
+      additionalProperties: false
+      type: object
+    errorResponse_400:
+      description: Array of Error Response Failure Object in Error Response.
+      title: Error Response
+      type: object
+      properties:
+        failures:
+          $ref: "#/components/schemas/errorResponseFailure_400"
+    errorResponseFailure_400:
+      description: Array of Error Response Failure Object in Error Response.
+      title: Failure Object in Error Response
+      type: array
+      items:
+        $ref: "#/components/schemas/errorResourceObj_400"
+    errorResourceObj_400:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          minLength: 1
+          description: Displays the reason of the failure.
+          type: string
+          maxLength: 120
+        code:
+          description: "The error code representing the error that has occurred. Valid
+            values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing
+            input parameter path.to.field')\n400.2 - HTTP message not readable."
+          type: string
+    errorResponse_403:
+      items:
+        $ref: "#/components/schemas/errorResourceObj_403_Forbidden"
+      description: Error Response Payload for this API
+      title: Unauthorised Error Response
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          type: string
+          enum:
+            - "Forbidden"
+        code:
+          description: "The error code representing the firbidden Error."
+          type: string
+          enum:
+            - "FORBIDDEN"
+    errorResponse_422:
+      description: Error Response Payload for this API
+      title: Error Response
+      type: object
+      properties:
+        failures:
+          $ref: "#/components/schemas/errorResponseFailure_422"
+    errorResponseFailure_422:
+      description: Array of Error Response Failure Object in Error Response.
+      title: Failure Object in Error Response
+      type: array
+      items:
+        $ref: "#/components/schemas/errorResourceObj_422"
+    errorResourceObj_422:
+      type: object
+      required:
+        - code
+        - reason
+      properties:
+        reason:
+          minLength: 1
+          description: Displays the reason of the failure.
+          type: string
+          maxLength: 120
+        code:
+          minLength: 1
+          description: The error code representing the error that has occurred.
+          type: string
+          maxLength: 10

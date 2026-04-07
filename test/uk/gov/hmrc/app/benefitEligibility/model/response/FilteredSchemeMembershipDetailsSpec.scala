@@ -248,7 +248,8 @@ class FilteredSchemeMembershipDetailsSpec extends AnyFreeSpec with Matchers {
               Some(BenefitSchemeName("EXAMPLE PENSION SCHEME")),
               Some(SchemeMembershipStartDate(LocalDate.parse("2022-06-27"))),
               Some(SchemeMembershipEndDate(LocalDate.parse("2022-06-27"))),
-              Some(EmployersContractedOutNumberDetails("S2345678C"))
+              Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+              Some(SchemeTerminatingContractedOutNumberDetails("S2345678C"))
             )
           )
         )

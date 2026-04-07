@@ -1,0 +1,320 @@
+---
+- type: java\.time\.ZonedDateTime
+  specAsParameter:
+    - type: string
+      format: date-time
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.marriagedetails\.marriagedetailssuccess\.spouseforename
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.liabilitysummarydetails\.liabilitysummarydetailssuccess\.startdate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.liabilitysummarydetails\.liabilitysummarydetailssuccess\.enddate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.nicontributionsandcredits\.nicontributionsandcreditssuccess\.nicontributionsandcreditssuccessresponse
+  specAsParameter: []
+  specAsProperty:
+    $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.individualstatepensioninformation\.individualstatepensioninformationsuccess\.totalprimarypaidearnings
+  specAsParameter:
+    - type: number
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.individualstatepensioninformation\.individualstatepensioninformationsuccess\.qualifyingtaxyear
+  specAsParameter:
+    - type: boolean
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.individualstatepensioninformation\.individualstatepensioninformationsuccess\.numberofqualifyingyears
+  specAsParameter:
+    - type: integer
+      description: Denotes the number of qualifying years an individual has for
+        receiving their basic pension.
+      maximum: 100
+      minimum: 0
+      example: 5
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.benefitschemedetails\.benefitschemedetailssuccess\.benefitschemename
+  specAsParameter:
+    - type: string
+      description: The name of the scheme used for the institution details of
+        a benefit scheme.
+      maxLength: 54
+      minLength: 1
+      pattern: "^[a-zA-Z0-9\\/,'.&() -]+$"
+      example: ACME PENSION SCHEME
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.schememembershipdetails\.schememembershipdetailssuccess\.schememembershipstartdate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.schememembershipdetails\.schememembershipdetailssuccess\.schememembershipenddate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.schememembershipdetails\.schememembershipdetailssuccess\.employerscontractedoutnumberdetails
+  specAsParameter:
+    - type: string
+      description: Denotes the Employer's Contracting-Out Number with prefix and
+        suffix - used where an employer has an occupational pension scheme that
+        is contracted-out of the State Second Pension.
+      maxLength: 9
+      minLength: 7
+      pattern: "^([A-Z]{0,1}[3]\\d{6}[A-Z ^GIO SUVZ]{0,1})$"
+      example: S3123456B
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.schememembershipdetails\.schememembershipdetailssuccess\.employerscontractedoutnumberdetails
+  specAsParameter:
+    - type: string
+      description: Denotes the Employer's Contracting-Out Number with prefix and
+        suffix - used where an employer has an occupational pension scheme that
+        is contracted-out of the State Second Pension.
+      maxLength: 9
+      minLength: 7
+      pattern: "^([A-Z]{0,1}[3]\\d{6}[A-Z ^GIO SUVZ]{0,1})$"
+      example: S3123456B
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.schememembershipdetails\.schememembershipdetailssuccess\.schemecreatingcontractedoutnumberdetails
+  specAsParameter:
+    - type: string
+      description: Denotes the Benefit Scheme's Contracted-Out Number with prefix
+        and suffix for the scheme being created.
+      maxLength: 9
+      minLength: 7
+      pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+      example: A7123456Q
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.schememembershipdetails\.schememembershipdetailssuccess\.schemeterminatingcontractedoutnumberdetails
+  specAsParameter:
+    - type: string
+      description: Denotes the Terminating Benefit Scheme's Contracted-Out Number
+        with prefix and suffix.
+      maxLength: 9
+      minLength: 7
+      pattern: "^([A]{0,1}7\\d{6}(?![GIOSUVZ])[A-Z]{0,1})$|^([S]{0,1}[0124568]\\\
+          d{6}(?![GIOSUVZ])[A-Z]{0,1})$"
+      example: S2123456B
+      
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.longtermbenefitcalculationdetails\.benefitcalculationdetailssuccess\.guaranteedminimumpensioncontractedoutdeductionspre1988
+  specAsParameter:
+    - type: number
+      description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+        Contracted-Out Deductions (COD) pre 1988
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      example: 10.56
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.longtermbenefitcalculationdetails\.benefitcalculationdetailssuccess\.guaranteedminimumpensioncontractedoutdeductionspost1988
+  specAsParameter:
+    - type: number
+      description: Denotes the value of the Guaranteed Minimum Pension (GMP) /
+        Contracted-Out Deductions (COD) post 1988
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      example: 10.56
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.longtermbenefitcalculationdetails\.benefitcalculationdetailssuccess\.contractedoutdeductionspre1988
+  specAsParameter:
+    - type: number
+      description: Denotes the value of the Contracted-Out Deductions (COD) pre
+        1988
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      example: 10.56
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.longtermbenefitcalculationdetails\.benefitcalculationdetailssuccess\.contractedoutdeductionspost1988
+  specAsParameter:
+    - type: number
+      description: Denotes the value of the Contracted-Out Deductions (COD) post
+        1988
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: -99999999999999.98
+      example: 10.56
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.longtermbenefitnotes\.longtermbenefitnotessuccess\.note
+  specAsParameter:
+    - type: string
+
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.marriagedetails\.marriagedetailssuccess\.marriagestartdate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.marriagedetails\.marriagedetailssuccess\.marriageenddate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefiteligibility\.model\.nps\.marriagedetails\.marriagedetailssuccess\.spousesurname
+  specAsParameter:
+    - type: string
+
+- type: java\.time\.LocalDate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.NpsErrorReason
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.EndTaxYear
+  specAsParameter:
+    - type: integer
+      format: year
+      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.TaxYear
+  specAsParameter:
+    - type: integer
+      format: year
+      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.DateOfBirth
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.CursorId
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.GovUkOriginatorId
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.GovUkJobRole
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.StartTaxYear
+  specAsParameter:
+    - type: integer
+      format: year
+      description: Denotes the tax year (e.g. 2023 for a 2023/2024 tax period).
+      example: 2022
+      maximum: 2099
+      minimum: 1900
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.CorrelationId
+  specAsParameter:
+    - type: string
+      format: uuid
+      description: Id sent by consumer for request tracing purposes.
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.ReceiptDate
+  specAsParameter:
+    - type: string
+      format: date
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.GovUkUserName
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.GovUkOrganisationId
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.CallbackUrl
+  specAsParameter:
+    - type: string
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.common\.Identifier
+  specAsParameter:
+    - type: string
+      description: NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix.
+      maxLength: 9
+      minLength: 8
+      pattern: ^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$
+      example: AB123456A
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.Class2NIContributionAmount
+  specAsParameter:
+    - type: number
+      description: Positive or zero monetary value.
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: 0
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.ContributionCategoryLetter
+  specAsParameter:
+    - type: string
+      description: Letter associated with the contribution category.
+      maxLength: 1
+      minLength: 1
+      pattern: "^[A-Z]$" 
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.NumberOfCreditsAndContributions
+  specAsParameter:
+    - type: integer
+      description: Number of weekly credits that apply to the credit record.
+      maximum: 53
+      minimum: 0
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.TotalGraduatedPensionUnits
+  specAsParameter:
+    - type: number
+      format: double
+      description: "Denotes the total number of graduated pension units paid to\
+        \ an individual. Value precision allows for up to 6 decimal places - i.e.\
+        \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+        \ values."
+      maximum: 100
+      minimum: 0
+      example: 10
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.EmployerName
+  specAsParameter:
+    - type: string
+      description: "Employer name, held as a checkbrick in NPS for employment details linked to a contribution."
+      minLength: 1
+      maxLength: 6
+      pattern: "^([A-Za-z ])+$"
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.PrimaryPaidEarnings
+  specAsParameter:
+    - type: number
+      description: Positive or zero monetary value.
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: 0
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.PrimaryContribution
+  specAsParameter:
+    - type: number
+      description: Positive or zero monetary value.
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: 0
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.Class2Or3EarningsFactor
+  specAsParameter:
+    - type: number
+      description: Positive or zero monetary value.
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: 0
+
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.response\.ErrorReason
+  specAsParameter:
+    - type: string

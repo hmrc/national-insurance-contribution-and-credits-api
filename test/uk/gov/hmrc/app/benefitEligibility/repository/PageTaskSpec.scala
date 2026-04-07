@@ -107,6 +107,7 @@ class PageTaskSpec
           marriageDetailsResult = None,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
           nextCursor = Some(
             PaginationCursor(
               PaginationType.MaPagination,
@@ -153,6 +154,56 @@ class PageTaskSpec
             Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
+          nextCursor = Some(
+            PaginationCursor(
+              PaginationType.BspPagination,
+              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+            )
+          )
+        )
+
+        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        result shouldBe Some(
+          BspPageTask(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
+            contributionAndCreditsPaging = Some(
+              ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+            ),
+            nationalInsuranceNumber,
+            createdAt = currentTimeSource.instantNow()
+          )
+        )
+      }
+      "should return pageTask if SEARCHLIGHT pagination result with next cursor" in {
+        val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
+        val paginationResult = PaginationResult(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          paginationType = PaginationType.BspPagination,
+          nationalInsuranceNumber,
+          liabilitiesResult = List(),
+          class2MaReceiptsResult = None,
+          marriageDetailsResult = Some(
+            SuccessResult(
+              ApiName.MarriageDetails,
+              MarriageDetailsSuccessResponse(
+                MarriageDetails(ActiveMarriage(true), None, Some(Links(SelfLink(Some(Href("SomeURL1")), Some(get)))))
+              )
+            )
+          ),
+          contributionCreditResult = ContributionCreditPagingResult(
+            Some(
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                NiContributionsAndCreditsSuccessResponse(None, None, None)
+              )
+            ),
+            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+          ),
+          benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
           nextCursor = Some(
             PaginationCursor(
               PaginationType.BspPagination,
@@ -312,6 +363,7 @@ class PageTaskSpec
               )
             )
           ),
+          callSystem = None,
           nextCursor = Some(
             PaginationCursor(
               PaginationType.GyspPagination,
@@ -346,6 +398,7 @@ class PageTaskSpec
           marriageDetailsResult = None,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
           nextCursor = None
         )
 
@@ -376,6 +429,7 @@ class PageTaskSpec
             Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
+          callSystem = None,
           nextCursor = None
         )
 
@@ -517,6 +571,7 @@ class PageTaskSpec
               )
             )
           ),
+          callSystem = None,
           nextCursor = None
         )
 

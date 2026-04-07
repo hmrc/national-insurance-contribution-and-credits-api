@@ -108,6 +108,7 @@ class BenefitEligibilityDataControllerItSpec
   val uuidOne: UUID   = UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
   val uuidTwo: UUID   = UUID.fromString("f678d869-7922-4a11-82e2-5cf4e235cfee")
   val uuidThree: UUID = UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")
+  val uuidFour: UUID  = UUID.fromString("e8a00a25-beec-4fc1-aeea-4a03c8dc55ac")
 
   val mockUuidGenerator: UuidGenerator = mock[UuidGenerator]
 
@@ -206,6 +207,20 @@ class BenefitEligibilityDataControllerItSpec
         ),
         nationalInsuranceNumber,
         currentTimeSource.instantNow()
+      ),
+      SearchLightPageTask(
+        correlationId,
+        PageTaskId(uuidFour),
+        PaginationType.BspPagination,
+        Some(
+          ContributionAndCreditsPaging(
+            NonEmptyList
+              .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2020), EndTaxYear(2022))),
+            DateOfBirth(LocalDate.parse("2025-10-10"))
+          )
+        ),
+        nationalInsuranceNumber,
+        currentTimeSource.instantNow()
       )
     ).foreach(pageTask => insert(pageTask).futureValue)
   }
@@ -261,7 +276,8 @@ class BenefitEligibilityDataControllerItSpec
         None,
         Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
         Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
-        Some(EmployersContractedOutNumberDetails("S2123456B"))
+        Some(SchemeCreatingContractedOutNumberDetails("S2123456B")),
+        Some(SchemeTerminatingContractedOutNumberDetails("S2123456B"))
       )
     )
   )
@@ -1189,9 +1205,9 @@ class BenefitEligibilityDataControllerItSpec
 
       }
 
-      "BSP Searchlight" - {
+      "Searchlight" - {
 
-        "should fetch BSP Searchlight Data correctly" in {
+        "should fetch Searchlight Data correctly" in {
 
           val successResponse = NiContributionsAndCreditsSuccessResponse(
             Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
@@ -1312,7 +1328,7 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
-        "should return a 502 if downstream calls to NPS services fail (BSP Searchlight)" in {
+        "should return a 502 if downstream calls to NPS services fail (Searchlight)" in {
 
           server.stubFor(
             post(urlEqualTo("/auth/authorise"))
@@ -3669,7 +3685,6 @@ class BenefitEligibilityDataControllerItSpec
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
 
       }
-
       "should handle a GYSP request containing nextCursor successfully (502)" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidThree)
 
@@ -3754,6 +3769,132 @@ class BenefitEligibilityDataControllerItSpec
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
           "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+        )
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 502
+        contentAsJson(result)
+          .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
+      }
+
+      "should handle a SEARCHLIGHT request containing nextCursor successfully (200)" in {
+
+        val newId = UUID.fromString("56836253-cd9d-4c6f-9251-9b275ebff863")
+
+        (() => mockUuidGenerator.generate).expects().returning(newId)
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJlOGEwMGEyNS1iZWVjLTRmYzEtYWVlYS00YTAzYzhkYzU1YWMifQ=="
+        )
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+          marriageDetailsResult = FilteredMarriageDetails(Nil),
+          nextCursor = Some(
+            CursorId(
+              "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiI1NjgzNjI1My1jZDlkLTRjNmYtOTI1MS05YjI3NWViZmY4NjMifQ=="
+            )
+          )
+        )
+
+        status(result) shouldBe 200
+        contentAsJson(result) shouldBe Json.toJson(expectedResult)
+      }
+      "should handle a SEARCHLIGHT request containing nextCursor successfully (502)" in {
+
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
+
+        val npsStandardErrorResponse400 = NpsStandardErrorResponse400(
+          HipOrigin.Hip,
+          NpsMultiErrorResponse(
+            Some(
+              List(
+                NpsSingleErrorResponse(
+                  NpsErrorReason("HTTP message not readable"),
+                  NpsErrorCode("502")
+                ),
+                NpsSingleErrorResponse(
+                  NpsErrorReason("Constraint violation: Invalid/Missing input parameter: <parameter>"),
+                  NpsErrorCode("502")
+                )
+              )
+            )
+          )
+        )
+
+        val niContributionsAndCreditsSuccessResponseBody =
+          Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
+        val npsStandardErrorResponse400Body = Json.toJson(npsStandardErrorResponse400).toString()
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(niContributionsAndCreditsSuccessResponseBody)
+            )
+        )
+        server.stubFor(
+          WireMock
+            .get(urlEqualTo(npsIndividualMarriageDetailsPath))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_REQUEST)
+                .withHeader("Content-Type", "application/json")
+                .withBody(npsStandardErrorResponse400Body)
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
         )
           .withHeaders(
             "Content-Type"  -> "application/json",

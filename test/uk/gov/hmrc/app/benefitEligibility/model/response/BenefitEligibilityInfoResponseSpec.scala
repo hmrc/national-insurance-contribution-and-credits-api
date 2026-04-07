@@ -187,7 +187,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         Some(BenefitSchemeName("EXAMPLE PENSION SCHEME")),
         Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
         Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
-        Some(EmployersContractedOutNumberDetails("S312345B"))
+        Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
+        Some(SchemeTerminatingContractedOutNumberDetails("S2123456B"))
       )
     )
   )
@@ -195,6 +196,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
   val filteredSchemeMembershipDetailsOptionalsExcluded = FilteredSchemeMembershipDetails(
     List(
       FilteredSchemeMembershipDetailsItem(
+        None,
         None,
         None,
         None,
@@ -742,6 +744,9 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     )
   )
 
+  val applicationOpenApiSpec =
+    "resources/public/api/conf/1.0/nicc_api_spec.yaml"
+
   "BenefitEligibilityInfoSuccessResponseMa" - {
     ".from" - {
       "should convert to a BenefitEligibilityInfoSuccessResponseMa" in {
@@ -832,13 +837,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
     "should match openapi schema (all optionals included)" in {
 
-      val applicationOpenApiSpec =
-        "resources/public/api/conf/1.0/application_combined.yaml"
-
       def successResponseMaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecVersion.VersionFlag.V7,
-        Some("MASuccessResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa"),
         metaSchemaValidation = Some(Valid(()))
       )
 
@@ -857,13 +859,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     }
     "should match openapi schema (all optionals excluded)" in {
 
-      val applicationOpenApiSpec =
-        "resources/public/api/conf/1.0/application_combined.yaml"
-
       def successResponseMaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecVersion.VersionFlag.V7,
-        Some("MASuccessResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa"),
         metaSchemaValidation = Some(Valid(()))
       )
 
@@ -969,13 +968,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     }
     "should match openapi schema (all optionals included)" in {
 
-      val applicationOpenApiSpec =
-        "resources/public/api/conf/1.0/application_combined.yaml"
-
       def successResponseBspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecVersion.VersionFlag.V7,
-        Some("BSPSuccessResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp"),
         metaSchemaValidation = Some(Valid(()))
       )
 
@@ -993,13 +989,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
     }
     "should match openapi schema (all optionals excluded)" in {
 
-      val applicationOpenApiSpec =
-        "resources/public/api/conf/1.0/application_combined.yaml"
-
       def successResponseBspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecVersion.VersionFlag.V7,
-        Some("BSPSuccessResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp"),
         metaSchemaValidation = Some(Valid(()))
       )
 
@@ -1098,7 +1091,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "schemeName":"EXAMPLE PENSION SCHEME",
             |            "schemeMembershipStartDate":"2022-06-27",
             |            "schemeMembershipEndDate":"2022-06-27",
-            |            "employersContractedOutNumberDetails":"S312345B"
+            |            "schemeCreatingContractedOutNumberDetails":"A7123456Q",
+            |            "schemeTerminatingContractedOutNumberDetails":"S2123456B"
             |         }
             |      ]
             |   },
@@ -1161,13 +1155,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should match openapi schema (all optionals included)" in {
 
-        val applicationOpenApiSpec =
-          "resources/public/api/conf/1.0/application_combined.yaml"
-
         def successResponseGyspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
           SpecVersion.VersionFlag.V7,
-          Some("GYSPSuccessResponse"),
+          Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp"),
           metaSchemaValidation = Some(Valid(()))
         )
 
@@ -1188,13 +1179,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should match openapi schema (all optionals excluded)" in {
 
-        val applicationOpenApiSpec =
-          "resources/public/api/conf/1.0/application_combined.yaml"
-
         def successResponseGyspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
           SpecVersion.VersionFlag.V7,
-          Some("GYSPSuccessResponse"),
+          Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp"),
           metaSchemaValidation = Some(Valid(()))
         )
 
@@ -1282,13 +1270,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should match openapi schema (all optionals included)" in {
 
-        val applicationOpenApiSpec =
-          "resources/public/api/conf/1.0/application_combined.yaml"
-
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
           SpecVersion.VersionFlag.V7,
-          Some("ESASuccessResponse"),
+          Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa"),
           metaSchemaValidation = Some(Valid(()))
         )
 
@@ -1304,13 +1289,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should match openapi schema (all optionals excluded)" in {
 
-        val applicationOpenApiSpec =
-          "resources/public/api/conf/1.0/application_combined.yaml"
-
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
           SpecVersion.VersionFlag.V7,
-          Some("ESASuccessResponse"),
+          Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa"),
           metaSchemaValidation = Some(Valid(()))
         )
 
@@ -1466,13 +1448,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should match openapi schema (all optionals included)" in {
 
-        val applicationOpenApiSpec =
-          "resources/public/api/conf/1.0/application_combined.yaml"
-
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
           SpecVersion.VersionFlag.V7,
-          Some("JSASuccessResponse"),
+          Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa"),
           metaSchemaValidation = Some(Valid(()))
         )
 
@@ -1488,13 +1467,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should match openapi schema (all optionals excluded)" in {
 
-        val applicationOpenApiSpec =
-          "resources/public/api/conf/1.0/application_combined.yaml"
-
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
           SpecVersion.VersionFlag.V7,
-          Some("JSASuccessResponse"),
+          Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa"),
           metaSchemaValidation = Some(Valid(()))
         )
 
@@ -1704,13 +1680,10 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
     "should match openapi schema" in {
 
-      val applicationOpenApiSpec =
-        "resources/public/api/conf/1.0/application_combined.yaml"
-
       def application502JsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecVersion.VersionFlag.V7,
-        Some("FailureResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
 
@@ -2093,14 +2066,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val paginationResult: PaginationResult =
           PaginationResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PaginationType.MaPagination,
-            nationalInsuranceNumber,
-            liabilityResult,
-            None,
-            None,
-            creditsAndContributionsPagingResult,
-            None,
-            None
+            paginationType = PaginationType.MaPagination,
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            liabilitiesResult = liabilityResult,
+            class2MaReceiptsResult = None,
+            marriageDetailsResult = None,
+            contributionCreditResult = creditsAndContributionsPagingResult,
+            benefitSchemeMembershipDetailsData = None,
+            callSystem = None,
+            nextCursor = None
           )
 
         val expectedResult = Right(
@@ -2123,14 +2097,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val paginationResult: PaginationResult =
           PaginationResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PaginationType.BspPagination,
-            nationalInsuranceNumber,
-            liabilityResult,
-            None,
-            None,
-            creditsAndContributionsPagingResult,
-            None,
-            None
+            paginationType = PaginationType.BspPagination,
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            liabilitiesResult = liabilityResult,
+            class2MaReceiptsResult = None,
+            marriageDetailsResult = None,
+            contributionCreditResult = creditsAndContributionsPagingResult,
+            benefitSchemeMembershipDetailsData = None,
+            callSystem = None,
+            nextCursor = None
           )
 
         val expectedResult = Right(
@@ -2152,14 +2127,15 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val paginationResult: PaginationResult =
           PaginationResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PaginationType.GyspPagination,
-            nationalInsuranceNumber,
-            liabilityResult,
-            None,
-            None,
-            creditsAndContributionsPagingResult,
-            None,
-            None
+            paginationType = PaginationType.GyspPagination,
+            nationalInsuranceNumber = nationalInsuranceNumber,
+            liabilitiesResult = liabilityResult,
+            class2MaReceiptsResult = None,
+            marriageDetailsResult = None,
+            contributionCreditResult = creditsAndContributionsPagingResult,
+            benefitSchemeMembershipDetailsData = None,
+            callSystem = None,
+            nextCursor = None
           )
 
         val expectedResult = Right(

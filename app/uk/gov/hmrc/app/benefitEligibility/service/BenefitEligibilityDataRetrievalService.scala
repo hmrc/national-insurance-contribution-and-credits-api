@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.syntax.all.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, CorrelationId}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.{
   BSPEligibilityCheckDataRequest,

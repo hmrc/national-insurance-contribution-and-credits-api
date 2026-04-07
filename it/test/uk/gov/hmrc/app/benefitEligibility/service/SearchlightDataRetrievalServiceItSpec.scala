@@ -18,6 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, postRequestedFor, urlEqualTo}
 import com.github.tomakehurst.wiremock.http.Fault
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
@@ -48,6 +49,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, F
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BspPagination
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
   Class1ContributionStatus,
@@ -65,20 +67,30 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  BenefitEligibilityRepositoryImpl,
+  PageTask,
+  PageTaskId,
+  PaginationCursor
+}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class SearchlightDataRetrievalServiceItSpec
     extends AnyFreeSpec
+    with DefaultPlayMongoRepositorySupport[PageTask]
     with EitherValues
-    with GuiceOneAppPerSuite
     with WireMockHelper
     with Injecting
     with Matchers
+    with MockFactory
     with ScalaFutures {
 
   implicit val ec: ExecutionContext = ExecutionContext.global
@@ -90,14 +102,39 @@ class SearchlightDataRetrievalServiceItSpec
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
-  override def fakeApplication(): Application =
+  val uuidOne   = UUID.fromString("67ef7500-4d9f-4e4e-a87b-0828293f9f08")
+  val uuidTwo   = UUID.fromString("4a566a78-b195-4546-86e9-0a7ac89632ac")
+  val uuidThree = UUID.fromString("5b0e3451-475d-46c0-997e-00eb799250e2")
+  val uuidFour  = UUID.fromString("27d18297-bfc9-47b6-b2ab-4ac8964e6027")
+
+  val mockUuidGenerator: UuidGenerator = mock[UuidGenerator]
+
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = Instant.parse("2007-12-03T10:15:30.00Z")
+  }
+
+  lazy val app: Application =
     GuiceApplicationBuilder()
+      .overrides(
+        play.api.inject.bind[UuidGenerator].toInstance(mockUuidGenerator),
+        play.api.inject.bind[MongoComponent].toInstance(mongoComponent),
+        play.api.inject.bind[CurrentTimeSource].toInstance(currentTimeSource)
+      )
       .configure(
         "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port
       )
       .build()
 
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
+
+  // wiremock server must be started before the repo is injected else suite will fail
+  // perm fix: declare protected val repository: PlayMongoRepository[A] in PlayMongoRepositorySupport as a def (library update)
+  server.start()
+
+  override protected val repository: BenefitEligibilityRepositoryImpl =
+    inject[BenefitEligibilityRepositoryImpl]
+
+  override protected def checkTtlIndex = false
 
   private lazy val service: SearchlightDataRetrievalService =
     inject[SearchlightDataRetrievalService]
@@ -117,6 +154,87 @@ class SearchlightDataRetrievalServiceItSpec
           EndTaxYear(2026)
         )
       )
+
+      "when a request with a tax year range great than 6 years is sent and the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
+        "should save paginated data and parse response to result successfully" in {
+          val successResponse = NiContributionsAndCreditsSuccessResponse(
+            Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
+            Some(
+              List(
+                Class1ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                  contributionCategory = Some(ContributionCategory.None),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                  creditSource = Some(CreditSource.NotKnown),
+                  employerName = Some(EmployerName("ipOpMs")),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
+              )
+            ),
+            Some(
+              List(
+                Class2or3ContributionAndCredits(
+                  taxYear = Some(TaxYear(2022)),
+                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                  contributionCreditType = Some(NiContributionCreditType.C1),
+                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                  class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                  creditSource = Some(CreditSource.NotKnown),
+                  latePaymentPeriod = Some(LatePaymentPeriod.L)
+                )
+              )
+            )
+          )
+
+          (() => mockUuidGenerator.generate).expects().returning(uuidOne)
+
+          val responseBody = Json.toJson(successResponse).toString()
+
+          server.stubFor(
+            post(urlEqualTo(npsCreditsAndContributionsPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(OK)
+                  .withHeader("Content-Type", "application/json")
+                  .withBody(responseBody)
+              )
+          )
+
+          val searchlightEligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
+            BenefitType.BSP,
+            Identifier("GD379251T"),
+            ContributionsAndCreditsRequestParams(
+              DateOfBirth(LocalDate.parse("2025-10-10")),
+              StartTaxYear(2025),
+              EndTaxYear(2035)
+            )
+          )
+
+          val result = service.fetchEligibilityData(searchlightEligibilityCheckDataRequest).value.futureValue
+
+          result shouldBe Right(
+            EligibilityCheckDataResultSearchLight(
+              BenefitType.BSP,
+              SuccessResult(
+                ApiName.NiContributionAndCredits,
+                successResponse
+              ),
+              Some(PaginationCursor(BspPagination, PageTaskId(uuidOne)))
+            )
+          )
+
+          server.verify(
+            postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
+          )
+
+        }
+      }
 
       "when the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {

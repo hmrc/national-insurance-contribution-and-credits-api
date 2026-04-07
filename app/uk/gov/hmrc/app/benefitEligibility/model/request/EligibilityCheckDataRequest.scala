@@ -17,10 +17,9 @@
 package uk.gov.hmrc.app.benefitEligibility.model.request
 
 import play.api.libs.json.*
-import EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CallSystem, Identifier}
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 
 object EligibilityCheckDataRequest {
 
