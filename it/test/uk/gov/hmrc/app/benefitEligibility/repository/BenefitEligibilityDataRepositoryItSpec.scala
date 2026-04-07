@@ -112,7 +112,7 @@ class BenefitEligibilityDataRepositoryItSpec
           )
         )
 
-        pageTasksList.foreach(insert)
+        pageTasksList.foreach(task => insert(task).futureValue)
 
         val pageTasks = Table("page_task", pageTasksList: _*)
 
@@ -474,7 +474,7 @@ class BenefitEligibilityDataRepositoryItSpec
           )
         )
 
-        pageTasksList.foreach(insert)
+        pageTasksList.foreach(task => insert(task).futureValue)
 
         repository.delete(pageTaskId1.value).value.futureValue shouldBe Right(1)
         findAll().futureValue should contain theSameElementsAs newPageTasksList
