@@ -50,60 +50,69 @@ object BenefitEligibilityRequestHandler {
       ]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (
-      getCorrelationId(request) match {
-        case Right(correlationId) =>
-          request.body.asJson match {
-            case Some(requestJson) =>
-              requestJson.validate[EligibilityCheckDataRequest] match {
-                case JsSuccess(eligibilityCheckDataRequest, _) =>
-                  RequestValidations.validateRequest(eligibilityCheckDataRequest) match {
-                    case Left(validationError) =>
-                      logger.error(s"Validation Error: ${validationError.messages.mkString(",")}")
+      getAcceptHeader(request) match {
+        case Right(acceptHeader) =>
+          getCorrelationId(request) match {
+            case Right(correlationId) =>
+              request.body.asJson match {
+                case Some(requestJson) =>
+                  requestJson.validate[EligibilityCheckDataRequest] match {
+                    case JsSuccess(eligibilityCheckDataRequest, _) =>
+                      RequestValidations.validateRequest(eligibilityCheckDataRequest) match {
+                        case Left(validationError) =>
+                          logger.error(s"Validation Error: ${validationError.messages.mkString(",")}")
+                          EitherT.rightT[Future, BenefitEligibilityError](
+                            UnprocessableEntity(
+                              Json.toJson(
+                                ErrorResponse(
+                                  ErrorCode.UnprocessableEntity,
+                                  ErrorReason(validationError.messages.mkString(","))
+                                )
+                              )
+                            )
+                          )
+                        case Right(value) =>
+                          fn(eligibilityCheckDataRequest, correlationId).map { result =>
+                            BenefitEligibilityInfoResponse.from(
+                              eligibilityCheckDataRequest.nationalInsuranceNumber,
+                              result
+                            ) match {
+                              case Left(value)  => BadGateway(Json.toJson(value))
+                              case Right(value) => Ok(Json.toJson(value))
+                            }
+                          }
+                      }
+                    case JsError(errors) =>
+                      val errorMessage = errors
+                        .map { error =>
+                          if (error._1.toString.isEmpty) error._2.flatMap(_.messages).mkString(",")
+                          else s"${error._1.toString} ${error._2.flatMap(_.messages).mkString(",")}"
+                        }
+                        .mkString("[", ", ", "]")
+                      logger.error(s"bad request ${errors.mkString(",")}")
                       EitherT.rightT[Future, BenefitEligibilityError](
-                        UnprocessableEntity(
+                        BadRequest(
                           Json.toJson(
                             ErrorResponse(
-                              ErrorCode.UnprocessableEntity,
-                              ErrorReason(validationError.messages.mkString(","))
+                              ErrorCode.BadRequest,
+                              ErrorReason(s"incompatible json, request body does not match schema - $errorMessage")
                             )
                           )
                         )
                       )
-                    case Right(value) =>
-                      fn(eligibilityCheckDataRequest, correlationId).map { result =>
-                        BenefitEligibilityInfoResponse.from(
-                          eligibilityCheckDataRequest.nationalInsuranceNumber,
-                          result
-                        ) match {
-                          case Left(value)  => BadGateway(Json.toJson(value))
-                          case Right(value) => Ok(Json.toJson(value))
-                        }
-                      }
                   }
-                case JsError(errors) =>
-                  val errorMessage = errors
-                    .map { error =>
-                      if (error._1.toString.isEmpty) error._2.flatMap(_.messages).mkString(",")
-                      else s"${error._1.toString} ${error._2.flatMap(_.messages).mkString(",")}"
-                    }
-                    .mkString("[", ", ", "]")
-                  logger.error(s"bad request ${errors.mkString(",")}")
+                case None =>
+                  logger.error("invalid json")
                   EitherT.rightT[Future, BenefitEligibilityError](
                     BadRequest(
-                      Json.toJson(
-                        ErrorResponse(
-                          ErrorCode.BadRequest,
-                          ErrorReason(s"incompatible json, request body does not match schema - $errorMessage")
-                        )
-                      )
+                      Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
                     )
                   )
               }
-            case None =>
-              logger.error("invalid json")
+            case Left(error: ErrorReason) =>
               EitherT.rightT[Future, BenefitEligibilityError](
                 BadRequest(
-                  Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
+                  Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
                 )
               )
           }
@@ -192,6 +201,25 @@ object BenefitEligibilityRequestHandler {
         }
 
       case Right(response) => response
+    }
+
+  def getAcceptHeader(request: Request[AnyContent])(
+      implicit headerCarrier: HeaderCarrier,
+      executionContext: ExecutionContext
+  ): Either[ErrorReason, String] =
+    request.headers.get("Accept") match {
+      case None =>
+        logger.error("Missing header Accept")
+        Left(
+          ErrorReason("Missing Header Accept")
+        )
+      case Some(acceptHeader) =>
+        RequestValidations.validateAcceptHeader(Some(acceptHeader)) match {
+          case Right(header) => Right(header)
+          case Left(error) =>
+            logger.error("Accept header validation failed")
+            Left(error)
+        }
     }
 
   private[controller] def getCorrelationId(request: Request[AnyContent])(

@@ -95,4 +95,14 @@ object RequestValidations {
     }
   }
 
+  def validateAcceptHeader(acceptHeader: Option[String]): Either[ErrorReason, String] =
+    acceptHeader match {
+      case None =>
+        Left(ErrorReason("Accept header is required"))
+      case Some(header) if header.trim.nonEmpty =>
+        Right(header)
+      case Some(_) =>
+        Left(ErrorReason("Accept header cannot be empty"))
+    }
+
 }
