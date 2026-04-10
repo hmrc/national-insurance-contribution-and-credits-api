@@ -63,7 +63,7 @@ class IndividualStatePensionInformationConnector @Inject() (
   ): EitherT[Future, BenefitEligibilityError, IndividualStatePensionResult] = {
 
     val path =
-      s"${appConfig.baseUrl(apiName)}/ni/national-insurance/${identifier.value}/benefits/long-term/contributions"
+      s"${appConfig.baseUrl(apiName)}/ni/long-term-benefits/${identifier.value}/contributions"
 
     npsClient
       .get(path)

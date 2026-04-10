@@ -2276,7 +2276,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             WireMock
               .get(
-                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+                urlEqualTo(s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/contributions")
               )
               .willReturn(
                 aResponse()
@@ -2495,7 +2495,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             WireMock
               .get(
-                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+                urlEqualTo(s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/contributions")
               )
               .willReturn(
                 aResponse()
@@ -2632,7 +2632,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             WireMock
               .get(
-                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+                urlEqualTo(s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/contributions")
               )
               .willReturn(
                 aResponse()
@@ -2793,7 +2793,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             WireMock
               .get(
-                urlEqualTo(s"/ni/national-insurance/${nationalInsuranceNumber.value}/benefits/long-term/contributions")
+                urlEqualTo(s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/contributions")
               )
               .willReturn(
                 aResponse()
