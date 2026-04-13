@@ -90,7 +90,7 @@ class PaginationServiceItSpec
 
   val nationalInsuranceNumber                = Identifier("GD379251T")
   val npsLiabilitySummaryDetailsPath: String = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
-  val npsCreditsAndContributionsPath         = "/national-insurance/contributions-and-credits"
+  val npsCreditsAndContributionsPath         = "/ni/national-insurance/contributions-and-credits"
   val npsIndividualMarriageDetailsPath       = s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"
   val benefitSchemeDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S3123456B"
   val schemeMembershipDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"

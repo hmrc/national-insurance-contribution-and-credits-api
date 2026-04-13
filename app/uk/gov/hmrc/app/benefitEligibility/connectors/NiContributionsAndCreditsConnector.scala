@@ -58,7 +58,7 @@ class NiContributionsAndCreditsConnector @Inject() (
 
   private val logger = new RequestAwareLogger(this.getClass)
 
-  def path = s"${appConfig.baseUrl(apiName)}/national-insurance/contributions-and-credits"
+  def path = s"${appConfig.baseUrl(apiName)}/ni/national-insurance/contributions-and-credits"
 
   def fetchContributionsAndCredits(
       benefitType: BenefitType,

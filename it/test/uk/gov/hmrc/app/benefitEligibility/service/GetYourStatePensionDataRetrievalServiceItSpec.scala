@@ -591,11 +591,11 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val npsCreditsAndContributionsPath        = "/national-insurance/contributions-and-credits"
+      val npsCreditsAndContributionsPath        = "/ni/national-insurance/contributions-and-credits"
       val benefitSchemeDetailsPath              = "/ni/benefit-scheme/GD379251T/benefit-scheme-details/S2123456B"
       val marriageDetailsPath                   = "/paye/individual/GD379251T/marriage-cp"
-      val longTermBenefitCalculationDetailsPath = "/long-term-benefits/GD379251T/calculation"
-      val longTermBenefitNotesPath              = "/long-term-benefits/GD379251T/calculation/ALL/notes/86"
+      val longTermBenefitCalculationDetailsPath = "/ni/long-term-benefits/GD379251T/calculation"
+      val longTermBenefitNotesPath              = "/ni/long-term-benefits/GD379251T/calculation/ALL/notes/86"
       val schemeMembershipDetailsPath           = "/ni/benefit-scheme/GD379251T/scheme-membership-details"
       val individualStatePensionInformationPath = "/ni/long-term-benefits/GD379251T/contributions"
 

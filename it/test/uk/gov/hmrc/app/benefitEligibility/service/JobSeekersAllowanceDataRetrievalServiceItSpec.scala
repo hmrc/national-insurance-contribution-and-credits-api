@@ -97,7 +97,7 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
+      val npsCreditsAndContributionsPath = "/ni/national-insurance/contributions-and-credits"
 
       val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
         Identifier("GD379251T"),
