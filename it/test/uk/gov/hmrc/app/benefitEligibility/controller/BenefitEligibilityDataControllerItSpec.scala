@@ -150,12 +150,14 @@ class BenefitEligibilityDataControllerItSpec
   private val nationalInsuranceNumber2: Identifier = Identifier("CD345678E")
 
   val npsLiabilitySummaryDetailsPath: String = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
-  val npsCreditsAndContributionsPath         = "/national-insurance/contributions-and-credits"
+  val npsCreditsAndContributionsPath         = "/ni/national-insurance/contributions-and-credits"
   val npsIndividualMarriageDetailsPath       = s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"
   val benefitSchemeDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"
   val schemeMembershipDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
-  val npsClass2MaReceiptsPath     = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-
+  val npsClass2MaReceiptsPath     = s"/ni/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
+  val npsLongTermBenefitsCalculation = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation"
+  val npsLongTermBenefitsNotes = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"  
+  
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
   override protected def beforeEach(): Unit = {
@@ -858,7 +860,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -902,7 +904,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -1070,7 +1072,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1115,7 +1117,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -1285,7 +1287,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1340,7 +1342,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -1395,10 +1397,6 @@ class BenefitEligibilityDataControllerItSpec
 
       "MA" - {
         "should Fetch MA Correctly" in {
-
-          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-          val npsLiabilitySummaryDetailsPath = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
-
           val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
           val liabilitySummaryDetailsSuccessResponseBody =
             Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
@@ -1415,7 +1413,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1516,9 +1514,6 @@ class BenefitEligibilityDataControllerItSpec
             ),
             callback = Some(Callback(Some(CallbackUrl("someUrl"))))
           )
-          val npsClass2MaReceiptsPath        = s"/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
-          val npsLiabilitySummaryDetailsPath = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
-
           val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
           val liabilitySummaryDetailsSuccessResponseBody =
             Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
@@ -1534,7 +1529,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1614,7 +1609,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -1717,7 +1712,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2030,7 +2025,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2109,7 +2104,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2212,7 +2207,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2245,7 +2240,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .get(urlEqualTo(npsLongTermBenefitsCalculation))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2255,7 +2250,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .get(urlEqualTo(npsLongTermBenefitsNotes))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2431,7 +2426,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2464,7 +2459,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .get(urlEqualTo(npsLongTermBenefitsCalculation))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2474,7 +2469,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .get(urlEqualTo(npsLongTermBenefitsNotes))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2568,7 +2563,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2601,7 +2596,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .get(urlEqualTo(npsLongTermBenefitsCalculation))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2611,7 +2606,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .get(urlEqualTo(npsLongTermBenefitsNotes))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2729,7 +2724,7 @@ class BenefitEligibilityDataControllerItSpec
               )
           )
           server.stubFor(
-            post(urlEqualTo("/national-insurance/contributions-and-credits"))
+            post(urlEqualTo(npsCreditsAndContributionsPath))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2762,7 +2757,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation"))
+              .get(urlEqualTo(npsLongTermBenefitsCalculation))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2772,7 +2767,7 @@ class BenefitEligibilityDataControllerItSpec
           )
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"))
+              .get(urlEqualTo(npsLongTermBenefitsNotes))
               .willReturn(
                 aResponse()
                   .withStatus(BAD_GATEWAY)
@@ -2997,7 +2992,7 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
         server.stubFor(
-          post(urlEqualTo("/national-insurance/contributions-and-credits"))
+          post(urlEqualTo(npsCreditsAndContributionsPath))
             .willReturn(
               aResponse()
                 .withStatus(OK)

@@ -93,7 +93,7 @@ class NiContributionsAndCreditsConnectorItSpec
 
     ".fetchContributionsAndCredits" - {
 
-      val testPath = "/national-insurance/contributions-and-credits"
+      val testPath = "/ni/national-insurance/contributions-and-credits"
 
       val requestBody = NiContributionsAndCreditsRequest(
         Identifier(""),

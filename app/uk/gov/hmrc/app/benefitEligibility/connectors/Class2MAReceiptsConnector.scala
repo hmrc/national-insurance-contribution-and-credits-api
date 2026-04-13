@@ -64,7 +64,7 @@ class Class2MAReceiptsConnector @Inject() (
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] = {
 
-    val path = s"/class-2/${identifier.value}/maternity-allowance/receipts"
+    val path = s"/ni/class-2/${identifier.value}/maternity-allowance/receipts"
     fetchData(benefitType, path)
   }
 

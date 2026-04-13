@@ -92,7 +92,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
     ".fetchBenefitCalculationDetails" - {
 
-      val testPath                                             = "/long-term-benefits/AB123456C/calculation"
+      val testPath                                             = "/ni/long-term-benefits/AB123456C/calculation"
       val identifier: Identifier                               = Identifier("AB123456C")
       val longTermBenefitType: Option[LongTermBenefitType]     = None
       val pensionProcessingArea: Option[PensionProcessingArea] = None

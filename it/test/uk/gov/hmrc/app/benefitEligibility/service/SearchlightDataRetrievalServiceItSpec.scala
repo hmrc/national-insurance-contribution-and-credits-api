@@ -143,7 +143,7 @@ class SearchlightDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
+      val npsCreditsAndContributionsPath = "/ni/national-insurance/contributions-and-credits"
 
       val bspSearchlightEligibilityCheckDataRequest = SearchlightEligibilityCheckDataRequest(
         BenefitType.BSP,
