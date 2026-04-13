@@ -880,7 +880,8 @@ class BenefitEligibilityDataControllerItSpec
               .withHeaders(
                 "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
-                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+                "Accept" -> "application/json"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -922,7 +923,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -977,7 +979,8 @@ class BenefitEligibilityDataControllerItSpec
               .withHeaders(
                 "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
-                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+                "Accept" -> "application/json"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1091,7 +1094,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1135,7 +1139,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1191,7 +1196,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1308,7 +1314,8 @@ class BenefitEligibilityDataControllerItSpec
               .withHeaders(
                 "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
-                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+                "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+                "Accept" -> "application/json"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1361,7 +1368,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1460,7 +1468,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1577,7 +1586,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1659,7 +1669,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1762,7 +1773,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1837,7 +1849,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1899,7 +1912,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1997,7 +2011,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2063,7 +2078,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2142,7 +2158,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2301,7 +2318,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2520,7 +2538,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2657,7 +2676,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2818,7 +2838,8 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "Accept" -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2908,7 +2929,11 @@ class BenefitEligibilityDataControllerItSpec
         )
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
           .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
-          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token")
+          .withHeaders(
+            "Content-Type" -> "application/json",
+            "Authorization" -> "Bearer token",
+            "Accept" -> "application/json"
+          )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
@@ -2916,6 +2941,41 @@ class BenefitEligibilityDataControllerItSpec
 
         contentAsJson(result) shouldBe Json.toJson(
           ErrorResponse(BadRequest, ErrorReason("Missing Header CorrelationId"))
+        )
+      }
+      "should return a 400 if a request is sent without a Accept Header" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2025),
+            EndTaxYear(2026)
+          )
+        )
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type" -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("Missing Header Accept"))
         )
       }
       "should return a 400 if a request is sent with an invalid CorrelationID" in {
@@ -2942,7 +3002,8 @@ class BenefitEligibilityDataControllerItSpec
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
-            "CorrelationID" -> "notValidCorrelationId"
+            "CorrelationID" -> "notValidCorrelationId",
+            "Accept" -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3051,7 +3112,8 @@ class BenefitEligibilityDataControllerItSpec
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+            "Accept" -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3080,7 +3142,8 @@ class BenefitEligibilityDataControllerItSpec
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+            "Accept" -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3110,7 +3173,8 @@ class BenefitEligibilityDataControllerItSpec
           .withHeaders(
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
-            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
+            "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+            "Accept" -> "application/json"
           )
           .withTextBody("invalidJson")
 
