@@ -31,7 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.response.{
 }
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
-import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
+import uk.gov.hmrc.app.benefitEligibility.util.{RequestAwareLogger, SuccessfulResult}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -203,23 +203,16 @@ object BenefitEligibilityRequestHandler {
       case Right(response) => response
     }
 
-  def getAcceptHeader(request: Request[AnyContent])(
+  private def getAcceptHeader(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier,
       executionContext: ExecutionContext
-  ): Either[ErrorReason, String] =
+  ): Either[ErrorReason, SuccessfulResult.type] =
     request.headers.get("Accept") match {
       case None =>
         logger.error("Missing header Accept")
-        Left(
-          ErrorReason("Missing Header Accept")
-        )
+        Left(ErrorReason("Missing Header Accept"))
       case Some(acceptHeader) =>
-        RequestValidations.validateAcceptHeader(Some(acceptHeader)) match {
-          case Right(header) => Right(header)
-          case Left(error) =>
-            logger.error("Accept header validation failed")
-            Left(error)
-        }
+        RequestValidations.validateAcceptHeader(Some(acceptHeader))
     }
 
   private[controller] def getCorrelationId(request: Request[AnyContent])(
