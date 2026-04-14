@@ -21,12 +21,14 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{NpsErrorReason, TaxYear}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums._
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
+import uk.gov.hmrc.app.benefitEligibility.model.common.{NpsErrorReason, ReceiptDate, TaxYear}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
+
+import java.time.LocalDate
 
 class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
 
@@ -79,10 +81,11 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
               numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
               contributionCreditType = Some(NiContributionCreditType.C1),
               class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-              class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+              class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
               class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
               creditSource = Some(CreditSource.NotKnown),
-              latePaymentPeriod = Some(LatePaymentPeriod.L)
+              latePaymentPeriod = Some(LatePaymentPeriod.L),
+              receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
             )
           )
         )
@@ -114,10 +117,11 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
               numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
               contributionCreditType = Some(NiContributionCreditType.C1),
               class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-              class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+              class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
               class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
               creditSource = Some(CreditSource.NotKnown),
-              latePaymentPeriod = Some(LatePaymentPeriod.L)
+              latePaymentPeriod = Some(LatePaymentPeriod.L),
+              receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
             )
           )
         )
@@ -152,10 +156,11 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |      "numberOfContributionsAndCredits": 53,
           |      "contributionCreditType": "C1",
           |      "class2Or3EarningsFactor": 99999999999999.98,
-          |      "class2NIContributionAmount": 99999999999999.98,
+          |      "class2Or3NIContributionAmount": 99999999999999.98,
           |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
           |      "creditSource": "NOT KNOWN",
-          |      "latePaymentPeriod": "L"
+          |      "latePaymentPeriod": "L",
+          |      "receiptDate": "2025-10-10"
           |    }
           |  ]
           |}""".stripMargin
@@ -184,7 +189,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
           |         "numberOfContributionsAndCredits":53,
           |         "contributionCreditType":"C1",
           |         "class2Or3EarningsFactor":99999999999999.98,
-          |         "class2NIContributionAmount":99999999999999.98,
+          |         "class2Or3NIContributionAmount":99999999999999.98,
           |         "class2Or3CreditStatus":"NOT KNOWN/NOT APPLICABLE",
           |         "creditSource":"NOT KNOWN",
           |         "latePaymentPeriod":"L"

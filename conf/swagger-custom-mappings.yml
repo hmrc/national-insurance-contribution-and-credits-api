@@ -248,7 +248,7 @@
       pattern: ^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$
       example: AB123456A
 
-- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.Class2NIContributionAmount
+- type: uk\.gov\.hmrc\.app\.benefitEligibility\.model\.nps\.niContributionsAndCredits\.NiContributionsAndCreditsSuccess\.Class2Or3NIContributionAmount
   specAsParameter:
     - type: number
       description: Positive or zero monetary value.
