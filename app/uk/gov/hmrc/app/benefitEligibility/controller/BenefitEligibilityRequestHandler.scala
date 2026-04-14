@@ -51,7 +51,7 @@ object BenefitEligibilityRequestHandler {
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (
       getAcceptHeader(request) match {
-        case Right(acceptHeader) =>
+        case Right(_) =>
           getCorrelationId(request) match {
             case Right(correlationId) =>
               request.body.asJson match {
