@@ -73,7 +73,7 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
       )
 
     npsClient
-      .get(path)
+      .get(benefitType, path)
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

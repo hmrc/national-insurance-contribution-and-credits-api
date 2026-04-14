@@ -226,8 +226,10 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
@@ -294,8 +296,10 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
@@ -355,8 +359,10 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
@@ -409,8 +415,10 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
@@ -460,8 +468,10 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(error2)
           )

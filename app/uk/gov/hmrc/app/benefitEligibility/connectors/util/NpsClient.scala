@@ -23,7 +23,7 @@ import play.api.http.HeaderNames.{AUTHORIZATION, CONTENT_TYPE}
 import play.api.http.MimeTypes.JSON
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsClientError
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CallSystem, NpsClientError}
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{
   CORRELATION_ID,
@@ -38,17 +38,39 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) {
 
+  private def getOriginatorId(benefitType: BenefitType, callSystem: Option[CallSystem] = None): String =
+    callSystem match {
+      case Some(_) =>
+        benefitType match {
+          case BenefitType.MA   => config.hipOriginatorIdMa.searchlightId
+          case BenefitType.ESA  => config.hipOriginatorIdEsa.searchlightId
+          case BenefitType.JSA  => config.hipOriginatorIdJsa.searchlightId
+          case BenefitType.GYSP => config.hipOriginatorIdGysp.searchlightId
+          case BenefitType.BSP  => config.hipOriginatorIdBsp.searchlightId
+        }
+      case None =>
+        benefitType match {
+          case BenefitType.MA   => config.hipOriginatorIdMa.standardId
+          case BenefitType.ESA  => config.hipOriginatorIdEsa.standardId
+          case BenefitType.JSA  => config.hipOriginatorIdJsa.standardId
+          case BenefitType.GYSP => config.hipOriginatorIdGysp.standardId
+          case BenefitType.BSP  => config.hipOriginatorIdBsp.standardId
+        }
+    }
+
   private val commonHeaders: List[(String, String)] = List(
-    AUTHORIZATION      -> s"Basic ${config.base64HipAuthToken}",
-    CONTENT_TYPE       -> JSON,
-    ORIGINATING_SYSTEM -> config.hipOriginatorId
+    AUTHORIZATION -> s"Basic ${config.base64HipAuthToken}",
+    CONTENT_TYPE  -> JSON
   )
 
-  def post[A: Tag](path: String, body: A)(
+  def post[A: Tag](benefitType: BenefitType, path: String, body: A, callSystem: Option[CallSystem])(
       implicit hc: HeaderCarrier,
       writes: Writes[A]
   ): EitherT[Future, NpsClientError, HttpResponse] = {
-    val requestHeaders = hc.headers(Seq("CorrelationId")) ++ commonHeaders
+    val requestHeaders =
+      (ORIGINATING_SYSTEM, getOriginatorId(benefitType, callSystem)) +: (hc.headers(
+        Seq("CorrelationId")
+      ) ++ commonHeaders)
     EitherT(
       httpClientV2
         .post(url"$path")
@@ -59,10 +81,11 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
     ).leftMap(NpsClientError(_))
   }
 
-  def get(path: String)(
+  def get(benefitType: BenefitType, path: String)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, NpsClientError, HttpResponse] = {
-    val requestHeaders = hc.headers(Seq("CorrelationId")) ++ commonHeaders
+    val requestHeaders =
+      (ORIGINATING_SYSTEM, getOriginatorId(benefitType)) +: (hc.headers(Seq("CorrelationId")) ++ commonHeaders)
     httpClientV2
       .get(url"$path")
       .setHeader(requestHeaders *)

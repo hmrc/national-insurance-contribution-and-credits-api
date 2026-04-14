@@ -44,6 +44,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
   BenefitType,
+  CallSystem,
   CorrelationId,
   DateOfBirth,
   EndTaxYear,
@@ -158,8 +159,10 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
           .returning(
             EitherT.rightT(
               SuccessResult(
@@ -189,8 +192,10 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
           .returning(
             EitherT.rightT(result)
           )
@@ -206,8 +211,10 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
       "should propagate the error returned from the connector (ValidationError)" in {
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
           .returning(
             EitherT.leftT(JsonValidationError(List.empty))
           )
@@ -224,8 +231,10 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
           .returning(
             EitherT.leftT(InvalidJsonError(error))
           )
@@ -241,8 +250,10 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
       "should propagate the error returned from the connector (NpsClientError)" in {
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
           .returning(
             EitherT.leftT(NpsClientError(error))
           )

@@ -43,6 +43,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   ApiName,
   BenefitType,
+  CallSystem,
   CorrelationId,
   DataRetrievalServiceError,
   DateOfBirth,
@@ -142,8 +143,10 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(
               SuccessResult(
@@ -171,8 +174,10 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(result)
           )
@@ -188,8 +193,10 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
 
       "should propagate the error returned from the connector (ValidationError)" in {
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(JsonValidationError(List.empty))
           )
@@ -204,8 +211,10 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
 
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(InvalidJsonError(error))
           )
@@ -219,8 +228,10 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
       "should propagate the error returned from the connector (NpsClientError)" in {
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(NpsClientError(error))
           )

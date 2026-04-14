@@ -162,7 +162,10 @@ class PaginationService @Inject() (
   ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for BSP")
     (
-      marriageDetailsConnectorFetchData(bspPageTask.marriageDetailsPaging),
+      marriageDetailsConnectorFetchData(
+        BenefitType.from(bspPageTask.paginationType),
+        bspPageTask.marriageDetailsPaging
+      ),
       fetchContributionsAndCreditsData(
         BenefitType.from(bspPageTask.paginationType),
         bspPageTask.nationalInsuranceNumber,
@@ -270,7 +273,10 @@ class PaginationService @Inject() (
         )
 
     (
-      marriageDetailsConnectorFetchData(gyspPageTask.marriageDetailsPaging),
+      marriageDetailsConnectorFetchData(
+        BenefitType.from(gyspPageTask.paginationType),
+        gyspPageTask.marriageDetailsPaging
+      ),
       fetchContributionsAndCreditsData(
         BenefitType.from(gyspPageTask.paginationType),
         gyspPageTask.nationalInsuranceNumber,
@@ -301,12 +307,17 @@ class PaginationService @Inject() (
       }
   }
 
-  private def marriageDetailsConnectorFetchData(marriageDetailsPaging: Option[PaginationSource])(
+  private def marriageDetailsConnectorFetchData(
+      benefitType: BenefitType,
+      marriageDetailsPaging: Option[PaginationSource]
+  )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
     marriageDetailsPaging
-      .map(paginationSource => marriageDetailsConnector.fetchMarriageDetailsData(paginationSource.callBackURL))
+      .map(paginationSource =>
+        marriageDetailsConnector.fetchMarriageDetailsData(benefitType, paginationSource.callBackURL)
+      )
       .sequence
   }
 

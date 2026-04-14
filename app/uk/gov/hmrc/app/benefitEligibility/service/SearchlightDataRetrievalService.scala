@@ -73,7 +73,8 @@ class SearchlightDataRetrievalService @Inject() (
               eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
               taxWindows.head.startTaxYear,
               taxWindows.head.endTaxYear
-            )
+            ),
+            Some(eligibilityCheckDataRequest.system)
           )
           .flatMap { contributionCreditResult =>
             val result = EligibilityCheckDataResultSearchLight(

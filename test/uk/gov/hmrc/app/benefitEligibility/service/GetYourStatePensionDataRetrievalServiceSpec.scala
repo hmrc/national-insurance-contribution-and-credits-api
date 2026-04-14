@@ -676,8 +676,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
@@ -694,9 +696,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -811,8 +814,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
@@ -829,9 +834,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -922,17 +928,20 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -1017,8 +1026,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(error1)
           )
@@ -1037,9 +1048,10 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -1096,17 +1108,20 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         val error5 = NpsClientError(new RuntimeException("error_5"))
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(error1)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.GYSP, identifier, *)
           .returning(
             EitherT.leftT(error2)
           )

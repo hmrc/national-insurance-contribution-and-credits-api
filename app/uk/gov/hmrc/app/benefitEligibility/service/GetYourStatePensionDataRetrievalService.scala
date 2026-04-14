@@ -198,6 +198,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
   private[service] def fetchMarriageDetailsData(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
     marriageDetailsConnector.fetchMarriageDetails(
+      requestKey.benefitType,
       requestKey.nationalInsuranceNumber
     )
 
