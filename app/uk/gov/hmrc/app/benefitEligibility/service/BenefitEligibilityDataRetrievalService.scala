@@ -29,6 +29,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.{
   MAEligibilityCheckDataRequest,
   SearchlightEligibilityCheckDataRequest
 }
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.CORRELATION_ID
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
