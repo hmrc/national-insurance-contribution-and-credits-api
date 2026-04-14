@@ -1099,7 +1099,7 @@ class BenefitEligibilityDataControllerItSpec
             .withHeaders(
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
-              "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92",
+              "CorrelationID" -> correlationId.value.toString,
               "Accept" -> "application/json"
             )
 
