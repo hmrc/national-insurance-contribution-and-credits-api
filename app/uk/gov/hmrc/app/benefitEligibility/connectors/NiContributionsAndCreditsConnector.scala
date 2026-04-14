@@ -62,10 +62,11 @@ class NiContributionsAndCreditsConnector @Inject() (
 
   def fetchContributionsAndCredits(
       benefitType: BenefitType,
-      request: NiContributionsAndCreditsRequest
+      request: NiContributionsAndCreditsRequest,
+      callSystem: Option[CallSystem] = None
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, ContributionCreditResult] =
     npsClient
-      .post(path, request)
+      .post(benefitType, path, request, callSystem)
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

@@ -72,7 +72,7 @@ class BenefitSchemeDetailsConnector @Inject() (
       s"${appConfig.baseUrl(apiName)}/ni/benefit-scheme/${identifier.value}/benefit-scheme-details/${schemeContractedOutNumberDetails.value}"
 
     npsClient
-      .get(path)
+      .get(benefitType, path)
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

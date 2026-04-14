@@ -33,6 +33,7 @@ import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.*
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
@@ -164,7 +165,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -212,7 +213,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -266,7 +267,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -312,7 +313,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -353,7 +354,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -398,7 +399,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -456,7 +457,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -511,7 +512,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -544,7 +545,7 @@ class MarriageDetailsConnectorItSpec
 
             val result =
               connector
-                .fetchMarriageDetails(identifier)
+                .fetchMarriageDetails(BSP, identifier)
                 .value
                 .futureValue
 
@@ -573,7 +574,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -604,7 +605,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 
@@ -626,7 +627,7 @@ class MarriageDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchMarriageDetails(identifier)
+              .fetchMarriageDetails(BSP, identifier)
               .value
               .futureValue
 

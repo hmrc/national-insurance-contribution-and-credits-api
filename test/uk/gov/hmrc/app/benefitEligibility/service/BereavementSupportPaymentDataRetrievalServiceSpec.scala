@@ -191,17 +191,20 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -238,17 +241,20 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -274,17 +280,20 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.rightT(marriageDetailsResult)
           )
@@ -307,17 +316,20 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.leftT(error)
           )
@@ -336,17 +348,20 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         val error2 = NpsClientError(new RuntimeException("error_2"))
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.leftT(error1)
           )
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetails(
+            _: BenefitType,
             _: Identifier
           )(_: HeaderCarrier))
-          .expects(identifier, *)
+          .expects(BenefitType.BSP, identifier, *)
           .returning(
             EitherT.leftT(error2)
           )

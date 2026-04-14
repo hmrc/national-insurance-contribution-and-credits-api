@@ -73,7 +73,7 @@ class SchemeMembershipDetailsConnector @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, SchemeMembershipDetailsResult] =
 
     npsClient
-      .get(s"${appConfig.baseUrl(apiName)}$path")
+      .get(benefitType, s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

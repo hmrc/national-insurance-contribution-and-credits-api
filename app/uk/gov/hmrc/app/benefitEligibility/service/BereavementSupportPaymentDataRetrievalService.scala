@@ -80,6 +80,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
             )
           ),
           marriageDetailsConnector.fetchMarriageDetails(
+            eligibilityCheckDataRequest.benefitType,
             eligibilityCheckDataRequest.nationalInsuranceNumber
           )
         ).parTupled

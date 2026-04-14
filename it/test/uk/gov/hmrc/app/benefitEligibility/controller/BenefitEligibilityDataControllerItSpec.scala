@@ -863,6 +863,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdEsa"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -885,7 +886,7 @@ class BenefitEligibilityDataControllerItSpec
                 "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
                 "CorrelationID" -> correlationId.value.toString,
-                "Accept" -> "application/json"
+                "Accept"        -> "application/json"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -928,7 +929,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -984,7 +985,7 @@ class BenefitEligibilityDataControllerItSpec
                 "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
                 "CorrelationID" -> correlationId.value.toString,
-                "Accept" -> "application/json"
+                "Accept"        -> "application/json"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1079,6 +1080,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdJsa"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1100,7 +1102,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1146,7 +1148,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1203,7 +1205,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1299,6 +1301,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdBspSearchlight"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1322,7 +1325,7 @@ class BenefitEligibilityDataControllerItSpec
                 "Content-Type"  -> "application/json",
                 "Authorization" -> "Bearer token",
                 "CorrelationID" -> correlationId.value.toString,
-                "Accept" -> "application/json"
+                "Accept"        -> "application/json"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1373,7 +1376,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1425,6 +1428,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdMa"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1437,6 +1441,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(npsClass2MaReceiptsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdMa"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1449,6 +1454,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdMa"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1472,7 +1478,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1590,7 +1596,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1676,7 +1682,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1783,7 +1789,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1859,7 +1865,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1891,6 +1897,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdBsp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1902,6 +1909,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(npsIndividualMarriageDetailsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdBsp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1925,7 +1933,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2026,7 +2034,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2095,7 +2103,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2177,7 +2185,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2249,6 +2257,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2261,6 +2270,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2272,6 +2282,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             WireMock
               .get(urlEqualTo(s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
               .willReturn(
                 aResponse()
@@ -2285,6 +2296,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(npsLongTermBenefitsCalculation))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2296,6 +2308,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(npsLongTermBenefitsNotes))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2307,6 +2320,7 @@ class BenefitEligibilityDataControllerItSpec
             WireMock
               .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2320,6 +2334,7 @@ class BenefitEligibilityDataControllerItSpec
                 urlEqualTo(s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/contributions")
               )
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -2344,7 +2359,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2571,7 +2586,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2716,7 +2731,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2885,7 +2900,7 @@ class BenefitEligibilityDataControllerItSpec
               "Content-Type"  -> "application/json",
               "Authorization" -> "Bearer token",
               "CorrelationID" -> correlationId.value.toString,
-              "Accept" -> "application/json"
+              "Accept"        -> "application/json"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -2976,9 +2991,9 @@ class BenefitEligibilityDataControllerItSpec
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
           .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
           .withHeaders(
-            "Content-Type" -> "application/json",
+            "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
-            "Accept" -> "application/json"
+            "Accept"        -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3011,7 +3026,7 @@ class BenefitEligibilityDataControllerItSpec
         val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
           .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
           .withHeaders(
-            "Content-Type" -> "application/json",
+            "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "eba473d1-c34b-498d-925f-af8d2514fa92"
           )
@@ -3049,7 +3064,7 @@ class BenefitEligibilityDataControllerItSpec
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> "notValidCorrelationId",
-            "Accept" -> "application/json"
+            "Accept"        -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3160,7 +3175,7 @@ class BenefitEligibilityDataControllerItSpec
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> correlationId.value.toString,
-            "Accept" -> "application/json"
+            "Accept"        -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3190,7 +3205,7 @@ class BenefitEligibilityDataControllerItSpec
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> correlationId.value.toString,
-            "Accept" -> "application/json"
+            "Accept"        -> "application/json"
           )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -3221,7 +3236,7 @@ class BenefitEligibilityDataControllerItSpec
             "Content-Type"  -> "application/json",
             "Authorization" -> "Bearer token",
             "CorrelationID" -> correlationId.value.toString,
-            "Accept" -> "application/json"
+            "Accept"        -> "application/json"
           )
           .withTextBody("invalidJson")
 
@@ -3735,6 +3750,7 @@ class BenefitEligibilityDataControllerItSpec
         server.stubFor(
           post(urlEqualTo(npsCreditsAndContributionsPath))
             .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+            .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
             .willReturn(
               aResponse()
                 .withStatus(OK)
@@ -3747,6 +3763,7 @@ class BenefitEligibilityDataControllerItSpec
           WireMock
             .get(urlEqualTo(npsIndividualMarriageDetailsPath))
             .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+            .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
             .willReturn(
               aResponse()
                 .withStatus(OK)
@@ -3758,6 +3775,7 @@ class BenefitEligibilityDataControllerItSpec
           WireMock
             .get(urlEqualTo(schemeMembershipDetailsPath))
             .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+            .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
             .willReturn(
               aResponse()
                 .withStatus(OK)
@@ -3770,6 +3788,7 @@ class BenefitEligibilityDataControllerItSpec
           WireMock
             .get(urlEqualTo(benefitSchemeDetailsPath))
             .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+            .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
             .willReturn(
               aResponse()
                 .withStatus(OK)

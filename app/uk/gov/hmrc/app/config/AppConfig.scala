@@ -26,6 +26,8 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (config: ServicesConfig) {
 
+  final case class OriginatorIdConfig(standardId: String, searchlightId: String)
+
   def baseUrl(apiName: ApiName): String = {
     val npsEndpointName: String = apiName match {
       case ApiName.Class2MAReceipts                                                 => "class2MaReceipts"
@@ -44,7 +46,36 @@ class AppConfig @Inject() (config: ServicesConfig) {
   val benefitEligibilityInfoEndpointEnabled: Boolean = config.getBoolean("benefitEligibilityInfoEndpointEnabled")
   val hipBaseUrl: String                             = config.baseUrl("hip")
 
-  val hipOriginatorId: String         = config.getString(s"$hipServicePrefix.originatorId")
+  val hipOriginatorId: String = config.getString(s"$hipServicePrefix.originatorId")
+
+  val npsOriginatorIdPrefix = s"$hipServicePrefix.nps.originatorId"
+
+  val hipOriginatorIdBsp =
+    OriginatorIdConfig(
+      standardId = config.getString(s"$npsOriginatorIdPrefix.bsp.standard"),
+      searchlightId = config.getString(s"$npsOriginatorIdPrefix.bsp.searchlight")
+    )
+
+  val hipOriginatorIdGysp = OriginatorIdConfig(
+    standardId = config.getString(s"$npsOriginatorIdPrefix.gysp.standard"),
+    searchlightId = config.getString(s"$npsOriginatorIdPrefix.gysp.searchlight")
+  )
+
+  val hipOriginatorIdMa = OriginatorIdConfig(
+    standardId = config.getString(s"$npsOriginatorIdPrefix.ma.standard"),
+    searchlightId = config.getString(s"$npsOriginatorIdPrefix.ma.searchlight")
+  )
+
+  val hipOriginatorIdEsa = OriginatorIdConfig(
+    standardId = config.getString(s"$npsOriginatorIdPrefix.esa.standard"),
+    searchlightId = config.getString(s"$npsOriginatorIdPrefix.esa.searchlight")
+  )
+
+  val hipOriginatorIdJsa = OriginatorIdConfig(
+    standardId = config.getString(s"$npsOriginatorIdPrefix.jsa.standard"),
+    searchlightId = config.getString(s"$npsOriginatorIdPrefix.jsa.searchlight")
+  )
+
   private val hipClientId: String     = config.getString(s"$hipServicePrefix.clientId")
   private val hipClientSecret: String = config.getString(s"$hipServicePrefix.clientSecret")
 

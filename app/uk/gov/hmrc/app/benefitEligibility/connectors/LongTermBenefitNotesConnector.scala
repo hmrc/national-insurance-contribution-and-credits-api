@@ -70,7 +70,7 @@ class LongTermBenefitNotesConnector @Inject() (
       s"${appConfig.baseUrl(apiName)}/ni/long-term-benefits/${identifier.value}/calculation/${longTermBenefitType.entryName}/notes/${seqNo.value}"
 
     npsClient
-      .get(path)
+      .get(benefitType, path)
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

@@ -98,7 +98,7 @@ class LiabilitySummaryDetailsConnector @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, LiabilityResult] =
 
     npsClient
-      .get(s"${appConfig.baseUrl(apiName)}$path")
+      .get(benefitType, s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName for $benefitType")
 

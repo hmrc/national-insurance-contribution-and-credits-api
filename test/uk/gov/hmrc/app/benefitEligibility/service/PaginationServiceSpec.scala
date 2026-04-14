@@ -330,15 +330,17 @@ class PaginationServiceSpec
           .returning(EitherT.rightT(uuid))
 
         (mockMarriageDetailsConnector
-          .fetchMarriageDetailsData(_: String)(_: HeaderCarrier))
-          .expects(marriageDetailsCallBackUrl, *)
+          .fetchMarriageDetailsData(_: BenefitType, _: String)(_: HeaderCarrier))
+          .expects(BenefitType.from(pageTask.paginationType), marriageDetailsCallBackUrl, *)
           .returning(
             EitherT.rightT(NpsApiResult.SuccessResult(ApiName.MarriageDetails, marriageDetailsSuccessResponse))
           )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
@@ -414,8 +416,10 @@ class PaginationServiceSpec
           .returning(EitherT.rightT(uuid))
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
@@ -613,15 +617,17 @@ class PaginationServiceSpec
           .returning(EitherT.rightT(uuid))
 
         (mockMarriageDetailsConnector
-          .fetchMarriageDetailsData(_: String)(_: HeaderCarrier))
-          .expects(marriageDetailsCallBackUrl, *)
+          .fetchMarriageDetailsData(_: BenefitType, _: String)(_: HeaderCarrier))
+          .expects(BenefitType.from(pageTask.paginationType), marriageDetailsCallBackUrl, *)
           .returning(
             EitherT.rightT(NpsApiResult.SuccessResult(ApiName.MarriageDetails, marriageDetailsSuccessResponse))
           )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, *)
+          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
+            _: HeaderCarrier
+          ))
+          .expects(BenefitType.from(pageTask.paginationType), niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
