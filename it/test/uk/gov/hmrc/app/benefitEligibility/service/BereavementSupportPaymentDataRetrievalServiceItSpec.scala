@@ -132,7 +132,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val npsCreditsAndContributionsPath   = "/national-insurance/contributions-and-credits"
+      val npsCreditsAndContributionsPath   = "/ni/national-insurance/contributions-and-credits"
       val npsIndividualMarriageDetailsPath = "/paye/individual/GD379251T/marriage-cp"
 
       val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(

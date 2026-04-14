@@ -134,8 +134,8 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
-      val npsClass2MaReceiptsPath        = "/class-2/GD379251T/maternity-allowance/receipts"
+      val npsCreditsAndContributionsPath = "/ni/national-insurance/contributions-and-credits"
+      val npsClass2MaReceiptsPath        = "/ni/class-2/GD379251T/maternity-allowance/receipts"
       val npsLiabilitySummaryDetailsPath = "/ni/person/GD379251T/liability-summary/ABROAD"
 
       val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(

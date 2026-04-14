@@ -25,7 +25,10 @@ import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsClientError
 import uk.gov.hmrc.app.config.AppConfig
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.ORIGINATING_SYSTEM
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{
+  CORRELATION_ID,
+  ORIGINATING_SYSTEM
+}
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
@@ -44,26 +47,28 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
   def post[A: Tag](path: String, body: A)(
       implicit hc: HeaderCarrier,
       writes: Writes[A]
-  ): EitherT[Future, NpsClientError, HttpResponse] =
-
+  ): EitherT[Future, NpsClientError, HttpResponse] = {
+    val requestHeaders = hc.headers(Seq("CorrelationId")) ++ commonHeaders
     EitherT(
       httpClientV2
         .post(url"$path")
-        .setHeader(commonHeaders *)
+        .setHeader(requestHeaders *)
         .withBody(Json.toJson(body))
         .execute[HttpResponse]
         .attempt
     ).leftMap(NpsClientError(_))
+  }
 
   def get(path: String)(
       implicit hc: HeaderCarrier
-  ): EitherT[Future, NpsClientError, HttpResponse] =
-
+  ): EitherT[Future, NpsClientError, HttpResponse] = {
+    val requestHeaders = hc.headers(Seq("CorrelationId")) ++ commonHeaders
     httpClientV2
       .get(url"$path")
-      .setHeader(commonHeaders *)
+      .setHeader(requestHeaders *)
       .execute[HttpResponse]
       .attemptT
       .leftMap(NpsClientError(_))
+  }
 
 }

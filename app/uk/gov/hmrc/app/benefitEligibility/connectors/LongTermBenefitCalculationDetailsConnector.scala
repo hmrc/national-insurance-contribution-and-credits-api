@@ -68,7 +68,7 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
 
     val path =
       RequestBuilder.buildPath(
-        s"${appConfig.baseUrl(apiName)}/long-term-benefits/${identifier.value}/calculation",
+        s"${appConfig.baseUrl(apiName)}/ni/long-term-benefits/${identifier.value}/calculation",
         options
       )
 

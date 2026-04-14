@@ -79,7 +79,7 @@ class Class2MAReceiptsConnectorItSpec
 
     ".fetchClass2MAReceipts" - {
 
-      val testPath               = "/class-2/AB123456C/maternity-allowance/receipts"
+      val testPath               = "/ni/class-2/AB123456C/maternity-allowance/receipts"
       val identifier: Identifier = Identifier("AB123456C")
 
       "when the Class2MAReceipts endpoint returns OK (200) with valid response" - {

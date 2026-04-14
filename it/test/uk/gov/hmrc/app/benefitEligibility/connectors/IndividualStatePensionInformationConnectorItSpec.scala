@@ -83,7 +83,7 @@ class IndividualStatePensionInformationConnectorItSpec
 
     ".fetchIndividualStatePensionInformation" - {
 
-      val testPath               = "/ni/national-insurance/AB123456C/benefits/long-term/contributions"
+      val testPath               = "/ni/long-term-benefits/AB123456C/contributions"
       val identifier: Identifier = Identifier("AB123456C")
 
       "when the IndividualStatePension endpoint returns OK (200) with valid response" - {

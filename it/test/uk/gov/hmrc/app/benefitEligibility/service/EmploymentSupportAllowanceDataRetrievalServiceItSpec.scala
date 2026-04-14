@@ -105,7 +105,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
 
     ".fetchEligibilityData" - {
 
-      val npsCreditsAndContributionsPath = "/national-insurance/contributions-and-credits"
+      val npsCreditsAndContributionsPath = "/ni/national-insurance/contributions-and-credits"
 
       val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
         Identifier("GD379251T"),
