@@ -204,8 +204,7 @@ object BenefitEligibilityRequestHandler {
     }
 
   private def getAcceptHeader(request: Request[AnyContent])(
-      implicit headerCarrier: HeaderCarrier,
-      executionContext: ExecutionContext
+      implicit headerCarrier: HeaderCarrier
   ): Either[ErrorReason, SuccessfulResult.type] =
     request.headers.get("Accept") match {
       case None =>
@@ -216,8 +215,7 @@ object BenefitEligibilityRequestHandler {
     }
 
   private[controller] def getCorrelationId(request: Request[AnyContent])(
-      implicit headerCarrier: HeaderCarrier,
-      executionContext: ExecutionContext
+      implicit headerCarrier: HeaderCarrier
   ): Either[ErrorReason, CorrelationId] =
     request.headers.get("CorrelationId") match {
       case None =>
