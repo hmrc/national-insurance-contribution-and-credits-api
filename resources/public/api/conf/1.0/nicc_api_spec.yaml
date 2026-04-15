@@ -210,7 +210,7 @@ paths:
                         numberOfContributionsAndCredits: 52
                         contributionCreditType: C2
                         class2Or3EarningsFactor: 1.5
-                        class2NIContributionAmount: 150
+                        class2Or3NIContributionAmount: 150
                         class2Or3CreditStatus: VALID
                         creditSource: DIRECT DEBIT
                         latePaymentPeriod: ZZ
@@ -218,7 +218,7 @@ paths:
                         numberOfContributionsAndCredits: 30
                         contributionCreditType: C2
                         class2Or3EarningsFactor: 2.1
-                        class2NIContributionAmount: 120
+                        class2Or3NIContributionAmount: 120
                         class2Or3CreditStatus: VALID
                         creditSource: QUARTERLY BILLING
                         latePaymentPeriod: L
@@ -302,7 +302,7 @@ paths:
                         numberOfContributionsAndCredits: 53
                         contributionCreditType: C1
                         class2Or3EarningsFactor: 9.999999999999998E13
-                        class2NIContributionAmount: 9.999999999999998E13
+                        class2Or3NIContributionAmount: 9.999999999999998E13
                         class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
                         creditSource: NOT KNOWN
                         latePaymentPeriod: L
@@ -361,7 +361,7 @@ paths:
                         numberOfContributionsAndCredits: 20
                         contributionCreditType: 2A
                         class2Or3EarningsFactor: 1.3
-                        class2NIContributionAmount: 52
+                        class2Or3NIContributionAmount: 52
                         class2Or3CreditStatus: VALID
                         creditSource: EMPLOYMENT AND SUPPORT
                         latePaymentPeriod: ZZ
@@ -369,7 +369,7 @@ paths:
                         numberOfContributionsAndCredits: 15
                         contributionCreditType: 2A
                         class2Or3EarningsFactor: 0.8
-                        class2NIContributionAmount: 30
+                        class2Or3NIContributionAmount: 30
                         class2Or3CreditStatus: VALID
                         creditSource: EMPLOYMENT AND SUPPORT
                         latePaymentPeriod: L
@@ -427,7 +427,7 @@ paths:
                         numberOfContributionsAndCredits: 30
                         contributionCreditType: 2B
                         class2Or3EarningsFactor: 1.1
-                        class2NIContributionAmount: 44
+                        class2Or3NIContributionAmount: 44
                         class2Or3CreditStatus: VALID
                         creditSource: JSA TAPE INPUT
                         latePaymentPeriod: ZZ
@@ -435,7 +435,7 @@ paths:
                         numberOfContributionsAndCredits: 25
                         contributionCreditType: 2B
                         class2Or3EarningsFactor: 0.9
-                        class2NIContributionAmount: 36
+                        class2Or3NIContributionAmount: 36
                         class2Or3CreditStatus: VALID
                         creditSource: JSA PAPER INPUT
                         latePaymentPeriod: L
@@ -482,7 +482,7 @@ paths:
                         numberOfContributionsAndCredits: 53
                         contributionCreditType: C1
                         class2Or3EarningsFactor: 9.999999999999998E13
-                        class2NIContributionAmount: 9.999999999999998E13
+                        class2Or3NIContributionAmount: 9.999999999999998E13
                         class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
                         creditSource: NOT KNOWN
                         latePaymentPeriod: L
@@ -717,7 +717,7 @@ paths:
                         numberOfContributionsAndCredits: 52
                         contributionCreditType: C2
                         class2Or3EarningsFactor: 1.5
-                        class2NIContributionAmount: 150
+                        class2Or3NIContributionAmount: 150
                         class2Or3CreditStatus: VALID
                         creditSource: DIRECT DEBIT
                         latePaymentPeriod: ZZ
@@ -725,7 +725,7 @@ paths:
                         numberOfContributionsAndCredits: 30
                         contributionCreditType: C2
                         class2Or3EarningsFactor: 2.1
-                        class2NIContributionAmount: 120
+                        class2Or3NIContributionAmount: 120
                         class2Or3CreditStatus: VALID
                         creditSource: QUARTERLY BILLING
                         latePaymentPeriod: L
@@ -772,7 +772,7 @@ paths:
                         numberOfContributionsAndCredits: 53
                         contributionCreditType: C1
                         class2Or3EarningsFactor: 9.999999999999998E13
-                        class2NIContributionAmount: 9.999999999999998E13
+                        class2Or3NIContributionAmount: 9.999999999999998E13
                         class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
                         creditSource: NOT KNOWN
                         latePaymentPeriod: L
@@ -1093,7 +1093,7 @@ components:
           multipleOf: 0.01
           maximum: 9.999999999999998E13
           minimum: 0
-        class2NIContributionAmount:
+        class2Or3NIContributionAmount:
           nullable: true
           type: number
           description: Positive or zero monetary value.

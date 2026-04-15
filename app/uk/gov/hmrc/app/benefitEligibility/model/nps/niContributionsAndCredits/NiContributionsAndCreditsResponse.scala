@@ -17,17 +17,10 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits
 
 import play.api.libs.json.*
-import NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.TaxYear
+import uk.gov.hmrc.app.benefitEligibility.model.common.{ReceiptDate, TaxYear}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
 
 import java.time.LocalDate
 import scala.collection.immutable
@@ -114,12 +107,12 @@ object NiContributionsAndCreditsSuccess {
 
   }
 
-  case class Class2NIContributionAmount(value: BigDecimal) extends AnyVal
+  case class Class2Or3NIContributionAmount(value: BigDecimal) extends AnyVal
 
-  object Class2NIContributionAmount {
+  object Class2Or3NIContributionAmount {
 
-    implicit val class2NIContributionAmountFormat: Format[Class2NIContributionAmount] =
-      Json.valueFormat[Class2NIContributionAmount]
+    implicit val class2Or3NIContributionAmountFormat: Format[Class2Or3NIContributionAmount] =
+      Json.valueFormat[Class2Or3NIContributionAmount]
 
   }
 
@@ -164,10 +157,11 @@ object NiContributionsAndCreditsSuccess {
       numberOfContributionsAndCredits: Option[NumberOfCreditsAndContributions],
       contributionCreditType: Option[NiContributionCreditType],
       class2Or3EarningsFactor: Option[Class2Or3EarningsFactor],
-      class2NIContributionAmount: Option[Class2NIContributionAmount],
+      class2Or3NIContributionAmount: Option[Class2Or3NIContributionAmount],
       class2Or3CreditStatus: Option[Class2Or3CreditStatus],
       creditSource: Option[CreditSource],
-      latePaymentPeriod: Option[LatePaymentPeriod]
+      latePaymentPeriod: Option[LatePaymentPeriod],
+      receiptDate: Option[ReceiptDate]
   )
 
   object Class2or3ContributionAndCredits {

@@ -30,8 +30,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.E
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
   Class1ContributionAndCredits,
-  Class2NIContributionAmount,
   Class2Or3EarningsFactor,
+  Class2Or3NIContributionAmount,
   Class2or3ContributionAndCredits,
   ContributionCategoryLetter,
   EmployerName,
@@ -52,6 +52,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   InvalidJsonError,
   JsonValidationError,
   NpsClientError,
+  ReceiptDate,
   StartTaxYear,
   TaxYear
 }
@@ -149,10 +150,11 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
                 numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
                 contributionCreditType = Some(NiContributionCreditType.C1),
                 class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                class2NIContributionAmount = Some(Class2NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
                 class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
                 creditSource = Some(CreditSource.NotKnown),
-                latePaymentPeriod = Some(LatePaymentPeriod.L)
+                latePaymentPeriod = Some(LatePaymentPeriod.L),
+                receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
               )
             )
           )
