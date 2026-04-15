@@ -29,6 +29,7 @@ import play.api.inject
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.Codecs
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
@@ -61,6 +62,7 @@ class BenefitEligibilityDataRepositoryItSpec
   val nationalInsuranceNumber = Identifier("AB123456C")
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+  implicit val headerCarrier: HeaderCarrier = new HeaderCarrier()
 
   "BenefitEligibilityRepository" - {
     ".getItem" - {

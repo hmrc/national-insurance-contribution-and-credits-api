@@ -72,6 +72,7 @@ object BenefitEligibilityRequestHandler {
                             )
                           )
                         case Right(value) =>
+                          logger.info("Fetching benefit eligibility data")
                           fn(eligibilityCheckDataRequest, correlationId).map { result =>
                             BenefitEligibilityInfoResponse.from(
                               eligibilityCheckDataRequest.nationalInsuranceNumber,
@@ -160,6 +161,7 @@ object BenefitEligibilityRequestHandler {
               nextCursor
             )
               .map { paginationResult =>
+                logger.info("Getting paginated data")
                 BenefitEligibilityInfoResponse.from(
                   paginationResult
                 ) match {
@@ -205,7 +207,8 @@ object BenefitEligibilityRequestHandler {
 
   private def getAcceptHeader(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, SuccessfulResult.type] =
+  ): Either[ErrorReason, SuccessfulResult.type] = {
+    logger.info("Validating Accept Header")
     request.headers.get("Accept") match {
       case None =>
         logger.error("Missing header Accept")
@@ -213,10 +216,12 @@ object BenefitEligibilityRequestHandler {
       case Some(acceptHeader) =>
         RequestValidations.validateAcceptHeader(Some(acceptHeader))
     }
+  }
 
   private[controller] def getCorrelationId(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, CorrelationId] =
+  ): Either[ErrorReason, CorrelationId] = {
+    logger.info("Validating CorrelationId")
     request.headers.get("CorrelationId") match {
       case None =>
         logger.error("Missing header CorrelationID")
@@ -225,11 +230,14 @@ object BenefitEligibilityRequestHandler {
         )
       case Some(correlationId) =>
         RequestValidations.validateCorrelationId(correlationId) match {
-          case Right(id) => Right(id)
+          case Right(id) =>
+            logger.info("CorrelationId is Valid")
+            Right(id)
           case Left(error) =>
             logger.error("Correlation Id is not a valid UUID")
             Left(error)
         }
     }
+  }
 
 }

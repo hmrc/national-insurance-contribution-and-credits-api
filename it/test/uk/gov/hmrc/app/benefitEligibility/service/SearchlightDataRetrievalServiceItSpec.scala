@@ -698,7 +698,7 @@ class SearchlightDataRetrievalServiceItSpec
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[InvalidJsonError]
+          result.left.value shouldBe a[DataRetrievalServiceError]
         }
       }
 
@@ -717,7 +717,7 @@ class SearchlightDataRetrievalServiceItSpec
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[NpsClientError]
+          result.left.value shouldBe a[DataRetrievalServiceError]
         }
       }
 

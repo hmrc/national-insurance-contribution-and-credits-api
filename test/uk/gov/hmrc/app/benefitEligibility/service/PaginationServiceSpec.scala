@@ -125,8 +125,8 @@ class PaginationServiceSpec
         )
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask))
-          .expects(pageTask)
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(pageTask, *)
           .returning(EitherT.rightT(pageTask.pageTaskId.value))
 
         underTest.addTask(pageTask).value.futureValue shouldBe Right(
@@ -148,8 +148,8 @@ class PaginationServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask))
-          .expects(pageTask)
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
 
         underTest.addTask(pageTask).value.futureValue shouldBe Left(DatabaseError(error))
@@ -182,8 +182,8 @@ class PaginationServiceSpec
         val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask))
-          .expects(pageTask)
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
           .noMoreThanOnce()
 
@@ -191,8 +191,8 @@ class PaginationServiceSpec
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask))
-          .expects(newPageTask)
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(newPageTask, *)
           .returning(EitherT.rightT(newPageTask.pageTaskId.value))
           .noMoreThanOnce()
 
@@ -228,8 +228,8 @@ class PaginationServiceSpec
           Class2MAReceiptsSuccessResponse(None, None, Some(Callback(Some(CallbackUrl(class2MAReceiptsCallBackUrl)))))
 
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .getItem(_: PaginationCursor)(_: HeaderCarrier))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
           .returning(EitherT.rightT(pageTask))
 
         (mockLiabilitySummaryDetailsConnector
@@ -245,8 +245,8 @@ class PaginationServiceSpec
           )
 
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask))
-          .expects(Some(pageTask.pageTaskId.value), *)
+          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
         val expectedResult = PaginationResult(
@@ -321,12 +321,12 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .getItem(_: PaginationCursor)(_: HeaderCarrier))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask))
-          .expects(Some(pageTask.pageTaskId.value), *)
+          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
         (mockMarriageDetailsConnector
@@ -407,12 +407,12 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .getItem(_: PaginationCursor)(_: HeaderCarrier))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask))
-          .expects(Some(pageTask.pageTaskId.value), *)
+          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
         (mockNiContributionsAndCreditsConnector
@@ -608,12 +608,12 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .getItem(_: PaginationCursor)(_: HeaderCarrier))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask))
-          .expects(Some(pageTask.pageTaskId.value), *)
+          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
         (mockMarriageDetailsConnector
@@ -818,8 +818,8 @@ class PaginationServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .getItem(_: PaginationCursor)(_: HeaderCarrier))
+          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
           .returning(EitherT.rightT(pageTask))
 
         (mockLiabilitySummaryDetailsConnector
@@ -845,8 +845,8 @@ class PaginationServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor))
-          .expects(paginationCursor)
+          .getItem(_: PaginationCursor)(_: HeaderCarrier))
+          .expects(paginationCursor, *)
           .returning(EitherT.leftT(DatabaseError(error)))
 
         underTest.paginate(paginationCursor).value.futureValue shouldBe Left(

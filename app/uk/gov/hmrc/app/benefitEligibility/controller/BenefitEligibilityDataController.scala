@@ -17,12 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.{BenefitEligibilityDataRetrievalService, PaginationService}
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,6 +35,8 @@ class BenefitEligibilityDataController @Inject() (
     appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
+
+  private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
   def fetchBenefitEligibilityData(): Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {

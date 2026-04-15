@@ -122,9 +122,9 @@ class SearchlightDataRetrievalService @Inject() (
     }
 
   }
-//    .leftMap {
-//    // TODO add logging
-//    error => DataRetrievalServiceError()
-//  }
+    .leftMap {
+      case error @ DataRetrievalServiceError(_) => error
+      case error                                => DataRetrievalServiceError(List(error))
+    }
 
 }

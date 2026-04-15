@@ -29,6 +29,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.ESAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,6 +37,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmploymentSupportAllowanceDataRetrievalService @Inject() (
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector
 )(implicit ec: ExecutionContext) {
+
+  private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
   def fetchEligibilityData(
       eligibilityCheckDataRequest: ESAEligibilityCheckDataRequest
@@ -56,7 +59,7 @@ class EmploymentSupportAllowanceDataRetrievalService @Inject() (
       )
       .map(EligibilityCheckDataResultESA(_))
       .leftMap { error =>
-        // TODO add logging
+        logger.info("Fetch ESA eligibility data failed: " + error.getMessage)
         DataRetrievalServiceError(List(error))
       }
 
