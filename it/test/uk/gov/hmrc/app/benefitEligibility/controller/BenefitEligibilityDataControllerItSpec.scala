@@ -153,7 +153,7 @@ class BenefitEligibilityDataControllerItSpec
   val npsLiabilitySummaryDetailsPath: String = s"/ni/person/${nationalInsuranceNumber.value}/liability-summary/ABROAD"
   val npsCreditsAndContributionsPath         = "/ni/national-insurance/contributions-and-credits"
   val npsIndividualMarriageDetailsPath       = s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"
-  val benefitSchemeDetailsPath = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"
+  val benefitSchemeDetailsPath               = "/ni/benefit-scheme/benefit-scheme-details/S2123456B"
   val schemeMembershipDetailsPath    = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
   val npsClass2MaReceiptsPath        = s"/ni/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
   val npsLongTermBenefitsCalculation = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation"
@@ -2275,7 +2275,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/benefit-scheme-details/S2123456B"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
               .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdGysp"))
               .willReturn(
@@ -2508,7 +2508,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/benefit-scheme-details/S2123456B"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
               .willReturn(
                 aResponse()
@@ -2653,7 +2653,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/benefit-scheme-details/S2123456B"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
               .willReturn(
                 aResponse()
@@ -2822,7 +2822,7 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/benefit-scheme-details/S2123456B"))
+              .get(urlEqualTo(s"/ni/benefit-scheme/benefit-scheme-details/S2123456B"))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
               .willReturn(
                 aResponse()
