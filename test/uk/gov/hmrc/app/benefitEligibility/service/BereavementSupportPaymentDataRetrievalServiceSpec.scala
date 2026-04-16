@@ -213,8 +213,8 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
         (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
         (mockPaginationService
-          .addTask(_: PageTask))
-          .expects(paging)
+          .addTask(_: PageTask)(_: HeaderCarrier))
+          .expects(paging, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 
         underTest

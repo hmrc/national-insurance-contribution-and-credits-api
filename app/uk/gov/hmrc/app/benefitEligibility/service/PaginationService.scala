@@ -48,8 +48,9 @@ class PaginationService @Inject() (
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
-  def addTask(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
+  def addTask(pageTask: PageTask)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
     def createNewPageTask(pageTask: PageTask) = {
+      logger.info("Creating new page task")
       val newPageTask: PageTask = pageTask match {
         case m: MaPageTask =>
           MaPageTask(
@@ -95,8 +96,10 @@ class PaginationService @Inject() (
     pageTaskRepo.insert(pageTask).recoverWith {
       case DatabaseError(dbError: com.mongodb.MongoWriteException)
           if dbError.getError.getCategory == com.mongodb.ErrorCategory.DUPLICATE_KEY =>
+        logger.info("MongoWriteException: Duplicate key error")
         createNewPageTask(pageTask)
       case DatabaseError(dbError: com.mongodb.DuplicateKeyException) =>
+        logger.info("DuplicateKeyException: Duplicate key error")
         createNewPageTask(pageTask)
       case error =>
         EitherT.leftT(error)

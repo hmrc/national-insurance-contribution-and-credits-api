@@ -46,6 +46,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitType,
   CallSystem,
   CorrelationId,
+  DataRetrievalServiceError,
   DateOfBirth,
   EndTaxYear,
   Identifier,
@@ -224,9 +225,7 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Left(
-          JsonValidationError(List.empty)
-        )
+          .futureValue shouldBe Left(DataRetrievalServiceError(List(JsonValidationError(List.empty))))
       }
 
       "should propagate the error returned from the connector (ParsingError)" in {
@@ -244,9 +243,7 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Left(
-          InvalidJsonError(error)
-        )
+          .futureValue shouldBe Left(DataRetrievalServiceError(List(InvalidJsonError(error))))
       }
 
       "should propagate the error returned from the connector (NpsClientError)" in {
@@ -263,9 +260,7 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Left(
-          NpsClientError(error)
-        )
+          .futureValue shouldBe Left(DataRetrievalServiceError(List(NpsClientError(error))))
       }
     }
   }

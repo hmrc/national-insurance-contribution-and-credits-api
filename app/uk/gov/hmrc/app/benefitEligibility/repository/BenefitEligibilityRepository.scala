@@ -27,6 +27,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   DatabaseError,
   RecordNotFound
 }
+import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -37,10 +39,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[BenefitEligibilityRepositoryImpl])
 trait BenefitEligibilityRepository {
-  def getItem(paginationCursor: PaginationCursor): EitherT[Future, BenefitEligibilityError, PageTask]
-  def upsert(id: Option[UUID], update: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
-  def insert(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID]
-  def delete(id: UUID): EitherT[Future, BenefitEligibilityError, Long]
+
+  def getItem(paginationCursor: PaginationCursor)(
+      implicit hc: HeaderCarrier
+  ): EitherT[Future, BenefitEligibilityError, PageTask]
+
+  def upsert(id: Option[UUID], update: PageTask)(
+      implicit hc: HeaderCarrier
+  ): EitherT[Future, BenefitEligibilityError, UUID]
+
+  def insert(pageTask: PageTask)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID]
+  def delete(id: UUID)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, Long]
 }
 
 @Singleton
@@ -63,7 +72,12 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
     )
     with BenefitEligibilityRepository {
 
-  def getItem(paginationCursor: PaginationCursor): EitherT[Future, BenefitEligibilityError, PageTask] =
+  private val logger = new RequestAwareLogger(this.getClass)
+
+  def getItem(
+      paginationCursor: PaginationCursor
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PageTask] = {
+    logger.info("getItem called - Retrieving page task from DataBase ")
     collection
       .find(Filters.equal("pageTaskId", Codecs.toBson(paginationCursor.pageTaskId)))
       .headOption()
@@ -73,8 +87,12 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
         case None           => EitherT.leftT(RecordNotFound(CursorId.from(paginationCursor)))
         case Some(pageTask) => EitherT.rightT(pageTask)
       }
+  }
 
-  def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] = {
+  def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask)(
+      implicit hc: HeaderCarrier
+  ): EitherT[Future, BenefitEligibilityError, UUID] = {
+    logger.info("Upsert called - Updating page task in database")
     val updates = pageTask match {
       case MaPageTask(
             correlationId,
@@ -164,7 +182,9 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       .leftMap(error => DatabaseError(error))
   }
 
-  def insert(pageTask: PageTask): EitherT[Future, BenefitEligibilityError, UUID] =
+  def insert(pageTask: PageTask)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
+    logger.info("insert called - inserting page task in database")
+
     collection
       .insertOne(
         pageTask
@@ -173,13 +193,17 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       .attemptT
       .map(_ => pageTask.pageTaskId.value)
       .leftMap(error => DatabaseError(error))
+  }
 
-  def delete(id: UUID): EitherT[Future, BenefitEligibilityError, Long] =
+  def delete(id: UUID)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, Long] = {
+    logger.info("delete called - deleting page task from database")
+
     collection
       .deleteOne(Filters.equal("pageTaskId", id.toString))
       .toFuture()
       .attemptT
       .map(_.getDeletedCount())
       .leftMap(error => DatabaseError(error))
+  }
 
 }
