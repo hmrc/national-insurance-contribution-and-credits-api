@@ -34,6 +34,9 @@ object JsonToYaml {
 
       val jsonFile: File = baseDirectory.value / "target/swagger/swagger.json"
       val yamlFile: File = baseDirectory.value / "target/swagger/application.yaml"
+      val publicYamlFile: File = baseDirectory.value / "public/api/conf/application.yaml"
+      val versionedPublicYamlFile: File = baseDirectory.value / "resources/public/api/conf/1.0/application.yaml"
+
 
       val jsonString = IO.read(jsonFile)
       val parsedJson = Json.parse(jsonString)
@@ -246,6 +249,9 @@ object JsonToYaml {
         )
 
       IO.write(yamlFile, updatedYaml)
+      IO.write(publicYamlFile, updatedYaml)
+      IO.write(versionedPublicYamlFile, updatedYaml)
+
     }
   )
 
