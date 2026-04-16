@@ -77,7 +77,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
   def getItem(
       paginationCursor: PaginationCursor
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PageTask] = {
-    logger.info("getItem called - Retrieving page task from DataBase ")
+    logger.info("getItem called - Retrieving page task from Database ")
     collection
       .find(Filters.equal("pageTaskId", Codecs.toBson(paginationCursor.pageTaskId)))
       .headOption()

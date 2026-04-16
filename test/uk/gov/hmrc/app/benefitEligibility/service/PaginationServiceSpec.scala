@@ -155,7 +155,7 @@ class PaginationServiceSpec
         underTest.addTask(pageTask).value.futureValue shouldBe Left(DatabaseError(error))
 
       }
-      "should return a new uuid if current uuid already exists in database" in {
+      "should return a new uuid if current uuid already exists in database for MA" in {
         val uuidOne           = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
@@ -174,6 +174,142 @@ class PaginationServiceSpec
           liabilitiesPaging = paginationSource3,
           None,
           nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val serverAddress              = new ServerAddress()
+        val errorDetails: BsonDocument = new BsonDocument()
+        val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
+        val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(pageTask, *)
+          .returning(EitherT.leftT(DatabaseError(error)))
+          .noMoreThanOnce()
+
+        // Note: This verifies that a new uuid is being generated if we get a duplicate key error
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(newPageTask, *)
+          .returning(EitherT.rightT(newPageTask.pageTaskId.value))
+          .noMoreThanOnce()
+
+        underTest.addTask(pageTask).value.futureValue
+      }
+      "should return a new uuid if current uuid already exists in database for BSP" in {
+        val uuidOne           = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val paginationSource3 = Some(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+
+        val pageTask = BspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = uuidOne,
+          marriageDetailsPaging = paginationSource3,
+          contributionAndCreditsPaging = None,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val newPageTask = BspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = uuidTwo,
+          marriageDetailsPaging = paginationSource3,
+          contributionAndCreditsPaging = None,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val serverAddress              = new ServerAddress()
+        val errorDetails: BsonDocument = new BsonDocument()
+        val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
+        val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(pageTask, *)
+          .returning(EitherT.leftT(DatabaseError(error)))
+          .noMoreThanOnce()
+
+        // Note: This verifies that a new uuid is being generated if we get a duplicate key error
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(newPageTask, *)
+          .returning(EitherT.rightT(newPageTask.pageTaskId.value))
+          .noMoreThanOnce()
+
+        underTest.addTask(pageTask).value.futureValue
+      }
+      "should return a new uuid if current uuid already exists in database for GYSP" in {
+        val uuidOne           = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val paginationSource3 = Some(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+
+        val pageTask = GyspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = uuidOne,
+          benefitSchemeMembershipDetailsPaging = paginationSource3,
+          marriageDetailsPaging = None,
+          contributionAndCreditsPaging = None,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val newPageTask = GyspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = uuidTwo,
+          benefitSchemeMembershipDetailsPaging = paginationSource3,
+          marriageDetailsPaging = None,
+          contributionAndCreditsPaging = None,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val serverAddress              = new ServerAddress()
+        val errorDetails: BsonDocument = new BsonDocument()
+        val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
+        val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(pageTask, *)
+          .returning(EitherT.leftT(DatabaseError(error)))
+          .noMoreThanOnce()
+
+        // Note: This verifies that a new uuid is being generated if we get a duplicate key error
+        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+
+        (mockBenefitEligibilityRepository
+          .insert(_: PageTask)(_: HeaderCarrier))
+          .expects(newPageTask, *)
+          .returning(EitherT.rightT(newPageTask.pageTaskId.value))
+          .noMoreThanOnce()
+
+        underTest.addTask(pageTask).value.futureValue
+      }
+      "should return a new uuid if current uuid already exists in database for SearchLight" in {
+        val uuidOne = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val dob     = DateOfBirth(LocalDate.parse("2025-10-10"))
+        val paginationSource2 =
+          ContributionAndCreditsPaging(
+            NonEmptyList
+              .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
+            dob
+          )
+        val pageTask = SearchLightPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = uuidOne,
+          paginationType = PaginationType.MaPagination,
+          contributionAndCreditsPaging = Some(paginationSource2),
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+        val newPageTask = SearchLightPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = uuidTwo,
+          paginationType = PaginationType.MaPagination,
+          contributionAndCreditsPaging = Some(paginationSource2),
+          nationalInsuranceNumber = nationalInsuranceNumber,
           createdAt = currentTimeSource.instantNow()
         )
         val serverAddress              = new ServerAddress()

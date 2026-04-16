@@ -173,7 +173,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
         Identifier("GD379251T"),
         ContributionsAndCreditsRequestParams(
           DateOfBirth(LocalDate.parse("2025-10-10")),
-          StartTaxYear(2025),
+          StartTaxYear(2015),
           EndTaxYear(2026)
         )
       )
