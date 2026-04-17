@@ -27,7 +27,7 @@ object ErrorCode extends Enum[ErrorCode] with PlayJsonEnum[ErrorCode] {
   val values: immutable.IndexedSeq[ErrorCode] = findValues
 
   case object BadRequest          extends ErrorCode("BAD_REQUEST")
-  case object Forbidden           extends ErrorCode("FORBIDDEN")
+  case object Unauthorised        extends ErrorCode("UNAUTHORIZED")
   case object UnprocessableEntity extends ErrorCode("UNPROCESSABLE_ENTITY")
   case object InternalServerError extends ErrorCode("INTERNAL_SERVER_ERROR")
   case object NotFound            extends ErrorCode("NOT_FOUND")

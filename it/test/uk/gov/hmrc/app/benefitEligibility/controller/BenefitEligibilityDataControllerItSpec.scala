@@ -81,8 +81,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{
   BadRequest,
-  Forbidden,
   InternalServerError,
+  Unauthorised,
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.repository.*
@@ -899,7 +899,7 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
-        "should return a 502 if downstream calls to NPS services fail (ESA)" in {
+        "should return a 500 if downstream calls to NPS services fail (ESA)" in {
 
           server.stubFor(
             post(urlEqualTo("/auth/authorise"))
@@ -958,7 +958,7 @@ class BenefitEligibilityDataControllerItSpec
                                    |      }
                                    |   ]
                                    |}""".stripMargin
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
         }
         "should return 422 if ESA Tax years exceed 6 years" in {
@@ -1118,7 +1118,7 @@ class BenefitEligibilityDataControllerItSpec
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
 
         }
-        "should return a 502 if downstream calls to NPS services fail (JSA)" in {
+        "should return a 500 if downstream calls to NPS services fail (JSA)" in {
 
           server.stubFor(
             WireMock
@@ -1179,7 +1179,7 @@ class BenefitEligibilityDataControllerItSpec
                                    |      }
                                    |   ]
                                    |}""".stripMargin
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
 
         }
@@ -1348,7 +1348,7 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
-        "should return a 502 if downstream calls to NPS services fail (Searchlight)" in {
+        "should return a 500 if downstream calls to NPS services fail (Searchlight)" in {
 
           server.stubFor(
             post(urlEqualTo("/auth/authorise"))
@@ -1410,7 +1410,7 @@ class BenefitEligibilityDataControllerItSpec
               |      }
               |   ]
               |}""".stripMargin
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
         }
       }
@@ -1623,7 +1623,7 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
-        "should return a 502 if some downstream calls to NPS services fail (MA - Partial Failure)" in {
+        "should return a 500 if some downstream calls to NPS services fail (MA - Partial Failure)" in {
 
           val liabilitySummaryDetailsSuccessResponseBody =
             Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
@@ -1729,10 +1729,10 @@ class BenefitEligibilityDataControllerItSpec
                                  |   ]
                                  |}""".stripMargin
 
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
         }
-        "should return a 502 if all downstream calls to NPS services fail (MA - Failure)" in {
+        "should return a 500 if all downstream calls to NPS services fail (MA - Failure)" in {
 
           val niContributionsAndCreditsSuccessResponseBody =
             Json.toJson(niContributionsAndCreditsSuccessResponse).toString()
@@ -1841,7 +1841,7 @@ class BenefitEligibilityDataControllerItSpec
                                  |   ]
                                  |}""".stripMargin
 
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
         }
         "should return 422 if MA Tax years exceed 6 years" in {
@@ -2060,7 +2060,7 @@ class BenefitEligibilityDataControllerItSpec
           status(result) shouldBe 200
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
         }
-        "should return a 502 if some downstream calls to NPS services fail (BSP - Partial Failure)" in {
+        "should return a 500 if some downstream calls to NPS services fail (BSP - Partial Failure)" in {
 
           val marriageDetailsSuccessResponseBody = Json.toJson(marriageDetailsSuccessResponse).toString()
 
@@ -2141,10 +2141,10 @@ class BenefitEligibilityDataControllerItSpec
                                  |   ]
                                  |}""".stripMargin
 
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
         }
-        "should return a 502 if all downstream calls to NPS services fail (BSP - Failure)" in {
+        "should return a 500 if all downstream calls to NPS services fail (BSP - Failure)" in {
 
           server.stubFor(
             post(urlEqualTo("/auth/authorise"))
@@ -2228,7 +2228,7 @@ class BenefitEligibilityDataControllerItSpec
                                  |   ]
                                  |}""".stripMargin
 
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
         }
       }
@@ -2616,7 +2616,7 @@ class BenefitEligibilityDataControllerItSpec
           contentAsJson(result) shouldBe Json.toJson(expectedResult)
 
         }
-        "should return a 502 if some downstream calls to NPS services fail (GYSP - Partial Failure)" in {
+        "should return a 500 if some downstream calls to NPS services fail (GYSP - Partial Failure)" in {
 
           val benefitSchemeDetailsSuccessResponseBody = Json.toJson(benefitSchemeDetailsSuccessResponse).toString()
 
@@ -2794,11 +2794,11 @@ class BenefitEligibilityDataControllerItSpec
                                  |   ]
                                  |}""".stripMargin
 
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
 
         }
-        "should return a 502 if some downstream calls to NPS services fail (GYSP - Failure)" in {
+        "should return a 500 if some downstream calls to NPS services fail (GYSP - Failure)" in {
 
           server.stubFor(
             post(urlEqualTo("/auth/authorise"))
@@ -2970,7 +2970,7 @@ class BenefitEligibilityDataControllerItSpec
                                  |   ]
                                  |}""".stripMargin
 
-          status(result) shouldBe 502
+          status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
 
         }
@@ -3153,8 +3153,10 @@ class BenefitEligibilityDataControllerItSpec
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
-        status(result) shouldBe 403
-        contentAsJson(result) shouldBe Json.toJson(ErrorResponse(Forbidden, ErrorReason("Bearer token not supplied")))
+        status(result) shouldBe 401
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(Unauthorised, ErrorReason("Bearer token not supplied"))
+        )
       }
       "should return a 422 if a request is sent with invalid data" in {
 
@@ -3480,7 +3482,7 @@ class BenefitEligibilityDataControllerItSpec
           )
         )
 
-        status(result) shouldBe 502
+        status(result) shouldBe 500
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
       }
 
@@ -3650,7 +3652,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val result: Future[Result] = underTest.getNextPage()(request)
 
-        status(result) shouldBe 502
+        status(result) shouldBe 500
         contentAsJson(result)
           .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
       }
@@ -3931,7 +3933,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val result: Future[Result] = underTest.getNextPage()(request)
 
-        status(result) shouldBe 502
+        status(result) shouldBe 500
         contentAsJson(result)
           .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
       }
@@ -4060,7 +4062,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val result: Future[Result] = underTest.getNextPage()(request)
 
-        status(result) shouldBe 502
+        status(result) shouldBe 500
         contentAsJson(result)
           .validate[BenefitEligibilityInfoErrorResponse] shouldBe a[JsSuccess[BenefitEligibilityInfoErrorResponse]]
       }

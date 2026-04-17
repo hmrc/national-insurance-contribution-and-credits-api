@@ -559,20 +559,20 @@ paths:
                   value:
                     code: "BAD_REQUEST"
                     reason: "type field is required"
-        '403':
-          description: Forbidden
+        '401':
+          description: Unauthorised
           content:
             application/json:
               examples:
                 missing_auth_token:
                   summary: Missing authentication token
                   value:
-                    code: "FORBIDDEN"
+                    code: "UNAUTHORIZED"
                     reason: "authentication token is required"
                 invalid_auth_token:
                   summary: Invalid authentication token
                   value:
-                    code: "FORBIDDEN"
+                    code: "UNAUTHORIZED"
                     reason: "invalid or expired authentication token"
         '422':
           description: Unprocessable Entity
@@ -619,11 +619,6 @@ paths:
                   value:
                     code: "INTERNAL_SERVER_ERROR"
                     reason: "an unexpected error occurred while processing the request"
-        '502':
-          description: Partial or complete failure from downstream services
-          content:
-            application/json:
-              examples:
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -821,20 +816,20 @@ paths:
                   value:
                     code: BAD_REQUEST
                     reason: type field is required
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorized
           content:
             application/json:
               examples:
                 missing_auth_token:
                   summary: Missing authentication token
                   value:
-                    code: FORBIDDEN
+                    code: UNAUTHORIZED
                     reason: authentication token is required
                 invalid_auth_token:
                   summary: Invalid authentication token
                   value:
-                    code: FORBIDDEN
+                    code: UNAUTHORIZED
                     reason: invalid or expired authentication token
         "404":
           description: Not Found
@@ -889,62 +884,57 @@ paths:
                 unexpected_error:
                   summary: Unexpected error
                   value:
-                    code: INTERNAL_SERVER_ERROR
-                    reason: an unexpected error occurred while processing the request
-        "502":
-          description: Partial or complete failure from downstream services
-          content:
-            application/json:
-              examples:
+                    code: "INTERNAL_SERVER_ERROR"
+                    reason: "an unexpected error occurred while processing the request"
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
-                    status: PARTIAL_FAILURE
-                    benefitType: MA
-                    nationalInsuranceNumber: KL890123M
+                    status: "PARTIAL_FAILURE"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "KL890123M"
                     summary:
                       totalCalls: 3
                       successful: 2
                       failed: 1
                     downStreams:
-                      - apiName: NiContributionsAndCredits
-                        status: SUCCESS
-                      - apiName: Class2MAReceipts
-                        status: SUCCESS
-                      - apiName: Liabilities
-                        status: FAILURE
+                      - apiName: "NiContributionsAndCredits"
+                        status: "SUCCESS"
+                      - apiName: "Class2MAReceipts"
+                        status: "SUCCESS"
+                      - apiName: "Liabilities"
+                        status: "FAILURE"
                         error:
-                          code: TIMEOUT
-                          message: liability calculation service timeout
+                          code: "TIMEOUT"
+                          message: "liability calculation service timeout"
                           downstreamStatus: 408
                 complete_failure:
                   summary: Complete failure - every downstream called for a given benefit responds with a failure
                   value:
-                    status: FAILURE
-                    benefitType: MA
-                    nationalInsuranceNumber: NP012345Q
+                    status: "FAILURE"
+                    benefitType: "MA"
+                    nationalInsuranceNumber: "NP012345Q"
                     summary:
                       totalCalls: 3
                       successful: 0
                       failed: 3
                     downStreams:
-                      - apiName: NiContributionsAndCredits
-                        status: FAILURE
+                      - apiName: "NiContributionsAndCredits"
+                        status: "FAILURE"
                         error:
-                          code: FORBIDDEN
-                          message: access denied to maternity allowance service
+                          code: "FORBIDDEN"
+                          message: "access denied to maternity allowance service"
                           downstreamStatus: 403
-                      - apiName: Class2MAReceipts
-                        status: FAILURE
+                      - apiName: "Class2MAReceipts"
+                        status: "FAILURE"
                         error:
-                          code: INTERNAL_SERVER_ERROR
-                          message: class 2 MA receipts service internal error
+                          code: "INTERNAL_SERVER_ERROR"
+                          message: "class 2 MA receipts service internal error"
                           downstreamStatus: 500
-                      - apiName: Liabilities
-                        status: FAILURE
+                      - apiName: "Liabilities"
+                        status: "FAILURE"
                         error:
-                          code: BAD_REQUEST
-                          message: invalid liability calculation parameters
+                          code: "BAD_REQUEST"
+                          message: "invalid liability calculation parameters"
                           downstreamStatus: 400
 
 
