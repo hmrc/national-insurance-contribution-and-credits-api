@@ -746,7 +746,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
   )
 
   val applicationOpenApiSpec =
-    "resources/public/api/conf/1.0/nicc_api_spec.yaml"
+    "resources/public/api/conf/1.0/application.yaml"
 
   "BenefitEligibilityInfoSuccessResponseMa" - {
     ".from" - {

@@ -206,6 +206,7 @@ paths:
                         class2Or3CreditStatus: VALID
                         creditSource: DIRECT DEBIT
                         latePaymentPeriod: ZZ
+                        receiptDate: 2025-10-10
                       - taxYear: 2022
                         numberOfContributionsAndCredits: 30
                         contributionCreditType: C2
@@ -214,6 +215,7 @@ paths:
                         class2Or3CreditStatus: VALID
                         creditSource: QUARTERLY BILLING
                         latePaymentPeriod: L
+                        receiptDate: 2025-10-10
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
                 GYSP_minimal_success:
                   summary: GYSP - Minimal response
@@ -298,6 +300,7 @@ paths:
                         class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
                         creditSource: NOT KNOWN
                         latePaymentPeriod: L
+                        receiptDate: 2025-10-10
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
                 ESA_minimal_success:
                   summary: ESA - Minimal response
@@ -357,6 +360,7 @@ paths:
                         class2Or3CreditStatus: VALID
                         creditSource: EMPLOYMENT AND SUPPORT
                         latePaymentPeriod: ZZ
+                        receiptDate: 2025-10-10
                       - taxYear: 2021
                         numberOfContributionsAndCredits: 15
                         contributionCreditType: 2A
@@ -423,6 +427,7 @@ paths:
                         class2Or3CreditStatus: VALID
                         creditSource: JSA TAPE INPUT
                         latePaymentPeriod: ZZ
+                        receiptDate: 2025-10-10
                       - taxYear: 2023
                         numberOfContributionsAndCredits: 25
                         contributionCreditType: 2B
@@ -478,6 +483,7 @@ paths:
                         class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
                         creditSource: NOT KNOWN
                         latePaymentPeriod: L
+                        receiptDate: 2025-10-10
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
         "400":
           description: Bad Request
@@ -713,6 +719,7 @@ paths:
                         class2Or3CreditStatus: VALID
                         creditSource: DIRECT DEBIT
                         latePaymentPeriod: ZZ
+                        receiptDate: 2025-10-10
                       - taxYear: 2022
                         numberOfContributionsAndCredits: 30
                         contributionCreditType: C2
@@ -768,6 +775,7 @@ paths:
                         class2Or3CreditStatus: NOT KNOWN/NOT APPLICABLE
                         creditSource: NOT KNOWN
                         latePaymentPeriod: L
+                        receiptDate: 2025-10-10
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
                 MA_maximal_success:
                   summary: MA - Maximal response
