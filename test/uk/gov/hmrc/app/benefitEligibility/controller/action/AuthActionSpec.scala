@@ -86,7 +86,7 @@ class AuthActionSpec
       }
     }
     "the user is not logged in" when {
-      "must return 403 when token is from Unsupported Auth Provider" in {
+      "must return 401 when token is from Unsupported Auth Provider" in {
         when(
           mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
             any[HeaderCarrier](),
@@ -97,11 +97,11 @@ class AuthActionSpec
 
         val authAction  = application.injector.instanceOf[AuthAction]
         val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
-        blockResult.futureValue.header.status shouldBe FORBIDDEN
+        blockResult.futureValue.header.status shouldBe UNAUTHORIZED
         blockResult.futureValue.header.headers.contains("correlationId")
       }
 
-      "must return 403 when token is expired" in {
+      "must return 401 when token is expired" in {
         when(
           mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
             any[HeaderCarrier](),
@@ -112,11 +112,11 @@ class AuthActionSpec
 
         val authAction  = application.injector.instanceOf[AuthAction]
         val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
-        blockResult.futureValue.header.status shouldBe FORBIDDEN
+        blockResult.futureValue.header.status shouldBe UNAUTHORIZED
         blockResult.futureValue.header.headers.contains("correlationId")
       }
 
-      "must return 403 when token is invalid" in {
+      "must return 401 when token is invalid" in {
         when(
           mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
             any[HeaderCarrier](),
@@ -127,11 +127,11 @@ class AuthActionSpec
 
         val authAction  = application.injector.instanceOf[AuthAction]
         val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
-        blockResult.futureValue.header.status shouldBe FORBIDDEN
+        blockResult.futureValue.header.status shouldBe UNAUTHORIZED
         blockResult.futureValue.header.headers.contains("correlationId")
       }
 
-      "must return 403 when token is missing" in {
+      "must return 401 when token is missing" in {
         when(
           mockAuthConnector.authorise(any[Predicate](), any[Retrieval[Unit]]())(
             any[HeaderCarrier](),
@@ -142,7 +142,7 @@ class AuthActionSpec
 
         val authAction  = application.injector.instanceOf[AuthAction]
         val blockResult = authAction.invokeBlock(mockRequest, (_: Request[_]) => Future.successful(ImATeapot("")))
-        blockResult.futureValue.header.status shouldBe FORBIDDEN
+        blockResult.futureValue.header.status shouldBe UNAUTHORIZED
         blockResult.futureValue.header.headers.contains("correlationId")
       }
     }

@@ -53,7 +53,7 @@
 #       application/json:
 #         schema:
 #           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
-#   '403':
+#   '401':
 #     description: Forbidden
 #     content:
 #       application/json:
@@ -70,13 +70,9 @@
 #     content:
 #       application/json:
 #         schema:
-#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
-#   '502':
-#     description: Partial or complete failure from downstream services
-#     content:
-#       application/json:
-#         schema:
-#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
+#           oneOf:
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
 ###
 POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.fetchBenefitEligibilityData()
 
@@ -131,7 +127,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #       application/json:
 #         schema:
 #           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
-#   '403':
+#   '401':
 #     description: Forbidden
 #     content:
 #       application/json:
@@ -154,13 +150,9 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #     content:
 #       application/json:
 #         schema:
-#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
-#   '502':
-#     description: Partial or complete failure from downstream services
-#     content:
-#       application/json:
-#         schema:
-#           $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
+#           oneOf:
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
 ###
 GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextPage()
 

@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.EitherT
 import play.api.libs.json.*
-import play.api.mvc.Results.{BadGateway, BadRequest, InternalServerError, NotFound, Ok, UnprocessableEntity}
+import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, Ok, UnprocessableEntity}
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
@@ -78,7 +78,7 @@ object BenefitEligibilityRequestHandler {
                               eligibilityCheckDataRequest.nationalInsuranceNumber,
                               result
                             ) match {
-                              case Left(value)  => BadGateway(Json.toJson(value))
+                              case Left(value)  => InternalServerError(Json.toJson(value))
                               case Right(value) => Ok(Json.toJson(value))
                             }
                           }
@@ -165,7 +165,7 @@ object BenefitEligibilityRequestHandler {
                 BenefitEligibilityInfoResponse.from(
                   paginationResult
                 ) match {
-                  case Left(value)  => BadGateway(Json.toJson(value))
+                  case Left(value)  => InternalServerError(Json.toJson(value))
                   case Right(value) => Ok(Json.toJson(value))
                 }
               }

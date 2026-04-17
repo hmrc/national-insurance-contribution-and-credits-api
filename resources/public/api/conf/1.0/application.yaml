@@ -497,8 +497,8 @@ paths:
                   value:
                     code: BAD_REQUEST
                     reason: type field is required
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorised
           content:
             application/json:
               schema:
@@ -507,12 +507,12 @@ paths:
                 missing_auth_token:
                   summary: Missing authentication token
                   value:
-                    code: FORBIDDEN
+                    code: UNAUTHORIZED
                     reason: authentication token is required
                 invalid_auth_token:
                   summary: Invalid authentication token
                   value:
-                    code: FORBIDDEN
+                    code: UNAUTHORIZED
                     reason: invalid or expired authentication token
         "422":
           description: Unprocessable Entity
@@ -556,20 +556,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
+                oneOf:
+                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
+                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
               examples:
                 unexpected_error:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
                     reason: an unexpected error occurred while processing the request
-        "502":
-          description: Partial or complete failure from downstream services
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
-              examples:
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -803,8 +798,8 @@ paths:
                   value:
                     code: BAD_REQUEST
                     reason: type field is required
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -813,12 +808,12 @@ paths:
                 missing_auth_token:
                   summary: Missing authentication token
                   value:
-                    code: FORBIDDEN
+                    code: UNAUTHORIZED
                     reason: authentication token is required
                 invalid_auth_token:
                   summary: Invalid authentication token
                   value:
-                    code: FORBIDDEN
+                    code: UNAUTHORIZED
                     reason: invalid or expired authentication token
         "404":
           description: Not Found
@@ -874,20 +869,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
+                oneOf:
+                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
+                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
               examples:
                 unexpected_error:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
                     reason: an unexpected error occurred while processing the request
-        "502":
-          description: Partial or complete failure from downstream services
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
-              examples:
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -1502,7 +1492,7 @@ components:
           type: string
           enum:
           - BAD_REQUEST
-          - FORBIDDEN
+          - UNAUTHORIZED
           - UNPROCESSABLE_ENTITY
           - INTERNAL_SERVER_ERROR
           - NOT_FOUND
