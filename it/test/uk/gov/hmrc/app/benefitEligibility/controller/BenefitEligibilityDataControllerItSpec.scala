@@ -4105,6 +4105,93 @@ class BenefitEligibilityDataControllerItSpec
              |}""".stripMargin
         )
       }
+
+      "should return 400 if no next cursor is present" in {
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          "/benefit-eligibility-info"
+        )
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> correlationId.value.toString
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 400
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("Paginate request sent with no next cursor"))
+        )
+      }
+      "should return 400 if invalid next cursor is passed" in {
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          "/benefit-eligibility-info?cursorId=123245678990"
+        )
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> correlationId.value.toString
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 400
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(
+            BadRequest,
+            ErrorReason(
+              "invalid nextCursor Unexpected character ('�' (code 65533 / 0xfffd)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n at [Source: (String)\"�m�㞻��t\"; line: 1, column: 2]"
+            )
+          )
+        )
+      }
+      "should return 400 if no correlation id is present" in {
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          "/benefit-eligibility-info?cursorId=123245678990"
+        )
+          .withHeaders("Content-Type" -> "application/json", "Authorization" -> "Bearer token")
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 400
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("Missing Header CorrelationId"))
+        )
+      }
+
     }
   }
 

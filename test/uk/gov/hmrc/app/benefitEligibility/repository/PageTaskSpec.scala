@@ -578,7 +578,23 @@ class PageTaskSpec
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe None
       }
+    }
+    ".PaginationCursor" - {
+      ".from" - {
+        "should return pagination cursor if should page is true" in {
+          val uuidOne = UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")
+          val result  = PaginationCursor.from(PaginationType.MaPagination, true, uuidOne)
 
+          result shouldBe Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(uuidOne)))
+        }
+
+        "should return none if should page is false" in {
+          val uuidOne = UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")
+          val result  = PaginationCursor.from(PaginationType.MaPagination, false, uuidOne)
+
+          result shouldBe None
+        }
+      }
     }
   }
 
