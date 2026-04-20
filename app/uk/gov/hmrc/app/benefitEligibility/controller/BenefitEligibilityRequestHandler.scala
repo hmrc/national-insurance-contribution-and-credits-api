@@ -69,7 +69,7 @@ object BenefitEligibilityRequestHandler {
                                   ErrorReason(validationError.messages.mkString(","))
                                 )
                               )
-                            )
+                            ).withHeaders("CorrelationId" -> correlationId.value.toString)
                           )
                         case Right(value) =>
                           logger.info("Fetching benefit eligibility data")
@@ -78,8 +78,12 @@ object BenefitEligibilityRequestHandler {
                               eligibilityCheckDataRequest.nationalInsuranceNumber,
                               result
                             ) match {
-                              case Left(value)  => InternalServerError(Json.toJson(value))
-                              case Right(value) => Ok(Json.toJson(value))
+                              case Left(value) =>
+                                InternalServerError(Json.toJson(value)).withHeaders(
+                                  "CorrelationId" -> correlationId.value.toString
+                                )
+                              case Right(value) =>
+                                Ok(Json.toJson(value)).withHeaders("CorrelationId" -> correlationId.value.toString)
                             }
                           }
                       }
@@ -99,7 +103,7 @@ object BenefitEligibilityRequestHandler {
                               ErrorReason(s"incompatible json, request body does not match schema - $errorMessage")
                             )
                           )
-                        )
+                        ).withHeaders("CorrelationId" -> correlationId.value.toString)
                       )
                   }
                 case None =>
@@ -107,21 +111,21 @@ object BenefitEligibilityRequestHandler {
                   EitherT.rightT[Future, BenefitEligibilityError](
                     BadRequest(
                       Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
-                    )
+                    ).withHeaders("CorrelationId" -> correlationId.value.toString)
                   )
               }
             case Left(error: ErrorReason) =>
               EitherT.rightT[Future, BenefitEligibilityError](
                 BadRequest(
                   Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
-                )
+                ).withHeaders("CorrelationId" -> "N/A")
               )
           }
         case Left(error: ErrorReason) =>
           EitherT.rightT[Future, BenefitEligibilityError](
             BadRequest(
               Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
-            )
+            ).withHeaders("CorrelationId" -> "N/A")
           )
       }
     ).value.map {
@@ -129,7 +133,7 @@ object BenefitEligibilityRequestHandler {
         logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
         InternalServerError(
           Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
-        )
+        ).withHeaders("CorrelationId" -> "N/A")
       case Right(response) => response
     }
 
@@ -138,7 +142,7 @@ object BenefitEligibilityRequestHandler {
       paginationFunction: PaginationCursor => EitherT[Future, BenefitEligibilityError, PaginationResult]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (getCorrelationId(request) match {
-      case Right(_) =>
+      case Right(correlationId) =>
         val maybeNextCursor =
           request.queryString
             .get("cursorId")
@@ -154,7 +158,7 @@ object BenefitEligibilityRequestHandler {
                     ErrorReason("invalid nextCursor " + e.getMessage)
                   )
                 )
-              )
+              ).withHeaders("CorrelationId" -> correlationId.value.toString)
             )
           case Some(Success(nextCursor)) =>
             paginationFunction(
@@ -165,8 +169,10 @@ object BenefitEligibilityRequestHandler {
                 BenefitEligibilityInfoResponse.from(
                   paginationResult
                 ) match {
-                  case Left(value)  => InternalServerError(Json.toJson(value))
-                  case Right(value) => Ok(Json.toJson(value))
+                  case Left(value) =>
+                    InternalServerError(Json.toJson(value)).withHeaders("CorrelationId" -> correlationId.value.toString)
+                  case Right(value) =>
+                    Ok(Json.toJson(value)).withHeaders("CorrelationId" -> correlationId.value.toString)
                 }
               }
           case None =>
@@ -178,14 +184,14 @@ object BenefitEligibilityRequestHandler {
                     ErrorReason("Paginate request sent with no next cursor")
                   )
                 )
-              )
+              ).withHeaders("CorrelationId" -> correlationId.value.toString)
             )
         }
       case Left(error: ErrorReason) =>
         EitherT.rightT[Future, BenefitEligibilityError](
           BadRequest(
             Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
-          )
+          ).withHeaders("CorrelationId" -> "N/A")
         )
     }).value.map {
       case Left(error) =>
@@ -194,12 +200,12 @@ object BenefitEligibilityRequestHandler {
             logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
             NotFound(
               Json.toJson(ErrorResponse(ErrorCode.NotFound, ErrorReason(s"record not found for cursorId: ${id.value}")))
-            )
+            ).withHeaders("CorrelationId" -> "N/A")
           case _ =>
             logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
             InternalServerError(
               Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
-            )
+            ).withHeaders("CorrelationId" -> "N/A")
         }
 
       case Right(response) => response
