@@ -19,9 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.Validated
 import cats.implicits.catsSyntaxTuple6Semigroupal
 import play.api.libs.json.JsonValidationError
-import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityRequestHandler.logger
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.{BSP, ESA, GYSP, JSA, MA}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CorrelationId, Identifier, PaginationType}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{CorrelationId, Identifier, OriginatorIdType, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 import uk.gov.hmrc.app.benefitEligibility.util.{
@@ -114,6 +112,15 @@ object RequestValidations {
         Right(SuccessfulResult)
       case Some(_) =>
         Left(ErrorReason("Accept header cannot be empty"))
+    }
+
+  def validateOriginatorId(
+      originatorId: Option[String]
+  )(implicit hc: HeaderCarrier): Either[ErrorReason, OriginatorIdType] =
+    originatorId.flatMap(id => OriginatorIdType.withNameOption(id)) match {
+      case None =>
+        Left(ErrorReason("Originator Id is missing or invalid"))
+      case Some(success) => Right(success)
     }
 
 }
