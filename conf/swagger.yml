@@ -207,6 +207,9 @@ paths:
       responses:
         '200':
           description: Successful response
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -551,6 +554,9 @@ paths:
 
         '400':
           description: Bad Request
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -561,6 +567,9 @@ paths:
                     reason: "type field is required"
         '401':
           description: Unauthorised
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -576,6 +585,9 @@ paths:
                     reason: "invalid or expired authentication token"
         '422':
           description: Unprocessable Entity
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -611,6 +623,9 @@ paths:
                     reason: "End tax year after CY-1"
         '500':
           description: Internal Server Error
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -682,6 +697,9 @@ paths:
       responses:
         "200":
           description: Successful response
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -808,6 +826,9 @@ paths:
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
         "400":
           description: Bad Request
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -818,6 +839,9 @@ paths:
                     reason: type field is required
         "401":
           description: Unauthorized
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -833,6 +857,9 @@ paths:
                     reason: invalid or expired authentication token
         "404":
           description: Not Found
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -843,6 +870,9 @@ paths:
                     reason: pagination record not found
         "422":
           description: Unprocessable Entity
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:
@@ -878,6 +908,9 @@ paths:
                     reason: End tax year after CY-1
         "500":
           description: Internal Server Error
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
           content:
             application/json:
               examples:

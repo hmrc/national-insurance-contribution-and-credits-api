@@ -3290,6 +3290,146 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(InternalServerError, ErrorReason("unexpected internal failure"))
         )
       }
+
+      "should include CorrelationId header in success responses" in {
+
+        val successResponseJson =
+          """{
+            |  "totalGraduatedPensionUnits": 100,
+            |  "class1ContributionAndCredits": [
+            |    {
+            |      "taxYear": 2022,
+            |      "numberOfContributionsAndCredits": 53,
+            |      "contributionCategoryLetter": "U",
+            |      "contributionCategory": "(NONE)",
+            |      "contributionCreditType": "C1",
+            |      "primaryContribution": 99999999999999.98,
+            |      "class1ContributionStatus": "COMPLIANCE & YIELD INCOMPLETE",
+            |      "primaryPaidEarnings": 99999999999999.98,
+            |      "creditSource": "NOT KNOWN",
+            |      "employerName": "ipOpMs",
+            |      "latePaymentPeriod": "L"
+            |    }
+            |  ],
+            |  "class2Or3ContributionAndCredits": [
+            |    {
+            |      "taxYear": 2022,
+            |      "numberOfContributionsAndCredits": 53,
+            |      "contributionCreditType": "C1",
+            |      "class2Or3EarningsFactor": 99999999999999.98,
+            |      "class2Or3NIContributionAmount": 99999999999999.98,
+            |      "class2Or3CreditStatus": "NOT KNOWN/NOT APPLICABLE",
+            |      "creditSource": "NOT KNOWN",
+            |      "latePaymentPeriod": "L"
+            |    }
+            |  ]
+            |}""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody(successResponseJson)
+            )
+        )
+
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          )
+        )
+        val request: FakeRequest[AnyContent] =
+          FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type" -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> correlationId.value.toString,
+              "Accept" -> "application/json"
+            )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 200
+        val r = Helpers.await(result)
+        r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
+      }
+
+      "should include CorrelationId header in bad request responses" in {
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withHeaders(
+            "Content-Type" -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> correlationId.value.toString,
+            "Accept" -> "application/json"
+          )
+          .withTextBody("invalidJson")
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+        val r = Helpers.await(result)
+        r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
+      }
+
+      "should include CorrelationId header as N/A when missing from request" in {
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2025),
+            EndTaxYear(2026)
+          )
+        )
+        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
+          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+          .withHeaders(
+            "Content-Type" -> "application/json",
+            "Authorization" -> "Bearer token",
+            "Accept" -> "application/json"
+          )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 400
+        val r = Helpers.await(result)
+        r.header.headers.get("CorrelationId") shouldBe Some("N/A")
+      }
     }
     ".getNextPage" - {
       "should handle a MA request containing nextCursor successfully (200)" in {

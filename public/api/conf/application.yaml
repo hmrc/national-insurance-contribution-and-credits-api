@@ -485,6 +485,9 @@ paths:
                         latePaymentPeriod: L
                         receiptDate: 2025-10-10
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "400":
           description: Bad Request
           content:
@@ -497,6 +500,9 @@ paths:
                   value:
                     code: BAD_REQUEST
                     reason: type field is required
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "401":
           description: Unauthorised
           content:
@@ -514,6 +520,9 @@ paths:
                   value:
                     code: UNAUTHORIZED
                     reason: invalid or expired authentication token
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "422":
           description: Unprocessable Entity
           content:
@@ -551,6 +560,9 @@ paths:
                   value:
                     code: UNPROCESSABLE_ENTITY
                     reason: End tax year after CY-1
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "500":
           description: Internal Server Error
           content:
@@ -615,6 +627,9 @@ paths:
                         code: BAD_REQUEST
                         message: invalid liability calculation parameters
                         downstreamStatus: 400
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
       description: "retrieves data for that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA"
       security:
       - applicationRestricted:
@@ -786,6 +801,9 @@ paths:
                         endDate: 2027-01-01
                     niContributionsAndCreditsResult: {}
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "400":
           description: Bad Request
           content:
@@ -798,6 +816,9 @@ paths:
                   value:
                     code: BAD_REQUEST
                     reason: type field is required
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "401":
           description: Unauthorized
           content:
@@ -815,6 +836,9 @@ paths:
                   value:
                     code: UNAUTHORIZED
                     reason: invalid or expired authentication token
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "404":
           description: Not Found
           content:
@@ -827,6 +851,9 @@ paths:
                   value:
                     code: NOT_FOUND
                     reason: pagination record not found
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "422":
           description: Unprocessable Entity
           content:
@@ -864,6 +891,9 @@ paths:
                   value:
                     code: UNPROCESSABLE_ENTITY
                     reason: End tax year after CY-1
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
         "500":
           description: Internal Server Error
           content:
@@ -928,6 +958,9 @@ paths:
                         code: BAD_REQUEST
                         message: invalid liability calculation parameters
                         downstreamStatus: 400
+          headers:
+            CorrelationId:
+              $ref: "#/components/headers/correlationId"
       description: "retrieves data for that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA"
       security:
       - applicationRestricted:
