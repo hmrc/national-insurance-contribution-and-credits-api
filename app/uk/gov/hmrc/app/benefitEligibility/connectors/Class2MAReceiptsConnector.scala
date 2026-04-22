@@ -107,8 +107,9 @@ class Class2MAReceiptsConnector @Inject() (
 
             case INTERNAL_SERVER_ERROR =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              Right(toFailureResult(InternalServerError, None))
-
+              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
+                toFailureResult(InternalServerError, Some(resp))
+              }
             case SERVICE_UNAVAILABLE =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
               attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
