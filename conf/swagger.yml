@@ -688,8 +688,8 @@ paths:
     get:
       tags:
         - Benefit-eligibility-info
-      summary: Request information that can be used to determine benefit eligibility
-      description: retrieves data for that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA
+      summary: Request any remaining information that can be used to determine benefit eligibility (paging endpoint only)
+      description: retrieves remaining data for that is critical to successfully checking a claimants eligibility
       security:
         - applicationRestricted:
             - write:protect-connect

@@ -1,998 +1,855 @@
-{
-  "openapi": "3.0.3",
-  "info": {
-    "title": "NPS Interface Catalogue for the National Insurance Service",
-    "description": "# Usage Terms\nThese interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).",
-    "contact": {
-      "name": "HMRC NPS Live Service",
-      "url": "http://",
-      "email": "user@hmrc.gov.uk"
-    },
-    "version": "0.0.1",
-    "license": {
-      "name": "HMRC",
-      "url": "https://license.example.hmrc.gov.uk"
-    }
-  },
-  "servers": [
-    {
-      "url": "https://api.example.hmrc.gov.uk",
-      "description": "The actual environment values to use will differ depending on the environment."
-    }
-  ],
-  "tags": [],
-  "security": [],
-  "paths": {
-    "/national-insurance/contributions-and-credits": {
-      "description": "# Volumes & Registered Consumers\nThis API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection.\n\n| Consumer | Average API Calls Per Hour | Peak API Calls Per Hour | Peak TPS |\n|----------|------------------------|---------------------|----------|\n| xxx | xxx | xxx | xxx |\n\n*TPS = Transactions per second\n\n## Version Log\n| Version | Date | Author | Description |\n|---------|------|--------|-------------|\n| 0.0.1 | 25/02/2026 | NPS ScrumTeam 4 | Initial Draft |",
-      "post": {
-        "tags": [
-          "Person"
-        ],
-        "summary": "Retrieve Class 1, Class 2 and Class 3 Contribution and Credits.",
-        "description": "# Purpose\nThis API provides the capability to retrieve Class 1, Class 2 and Class 3 data for an account.<br>\n- This allows a search for Class 1 contributions and Class 2 & 3 credits for a given NINO (suffix optional) and range of tax years.\n- Request payload will contain the NINO and date of birth.<br>\n- A start year for the tax year range, not before 1975 or after CY-1<br>\n- An end year for the tax year range, not before the start year or after CY-1, and no more than five years after the start year (thereby allowing a range of six years inclusive). \n## Request Data Structure & Payload Details",
-        "operationId": "postNIContributionAndCredits",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/correlationId"
-          },
-          {
-            "$ref": "#/components/parameters/govUkOriginatorId"
-          },
-          {
-            "$ref": "#/components/parameters/govUkOrganisationId"
-          },
-          {
-            "$ref": "#/components/parameters/govUkUserId"
-          },
-          {
-            "$ref": "#/components/parameters/govUkUserName"
-          },
-          {
-            "$ref": "#/components/parameters/govUkJobRole"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostNIContributionCreditRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "headers": {
-              "correlationId": {
-                "$ref": "#/components/headers/correlationId"
-              }
-            },
-            "content": {
-              "application/json;charset=UTF-8": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostNIContCredResponse"
-                },
-                "examples": {
-                  "exampleClass1Response": {
-                    "summary": "Employee with Class 1 across 2023-2024",
-                    "value": {
-                      "totalGraduatedPensionUnits": 9.5,
-                      "class1ContributionAndCredits": [
-                        {
-                          "taxYear": 2024,
-                          "numberOfContributionsAndCredits": 51,
-                          "contributionCategoryLetter": "A",
-                          "contributionCategory": "STANDARD RATE",
-                          "contributionCreditType": "C1",
-                          "primaryContribution": 2850,
-                          "class1ContributionStatus": "VALID",
-                          "primaryPaidEarnings": 32000,
-                          "creditSource": "EMPLOYMENT SERVICES",
-                          "employerName": "AcmeCo",
-                          "latePaymentPeriod": "L"
-                        },
-                        {
-                          "taxYear": 2023,
-                          "numberOfContributionsAndCredits": 51,
-                          "contributionCategoryLetter": "A",
-                          "contributionCategory": "STANDARD RATE",
-                          "contributionCreditType": "C1",
-                          "primaryContribution": 2700,
-                          "class1ContributionStatus": "VALID",
-                          "primaryPaidEarnings": 30000,
-                          "creditSource": "EMPLOYMENT SERVICES",
-                          "employerName": "Widget",
-                          "latePaymentPeriod": "L"
-                        }
-                      ]
-                    }
-                  },
-                  "exampleJSAESAResponse": {
-                    "summary": "Employee with Class 1 JSA/ESA Credits",
-                    "value": {
-                      "totalGraduatedPensionUnits": 9.5,
-                      "class1ContributionAndCredits": [
-                        {
-                          "taxYear": 2024,
-                          "numberOfContributionsAndCredits": 51,
-                          "contributionCategoryLetter": "A",
-                          "contributionCategory": "STANDARD RATE",
-                          "contributionCreditType": "C1",
-                          "primaryContribution": 2850,
-                          "class1ContributionStatus": "VALID",
-                          "primaryPaidEarnings": 32000,
-                          "creditSource": "JSA TAPE INPUT",
-                          "employerName": "AcmeCo",
-                          "latePaymentPeriod": "L"
-                        },
-                        {
-                          "taxYear": 2023,
-                          "numberOfContributionsAndCredits": 51,
-                          "contributionCategoryLetter": "A",
-                          "contributionCategory": "STANDARD RATE",
-                          "contributionCreditType": "C1",
-                          "primaryContribution": 2700,
-                          "class1ContributionStatus": "VALID",
-                          "primaryPaidEarnings": 30000,
-                          "creditSource": "EMPLOYMENT AND SUPPORT",
-                          "employerName": "Widget",
-                          "latePaymentPeriod": "L"
-                        }
-                      ]
-                    }
-                  },
-                  "exampleClass2Response": {
-                    "summary": "Self-employed with Class 2 credits",
-                    "value": {
-                      "totalGraduatedPensionUnits": 0,
-                      "class2Or3ContributionAndCredits": [
-                        {
-                          "taxYear": 2024,
-                          "numberOfContributionsAndCredits": 52,
-                          "contributionCreditType": "C2",
-                          "class2Or3EarningsFactor": 6500,
-                          "class2Or3NIContributionAmount": 163.8,
-                          "class2Or3CreditStatus": "VALID",
-                          "creditSource": "DIRECT DEBIT",
-                          "latePaymentPeriod": "LX"
-                        }
-                      ]
-                    }
-                  },
-                  "maximallyPopulatedResponse": {
-                    "summary": "Maximally populate response. Combined Class 1 and Class 2.",
-                    "value": {
-                      "totalGraduatedPensionUnits": 7,
-                      "class1ContributionAndCredits": [
-                        {
-                          "taxYear": 2022,
-                          "numberOfContributionsAndCredits": 26,
-                          "contributionCategoryLetter": "B",
-                          "contributionCategory": "REDUCED RATE",
-                          "contributionCreditType": "C1",
-                          "primaryContribution": 1200,
-                          "class1ContributionStatus": "CURRENT",
-                          "primaryPaidEarnings": 18000,
-                          "creditSource": "EMPLOYMENT SERVICES",
-                          "employerName": "Fabrik",
-                          "latePaymentPeriod": "ZZ"
-                        }
-                      ],
-                      "class2Or3ContributionAndCredits": [
-                        {
-                          "taxYear": 2022,
-                          "numberOfContributionsAndCredits": 26,
-                          "contributionCreditType": "C2",
-                          "class2Or3EarningsFactor": 3250,
-                          "class2Or3NIContributionAmount": 81.9,
-                          "class2Or3CreditStatus": "POTENTIAL",
-                          "creditSource": "DIRECT DEBIT",
-                          "latePaymentPeriod": "L"
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request Response",
-            "$ref": "#/components/responses/badRequestResponse"
-          },
-          "403": {
-            "content": {
-              "application/json;charset=UTF-8": {
-                "schema": {
-                  "$ref": "#/components/schemas/errorResourceObj_403_Forbidden"
-                },
-                "examples": {
-                  "Forbidden_Response": {
-                    "value": {
-                      "reason": "Forbidden",
-                      "code": "403.2"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Forbidden",
-            "headers": {
-              "correlationId": {
-                "$ref": "#/components/headers/correlationId"
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found Response",
-            "headers": {
-              "correlationId": {
-                "$ref": "#/components/headers/correlationId"
-              }
-            },
-            "content": {
-              "application/json;charset=UTF-8": {
-                "schema": {
-                  "$ref": "#/components/schemas/errorResourceObj_404_Not_Found"
-                },
-                "examples": {
-                  "Actual_Response": {
-                    "value": {
-                      "code": "404",
-                      "reason": "Not Found"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "headers": {
-              "correlationId": {
-                "$ref": "#/components/headers/correlationId"
-              }
-            },
-            "content": {
-              "application/json;charset=UTF-8": {
-                "schema": {
-                  "$ref": "#/components/schemas/errorResponse_422"
-                },
-                "examples": {
-                  "422_StartYearAfterEndYear": {
-                    "$ref": "#/components/examples/422_StartYearAfterEndYear"
-                  },
-                  "422_StartYearPre1975": {
-                    "$ref": "#/components/examples/422_StartYearPre1975"
-                  },
-                  "422_StartYearPostCY-1": {
-                    "$ref": "#/components/examples/422_StartYearPostCY-1"
-                  },
-                  "422_EndYearPostCY-1": {
-                    "$ref": "#/components/examples/422_EndYearPostCY-1"
-                  },
-                  "422_TaxYearRangeOver6": {
-                    "$ref": "#/components/examples/422_TaxYearRangeOver6"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error Response",
-            "$ref": "#/components/responses/internalServerErrorResponse"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "examples": {
-      "422_StartYearAfterEndYear": {
-        "summary": "Start Year After End Year",
-        "value": {
-          "failures": [
-            {
-              "reason": "Start tax year after end tax year",
-              "code": "63496"
-            }
-          ]
-        }
-      },
-      "422_StartYearPre1975": {
-        "summary": "Start Year Pre 1975",
-        "value": {
-          "failures": [
-            {
-              "reason": "Start tax year before 1975",
-              "code": "63497"
-            }
-          ]
-        }
-      },
-      "422_StartYearPostCY-1": {
-        "summary": "Start Year Post CY-1",
-        "value": {
-          "failures": [
-            {
-              "reason": "Start tax year after CY-1",
-              "code": "63498"
-            }
-          ]
-        }
-      },
-      "422_EndYearPostCY-1": {
-        "summary": "End Year Post CY-1",
-        "value": {
-          "failures": [
-            {
-              "reason": "End tax year after CY-1",
-              "code": "63499"
-            }
-          ]
-        }
-      },
-      "422_TaxYearRangeOver6": {
-        "summary": "Tax Year Range Over 6 Years",
-        "value": {
-          "failures": [
-            {
-              "reason": "Tax year range greater than six years",
-              "code": "63500"
-            }
-          ]
-        }
-      }
-    },
-    "headers": {
-      "correlationId": {
-        "required": true,
-        "schema": {
-          "$ref": "#/components/schemas/correlationId"
-        }
-      }
-    },
-    "parameters": {
-      "correlationId": {
-        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
-        "in": "header",
-        "name": "correlationId",
-        "required": true,
-        "schema": {
-          "$ref": "#/components/schemas/correlationId"
-        }
-      },
-      "govUkOriginatorId": {
-        "description": "Identity of the Originating System that made the API call.",
-        "in": "header",
-        "name": "gov-uk-originator-id",
-        "required": true,
-        "schema": {
-          "$ref": "#/components/schemas/govUkOriginatorId"
-        }
-      },
-      "govUkOrganisationId": {
-        "description": "A unique organisation ID for the user.",
-        "in": "header",
-        "name": "gov-uk-organisation-id",
-        "schema": {
-          "$ref": "#/components/schemas/govUkOrganisationId"
-        }
-      },
-      "govUkUserId": {
-        "description": "A unique user ID for the user.",
-        "in": "header",
-        "name": "gov-uk-user-id",
-        "required": false,
-        "schema": {
-          "$ref": "#/components/schemas/govUkUserId"
-        }
-      },
-      "govUkUserName": {
-        "description": "A unique username for the user.",
-        "in": "header",
-        "name": "gov-uk-user-name",
-        "schema": {
-          "$ref": "#/components/schemas/govUkUserName"
-        }
-      },
-      "govUkJobRole": {
-        "description": "A unique job role for the user.",
-        "in": "header",
-        "name": "gov-uk-job-role",
-        "schema": {
-          "$ref": "#/components/schemas/govUkJobRole"
-        }
-      }
-    },
-    "responses": {
-      "badRequestResponse": {
-        "content": {
-          "application/json;charset=UTF-8": {
-            "schema": {
-              "$ref": "#/components/schemas/errorResponse_400"
-            },
-            "examples": {
-              "Actual_Response": {
-                "value": {
-                  "failures": [
-                    {
-                      "reason": "HTTP message not readable",
-                      "code": "400.2"
-                    },
-                    {
-                      "reason": "Constraint violation: Invalid/Missing input parameter: <parameter>",
-                      "code": "400.1"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "description": "Bad Request",
-        "headers": {
-          "correlationId": {
-            "$ref": "#/components/headers/correlationId"
-          }
-        }
-      },
-      "notFoundErrorResponse": {
-        "headers": {
-          "correlationId": {
-            "$ref": "#/components/headers/correlationId"
-          }
-        },
-        "description": "The requested resource could not be found"
-      },
-      "internalServerErrorResponse": {
-        "description": "Internal Server Error",
-        "headers": {
-          "correlationId": {
-            "$ref": "#/components/headers/correlationId"
-          }
-        }
-      }
-    },
-    "schemas": {
-      "EnumLpind": {
-        "enum": [
-          "L",
-          "LX",
-          "ZY",
-          "ZZ"
-        ],
-        "type": "string"
-      },
-      "EnumCreditSource": {
-        "enum": [
-          "ADDITIONAL STATUTORY PATERNITY PAY",
-          "ADP CENTRE LIVINGSTON",
-          "ADP NORTHERN IRELAND",
-          "ADP READING",
-          "APPROVED TRAINING CREDITS (INTERNAL)",
-          "AUTOCREDITS - EXTERNALLY INPUT",
-          "AUTOCREDITS - INTERNALLY CALCULATED",
-          "CARER'S ALLOWANCE (CA)",
-          "CARER'S CREDIT",
-          "CENTRAL AWARD",
-          "CHILD BENEFIT",
-          "DIRECT DEBIT",
-          "DPTC (GB) EMP",
-          "DPTC (GB) S/EMP",
-          "DPTC (NI) EMP",
-          "DPTC (NI) S/EMP",
-          "DSS LOCAL OFFICES",
-          "DWA UNIT (BELFAST) EMPLOYED EARNERS",
-          "DWA UNIT (BELFAST) SELF EMPLOYED EARNERS",
-          "DWA UNIT (BLACKPOOL) EMPLOYED EARNERS",
-          "DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS",
-          "Disabled Tax Credit (Employed)",
-          "Disabled Tax Credit (Self-employed)",
-          "EMPLOYMENT AND SUPPORT",
-          "EMPLOYMENT SERVICES",
-          "FAMC-GB",
-          "FAMC-NI",
-          "FAMILY CREDIT (GB)",
-          "FAMILY CREDIT (NI)",
-          "FOSTER CARER",
-          "HNCIP OR SDA",
-          "HRP CONVERSION",
-          "INCAPACITY",
-          "ISLE OF MAN",
-          "JSA PAPER INPUT",
-          "JSA TAPE INPUT",
-          "JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)",
-          "JURY SERVICE",
-          "JUVENILE CREDITS (INTERNAL)",
-          "LONG TERM SCALE RATE",
-          "MoD Spouse/Civil Partner's Credits",
-          "NORTHERN IRELAND SICKNESS CREDITS",
-          "NOT APPLICABLE",
-          "NOT KNOWN",
-          "NUBS 2",
-          "NUBS 2 [ALTERNATIVE SB CONDITION MET]",
-          "PSCS INCAP",
-          "Post 75 Service Spouses Credit",
-          "QUARTERLY BILLING",
-          "SHARED PARENTAL PAY",
-          "SPECIFIED ADULT CARER",
-          "STATUTORY ADOPTION PAY CREDIT",
-          "STATUTORY MATERNITY PAY CREDIT",
-          "Statutory Parental Bereavement Pay",
-          "UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)",
-          "UNIVERSAL CREDIT",
-          "WFTC (GB)",
-          "WFTC (NI)",
-          "WIDOWS CREDITS (INTERNAL)",
-          "Working Tax Credit (Employed)",
-          "Working Tax Credit (Self-employed)",
-          "CARER SUPPORT PAYMENT (CSP)",
-          "Statutory Neonatal Care Pay"
-        ],
-        "type": "string"
-      },
-      "EnumCl1stat": {
-        "type": "string",
-        "enum": [
-          "COMPLIANCE & YIELD INCOMPLETE",
-          "CURRENT",
-          "HISTORIC AMENDED",
-          "HISTORIC CANCELLED",
-          "INVALID - NO RCF",
-          "INVALID - RCF",
-          "INVALID COMPATIBILITY CHECK",
-          "NOT KNOWN / NOT APPLICABLE",
-          "POTENTIAL",
-          "VALID",
-          "VALID RCF"
-        ]
-      },
-      "EnumCl2stat": {
-        "description": "Denotes the status for the credit.",
-        "enum": [
-          "NOT KNOWN/NOT APPLICABLE",
-          "VALID",
-          "INVALID",
-          "POTENTIAL",
-          "INVALID COMPATIBILITY CHECK"
-        ],
-        "type": "string"
-      },
-      "EnumCCType": {
-        "description": "Short code relating to the type of contribution or credit.",
-        "enum": [
-          "C1",
-          "HMF",
-          "MAR",
-          "CS",
-          "EON",
-          "CR1",
-          "C2",
-          "C2W",
-          "SF",
-          "2A",
-          "2B",
-          "2C",
-          "2D",
-          "SFA",
-          "SFB",
-          "SFC",
-          "SFD",
-          "VDA",
-          "VDB",
-          "VDC",
-          "VDD",
-          "2N",
-          "3PR",
-          "3A",
-          "3B",
-          "3C",
-          "3D",
-          "CR3",
-          "3N"
-        ],
-        "type": "string"
-      },
-      "EnumContCatFull": {
-        "type": "string",
-        "enum": [
-          "(NONE)",
-          "CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS",
-          "CONVERTED ACCOUNT - CONTRACTED OUT",
-          "CONTRACTED OUT REDUCED RATE",
-          "CONTRACTED-OUT REDUCED RATE COSR",
-          "CONTRACTED-OUT REDUCED RATE (COMP)",
-          "CONTRACTED OUT STANDARD RATE COSR",
-          "CONTRACTED-OUT STANDARD RATE (COMP)",
-          "NOT FEASIBLE",
-          "NO LIABILITY",
-          "OFFICE HOLDERS",
-          "DEFERRED RATE",
-          "REDUCED RATE",
-          "REDUCED RATE CONTRACTED-OUT",
-          "REDUCED RATE CONTRACTED-OUT (COSR)",
-          "STANDARD RATE",
-          "STANDARD RATE CONTRACTED OUT",
-          "STANDARD RATE CONTRACTED-OUT",
-          "STANDARD RATE CONTRACTED-OUT (COSR)",
-          "UNALLOCATED",
-          "ZERO RATE",
-          "ZERO RATE (NIC HOLIDAY)"
-        ]
-      },
-      "EnumContCatLetter": {
-        "type": "string",
-        "enum": [
-          "(NONE)",
-          "Y",
-          "J",
-          "O",
-          "N",
-          "T",
-          "W",
-          "R",
-          "K",
-          "H",
-          "V",
-          "I",
-          "P",
-          "G",
-          "F",
-          "M",
-          "S",
-          "L",
-          "Q",
-          "X",
-          "Z",
-          "B",
-          "E",
-          "A",
-          "D",
-          "U",
-          "C"
-        ]
-      },
-      "correlationId": {
-        "description": "Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.",
-        "example": "e470d658-99f7-4292-a4a1-ed12c72f1337",
-        "format": "uuid",
-        "type": "string"
-      },
-      "govUkOriginatorId": {
-        "description": "Identity of the Originating System that made the API call",
-        "type": "string",
-        "minLength": 3,
-        "maxLength": 40
-      },
-      "govUkOrganisationId": {
-        "description": "A unique organisation ID for the user.",
-        "type": "string",
-        "example": "Department",
-        "minLength": 4,
-        "maxLength": 40
-      },
-      "govUkUserId": {
-        "description": "A unique user ID for the user.",
-        "minLength": 7,
-        "maxLength": 7,
-        "type": "string"
-      },
-      "govUkUserName": {
-        "description": "A unique username for the user.",
-        "type": "string",
-        "minLength": 4,
-        "example": "Worker"
-      },
-      "govUkJobRole": {
-        "description": "A unique job role for the user.",
-        "type": "string",
-        "minLength": 4,
-        "example": "Social"
-      },
-      "errorResponse_400": {
-        "description": "Array of Error Response Failure Object in Error Response.",
-        "title": "Error Response",
-        "properties": {
-          "failures": {
-            "items": {
-              "$ref": "#/components/schemas/errorResourceObj_400"
-            },
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "errorResourceObj_400": {
-        "type": "object",
-        "required": [
-          "code",
-          "reason"
-        ],
-        "properties": {
-          "reason": {
-            "minLength": 1,
-            "description": "Displays the reason of the failure.",
-            "type": "string",
-            "maxLength": 128
-          },
-          "code": {
-            "description": "The error code representing the error that has occurred. Valid values are\n400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field'\n400.2 - HTTP message not readable;",
-            "type": "string",
-            "enum": [
-              "400.1",
-              "400.2"
-            ]
-          }
-        }
-      },
-      "errorResourceObj_403_Forbidden": {
-        "title": "403_Forbidden",
-        "type": "object",
-        "required": [
-          "code",
-          "reason"
-        ],
-        "properties": {
-          "reason": {
-            "description": "Displays the reason of the failure.",
-            "type": "string",
-            "enum": [
-              "Forbidden"
-            ]
-          },
-          "code": {
-            "description": "The error code representing the Forbidden Error.",
-            "type": "string",
-            "enum": [
-              "403.2"
-            ]
-          }
-        }
-      },
-      "errorResourceObj_404_Not_Found": {
-        "title": "404_Not_Found",
-        "type": "object",
-        "required": [
-          "code",
-          "reason"
-        ],
-        "properties": {
-          "reason": {
-            "description": "Displays the reason of the failure.",
-            "type": "string",
-            "enum": [
-              "Not Found"
-            ]
-          },
-          "code": {
-            "description": "The error code representing the Not Found Error.",
-            "type": "string",
-            "enum": [
-              "404"
-            ]
-          }
-        }
-      },
-      "errorResponse_422": {
-        "description": "Error Response Payload for this API",
-        "title": "Error Response",
-        "type": "object",
-        "properties": {
-          "failures": {
-            "$ref": "#/components/schemas/errorResponseFailure_422"
-          }
-        }
-      },
-      "errorResponseFailure_422": {
-        "description": "Array of Error Response Failure Object in Error Response.",
-        "title": "Failure Object in Error Response",
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/errorResourceObj_422"
-        }
-      },
-      "errorResourceObj_422": {
-        "type": "object",
-        "required": [
-          "code",
-          "reason"
-        ],
-        "properties": {
-          "reason": {
-            "minLength": 1,
-            "description": "Displays the reason of the failure.",
-            "type": "string",
-            "maxLength": 128
-          },
-          "code": {
-            "minLength": 1,
-            "description": "The error code representing the error that has occurred.",
-            "type": "string",
-            "maxLength": 10
-          }
-        }
-      },
-      "taxYear": {
-        "description": "Denotes the tax year (i.e. the year the tax period started, 2023 for a 2023/2024 tax period).",
-        "example": 2023,
-        "maximum": 2099,
-        "minimum": 1900,
-        "type": "integer"
-      },
-      "nationalInsuranceNumberAndSuffix": {
-        "description": "National Insurance Number - unique for an individual - note not all individuals qualify to be issued with one.",
-        "example": "AA000001A",
-        "minLength": 8,
-        "maxLength": 9,
-        "pattern": "^((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)$",
-        "type": "string"
-      },
-      "unsignedMoney": {
-        "description": "Positive or zero monetary value.",
-        "maximum": 99999999999999.98,
-        "minimum": 0,
-        "multipleOf": 0.01,
-        "type": "number"
-      },
-      "numberOfContributionsAndCredits": {
-        "description": "Number of weekly credits that apply to the credit record.",
-        "minimum": 0,
-        "maximum": 53,
-        "type": "integer"
-      },
-      "employerName": {
-        "description": "Employer name, held as a checkbrick in NPS for employment details linked to a contribution.",
-        "minLength": 1,
-        "maxLength": 6,
-        "pattern": "^([A-Za-z ])+$",
-        "type": "string"
-      },
-      "receiptDate": {
-        "description": "The date that the receipt was published.",
-        "example": "2022-06-27",
-        "format": "date",
-        "type": "string"
-      },
-      "PostNIContributionCreditRequest": {
-        "description": "Request payload for this API.",
-        "properties": {
-          "nationalInsuranceNumber": {
-            "$ref": "#/components/schemas/nationalInsuranceNumberAndSuffix"
-          },
-          "dateOfBirth": {
-            "description": "The date of birth of the individual.",
-            "example": "2022-06-27",
-            "format": "date",
-            "type": "string"
-          },
-          "startTaxYear": {
-            "description": "Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data from.",
-            "$ref": "#/components/schemas/taxYear"
-          },
-          "endTaxYear": {
-            "description": "Denotes the tax year (e.g. 2023 for a 2023/2024 tax period) to retrieve data up to and including.",
-            "$ref": "#/components/schemas/taxYear"
-          }
-        },
-        "required": [
-          "nationalInsuranceNumber",
-          "dateOfBirth",
-          "startTaxYear",
-          "endTaxYear"
-        ],
-        "additionalProperties": false,
-        "type": "object"
-      },
-      "PostNIContCredResponse": {
-        "description": "Success response payload for this API.",
-        "properties": {
-          "totalGraduatedPensionUnits": {
-            "description": "Denotes the total number of graduated pension units paid to an individual. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values.",
-            "example": 10,
-            "maximum": 100,
-            "minimum": 0,
-            "multipleOf": 0.000001,
-            "type": "number"
-          },
-          "class1ContributionAndCredits": {
-            "description": "Contains an array of Class 1 records.",
-            "items": {
-              "$ref": "#/components/schemas/Class1ContributionAndCredits"
-            },
-            "type": "array"
-          },
-          "class2Or3ContributionAndCredits": {
-            "description": "Contains an array of Class 2 or Class 3 records.",
-            "items": {
-              "$ref": "#/components/schemas/Class2Or3ContributionAndCredits"
-            },
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "Class1ContributionAndCredits": {
-        "description": "Contains details of a Class 1 record.",
-        "properties": {
-          "taxYear": {
-            "$ref": "#/components/schemas/taxYear"
-          },
-          "numberOfContributionsAndCredits": {
-            "$ref": "#/components/schemas/numberOfContributionsAndCredits"
-          },
-          "contributionCategoryLetter": {
-            "$ref": "#/components/schemas/EnumContCatLetter"
-          },
-          "contributionCategory": {
-            "$ref": "#/components/schemas/EnumContCatFull"
-          },
-          "contributionCreditType": {
-            "$ref": "#/components/schemas/EnumCCType"
-          },
-          "primaryContribution": {
-            "$ref": "#/components/schemas/unsignedMoney",
-            "description": "The amount of Class 1 contributions paid by an individual against that employment for a Tax Year (can only be a positive value)."
-          },
-          "class1ContributionStatus": {
-            "$ref": "#/components/schemas/EnumCl1stat"
-          },
-          "primaryPaidEarnings": {
-            "$ref": "#/components/schemas/unsignedMoney",
-            "description": "The total amount of earnings the Employee Class 1 NICs are payable on."
-          },
-          "creditSource": {
-            "$ref": "#/components/schemas/EnumCreditSource"
-          },
-          "employerName": {
-            "$ref": "#/components/schemas/employerName"
-          },
-          "latePaymentPeriod": {
-            "$ref": "#/components/schemas/EnumLpind",
-            "description": "The period of time under which a late payment was made. LX: 6 OR MORE YEARS LATE, L: LATE BUT UNDER 6 YEARS, ZZ: NOT KNOWN."
-          }
-        },
-        "type": "object"
-      },
-      "Class2Or3ContributionAndCredits": {
-        "description": "Contains details of a Class 2 or Class 3 record.",
-        "properties": {
-          "taxYear": {
-            "$ref": "#/components/schemas/taxYear"
-          },
-          "numberOfContributionsAndCredits": {
-            "$ref": "#/components/schemas/numberOfContributionsAndCredits"
-          },
-          "contributionCreditType": {
-            "$ref": "#/components/schemas/EnumCCType"
-          },
-          "class2Or3EarningsFactor": {
-            "$ref": "#/components/schemas/unsignedMoney",
-            "description": "The sum of the Lower Earning Limit (LEL) times by the number of weeks the contribution covers"
-          },
-          "class2Or3NIContributionAmount": {
-            "$ref": "#/components/schemas/unsignedMoney",
-            "description": "The amount an individual has paid to get the class 2 contributions they have on the account."
-          },
-          "class2Or3CreditStatus": {
-            "$ref": "#/components/schemas/EnumCl2stat"
-          },
-          "creditSource": {
-            "$ref": "#/components/schemas/EnumCreditSource"
-          },
-          "latePaymentPeriod": {
-            "$ref": "#/components/schemas/EnumLpind",
-            "description": "The period of time under which a late payment was made. LX: 6 OR MORE YEARS LATE, L: LATE BUT UNDER 6 YEARS, ZZ: NOT KNOWN."
-          },
-          "receiptDate": {
-            "$ref": "#/components/schemas/receiptDate"
-          }
-        },
-        "type": "object"
-      }
-    }
-  }
-}
+openapi: 3.0.3
+info:
+  title: NI Contributions and Credits
+  description: |-
+    # Usage Terms
+    These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
+    ## Version Log
+    | Version | Date | Author | Description |
+    |---------|------|--------|-------------|
+    | 0.0.1 | 25/02/2026 | NPS ScrumTeam 4 | Initial Draft |
+    | 1.0.0 | 07/04/2026 | NPS ScrumTeam 4 | Baseline Spec |
+    | 1.0.1 | 13/04/2026 | NPS ScrumTeam 4 | Adjustment's to 403 and 409 errors and fields |
+  version: 1.0.1
+  x-integration-catalogue:
+    reviewed-date: 2026-01-13T16:47:25Z
+    short-description: NI Contributions and Credit
+    status: ALPHA
+    api-type: SIMPLE
+    platform: HIP
+    backends:
+      - NI
+    domain: 1
+    sub-domain: 1.5
+servers:
+  - url: https://api.ipaas.prod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate - Production
+  - url: https://api.ipaas.preprod.eis.ns2p.corp.hmrc.gov.uk/ni
+    description: Corporate – Pre-Production
+  - url: https://api.ipaas.test.eis.ns2n.corp.hmrc.gov.uk/ni
+    description: Corporate - Test
+  - url: https://hip.ws.hmrc.gov.uk/ni
+    description: MDTP - Production
+  - url: https://hip.ws.ibt.hmrc.gov.uk/ni
+    description: MDTP - QA
+security:
+  - oAuth2:
+      - write:retrieve-ni-conts-creds
+paths:
+  /national-insurance/contributions-and-credits:
+    post:
+      tags:
+        - Contributions-and-credits
+      summary: "Retrieve Class 1, Class 2 and Class 3 Contribution and Credits."
+      description: "# Purpose\nThis API provides the capability to retrieve Class\
+        \ 1, Class 2 and Class 3 data for an account.<br>\n- This allows a search\
+        \ for Class 1 contributions and Class 2 & 3 credits for a given NINO (suffix\
+        \ optional) and range of tax years.\n- Request payload will contain the NINO\
+        \ and date of birth.<br>\n- A start year for the tax year range, not before\
+        \ 1975 or after CY-1<br>\n- An end year for the tax year range, not before\
+        \ the start year or after CY-1, and no more than five years after the start\
+        \ year (thereby allowing a range of six years inclusive). \n## Request Data\
+        \ Structure & Payload Details"
+      operationId: postNIContributionAndCredits
+      parameters:
+        - $ref: '#/components/parameters/correlationId'
+        - $ref: '#/components/parameters/govUkOriginatorId'
+        - $ref: '#/components/parameters/govUkOrganisationId'
+        - $ref: '#/components/parameters/govUkUserId'
+        - $ref: '#/components/parameters/govUkUserName'
+        - $ref: '#/components/parameters/govUkJobRole'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostNIContributionCreditRequest'
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/PostNIContCredResponse'
+              examples:
+                exampleClass1Response:
+                  summary: Employee with Class 1 across 2023-2024
+                  value:
+                    totalGraduatedPensionUnits: 9.5
+                    class1ContributionAndCredits:
+                      - taxYear: 2024
+                        numberOfContributionsAndCredits: 51
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: C1
+                        primaryContribution: 2850.0
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 32000.0
+                        creditSource: EMPLOYMENT SERVICES
+                        employerName: AcmeCo
+                        latePaymentPeriod: L
+                      - taxYear: 2023
+                        numberOfContributionsAndCredits: 51
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: C1
+                        primaryContribution: 2700.0
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 30000.0
+                        creditSource: EMPLOYMENT SERVICES
+                        employerName: Widget
+                        latePaymentPeriod: L
+                exampleJSAESAResponse:
+                  summary: Employee with Class 1 JSA/ESA Credits
+                  value:
+                    totalGraduatedPensionUnits: 9.5
+                    class1ContributionAndCredits:
+                      - taxYear: 2024
+                        numberOfContributionsAndCredits: 51
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: C1
+                        primaryContribution: 2850.0
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 32000.0
+                        creditSource: JSA TAPE INPUT
+                        employerName: AcmeCo
+                        latePaymentPeriod: L
+                      - taxYear: 2023
+                        numberOfContributionsAndCredits: 51
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: C1
+                        primaryContribution: 2700.0
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 30000.0
+                        creditSource: EMPLOYMENT AND SUPPORT
+                        employerName: Widget
+                        latePaymentPeriod: L
+                exampleClass2Response:
+                  summary: Self-employed with Class 2 credits
+                  value:
+                    totalGraduatedPensionUnits: 0
+                    class2Or3ContributionAndCredits:
+                      - taxYear: 2024
+                        numberOfContributionsAndCredits: 52
+                        contributionCreditType: C2
+                        class2Or3EarningsFactor: 6500.0
+                        class2Or3NIContributionAmount: 163.8
+                        class2Or3CreditStatus: VALID
+                        creditSource: DIRECT DEBIT
+                        latePaymentPeriod: LX
+                maximallyPopulatedResponse:
+                  summary: Maximally populate response. Combined Class 1 and Class
+                    2.
+                  value:
+                    totalGraduatedPensionUnits: 7.0
+                    class1ContributionAndCredits:
+                      - taxYear: 2022
+                        numberOfContributionsAndCredits: 26
+                        contributionCategoryLetter: B
+                        contributionCategory: REDUCED RATE
+                        contributionCreditType: C1
+                        primaryContribution: 1200.0
+                        class1ContributionStatus: CURRENT
+                        primaryPaidEarnings: 18000.0
+                        creditSource: EMPLOYMENT SERVICES
+                        employerName: Fabrik
+                        latePaymentPeriod: ZZ
+                    class2Or3ContributionAndCredits:
+                      - taxYear: 2022
+                        numberOfContributionsAndCredits: 26
+                        contributionCreditType: C2
+                        class2Or3EarningsFactor: 3250.0
+                        class2Or3NIContributionAmount: 81.9
+                        class2Or3CreditStatus: POTENTIAL
+                        creditSource: DIRECT DEBIT
+                        latePaymentPeriod: L
+        "400":
+          description: Bad Request
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                required:
+                  - origin
+                  - response
+                type: object
+                properties:
+                  origin:
+                    $ref: '#/components/schemas/HIP-originEnum'
+                  response:
+                    oneOf:
+                      - $ref: '#/components/schemas/HIP-failureResponse'
+                      - $ref: '#/components/schemas/errorResponse_400'
+                additionalProperties: false
+              examples:
+                Actual_Response:
+                  value:
+                    origin: HoD
+                    response:
+                      failures:
+                        - reason: HTTP message not readable
+                          code: "400.2"
+                        - reason: Constraint Violation - Invalid/Missing input parameter
+                          code: "400.1"
+                HIP-originResponse:
+                  description: HIP-originResponse
+                  value:
+                    origin: HIP
+                    response:
+                      - type: Type of Failure
+                        reason: Reason for Failure
+        "403":
+          description: Forbidden
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
+              examples:
+                Forbidden_Response:
+                  value:
+                    reason: Forbidden
+                    code: "403.2"
+        "404":
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResourceObj_404_Not_Found'
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
+        "422":
+          description: Unprocessable Entity
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/errorResponse_422'
+              examples:
+                "422_StartYearAfterEndYear":
+                  $ref: '#/components/examples/422_StartYearAfterEndYear'
+                "422_StartYearPre1975":
+                  $ref: '#/components/examples/422_StartYearPre1975'
+                "422_StartYearPostCY-1":
+                  $ref: '#/components/examples/422_StartYearPostCY-1'
+                "422_EndYearPostCY-1":
+                  $ref: '#/components/examples/422_EndYearPostCY-1'
+                "422_TaxYearRangeOver6":
+                  $ref: '#/components/examples/422_TaxYearRangeOver6'
+        "500":
+          $ref: '#/components/responses/internalServerErrorResponse'
+        "503":
+          description: Service Unavailable
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
+components:
+  schemas:
+    EnumLpind:
+      enum:
+        - L
+        - LX
+        - ZY
+        - ZZ
+      type: string
+    EnumCreditSource:
+      enum:
+        - ADDITIONAL STATUTORY PATERNITY PAY
+        - ADP CENTRE LIVINGSTON
+        - ADP NORTHERN IRELAND
+        - ADP READING
+        - APPROVED TRAINING CREDITS (INTERNAL)
+        - AUTOCREDITS - EXTERNALLY INPUT
+        - AUTOCREDITS - INTERNALLY CALCULATED
+        - CARER'S ALLOWANCE (CA)
+        - CARER'S CREDIT
+        - CENTRAL AWARD
+        - CHILD BENEFIT
+        - DIRECT DEBIT
+        - DPTC (GB) EMP
+        - DPTC (GB) S/EMP
+        - DPTC (NI) EMP
+        - DPTC (NI) S/EMP
+        - DSS LOCAL OFFICES
+        - DWA UNIT (BELFAST) EMPLOYED EARNERS
+        - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
+        - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
+        - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
+        - Disabled Tax Credit (Employed)
+        - Disabled Tax Credit (Self-employed)
+        - EMPLOYMENT AND SUPPORT
+        - EMPLOYMENT SERVICES
+        - FAMC-GB
+        - FAMC-NI
+        - FAMILY CREDIT (GB)
+        - FAMILY CREDIT (NI)
+        - FOSTER CARER
+        - HNCIP OR SDA
+        - HRP CONVERSION
+        - INCAPACITY
+        - ISLE OF MAN
+        - JSA PAPER INPUT
+        - JSA TAPE INPUT
+        - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
+        - JURY SERVICE
+        - JUVENILE CREDITS (INTERNAL)
+        - LONG TERM SCALE RATE
+        - MoD Spouse/Civil Partner's Credits
+        - NORTHERN IRELAND SICKNESS CREDITS
+        - NOT APPLICABLE
+        - NOT KNOWN
+        - NUBS 2
+        - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+        - PSCS INCAP
+        - Post 75 Service Spouses Credit
+        - QUARTERLY BILLING
+        - SHARED PARENTAL PAY
+        - SPECIFIED ADULT CARER
+        - STATUTORY ADOPTION PAY CREDIT
+        - STATUTORY MATERNITY PAY CREDIT
+        - Statutory Parental Bereavement Pay
+        - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
+        - UNIVERSAL CREDIT
+        - WFTC (GB)
+        - WFTC (NI)
+        - WIDOWS CREDITS (INTERNAL)
+        - Working Tax Credit (Employed)
+        - Working Tax Credit (Self-employed)
+        - CARER SUPPORT PAYMENT (CSP)
+        - Statutory Neonatal Care Pay
+      type: string
+    EnumCl1stat:
+      enum:
+        - COMPLIANCE & YIELD INCOMPLETE
+        - CURRENT
+        - HISTORIC AMENDED
+        - HISTORIC CANCELLED
+        - INVALID - NO RCF
+        - INVALID - RCF
+        - INVALID COMPATIBILITY CHECK
+        - NOT KNOWN / NOT APPLICABLE
+        - POTENTIAL
+        - VALID
+        - VALID RCF
+      type: string
+    EnumCl2stat:
+      description: Denotes the status for the credit.
+      enum:
+        - NOT KNOWN/NOT APPLICABLE
+        - VALID
+        - INVALID
+        - POTENTIAL
+        - INVALID COMPATIBILITY CHECK
+      type: string
+    EnumCCType:
+      description: Short code relating to the type of contribution or credit.
+      enum:
+        - C1
+        - HMF
+        - MAR
+        - CS
+        - EON
+        - CR1
+        - C2
+        - C2W
+        - SF
+        - 2A
+        - 2B
+        - 2C
+        - 2D
+        - SFA
+        - SFB
+        - SFC
+        - SFD
+        - VDA
+        - VDB
+        - VDC
+        - VDD
+        - 2N
+        - 3PR
+        - 3A
+        - 3B
+        - 3C
+        - 3D
+        - CR3
+        - 3N
+      type: string
+    EnumContCatFull:
+      enum:
+        - (NONE)
+        - CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS
+        - CONVERTED ACCOUNT - CONTRACTED OUT
+        - CONTRACTED OUT REDUCED RATE
+        - CONTRACTED-OUT REDUCED RATE COSR
+        - CONTRACTED-OUT REDUCED RATE (COMP)
+        - CONTRACTED OUT STANDARD RATE COSR
+        - CONTRACTED-OUT STANDARD RATE (COMP)
+        - NOT FEASIBLE
+        - NO LIABILITY
+        - OFFICE HOLDERS
+        - DEFERRED RATE
+        - REDUCED RATE
+        - REDUCED RATE CONTRACTED-OUT
+        - REDUCED RATE CONTRACTED-OUT (COSR)
+        - STANDARD RATE
+        - STANDARD RATE CONTRACTED OUT
+        - STANDARD RATE CONTRACTED-OUT
+        - STANDARD RATE CONTRACTED-OUT (COSR)
+        - UNALLOCATED
+        - ZERO RATE
+        - ZERO RATE (NIC HOLIDAY)
+      type: string
+    EnumContCatLetter:
+      enum:
+        - (NONE)
+        - "Y"
+        - J
+        - O
+        - "N"
+        - T
+        - W
+        - R
+        - K
+        - H
+        - V
+        - I
+        - P
+        - G
+        - F
+        - M
+        - S
+        - L
+        - Q
+        - X
+        - Z
+        - B
+        - E
+        - A
+        - D
+        - U
+        - C
+      type: string
+    correlationId:
+      format: uuid
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      type: string
+      example: e470d658-99f7-4292-a4a1-ed12c72f1337
+    govUkOriginatorId:
+      description: Identity of the Originating System that made the API call
+      maxLength: 40
+      minLength: 3
+      type: string
+    govUkOrganisationId:
+      description: A unique organisation ID for the user.
+      maxLength: 40
+      minLength: 4
+      type: string
+      example: Department
+    govUkUserId:
+      description: A unique user ID for the user.
+      maxLength: 7
+      minLength: 7
+      type: string
+    govUkUserName:
+      description: A unique username for the user.
+      minLength: 4
+      type: string
+      example: Worker
+    govUkJobRole:
+      description: A unique job role for the user.
+      minLength: 4
+      type: string
+      example: Social
+    errorResponse_400:
+      title: Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: object
+      properties:
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/errorResourceObj_400'
+    errorResourceObj_400:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: |-
+            The error code representing the error that has occurred. Valid values are
+            400.1 - Constraint violation (Followed by 'Invalid/Missing input parameter path.to.field')
+            400.2 - HTTP message not readable.
+          enum:
+            - "400.1"
+            - "400.2"
+          type: string
+    errorResourceObj_403_Forbidden:
+      title: 403_Forbidden
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Forbidden
+          type: string
+        code:
+          description: The error code representing the Forbidden Error.
+          enum:
+            - "403.2"
+          type: string
+    errorResourceObj_404_Not_Found:
+      title: 404_Not_Found
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          enum:
+            - Not Found
+          type: string
+        code:
+          description: The error code representing the Not Found Error.
+          enum:
+            - "404"
+          type: string
+    errorResponse_422:
+      title: Error Response
+      description: Error Response Payload for this API
+      type: object
+      properties:
+        failures:
+          $ref: '#/components/schemas/errorResponseFailure_422'
+    errorResponseFailure_422:
+      title: Failure Object in Error Response
+      description: Array of Error Response Failure Object in Error Response.
+      type: array
+      items:
+        $ref: '#/components/schemas/errorResourceObj_422'
+    errorResourceObj_422:
+      required:
+        - code
+        - reason
+      type: object
+      properties:
+        reason:
+          description: Displays the reason of the failure.
+          maxLength: 128
+          minLength: 1
+          type: string
+        code:
+          description: The error code representing the error that has occurred.
+          maxLength: 10
+          minLength: 1
+          type: string
+    taxYear:
+      description: "Denotes the tax year (i.e. the year the tax period started, 2023\
+        \ for a 2023/2024 tax period)."
+      maximum: 2099
+      minimum: 1900
+      type: integer
+      example: 2022
+    nationalInsuranceNumberAndSuffix:
+      description: National Insurance Number - unique for an individual - note not
+        all individuals qualify to be issued with one.
+      maxLength: 9
+      minLength: 8
+      pattern: "^((?:[ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]?)$"
+      type: string
+      example: AA000001A
+    unsignedMoney:
+      description: Positive or zero monetary value.
+      multipleOf: 0.01
+      maximum: 99999999999999.98
+      minimum: 0
+      type: number
+    numberOfContributionsAndCredits:
+      description: Number of weekly credits that apply to the credit record.
+      maximum: 53
+      minimum: 0
+      type: integer
+    employerName:
+      description: "Employer name, held as a checkbrick in NPS for employment details\
+        \ linked to a contribution."
+      maxLength: 6
+      minLength: 1
+      pattern: "^([A-Za-z ])+$"
+      type: string
+    receiptDate:
+      format: date
+      description: The date that the receipt was published.
+      type: string
+      example: 2022-06-27
+    PostNIContributionCreditRequest:
+      description: Request payload for this API.
+      required:
+        - nationalInsuranceNumber
+        - dateOfBirth
+        - startTaxYear
+        - endTaxYear
+      type: object
+      properties:
+        nationalInsuranceNumber:
+          $ref: '#/components/schemas/nationalInsuranceNumberAndSuffix'
+        dateOfBirth:
+          format: date
+          description: The date of birth of the individual.
+          type: string
+          example: 2022-06-27
+        startTaxYear:
+          $ref: '#/components/schemas/taxYear'
+        endTaxYear:
+          $ref: '#/components/schemas/taxYear'
+      additionalProperties: false
+    PostNIContCredResponse:
+      description: Success response payload for this API.
+      type: object
+      properties:
+        totalGraduatedPensionUnits:
+          description: "Denotes the total number of graduated pension units paid to\
+            \ an individual. Value precision allows for up to 6 decimal places - i.e.\
+            \ 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted\
+            \ values."
+          multipleOf: 0.0000010
+          maximum: 100
+          minimum: 0
+          type: number
+          example: 10
+        class1ContributionAndCredits:
+          description: Contains an array of Class 1 records.
+          type: array
+          items:
+            $ref: '#/components/schemas/Class1ContributionAndCredits'
+        class2Or3ContributionAndCredits:
+          description: Contains an array of Class 2 or Class 3 records.
+          type: array
+          items:
+            $ref: '#/components/schemas/Class2Or3ContributionAndCredits'
+    Class1ContributionAndCredits:
+      description: Contains details of a Class 1 record.
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        numberOfContributionsAndCredits:
+          $ref: '#/components/schemas/numberOfContributionsAndCredits'
+        contributionCategoryLetter:
+          $ref: '#/components/schemas/EnumContCatLetter'
+        contributionCategory:
+          $ref: '#/components/schemas/EnumContCatFull'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        primaryContribution:
+          $ref: '#/components/schemas/unsignedMoney'
+        class1ContributionStatus:
+          $ref: '#/components/schemas/EnumCl1stat'
+        primaryPaidEarnings:
+          $ref: '#/components/schemas/unsignedMoney'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        employerName:
+          $ref: '#/components/schemas/employerName'
+        latePaymentPeriod:
+          $ref: '#/components/schemas/EnumLpind'
+    Class2Or3ContributionAndCredits:
+      description: Contains details of a Class 2 or Class 3 record.
+      type: object
+      properties:
+        taxYear:
+          $ref: '#/components/schemas/taxYear'
+        numberOfContributionsAndCredits:
+          $ref: '#/components/schemas/numberOfContributionsAndCredits'
+        contributionCreditType:
+          $ref: '#/components/schemas/EnumCCType'
+        class2Or3EarningsFactor:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2Or3NIContributionAmount:
+          $ref: '#/components/schemas/unsignedMoney'
+        class2Or3CreditStatus:
+          $ref: '#/components/schemas/EnumCl2stat'
+        creditSource:
+          $ref: '#/components/schemas/EnumCreditSource'
+        latePaymentPeriod:
+          $ref: '#/components/schemas/EnumLpind'
+        receiptDate:
+          $ref: '#/components/schemas/receiptDate'
+    HIP-originEnum:
+      enum:
+        - HIP
+        - HoD
+      type: string
+    HIP-failureResponse:
+      required:
+        - failures
+      type: object
+      properties:
+        failures:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            required:
+              - type
+              - reason
+            type: object
+            properties:
+              type:
+                type: string
+              reason:
+                type: string
+            additionalProperties: false
+    HIP-originResponse:
+      required:
+        - origin
+        - response
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/HIP-originEnum'
+        response:
+          $ref: '#/components/schemas/HIP-failureResponse'
+      additionalProperties: false
+  responses:
+    badRequestResponse:
+      description: Bad Request
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/errorResponse_400'
+          examples:
+            Actual_Response:
+              value:
+                failures:
+                  - reason: HTTP message not readable
+                    code: "400.2"
+                  - reason: "Constraint violation: Invalid/Missing input parameter:\
+                    \ <parameter>"
+                    code: "400.1"
+    notFoundErrorResponse:
+      description: The requested resource could not be found
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+    internalServerErrorResponse:
+      description: Internal Server Error
+      headers:
+        correlationId:
+          $ref: '#/components/headers/correlationId'
+  parameters:
+    correlationId:
+      name: correlationId
+      in: header
+      description: Correlation ID - used for traceability purposes - note that this
+        value in the response matches that received in the request to allow correlation.
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+    govUkOriginatorId:
+      name: gov-uk-originator-id
+      in: header
+      description: Identity of the Originating System that made the API call.
+      required: true
+      schema:
+        $ref: '#/components/schemas/govUkOriginatorId'
+    govUkOrganisationId:
+      name: gov-uk-organisation-id
+      in: header
+      description: A unique organisation ID for the user.
+      schema:
+        $ref: '#/components/schemas/govUkOrganisationId'
+    govUkUserId:
+      name: gov-uk-user-id
+      in: header
+      description: A unique user ID for the user.
+      required: false
+      schema:
+        $ref: '#/components/schemas/govUkUserId'
+    govUkUserName:
+      name: gov-uk-user-name
+      in: header
+      description: A unique username for the user.
+      schema:
+        $ref: '#/components/schemas/govUkUserName'
+    govUkJobRole:
+      name: gov-uk-job-role
+      in: header
+      description: A unique job role for the user.
+      schema:
+        $ref: '#/components/schemas/govUkJobRole'
+  examples:
+    "422_StartYearAfterEndYear":
+      summary: Start Year After End Year
+      value:
+        failures:
+          - reason: Start tax year after end tax year
+            code: "63496"
+    "422_StartYearPre1975":
+      summary: Start Year Pre 1975
+      value:
+        failures:
+          - reason: Start tax year before 1975
+            code: "63497"
+    "422_StartYearPostCY-1":
+      summary: Start Year Post CY-1
+      value:
+        failures:
+          - reason: Start tax year after CY-1
+            code: "63498"
+    "422_EndYearPostCY-1":
+      summary: End Year Post CY-1
+      value:
+        failures:
+          - reason: End tax year after CY-1
+            code: "63499"
+    "422_TaxYearRangeOver6":
+      summary: Tax Year Range Over 6 Years
+      value:
+        failures:
+          - reason: Tax year range greater than six years
+            code: "63500"
+  headers:
+    correlationId:
+      required: true
+      schema:
+        $ref: '#/components/schemas/correlationId'
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: OAuth2 Client Credentials Flow
+      flows:
+        clientCredentials:
+          tokenUrl: /tokenUrl/not-required
+          scopes:
+            write:retrieve-ni-conts-creds: NI Contributions and Credit
