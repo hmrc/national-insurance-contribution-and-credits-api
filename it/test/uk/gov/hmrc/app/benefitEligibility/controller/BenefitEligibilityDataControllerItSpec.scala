@@ -3420,40 +3420,6 @@ class BenefitEligibilityDataControllerItSpec
         r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
       }
 
-      "should include CorrelationId header as N/A when missing from request" in {
-        server.stubFor(
-          post(urlEqualTo("/auth/authorise"))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")
-            )
-        )
-
-        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
-          nationalInsuranceNumber,
-          ContributionsAndCreditsRequestParams(
-            DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2025),
-            EndTaxYear(2026)
-          )
-        )
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "Accept"        -> "application/json"
-          )
-
-        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
-
-        status(result) shouldBe 400
-        val r = Helpers.await(result)
-        r.header.headers.get("CorrelationId") shouldBe Some("N/A")
-      }
-
       "should return 400 if request is missing originator id" in {
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
