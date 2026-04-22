@@ -50,75 +50,79 @@ object BenefitEligibilityRequestHandler {
       ]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (
-      getAcceptHeader(request) match {
-        case Right(_) =>
-          getCorrelationId(request) match {
-            case Right(correlationId) =>
-              request.body.asJson match {
-                case Some(requestJson) =>
-                  requestJson.validate[EligibilityCheckDataRequest] match {
-                    case JsSuccess(eligibilityCheckDataRequest, _) =>
-                      RequestValidations.validateRequest(eligibilityCheckDataRequest) match {
-                        case Left(validationError) =>
-                          logger.error(s"Validation Error: ${validationError.messages.mkString(",")}")
-                          EitherT.rightT[Future, BenefitEligibilityError](
-                            UnprocessableEntity(
-                              Json.toJson(
-                                ErrorResponse(
-                                  ErrorCode.UnprocessableEntity,
-                                  ErrorReason(validationError.messages.mkString(","))
-                                )
+      validateHeaders(request) match {
+        case Right(correlationId, originatorId) =>
+          request.body.asJson match {
+            case Some(requestJson) =>
+              requestJson.validate[EligibilityCheckDataRequest] match {
+                case JsSuccess(eligibilityCheckDataRequest, _) =>
+                  if (OriginatorIdType.from(eligibilityCheckDataRequest.benefitType) == originatorId) {
+                    RequestValidations.validateRequest(eligibilityCheckDataRequest) match {
+                      case Left(validationError) =>
+                        logger.error(s"Validation Error: ${validationError.messages.mkString(",")}")
+                        EitherT.rightT[Future, BenefitEligibilityError](
+                          UnprocessableEntity(
+                            Json.toJson(
+                              ErrorResponse(
+                                ErrorCode.UnprocessableEntity,
+                                ErrorReason(validationError.messages.mkString(","))
                               )
-                            ).withHeaders("CorrelationId" -> correlationId.value.toString)
-                          )
-                        case Right(value) =>
-                          logger.info("Fetching benefit eligibility data")
-                          fn(eligibilityCheckDataRequest, correlationId).map { result =>
-                            BenefitEligibilityInfoResponse.from(
-                              eligibilityCheckDataRequest.nationalInsuranceNumber,
-                              result
-                            ) match {
-                              case Left(value) =>
-                                InternalServerError(Json.toJson(value)).withHeaders(
-                                  "CorrelationId" -> correlationId.value.toString
-                                )
-                              case Right(value) =>
-                                Ok(Json.toJson(value)).withHeaders("CorrelationId" -> correlationId.value.toString)
-                            }
-                          }
-                      }
-                    case JsError(errors) =>
-                      val errorMessage = errors
-                        .map { error =>
-                          if (error._1.toString.isEmpty) error._2.flatMap(_.messages).mkString(",")
-                          else s"${error._1.toString} ${error._2.flatMap(_.messages).mkString(",")}"
-                        }
-                        .mkString("[", ", ", "]")
-                      logger.error(s"bad request ${errors.mkString(",")}")
-                      EitherT.rightT[Future, BenefitEligibilityError](
-                        BadRequest(
-                          Json.toJson(
-                            ErrorResponse(
-                              ErrorCode.BadRequest,
-                              ErrorReason(s"incompatible json, request body does not match schema - $errorMessage")
                             )
+                          ).withHeaders("CorrelationId" -> correlationId.value.toString)
+                        )
+                      case Right(value) =>
+                        logger.info("Fetching benefit eligibility data")
+                        fn(eligibilityCheckDataRequest, correlationId).map { result =>
+                          BenefitEligibilityInfoResponse.from(
+                            eligibilityCheckDataRequest.nationalInsuranceNumber,
+                            result
+                          ) match {
+                            case Left(value) =>
+                              InternalServerError(Json.toJson(value)).withHeaders(
+                                "CorrelationId" -> correlationId.value.toString
+                              )
+                            case Right(value) =>
+                              Ok(Json.toJson(value)).withHeaders("CorrelationId" -> correlationId.value.toString)
+                          }
+                        }
+                    }
+                  } else {
+                    EitherT.rightT[Future, BenefitEligibilityError](
+                      BadRequest(
+                        Json.toJson(
+                          ErrorResponse(
+                            ErrorCode.BadRequest,
+                            ErrorReason(s"Originator Id doesnt match benefit type")
                           )
-                        ).withHeaders("CorrelationId" -> correlationId.value.toString)
-                      )
+                        )
+                      ).withHeaders("CorrelationId" -> correlationId.value.toString)
+                    )
                   }
-                case None =>
-                  logger.error("invalid json")
+                case JsError(errors) =>
+                  val errorMessage = errors
+                    .map { error =>
+                      if (error._1.toString.isEmpty) error._2.flatMap(_.messages).mkString(",")
+                      else s"${error._1.toString} ${error._2.flatMap(_.messages).mkString(",")}"
+                    }
+                    .mkString("[", ", ", "]")
+                  logger.error(s"bad request ${errors.mkString(",")}")
                   EitherT.rightT[Future, BenefitEligibilityError](
                     BadRequest(
-                      Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
-                    ).withHeaders("CorrelationId" -> correlationId.value.toString)
+                      Json.toJson(
+                        ErrorResponse(
+                          ErrorCode.BadRequest,
+                          ErrorReason(s"incompatible json, request body does not match schema - $errorMessage")
+                        )
+                      )
+                    )
                   )
               }
-            case Left(error: ErrorReason) =>
+            case None =>
+              logger.error("invalid json")
               EitherT.rightT[Future, BenefitEligibilityError](
                 BadRequest(
-                  Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
-                ).withHeaders("CorrelationId" -> "N/A")
+                  Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
+                ).withHeaders("CorrelationId" -> correlationId.value.toString)
               )
           }
         case Left(error: ErrorReason) =>
@@ -141,8 +145,8 @@ object BenefitEligibilityRequestHandler {
       request: Request[AnyContent],
       paginationFunction: PaginationCursor => EitherT[Future, BenefitEligibilityError, PaginationResult]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
-    (getCorrelationId(request) match {
-      case Right(correlationId) =>
+    (validateHeaders(request) match {
+      case Right(correlationId, originatorId) =>
         val maybeNextCursor =
           request.queryString
             .get("cursorId")
@@ -210,6 +214,36 @@ object BenefitEligibilityRequestHandler {
 
       case Right(response) => response
     }
+
+  private def validateHeaders(request: Request[AnyContent])(
+      implicit headerCarrier: HeaderCarrier
+  ): Either[ErrorReason, (CorrelationId, OriginatorIdType)] =
+    getAcceptHeader(request) match {
+      case Right(_) =>
+        getOriginatorId(request) match {
+          case Right(id) =>
+            getCorrelationId(request) match {
+              case Right(correlationId)     => Right(correlationId, id)
+              case Left(error: ErrorReason) => Left(error)
+            }
+          case Left(error: ErrorReason) => Left(error)
+        }
+      case Left(error: ErrorReason) => Left(error)
+
+    }
+
+  private def getOriginatorId(request: Request[AnyContent])(
+      implicit headerCarrier: HeaderCarrier
+  ): Either[ErrorReason, OriginatorIdType] = {
+    logger.info("Validating Originator Id")
+    request.headers.get("OriginatorId") match {
+      case None =>
+        logger.error("Missing Originator Id")
+        Left(ErrorReason("Missing Originator Id"))
+      case Some(acceptHeader) =>
+        RequestValidations.validateOriginatorId(Some(acceptHeader))
+    }
+  }
 
   private def getAcceptHeader(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier
