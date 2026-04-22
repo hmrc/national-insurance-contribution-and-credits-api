@@ -638,7 +638,7 @@ paths:
       operationId: GetBenefitEligibilityInformation
       tags:
       - Benefit-eligibility-info
-      summary: Request information that can be used to determine benefit eligibility
+      summary: Request any remaining information that can be used to determine benefit eligibility (paging endpoint only)
       parameters:
       - name: correlationId
         description: Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.
@@ -958,10 +958,14 @@ paths:
                         code: BAD_REQUEST
                         message: invalid liability calculation parameters
                         downstreamStatus: 400
+<<<<<<< Updated upstream
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
       description: "retrieves data for that is critical to successfully checking a claimants eligibility for any of the following benefits - BSP, GYSP, ESA, JSA, MA"
+=======
+      description: retrieves remaining data for that is critical to successfully checking a claimants eligibility
+>>>>>>> Stashed changes
       security:
       - applicationRestricted:
         - write:protect-connect

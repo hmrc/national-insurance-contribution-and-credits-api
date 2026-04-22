@@ -48,7 +48,7 @@ object BenefitEligibilityRequestHandler {
         BenefitEligibilityError,
         EligibilityCheckDataResult
       ]
-  )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
+  )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] = {
     (
       getAcceptHeader(request) match {
         case Right(_) =>
@@ -69,7 +69,7 @@ object BenefitEligibilityRequestHandler {
                                   ErrorReason(validationError.messages.mkString(","))
                                 )
                               )
-                            ).withHeaders("CorrelationId" -> correlationId.value.toString)
+                            )
                           )
                         case Right(value) =>
                           logger.info("Fetching benefit eligibility data")
@@ -83,7 +83,7 @@ object BenefitEligibilityRequestHandler {
                                   "CorrelationId" -> correlationId.value.toString
                                 )
                               case Right(value) =>
-                                Ok(Json.toJson(value)).withHeaders("CorrelationId" -> correlationId.value.toString)
+                                Ok(Json.toJson(value))
                             }
                           }
                       }
@@ -103,7 +103,7 @@ object BenefitEligibilityRequestHandler {
                               ErrorReason(s"incompatible json, request body does not match schema - $errorMessage")
                             )
                           )
-                        ).withHeaders("CorrelationId" -> correlationId.value.toString)
+                        )
                       )
                   }
                 case None =>
@@ -111,31 +111,41 @@ object BenefitEligibilityRequestHandler {
                   EitherT.rightT[Future, BenefitEligibilityError](
                     BadRequest(
                       Json.toJson(ErrorResponse(ErrorCode.BadRequest, ErrorReason("invalid json")))
-                    ).withHeaders("CorrelationId" -> correlationId.value.toString)
+                    )
                   )
               }
             case Left(error: ErrorReason) =>
               EitherT.rightT[Future, BenefitEligibilityError](
                 BadRequest(
                   Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
-                ).withHeaders("CorrelationId" -> "N/A")
+                )
               )
           }
         case Left(error: ErrorReason) =>
           EitherT.rightT[Future, BenefitEligibilityError](
             BadRequest(
               Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
-            ).withHeaders("CorrelationId" -> "N/A")
+            )
           )
       }
-    ).value.map {
-      case Left(error) =>
-        logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
-        InternalServerError(
-          Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
-        ).withHeaders("CorrelationId" -> "N/A")
-      case Right(response) => response
+    ).value.map { v =>
+      getCorrelationId(request) match {
+        case Left(error) =>
+          BadRequest(
+            Json.toJson(ErrorResponse(ErrorCode.BadRequest, error))
+          )
+        case Right(correlationId) =>
+          v match {
+            case Left(error) =>
+              logger.error(s"Internal server error ${error.toStringSafeToLogInProd}")
+              InternalServerError(
+                Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
+              ).withHeaders("CorrelationId" -> correlationId.value.toString)
+            case Right(response) => response.withHeaders("CorrelationId" -> correlationId.value.toString)
+          }
+      }
     }
+  }
 
   def handlePaginationRequest(
       request: Request[AnyContent],

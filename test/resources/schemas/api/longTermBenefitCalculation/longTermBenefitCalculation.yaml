@@ -4,7 +4,7 @@ info:
   description: |-
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 0.0.3 Draft
+  version: 1.0.1
   x-integration-catalogue:
     reviewed-date: 2026-01-13T16:47:25Z
     short-description: Long Term Benefit Calculation
@@ -45,7 +45,9 @@ paths:
         | 0.0.1 | 10/12/2025 | NPS Development Team  | Initial Draft  |
         | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples |
         | 0.0.3 | 18/03/2026 | NPS Development Team  | Added resource group ID header |
-      operationId: GetLongTermBenefitCalculationDetails
+        | 1.0.0 | 30/03/2026 | Scrum Team 4          | Baselining Spec|
+        | 1.0.1 | 10/04/2026 | Scrum Team 4          | Lower casing parameters|
+      operationId: getLongTermBenefitCalculationDetails
       parameters:
         - $ref: '#/components/parameters/correlationId'
         - $ref: '#/components/parameters/govUkOriginatorId'
@@ -54,10 +56,10 @@ paths:
         - $ref: '#/components/parameters/govUkUserName'
         - $ref: '#/components/parameters/govUkJobRole'
         - $ref: '#/components/parameters/resourceGroupId'
-        - $ref: '#/components/parameters/Identifier'
-        - $ref: '#/components/parameters/AssociatedCalculationSequenceNumber'
-        - $ref: '#/components/parameters/BenefitType'
-        - $ref: '#/components/parameters/PensionProcessingArea'
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/associatedCalculationSequenceNumber'
+        - $ref: '#/components/parameters/benefitType'
+        - $ref: '#/components/parameters/pensionProcessingArea'
       responses:
         "200":
           description: Successful Response
@@ -114,7 +116,7 @@ paths:
                             calculationDate: 2025-11-01
                 maximallyPopulatedResponseBereavementBenefitAndJobCentrePlusEEPP:
                   summary: Maximally populated response when benefit type is BEREAVEMENT
-                    BENEFIT and PensionProcessingArea is Job Centre+ Electronic Enabled
+                    BENEFIT and pensionProcessingArea is Job Centre+ Electronic Enabled
                     Pension Processing
                   value:
                     statePensionAgeBefore2010TaxYear: true
@@ -188,7 +190,7 @@ paths:
                             newStatePensionRequisiteYears: 35
                             calculationDate: 2022-06-27
                 maximallyPopulatedResponseStandardEEPP:
-                  summary: Maximally populated response when PensionProcessingArea
+                  summary: Maximally populated response when pensionProcessingArea
                     is Standard Electronic Enabled Pension Processing
                   value:
                     statePensionAgeBefore2010TaxYear: true
@@ -504,7 +506,6 @@ components:
       type: string
     govUkUserName:
       description: A unique username for the user.
-      maxLength: 20
       minLength: 4
       type: string
       example: Worker
@@ -519,7 +520,7 @@ components:
       minimum: 0
       type: integer
       example: 11111111
-    identifier:
+    identifierParameter:
       description: The identifier of which could be either a Temporary Reference Number
         (TRN) e.g. 00A00000 or a National Insurance Number (NINO) e.g. AA000001A.
       maxLength: 9
@@ -1293,7 +1294,7 @@ components:
       properties:
         officeLocationDecode:
           description: A unique identifier for an office location.
-          maximum: 99999
+          maximum: 999999
           minimum: 0
           type: integer
           example: 1
@@ -1389,15 +1390,15 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/resourceGroupIdentifier'
-    Identifier:
+    identifier:
       name: identifier
       in: path
       description: The identifier of which could be either a Temporary Reference Number
         (TRN) or a National Insurance Number (NINO).
       required: true
       schema:
-        $ref: '#/components/schemas/identifier'
-    AssociatedCalculationSequenceNumber:
+        $ref: '#/components/schemas/identifierParameter'
+    associatedCalculationSequenceNumber:
       name: seqNo
       in: query
       description: Unique sequence number representing the position in the associated
@@ -1408,17 +1409,15 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/associatedCalculationSequenceNumber'
-    BenefitType:
+    benefitType:
       name: type
       in: query
       description: Denotes the area responsible for the electronic enabling of the
-        pensions processing. This would only be populated if the previous call did
-        not transfer all of the data i.e. there are more rows marked to be collected
-        still.
+        pensions processing.
       required: false
       schema:
         $ref: '#/components/schemas/benefitType'
-    PensionProcessingArea:
+    pensionProcessingArea:
       name: pensionProcessingArea
       in: query
       description: Denotes the area responsible for the electronic enabling of the

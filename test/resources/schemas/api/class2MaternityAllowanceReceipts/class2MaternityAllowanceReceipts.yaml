@@ -4,7 +4,7 @@ info:
   description: |-
     # Usage Terms
     These interfaces are business-critical interfaces for HMRC and DWP, supporting thousands of staff - all consumption, or change in consumption levels, should be registered and fully approved (see Registered Consumers below).
-  version: 0.0.4 Draft
+  version: 1.0.2
   x-integration-catalogue:
     reviewed-date: 2026-01-13T16:47:25Z
     short-description: Class 2 Maternity Allowance Receipts
@@ -37,6 +37,9 @@ paths:
       description: |-
         # Purpose
         This API provides the capability to retrieve class 2 Maternity Allowance Receipts.<br>
+        - The API must provide the following path parameters:<br>
+          - National Insurance Number (identifier). <br>
+        The default behaviour for this API if a sortBy parameter is not defined in the request is DATE OF FINAL PAYMENT  in ASCENDING order. <br>
         ## Version Log
         | Version | Date | Author | Description |
         |---------|------|--------|-------------|
@@ -44,6 +47,8 @@ paths:
         | 0.0.2 | 13/01/2026 | NPS Development Team  | Added examples |
         | 0.0.3 | 20/02/2026 | NPS Development Team  | changed latest query to archived + added callbackURL + changed to nino + removing receivablePeriodEndDate & receivablePeriodStartDate|
         | 0.0.4 | 18/03/2026 | NPS Development Team  | Changed minimum payload|
+        | 1.0.0 | 17/02/2026 | Scrum Team 4          | Spec Baseline  |
+        | 1.0.2 | 10/04/2026 | Scrum Team 4          | Adjusting error ref |
       operationId: getClass2MAReceipts
       parameters:
         - $ref: '#/components/parameters/correlationId'
@@ -52,10 +57,10 @@ paths:
         - $ref: '#/components/parameters/govUkUserId'
         - $ref: '#/components/parameters/govUkUserName'
         - $ref: '#/components/parameters/govUkJobRole'
-        - $ref: '#/components/parameters/FullNationalInsuranceNumber'
-        - $ref: '#/components/parameters/Archived'
-        - $ref: '#/components/parameters/ReceiptDate'
-        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/fullNationalInsuranceNumber'
+        - $ref: '#/components/parameters/archived'
+        - $ref: '#/components/parameters/receiptDate'
+        - $ref: '#/components/parameters/sortBy'
       responses:
         "200":
           description: Successful Response
@@ -151,27 +156,40 @@ paths:
                       - type: Type of Failure
                         reason: Reason for Failure
         "403":
-          description: 'Forbidden '
+          description: Forbidden
           headers:
             correlationId:
               $ref: '#/components/headers/correlationId'
           content:
             application/json;charset=UTF-8:
               schema:
-                $ref: '#/components/schemas/errorResponse_403'
+                $ref: '#/components/schemas/errorResourceObj_403_Forbidden'
               examples:
-                UserNotAuthorised_Response:
-                  value:
-                    reason: User Not Authorised
-                    code: "403.1"
                 Forbidden_Response:
                   value:
                     reason: Forbidden
                     code: "403.2"
         "404":
-          $ref: '#/components/responses/notFoundErrorResponse'
+          description: Not Found Response
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              examples:
+                Actual_Response:
+                  value:
+                    code: "404"
+                    reason: Not Found
         "500":
-          $ref: '#/components/responses/internalServerErrorResponse'
+          description: Internal Server Error
+          headers:
+            correlationId:
+              $ref: '#/components/headers/correlationId'
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/HIP-originResponse'
         "422":
           description: Unprocessable Entity
           headers:
@@ -218,7 +236,6 @@ components:
       type: string
     govUkUserName:
       description: A unique username for the user.
-      maxLength: 20
       minLength: 4
       type: string
       example: Worker
@@ -258,14 +275,14 @@ components:
       type: string
       example: 2023-06-27
     billAmount:
-      description: Bill amount of the class 2 MA receipt
+      description: Bill amount of the class 2 MA receipt.
       multipleOf: 0.01
       maximum: 99999999999999.98
       minimum: -99999999999999.98
       type: number
       example: 10.56
     billScheduleNumber:
-      description: Bill schedule number of the class 2 MA receipt
+      description: Bill schedule number of the class 2 MA receipt.
       type: integer
     isClosedRecord:
       description: Confirms if the receipt is a closed / paid receipt.
@@ -273,13 +290,6 @@ components:
     weeksPaid:
       description: A calculated number of weeks paid
       type: integer
-    initials:
-      description: The Initials of the customer.
-      maxLength: 2
-      minLength: 1
-      pattern: "^([A-Za-z '-])+$"
-      type: string
-      example: JP
     surname:
       description: The surname of the individual.
       maxLength: 99
@@ -287,6 +297,13 @@ components:
       pattern: "^([A-Za-z '-])+$"
       type: string
       example: van Cholmondley-warner
+    initials:
+      description: The Initials of the customer.
+      maxLength: 2
+      minLength: 1
+      pattern: "^([A-Za-z '-])+$"
+      type: string
+      example: JP
     errorResponse_400:
       title: Error Response
       description: Array of Error Response Failure Object in Error Response.
@@ -518,7 +535,7 @@ components:
       description: A unique job role for the user.
       schema:
         $ref: '#/components/schemas/govUkJobRole'
-    FullNationalInsuranceNumber:
+    fullNationalInsuranceNumber:
       name: nino
       in: path
       description: National Insurance Number - unique for an individual - note not
@@ -526,7 +543,7 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/nationalInsuranceNumberAndSuffix'
-    Archived:
+    archived:
       name: archived
       in: query
       description: "Flag to determine if the consuming system wants to access archived/\
@@ -537,16 +554,14 @@ components:
       schema:
         type: boolean
       example: true
-    ReceiptDate:
+    receiptDate:
       name: receiptDate
       in: query
-      description: Filter by Receipt Date - this is a restart key. This should only
-        be populated if the previous call did not transfer all of the data i.e. there
-        are more rows marked to be collected still.
+      description: Filter by Receipt Date.
       required: false
       schema:
         $ref: '#/components/schemas/receiptDate'
-    SortBy:
+    sortBy:
       name: type
       in: query
       description: Capabilities of data sort.
