@@ -84,6 +84,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.en
   Class1ContributionStatus,
   Class2Or3CreditStatus,
   ContributionCategory,
+  ContributionCategoryLetter,
   CreditSource,
   LatePaymentPeriod,
   NiContributionCreditType
@@ -204,7 +205,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
         Class1ContributionAndCredits(
           taxYear = Some(TaxYear(2022)),
           numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-          contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+          contributionCategoryLetter = Some(ContributionCategoryLetter.U),
           contributionCategory = Some(ContributionCategory.None),
           contributionCreditType = Some(NiContributionCreditType.C1),
           primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),

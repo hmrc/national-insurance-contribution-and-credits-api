@@ -80,15 +80,6 @@ object NiContributionsAndCreditsSuccess {
     implicit val billScheduleNumberFormat: Format[BillScheduleNumber] = Json.valueFormat[BillScheduleNumber]
   }
 
-  final case class ContributionCategoryLetter(value: String) extends AnyVal
-
-  object ContributionCategoryLetter {
-
-    implicit val contributionCategoryLetterWrites: Format[ContributionCategoryLetter] =
-      Json.valueFormat[ContributionCategoryLetter]
-
-  }
-
   final case class EmployerName(value: String) extends AnyVal
 
   object EmployerName {

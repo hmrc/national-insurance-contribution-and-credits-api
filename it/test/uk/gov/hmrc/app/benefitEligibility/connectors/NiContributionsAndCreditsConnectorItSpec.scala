@@ -111,7 +111,7 @@ class NiContributionsAndCreditsConnectorItSpec
                 Class1ContributionAndCredits(
                   taxYear = Some(TaxYear(2022)),
                   numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCategoryLetter = Some(ContributionCategoryLetter("U")),
+                  contributionCategoryLetter = Some(ContributionCategoryLetter.U),
                   contributionCategory = Some(ContributionCategory.None),
                   contributionCreditType = Some(NiContributionCreditType.C1),
                   primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
