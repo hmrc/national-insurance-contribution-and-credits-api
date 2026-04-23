@@ -67,7 +67,7 @@ class LongTermBenefitNotesConnector @Inject() (
   ): EitherT[Future, BenefitEligibilityError, LongTermBenefitNotesResult] = {
 
     val path =
-      s"${appConfig.baseUrl(apiName)}/ni/long-term-benefits/${identifier.value}/calculation/${longTermBenefitType.entryName}/notes/${seqNo.value}"
+      s"${appConfig.baseUrl(apiName)}/ni/long-term-benefits/${identifier.value}/calculation/notes/${seqNo.value}?type=${longTermBenefitType.entryName}"
 
     npsClient
       .get(benefitType, path)

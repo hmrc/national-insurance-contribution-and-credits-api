@@ -151,7 +151,7 @@ class BenefitEligibilityDataControllerItSpec
   val schemeMembershipDetailsPath    = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
   val npsClass2MaReceiptsPath        = s"/ni/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
   val npsLongTermBenefitsCalculation = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation"
-  val npsLongTermBenefitsNotes = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation/ALL/notes/86"
+  val npsLongTermBenefitsNotes = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation/notes/86?type=ALL"
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
