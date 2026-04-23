@@ -609,17 +609,19 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val longTermBenefitNotesSuccessResponse = LongTermBenefitNotesSuccessResponse(
-    List(
-      Note("Invalid Note Type Encountered."),
-      Note(
-        "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025."
-      ),
-      Note("Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025"),
-      Note("Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025."),
-      Note("Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025."),
-      Note("Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025."),
-      Note("Retirement Position of UNKNOWN recorded on this account from 07/04/2025."),
-      Note("Retirement Position of UNKNOWN recorded on this account between NOT KNOWN.")
+    Some(
+      List(
+        Note("Invalid Note Type Encountered."),
+        Note(
+          "Married Woman's/Widow's Reduced Rate Authority recorded on this account between 07/04/2020 and 07/04/2025."
+        ),
+        Note("Married Woman's/Widow's Reduced Rate Authority recorded on this account from 07/04/2025"),
+        Note("Widow's Benefit Award UNKNOWN  recorded on this account between 07/04/2020 and 07/04/2025."),
+        Note("Widow's Benefit Award UNKNOWN  recorded on this account from 07/04/2025."),
+        Note("Retirement Position of UNKNOWN recorded on this account between 07/04/2020 and 07/04/2025."),
+        Note("Retirement Position of UNKNOWN recorded on this account from 07/04/2025."),
+        Note("Retirement Position of UNKNOWN recorded on this account between NOT KNOWN.")
+      )
     )
   )
 

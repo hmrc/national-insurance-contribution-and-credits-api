@@ -80,18 +80,20 @@ class LongTermBenefitNotesConnectorItSpec
 
     ".fetchLongTermBenefitNotes" - {
 
-      val testPath                                   = "/ni/long-term-benefits/AB123456C/calculation/notes/1123232?type=ALL"
-      val identifier: Identifier                     = Identifier("AB123456C")
+      val testPath               = "/ni/long-term-benefits/AB123456C/calculation/notes/1123232?type=ALL"
+      val identifier: Identifier = Identifier("AB123456C")
       val longTermBenefitType: LongTermBenefitType   = LongTermBenefitType.All
       val seqNo: AssociatedCalculationSequenceNumber = AssociatedCalculationSequenceNumber(1123232)
 
       "when the LongTermBenefitNotes endpoint returns OK (200) with valid response" - {
         "should parse response and map to result successfully" in {
-          val longTermBenefitNotesSuccessResponse = LongTermBenefitNotesSuccessResponse(List.empty)
+          val longTermBenefitNotesSuccessResponse = LongTermBenefitNotesSuccessResponse(Some(List(Note("some note"))))
 
           val successResponseJson =
             """{
-              | "longTermBenefitNotes": []
+              | "longTermBenefitNotes": [
+              |   "some note"
+              | ]
               |}
               |""".stripMargin
 
@@ -502,31 +504,6 @@ class LongTermBenefitNotesConnectorItSpec
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[InvalidJsonError]
-        }
-      }
-
-      "when the LongTermBenefitNotes endpoint returns valid JSON with missing required fields" - {
-        "should return validation error" in {
-
-          val incompleteResponse =
-            """{
-              |}""".stripMargin
-
-          server.stubFor(
-            get(urlEqualTo(testPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(incompleteResponse)
-              )
-          )
-
-          val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
-
-          result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[JsonValidationError]
         }
       }
 

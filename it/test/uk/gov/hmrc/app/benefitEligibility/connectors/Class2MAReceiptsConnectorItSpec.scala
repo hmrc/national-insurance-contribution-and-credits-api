@@ -38,7 +38,15 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{FailureType, HipFailureItem, HipFailureResponse, NpsErrorResponseHipOrigin, NpsMultiErrorResponse, NpsSingleErrorResponse, NpsStandardErrorResponse400}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
+  FailureType,
+  HipFailureItem,
+  HipFailureResponse,
+  NpsErrorResponseHipOrigin,
+  NpsMultiErrorResponse,
+  NpsSingleErrorResponse,
+  NpsStandardErrorResponse400
+}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -360,7 +368,17 @@ class Class2MAReceiptsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Class2MAReceipts,
-              ErrorReport(NpsNormalizedError.InternalServerError, Some(NpsErrorResponseHipOrigin(Hip, HipFailureResponse(List(HipFailureItem(FailureType("TypeOfFailure"), NpsErrorReason("ReasonForFailure")))))))
+              ErrorReport(
+                NpsNormalizedError.InternalServerError,
+                Some(
+                  NpsErrorResponseHipOrigin(
+                    Hip,
+                    HipFailureResponse(
+                      List(HipFailureItem(FailureType("TypeOfFailure"), NpsErrorReason("ReasonForFailure")))
+                    )
+                  )
+                )
+              )
             )
           )
         }
