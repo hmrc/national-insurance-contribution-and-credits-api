@@ -68,7 +68,7 @@ object RequestValidations {
         "End tax year after CY-1"
       ),
       Validated.condNel(
-        request.niContributionsAndCredits.startTaxYear.value < request.niContributionsAndCredits.endTaxYear.value,
+        request.niContributionsAndCredits.startTaxYear.value <= request.niContributionsAndCredits.endTaxYear.value,
         SuccessfulResult,
         "Start tax year after end tax year"
       ),

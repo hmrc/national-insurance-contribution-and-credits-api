@@ -29,7 +29,7 @@ object LongTermBenefitNotesSuccess {
     implicit val noteReads: Format[Note] = Json.valueFormat[Note]
   }
 
-  case class LongTermBenefitNotesSuccessResponse(longTermBenefitNotes: List[Note])
+  case class LongTermBenefitNotesSuccessResponse(longTermBenefitNotes: Option[List[Note]])
       extends LongTermBenefitNotesResponse
       with NpsSuccessfulApiResponse
 

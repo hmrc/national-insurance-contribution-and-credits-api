@@ -64,7 +64,7 @@ object FilteredLongTermBenefitCalculationDetails {
             item.benefitCalculationDetail.flatMap(_.guaranteedMinimumPensionContractedOutDeductionsPost1988),
             item.benefitCalculationDetail.flatMap(_.contractedOutDeductionsPre1988),
             item.benefitCalculationDetail.flatMap(_.contractedOutDeductionsPost1988),
-            longTermBenefitNotesSuccessResponse.flatMap(_.longTermBenefitNotes)
+            longTermBenefitNotesSuccessResponse.flatMap(_.longTermBenefitNotes.getOrElse(Nil))
           )
         }
       case None => Nil
