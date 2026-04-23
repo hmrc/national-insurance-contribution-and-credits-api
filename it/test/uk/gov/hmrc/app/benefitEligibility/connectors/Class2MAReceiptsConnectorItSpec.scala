@@ -37,12 +37,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
-  NpsErrorResponseHipOrigin,
-  NpsMultiErrorResponse,
-  NpsSingleErrorResponse,
-  NpsStandardErrorResponse400
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{FailureType, HipFailureItem, HipFailureResponse, NpsErrorResponseHipOrigin, NpsMultiErrorResponse, NpsSingleErrorResponse, NpsStandardErrorResponse400}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -333,11 +329,28 @@ class Class2MAReceiptsConnectorItSpec
 
       "when the Class2MAReceipts endpoint returns an INTERNAL_SERVER_ERROR (500)" - {
         "should map to InternalServerError result" in {
+
+          val errorResponse =
+            """{
+              |  "origin": "HIP",
+              |  "response": {
+              |    "failures": [
+              |      {
+              |        "type": "TypeOfFailure",
+              |        "reason": "ReasonForFailure"
+              |      }
+              |    ]
+              |  }
+              |}""".stripMargin
+
+          val responseBody = Json.parse(errorResponse).toString()
+
           server.stubFor(
             get(urlEqualTo(testPath))
               .willReturn(
                 aResponse()
                   .withStatus(INTERNAL_SERVER_ERROR)
+                  .withBody(responseBody)
               )
           )
 
@@ -347,7 +360,7 @@ class Class2MAReceiptsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Class2MAReceipts,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport(NpsNormalizedError.InternalServerError, Some(NpsErrorResponseHipOrigin(Hip, HipFailureResponse(List(HipFailureItem(FailureType("TypeOfFailure"), NpsErrorReason("ReasonForFailure")))))))
             )
           )
         }
