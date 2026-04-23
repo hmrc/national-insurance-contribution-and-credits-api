@@ -79,8 +79,6 @@ object NiContributionCreditType extends Enum[NiContributionCreditType] with Play
 
   case object ThreeD extends NiContributionCreditType("3D")
 
-  case object CROne extends NiContributionCreditType("CR1")
-
   case object CRThree extends NiContributionCreditType("CR3")
 
   case object ThreeN extends NiContributionCreditType("3N")

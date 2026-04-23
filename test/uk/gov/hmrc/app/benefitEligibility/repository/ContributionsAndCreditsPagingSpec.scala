@@ -39,7 +39,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
   Class2Or3EarningsFactor,
   Class2Or3NIContributionAmount,
   Class2or3ContributionAndCredits,
-  ContributionCategoryLetter,
   EmployerName,
   NiContributionsAndCreditsSuccessResponse,
   NumberOfCreditsAndContributions,
@@ -51,6 +50,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.en
   Class1ContributionStatus,
   Class2Or3CreditStatus,
   ContributionCategory,
+  ContributionCategoryLetter,
   CreditSource,
   LatePaymentPeriod,
   NiContributionCreditType
