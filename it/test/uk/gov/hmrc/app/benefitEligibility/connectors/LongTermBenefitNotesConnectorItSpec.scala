@@ -80,7 +80,7 @@ class LongTermBenefitNotesConnectorItSpec
 
     ".fetchLongTermBenefitNotes" - {
 
-      val testPath                                   = "/ni/long-term-benefits/AB123456C/calculation/ALL/notes/1123232"
+      val testPath                                   = "/ni/long-term-benefits/AB123456C/calculation/notes/1123232?type=ALL"
       val identifier: Identifier                     = Identifier("AB123456C")
       val longTermBenefitType: LongTermBenefitType   = LongTermBenefitType.All
       val seqNo: AssociatedCalculationSequenceNumber = AssociatedCalculationSequenceNumber(1123232)
