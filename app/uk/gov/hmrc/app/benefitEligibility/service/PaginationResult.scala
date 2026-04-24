@@ -37,7 +37,6 @@ final case class PaginationResult(
     paginationType: PaginationType,
     nationalInsuranceNumber: Identifier,
     liabilitiesResult: List[LiabilityResult],
-    class2MaReceiptsResult: Option[Class2MaReceiptsResult],
     marriageDetailsResult: Option[MarriageDetailsResult],
     contributionCreditResult: ContributionCreditPagingResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
@@ -48,8 +47,7 @@ final case class PaginationResult(
   private def shouldPage: Boolean =
     (PaginationSource.fromLiabilities(liabilitiesResult) ++ List(
       PaginationSource.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
-      PaginationSource.fromMarriageDetails(marriageDetailsResult),
-      PaginationSource.fromClass2MAReceipts(class2MaReceiptsResult)
+      PaginationSource.fromMarriageDetails(marriageDetailsResult)
     ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsPaging.isDefined
 
   def setNextCursor(uuid: UUID): PaginationResult = {
@@ -64,7 +62,6 @@ final case class PaginationResult(
 
   def allResults: List[ApiResult] = liabilitiesResult ++ List(
     marriageDetailsResult,
-    class2MaReceiptsResult,
     contributionCreditResult.contributionCreditResult,
     benefitSchemeMembershipDetailsData.map(_.schemeMembershipDetailsResult)
   ).flatten ++ benefitSchemeMembershipDetailsData.map(_.benefitSchemeDetailsResults).getOrElse(Nil)

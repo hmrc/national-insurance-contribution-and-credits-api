@@ -27,7 +27,6 @@ import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
-  Class2MAReceipts,
   IndividualStatePension,
   Liabilities,
   LongTermBenefitCalculationDetails,
@@ -49,8 +48,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.Benefit
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
@@ -96,12 +93,6 @@ import scala.util.Random
 class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with MockFactory with EitherValues {
 
   private val nationalInsuranceNumber: Identifier = Identifier("AB123456C")
-
-  val filteredClass2MaReceipts = FilteredClass2MaReceipts(
-    List(
-      ReceiptDate(LocalDate.parse("2025-12-10"))
-    )
-  )
 
   val filteredLiabilitySummaryDetails = FilteredLiabilitySummaryDetails(
     List(
@@ -251,27 +242,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         )
       )
     )
-  )
-
-  val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    Some(Identifier("AA000001A")),
-    Some(
-      List(
-        Class2MAReceiptDetails(
-          initials = Some(Initials("JP")),
-          surname = Some(Surname("van Cholmondley-warner")),
-          receivablePayment = Some(ReceivablePayment(10.56)),
-          receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
-          liabilityStart = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-          liabilityEnd = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-          billAmount = Some(BillAmount(9999.98)),
-          billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
-          isClosedRecord = Some(IsClosedRecord(true)),
-          weeksPaid = Some(WeeksPaid(2))
-        )
-      )
-    ),
-    callBack = None
   )
 
   val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
@@ -757,7 +727,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val result = BenefitEligibilityInfoSuccessResponseMa.from(
           nationalInsuranceNumber,
           EligibilityCheckDataResultMA(
-            NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse),
             List(NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)),
             NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse),
             None
@@ -766,7 +735,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expected = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
-          filteredClass2MaReceipts,
           List(filteredLiabilitySummaryDetails),
           niContributionsAndCreditsSuccessResponse,
           None
@@ -779,7 +747,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val benefitEligibilityInfoSuccessResponseMa = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
-          filteredClass2MaReceipts,
           List(filteredLiabilitySummaryDetails),
           niContributionsAndCreditsSuccessResponse,
           None
@@ -789,11 +756,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           """{
             |   "benefitType":"MA",
             |   "nationalInsuranceNumber":"AB123456C",
-            |   "class2MAReceiptsResult":{
-            |      "receiptDates":[
-            |         "2025-12-10"
-            |      ]
-            |   },
             |   "liabilitySummaryDetailsResult":[{
             |      "liabilityDetails":[
             |         {
@@ -850,7 +812,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       val successResponse = BenefitEligibilityInfoSuccessResponseMa(
         nationalInsuranceNumber,
-        filteredClass2MaReceipts,
         List(filteredLiabilitySummaryDetails),
         niContributionsAndCreditsSuccessResponse,
         None
@@ -872,7 +833,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       val successResponse = BenefitEligibilityInfoSuccessResponseMa(
         nationalInsuranceNumber,
-        filteredClass2MaReceipts,
         List(filteredLiabilitySummaryDetailsOptionalsExcluded),
         niContributionsAndCreditsSuccessResponseOptionalsExcluded,
         None
@@ -1642,7 +1602,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           benefitType = benefitType,
           summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
           downStreams = List(
-            SanitizedApiResult(apiName = Class2MAReceipts, status = NpsApiResponseStatus.Success, error = None),
             SanitizedApiResult(
               apiName = Liabilities,
               status = NpsApiResponseStatus.Failure,
@@ -1663,10 +1622,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
              |      "failed":1
              |   },
              |   "downStreams":[
-             |      {
-             |         "apiName":"Class2 MA Receipts",
-             |         "status":"SUCCESS"
-             |      },
              |      {
              |         "apiName":"Liabilities",
              |         "status":"FAILURE",
@@ -1702,7 +1657,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         benefitType = MA,
         summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
         downStreams = List(
-          SanitizedApiResult(apiName = Class2MAReceipts, status = NpsApiResponseStatus.Success, error = None),
           SanitizedApiResult(
             apiName = Liabilities,
             status = NpsApiResponseStatus.Failure,
@@ -1906,10 +1860,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       "should return a success response if all of the api results in the data result are successful (MA)" in {
 
         val eligibilityCheckDataResultMA = EligibilityCheckDataResultMA(
-          NpsApiResult.SuccessResult[ErrorReport, Class2MAReceiptsSuccessResponse](
-            Class2MAReceipts,
-            class2MAReceiptsSuccessResponse
-          ),
           List(
             NpsApiResult.SuccessResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](
               Liabilities,
@@ -1930,7 +1880,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
               nationalInsuranceNumber,
-              filteredClass2MaReceipts,
               List(filteredLiabilitySummaryDetails),
               niContributionsAndCreditsSuccessResponse,
               None
@@ -2078,7 +2027,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             paginationType = PaginationType.MaPagination,
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
-            class2MaReceiptsResult = None,
             marriageDetailsResult = None,
             contributionCreditResult = creditsAndContributionsPagingResult,
             benefitSchemeMembershipDetailsData = None,
@@ -2089,7 +2037,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val expectedResult = Right(
           BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber = nationalInsuranceNumber,
-            class2MAReceiptsResult = FilteredClass2MaReceipts(List()),
             liabilitySummaryDetailsResult = List(FilteredLiabilitySummaryDetails(List())),
             niContributionsAndCreditsResult = NiContributionsAndCreditsSuccessResponse(None, None, None),
             nextCursor = None
@@ -2109,7 +2056,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             paginationType = PaginationType.BspPagination,
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
-            class2MaReceiptsResult = None,
             marriageDetailsResult = None,
             contributionCreditResult = creditsAndContributionsPagingResult,
             benefitSchemeMembershipDetailsData = None,
@@ -2139,7 +2085,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             paginationType = PaginationType.GyspPagination,
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
-            class2MaReceiptsResult = None,
             marriageDetailsResult = None,
             contributionCreditResult = creditsAndContributionsPagingResult,
             benefitSchemeMembershipDetailsData = None,

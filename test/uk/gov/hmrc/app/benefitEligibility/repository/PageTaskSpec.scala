@@ -31,7 +31,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.Benefit
   CurrentOptimisticLock,
   SchemeContractedOutNumberDetails
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.Methods.get
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.{
@@ -98,12 +97,6 @@ class PageTaskSpec
               LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl("SomeUrl1")))))
             )
           ),
-          class2MaReceiptsResult = Some(
-            SuccessResult(
-              ApiName.Class2MAReceipts,
-              Class2MAReceiptsSuccessResponse(None, None, Some(Callback(Some(CallbackUrl("SomeUrl2")))))
-            )
-          ),
           marriageDetailsResult = None,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
@@ -122,7 +115,6 @@ class PageTaskSpec
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             List(PaginationSource(Liabilities, "SomeUrl1")),
-            Some(PaginationSource(Liabilities, "SomeUrl2")),
             nationalInsuranceNumber,
             currentTimeSource.instantNow()
           )
@@ -135,7 +127,6 @@ class PageTaskSpec
           paginationType = PaginationType.BspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
-          class2MaReceiptsResult = None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -184,7 +175,6 @@ class PageTaskSpec
           paginationType = PaginationType.BspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
-          class2MaReceiptsResult = None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -233,7 +223,6 @@ class PageTaskSpec
           paginationType = PaginationType.GyspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
-          None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -394,7 +383,6 @@ class PageTaskSpec
           nationalInsuranceNumber,
           liabilitiesResult =
             List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
-          None,
           marriageDetailsResult = None,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
@@ -412,7 +400,6 @@ class PageTaskSpec
           paginationType = PaginationType.BspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
-          None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,
@@ -443,7 +430,6 @@ class PageTaskSpec
           paginationType = PaginationType.GyspPagination,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
-          None,
           marriageDetailsResult = Some(
             SuccessResult(
               ApiName.MarriageDetails,

@@ -1106,7 +1106,6 @@ components:
           - 3B
           - 3C
           - 3D
-          - CR1
           - CR3
           - 3N
         class2Or3EarningsFactor:
@@ -1136,70 +1135,69 @@ components:
           type: string
           nullable: true
           enum:
-          - NOT KNOWN
+          - ADDITIONAL STATUTORY PATERNITY PAY
           - ADP CENTRE LIVINGSTON
-          - DSS LOCAL OFFICES
-          - EMPLOYMENT SERVICES
-          - DIRECT DEBIT
-          - CARER'S ALLOWANCE (CA)
-          - HNCIP OR SDA
-          - NORTHERN IRELAND SICKNESS CREDITS
-          - JURY SERVICE
-          - NUBS 2
-          - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
-          - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
-          - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
-          - DWA UNIT (BELFAST) EMPLOYED EARNERS
-          - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
-          - ISLE OF MAN
-          - AUTOCREDITS - INTERNALLY CALCULATED
-          - AUTOCREDITS - EXTERNALLY INPUT
-          - JUVENILE CREDITS (INTERNAL)
-          - WIDOWS CREDITS   (INTERNAL)
-          - APPROVED TRAINING CREDITS (INTERNAL)
-          - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
-          - PSCS INCAP
-          - LONG TERM SCALE RATE
-          - ADP READING
-          - NOT APPLICABLE
-          - QUARTERLY BILLING
-          - JSA TAPE INPUT
-          - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
-          - JSA PAPER INPUT
-          - FAMC-NI
-          - FAMC-GB
-          - CENTRAL AWARD
           - ADP NORTHERN IRELAND
-          - FAMILY CREDIT (GB)
-          - FAMILY CREDIT (NI)
-          - INCAPACITY
+          - ADP READING
+          - APPROVED TRAINING CREDITS (INTERNAL)
+          - AUTOCREDITS - EXTERNALLY INPUT
+          - AUTOCREDITS - INTERNALLY CALCULATED
+          - CARER'S ALLOWANCE (CA)
+          - CARER'S CREDIT
+          - CENTRAL AWARD
+          - CHILD BENEFIT
+          - DIRECT DEBIT
           - DPTC (GB) EMP
           - DPTC (GB) S/EMP
           - DPTC (NI) EMP
           - DPTC (NI) S/EMP
-          - WFTC (GB)
-          - WFTC (NI)
-          - STATUTORY MATERNITY PAY CREDIT
-          - STATUTORY ADOPTION PAY CREDIT
+          - DSS LOCAL OFFICES
+          - DWA UNIT (BELFAST) EMPLOYED EARNERS
+          - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
+          - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
+          - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
           - Disabled Tax Credit (Employed)
           - Disabled Tax Credit (Self-employed)
+          - EMPLOYMENT AND SUPPORT
+          - EMPLOYMENT SERVICES
+          - FAMC-GB
+          - FAMC-NI
+          - FAMILY CREDIT (GB)
+          - FAMILY CREDIT (NI)
+          - FOSTER CARER
+          - HNCIP OR SDA
+          - HRP CONVERSION
+          - INCAPACITY
+          - ISLE OF MAN
+          - JSA PAPER INPUT
+          - JSA TAPE INPUT
+          - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
+          - JURY SERVICE
+          - JUVENILE CREDITS (INTERNAL)
+          - LONG TERM SCALE RATE
+          - MoD Spouse/Civil Partner's Credits
+          - NORTHERN IRELAND SICKNESS CREDITS
+          - NOT APPLICABLE
+          - NOT KNOWN
+          - NUBS 2
+          - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+          - PSCS INCAP
+          - Post 75 Service Spouses Credit
+          - QUARTERLY BILLING
+          - SHARED PARENTAL PAY
+          - SPECIFIED ADULT CARER
+          - STATUTORY ADOPTION PAY CREDIT
+          - STATUTORY MATERNITY PAY CREDIT
+          - Statutory Parental Bereavement Pay
+          - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
+          - UNIVERSAL CREDIT
+          - WFTC (GB)
+          - WFTC (NI)
+          - WIDOWS CREDITS (INTERNAL)
           - Working Tax Credit (Employed)
           - Working Tax Credit (Self-employed)
-          - EMPLOYMENT AND SUPPORT
-          - HRP CONVERSION
-          - CHILD BENEFIT
-          - CARER'S CREDIT
-          - FOSTER CARER
-          - MoD Spouse/Civil Partner's Credits
-          - ADDITIONAL STATUTORY PATERNITY PAY
-          - SPECIFIED ADULT CARER
-          - UNIVERSAL CREDIT
-          - SHARED PARENTAL PAY
-          - Post 75 Service Spouses Credit
-          - Statutory Parental Bereavement Pay
           - CARER SUPPORT PAYMENT (CSP)
           - Statutory Neonatal Care Pay
-          - REPLACEMENT CREDITS FOR PARENTS AND CARERS
         latePaymentPeriod:
           type: string
           nullable: true
@@ -1229,43 +1227,62 @@ components:
           maximum: 53
           minimum: 0
         contributionCategoryLetter:
-          nullable: true
           type: string
-          description: Letter associated with the contribution category.
-          maxLength: 1
-          minLength: 1
-          pattern: "^[A-Z]$"
+          nullable: true
+          enum:
+          - (NONE)
+          - C
+          - U
+          - D
+          - A
+          - E
+          - B
+          - Z
+          - X
+          - Q
+          - L
+          - S
+          - M
+          - F
+          - G
+          - P
+          - I
+          - V
+          - H
+          - K
+          - R
+          - W
+          - T
+          - "N"
+          - O
+          - J
+          - "Y"
         contributionCategory:
           type: string
           nullable: true
           enum:
           - (NONE)
-          - CLASS 1A - PAYE EMPLOYER ONLY CONTRIBUTIONS
-          - CONVERTED ACCOUNT - CONTRACTED OUT
-          - MARINER FOREIGN GOING REBATE ( REDUCED CONTRACTED-OUT )
-          - MARINER FOREIGN GOING REBATE ( STANDARD CONTRACTED-OUT )
-          - MARINER FOREIGN GOING REBATE EQUIVALENT (REDUCED)
-          - MARINER FOREIGN GOING REBATE EQUIVALENT (SECONDARY ONLY)
-          - MARINER FOREIGN GOING REBATE EQUIVALENT (STANDARD)
-          - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( REDUCED C-OUT)
-          - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE ( STANDARD C-OUT)
-          - MARINER REDUNDANCY FUND & FOREIGN GOING REBATE EQUIV.(SECONDARY ONLY)
-          - MARINER REDUNDANCY FUND & FRGN GNG REBATE EQUIV.(STD)
-          - MARINER REDUNDANCY FUND & FRGN GOING REBATE EQUIV.(RDCD)
-          - MARINER REDUNDANCY FUND REBATE ( REDUCED CONTRACTED-OUT )
-          - MARINER REDUNDANCY FUND REBATE ( STANDARD CONTRACTED-OUT )
-          - MARINER REDUNDANCY FUND REBATE EQUIV. (RDCD)
-          - MARINER REDUNDANCY FUND REBATE EQUIVALENT (SECONDARY ONLY)
-          - MARINER REDUNDANCY FUND REBATE EQUIVALENT (STANDARD)
-          - MARRIED WOMAN'S REDUCED RATE ELECTION
+          - CLASS 1 A -PAYE EMPLOYER ONLY CONTRIBUTIONS
+          - CONVERTED ACCOUNT -CONTRACTED OUT
+          - CONTRACTED OUT REDUCED RATE
+          - CONTRACTED - OUT REDUCED RATE COSR
+          - CONTRACTED - OUT REDUCED RATE(COMP)
+          - CONTRACTED OUT STANDARD RATE COSR
+          - CONTRACTED - OUT STANDARD RATE(COMP)
+          - NOT FEASIBLE
           - NO LIABILITY
           - OFFICE HOLDERS
+          - DEFERRED RATE
           - REDUCED RATE
-          - REDUCED RATE CONTRACTED-OUT
+          - REDUCED RATE CONTRACTED - OUT
+          - REDUCED RATE CONTRACTED - OUT(COSR)
           - STANDARD RATE
-          - STANDARD RATE CONTRACTED-OUT
+          - STANDARD RATE CONTRACTED OUT
+          - STANDARD RATE CONTRACTED - OUT
+          - STANDARD RATE CONTRACTED - OUT(COSR)
           - UNALLOCATED
           - ZERO RATE
+          - ZERO RATE (NIC HOLIDAY)
         contributionCreditType:
           type: string
           nullable: true
@@ -1297,7 +1314,6 @@ components:
           - 3B
           - 3C
           - 3D
-          - CR1
           - CR3
           - 3N
         primaryContribution:
@@ -1333,70 +1349,69 @@ components:
           type: string
           nullable: true
           enum:
-          - NOT KNOWN
+          - ADDITIONAL STATUTORY PATERNITY PAY
           - ADP CENTRE LIVINGSTON
-          - DSS LOCAL OFFICES
-          - EMPLOYMENT SERVICES
-          - DIRECT DEBIT
-          - CARER'S ALLOWANCE (CA)
-          - HNCIP OR SDA
-          - NORTHERN IRELAND SICKNESS CREDITS
-          - JURY SERVICE
-          - NUBS 2
-          - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
-          - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
-          - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
-          - DWA UNIT (BELFAST) EMPLOYED EARNERS
-          - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
-          - ISLE OF MAN
-          - AUTOCREDITS - INTERNALLY CALCULATED
-          - AUTOCREDITS - EXTERNALLY INPUT
-          - JUVENILE CREDITS (INTERNAL)
-          - WIDOWS CREDITS   (INTERNAL)
-          - APPROVED TRAINING CREDITS (INTERNAL)
-          - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
-          - PSCS INCAP
-          - LONG TERM SCALE RATE
-          - ADP READING
-          - NOT APPLICABLE
-          - QUARTERLY BILLING
-          - JSA TAPE INPUT
-          - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
-          - JSA PAPER INPUT
-          - FAMC-NI
-          - FAMC-GB
-          - CENTRAL AWARD
           - ADP NORTHERN IRELAND
-          - FAMILY CREDIT (GB)
-          - FAMILY CREDIT (NI)
-          - INCAPACITY
+          - ADP READING
+          - APPROVED TRAINING CREDITS (INTERNAL)
+          - AUTOCREDITS - EXTERNALLY INPUT
+          - AUTOCREDITS - INTERNALLY CALCULATED
+          - CARER'S ALLOWANCE (CA)
+          - CARER'S CREDIT
+          - CENTRAL AWARD
+          - CHILD BENEFIT
+          - DIRECT DEBIT
           - DPTC (GB) EMP
           - DPTC (GB) S/EMP
           - DPTC (NI) EMP
           - DPTC (NI) S/EMP
-          - WFTC (GB)
-          - WFTC (NI)
-          - STATUTORY MATERNITY PAY CREDIT
-          - STATUTORY ADOPTION PAY CREDIT
+          - DSS LOCAL OFFICES
+          - DWA UNIT (BELFAST) EMPLOYED EARNERS
+          - DWA UNIT (BELFAST) SELF EMPLOYED EARNERS
+          - DWA UNIT (BLACKPOOL) EMPLOYED EARNERS
+          - DWA UNIT (BLACKPOOL) SELF EMPLOYED EARNERS
           - Disabled Tax Credit (Employed)
           - Disabled Tax Credit (Self-employed)
+          - EMPLOYMENT AND SUPPORT
+          - EMPLOYMENT SERVICES
+          - FAMC-GB
+          - FAMC-NI
+          - FAMILY CREDIT (GB)
+          - FAMILY CREDIT (NI)
+          - FOSTER CARER
+          - HNCIP OR SDA
+          - HRP CONVERSION
+          - INCAPACITY
+          - ISLE OF MAN
+          - JSA PAPER INPUT
+          - JSA TAPE INPUT
+          - JSA TAPE INPUT (ALTERNATIVE SB CONDITION MET)
+          - JURY SERVICE
+          - JUVENILE CREDITS (INTERNAL)
+          - LONG TERM SCALE RATE
+          - MoD Spouse/Civil Partner's Credits
+          - NORTHERN IRELAND SICKNESS CREDITS
+          - NOT APPLICABLE
+          - NOT KNOWN
+          - NUBS 2
+          - "NUBS 2 [ALTERNATIVE SB CONDITION MET]"
+          - PSCS INCAP
+          - Post 75 Service Spouses Credit
+          - QUARTERLY BILLING
+          - SHARED PARENTAL PAY
+          - SPECIFIED ADULT CARER
+          - STATUTORY ADOPTION PAY CREDIT
+          - STATUTORY MATERNITY PAY CREDIT
+          - Statutory Parental Bereavement Pay
+          - UNEMPLOYABILITY SUPPLEMENT CREDITS (INTERNAL)
+          - UNIVERSAL CREDIT
+          - WFTC (GB)
+          - WFTC (NI)
+          - WIDOWS CREDITS (INTERNAL)
           - Working Tax Credit (Employed)
           - Working Tax Credit (Self-employed)
-          - EMPLOYMENT AND SUPPORT
-          - HRP CONVERSION
-          - CHILD BENEFIT
-          - CARER'S CREDIT
-          - FOSTER CARER
-          - MoD Spouse/Civil Partner's Credits
-          - ADDITIONAL STATUTORY PATERNITY PAY
-          - SPECIFIED ADULT CARER
-          - UNIVERSAL CREDIT
-          - SHARED PARENTAL PAY
-          - Post 75 Service Spouses Credit
-          - Statutory Parental Bereavement Pay
           - CARER SUPPORT PAYMENT (CSP)
           - Statutory Neonatal Care Pay
-          - REPLACEMENT CREDITS FOR PARENTS AND CARERS
         employerName:
           nullable: true
           type: string
@@ -1553,15 +1568,6 @@ components:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem"
       required:
       - liabilityDetails
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredClass2MaReceipts:
-      properties:
-        receiptDates:
-          type: array
-          items:
-            type: string
-            format: date
-      required:
-      - receiptDates
     uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa:
       properties:
         benefitType:
@@ -1575,8 +1581,6 @@ components:
           minLength: 8
           pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
           example: AB123456A
-        class2MAReceiptsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredClass2MaReceipts"
         liabilitySummaryDetailsResult:
           type: array
           items:
@@ -1589,7 +1593,6 @@ components:
       required:
       - benefitType
       - nationalInsuranceNumber
-      - class2MAReceiptsResult
       - liabilitySummaryDetailsResult
       - niContributionsAndCreditsResult
     uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa:
