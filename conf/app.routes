@@ -1,23 +1,31 @@
 ###
 # summary: microservice specific routes
 # parameters:
-#  - description: Correlation ID - used for traceability purposes - note that this
+#  - name: correlationId
+#    description: Correlation ID - used for traceability purposes - note that this
 #      value in the response matches that received in the request to allow correlation.
 #    in: header
-#    name: correlationId
 #    required: true
 #    schema:
 #     format: uuid
 #     type: string
-#  - description: Identity of the Originating System that made the API call.
+#  - name: Authorization
+#    description: Authorization token used to contact api.
 #    in: header
-#    name: Authorization
 #    required: true
 #    schema:
 #     type: string
-#  - description: Request the version of the API you want to use by including an Accept header with a media type of.
+#  - name: gov-uk-originator-id
 #    in: header
-#    name: Accept
+#    description: Identity of the Originating System that made the API call.
+#    required: tr
+#    schema:  
+#     type: string
+#     maxLength: 40
+#     minLength: 3
+#  - name: Accept
+#    description: Request the version of the API you want to use by including an Accept header with a media type of.
+#    in: header
 #    required: true
 #    schema:
 #     type: string
@@ -90,7 +98,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #     format: uuid
 #     type: string
 #  - name: Authorization
-#    description: Identity of the Originating System that made the API call.
+#    description: Authorization token used to contact api
 #    in: header
 #    required: true
 #    schema:
