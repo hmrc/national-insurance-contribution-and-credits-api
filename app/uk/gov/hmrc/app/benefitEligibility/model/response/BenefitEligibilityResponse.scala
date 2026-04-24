@@ -91,7 +91,6 @@ object BenefitEligibilityInfoResponse {
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
               paginationResult.nationalInsuranceNumber,
-              FilteredClass2MaReceipts(Nil),
               paginationResult.liabilitiesResult.map(toFilteredLiabilitySummaryDetails),
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
               paginationResult.getNextCursor.map(CursorId.from)
@@ -196,7 +195,6 @@ object PaginationStatus extends Enum[PaginationStatus] with PlayJsonEnum[Paginat
 final case class BenefitEligibilityInfoSuccessResponseMa private (
     benefitType: BenefitType,
     nationalInsuranceNumber: Identifier,
-    class2MAReceiptsResult: FilteredClass2MaReceipts,
     liabilitySummaryDetailsResult: List[FilteredLiabilitySummaryDetails],
     niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
     nextCursor: Option[CursorId]
@@ -210,14 +208,12 @@ object BenefitEligibilityInfoSuccessResponseMa {
 
   def apply(
       nationalInsuranceNumber: Identifier,
-      class2MAReceiptsResult: FilteredClass2MaReceipts,
       liabilitySummaryDetailsResult: List[FilteredLiabilitySummaryDetails],
       niContributionsAndCreditsResult: NiContributionsAndCreditsSuccessResponse,
       nextCursor: Option[CursorId]
   ) = new BenefitEligibilityInfoSuccessResponseMa(
     MA,
     nationalInsuranceNumber,
-    class2MAReceiptsResult,
     liabilitySummaryDetailsResult,
     niContributionsAndCreditsResult,
     nextCursor
@@ -235,7 +231,6 @@ object BenefitEligibilityInfoSuccessResponseMa {
         BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber = nationalInsuranceNumber,
           niContributionsAndCreditsResult = result.contributionCreditResult.getSuccess.get,
-          class2MAReceiptsResult = FilteredClass2MaReceipts.from(result.class2MaReceiptsResult.getSuccess.get),
           liabilitySummaryDetailsResult =
             result.liabilityResult.map(r => FilteredLiabilitySummaryDetails.from(r.getSuccess.get)),
           nextCursor = result.nextCursor.map(CursorId.from)

@@ -134,7 +134,6 @@ final case class MaPageTask private (
     pageTaskId: PageTaskId,
     paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
-    class2MaReceipts: Option[PaginationSource],
     nationalInsuranceNumber: Identifier,
     createdAt: Instant
 ) extends PageTask
@@ -147,7 +146,6 @@ object MaPageTask {
       correlationId: CorrelationId,
       pageTaskId: PageTaskId,
       liabilitiesPaging: List[PaginationSource],
-      class2MaReceipts: Option[PaginationSource],
       nationalInsuranceNumber: Identifier,
       createdAt: Instant
   ) =
@@ -156,7 +154,6 @@ object MaPageTask {
       pageTaskId,
       PaginationType.MaPagination,
       liabilitiesPaging,
-      class2MaReceipts,
       nationalInsuranceNumber,
       createdAt
     )
@@ -313,7 +310,6 @@ object PageTask {
             correlationId = paginationResult.correlationId,
             pageTaskId = cursor.pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
-            class2MaReceipts = PaginationSource.fromClass2MAReceipts(paginationResult.class2MaReceiptsResult),
             nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
             createdAt = now
           )

@@ -449,8 +449,6 @@ paths:
                   value:
                     benefitType: MA
                     nationalInsuranceNumber: KL890123M
-                    class2MAReceiptsResult:
-                      receiptDates: []
                     liabilitySummaryDetailsResult:
                     - liabilityDetails: []
                     niContributionsAndCreditsResult:
@@ -461,9 +459,6 @@ paths:
                   value:
                     benefitType: MA
                     nationalInsuranceNumber: AB123456C
-                    class2MAReceiptsResult:
-                      receiptDates:
-                      - 2025-12-10
                     liabilitySummaryDetailsResult:
                     - liabilityDetails:
                       - startDate: 2026-01-01
@@ -598,8 +593,6 @@ paths:
                     downStreams:
                     - apiName: NiContributionsAndCredits
                       status: SUCCESS
-                    - apiName: Class2MAReceipts
-                      status: SUCCESS
                     - apiName: Liabilities
                       status: FAILURE
                       error:
@@ -623,12 +616,6 @@ paths:
                         code: FORBIDDEN
                         message: access denied to maternity allowance service
                         downstreamStatus: 403
-                    - apiName: Class2MAReceipts
-                      status: FAILURE
-                      error:
-                        code: INTERNAL_SERVER_ERROR
-                        message: class 2 MA receipts service internal error
-                        downstreamStatus: 500
                     - apiName: Liabilities
                       status: FAILURE
                       error:
@@ -800,9 +787,6 @@ paths:
                   value:
                     benefitType: MA
                     nationalInsuranceNumber: AB123456C
-                    class2MAReceiptsResult:
-                      receiptDates:
-                      - 2025-12-10
                     liabilitySummaryDetailsResult:
                     - liabilityDetails:
                       - startDate: 2026-01-01
@@ -929,8 +913,6 @@ paths:
                     downStreams:
                     - apiName: NiContributionsAndCredits
                       status: SUCCESS
-                    - apiName: Class2MAReceipts
-                      status: SUCCESS
                     - apiName: Liabilities
                       status: FAILURE
                       error:
@@ -954,12 +936,6 @@ paths:
                         code: FORBIDDEN
                         message: access denied to maternity allowance service
                         downstreamStatus: 403
-                    - apiName: Class2MAReceipts
-                      status: FAILURE
-                      error:
-                        code: INTERNAL_SERVER_ERROR
-                        message: class 2 MA receipts service internal error
-                        downstreamStatus: 500
                     - apiName: Liabilities
                       status: FAILURE
                       error:
@@ -1576,15 +1552,6 @@ components:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem"
       required:
       - liabilityDetails
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredClass2MaReceipts:
-      properties:
-        receiptDates:
-          type: array
-          items:
-            type: string
-            format: date
-      required:
-      - receiptDates
     uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa:
       properties:
         benefitType:
@@ -1598,8 +1565,6 @@ components:
           minLength: 8
           pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
           example: AB123456A
-        class2MAReceiptsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredClass2MaReceipts"
         liabilitySummaryDetailsResult:
           type: array
           items:
@@ -1612,7 +1577,6 @@ components:
       required:
       - benefitType
       - nationalInsuranceNumber
-      - class2MAReceiptsResult
       - liabilitySummaryDetailsResult
       - niContributionsAndCreditsResult
     uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa:

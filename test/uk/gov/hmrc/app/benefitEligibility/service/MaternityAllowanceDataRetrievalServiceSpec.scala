@@ -23,17 +23,14 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.{
-  Class2MAReceiptsConnector,
   LiabilitySummaryDetailsConnector,
   NiContributionsAndCreditsConnector
 }
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.UnprocessableEntity
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
@@ -78,9 +75,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
-  val mockClass2MAReceiptsConnector: Class2MAReceiptsConnector =
-    mock[Class2MAReceiptsConnector]
-
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
   val mockPaginationService: PaginationService = mock[PaginationService]
@@ -95,7 +89,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   }
 
   val underTest = new MaternityAllowanceDataRetrievalService(
-    mockClass2MAReceiptsConnector,
     mockNiContributionsAndCreditsConnector,
     mockLiabilitySummaryDetailsConnector,
     mockPaginationService,
@@ -158,12 +151,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     )
   )
 
-  val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    nationalInsuranceNumber = Some(Identifier("AB123456C")),
-    class2MAReceiptDetails = None,
-    callBack = Some(Callback(Some(CallbackUrl("/some/url"))))
-  )
-
   val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
     Some(
       List(
@@ -204,7 +191,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     List(PaginationSource(ApiName.Liabilities, "/some/url")),
-    Some(PaginationSource(Class2MAReceipts, "/some/url")),
     identifier,
     testInstant
   )
@@ -215,11 +201,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         val niContributionAndCreditsResult = SuccessResult(
           ApiName.NiContributionAndCredits,
           niContributionsAndCreditsSuccessResponse
-        )
-
-        val class2MAReceiptsResult = SuccessResult(
-          ApiName.Class2MAReceipts,
-          class2MAReceiptsSuccessResponse
         )
 
         val liabilitySummaryDetailsResult = SuccessResult(
@@ -234,16 +215,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
-          )
-
-        (mockClass2MAReceiptsConnector
-          .fetchClass2MAReceipts(
-            _: BenefitType,
-            _: Identifier
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, *)
-          .returning(
-            EitherT.rightT(class2MAReceiptsResult)
           )
 
         (mockLiabilitySummaryDetailsConnector
@@ -272,7 +243,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .value
           .futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
-            class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
             Some(PaginationCursor(PaginationType.MaPagination, paging.pageTaskId))
@@ -287,14 +257,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           niContributionsAndCreditsSuccessResponse
         )
 
-        val class2MAReceiptsResult = FailureResult(
-          ApiName.Class2MAReceipts,
-          ErrorReport(UnprocessableEntity, None)
-        )
-
-        val liabilitySummaryDetailsResult = SuccessResult(
+        val liabilitySummaryDetailsResult = FailureResult(
           ApiName.Liabilities,
-          liabilitySummaryDetailsSuccessResponse
+          ErrorReport(UnprocessableEntity, None)
         )
 
         (mockNiContributionsAndCreditsConnector
@@ -304,16 +269,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
-          )
-
-        (mockClass2MAReceiptsConnector
-          .fetchClass2MAReceipts(
-            _: BenefitType,
-            _: Identifier
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, *)
-          .returning(
-            EitherT.rightT(class2MAReceiptsResult)
           )
 
         (mockLiabilitySummaryDetailsConnector
@@ -335,7 +290,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .value
           .futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
-            class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
             None
@@ -347,11 +301,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
         val niContributionAndCreditsResult = FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(UnprocessableEntity, None)
-        )
-
-        val class2MAReceiptsResult = FailureResult(
-          ApiName.Class2MAReceipts,
           ErrorReport(UnprocessableEntity, None)
         )
 
@@ -369,16 +318,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
-        (mockClass2MAReceiptsConnector
-          .fetchClass2MAReceipts(
-            _: BenefitType,
-            _: Identifier
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, *)
-          .returning(
-            EitherT.rightT(class2MAReceiptsResult)
-          )
-
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
             _: BenefitType,
@@ -398,7 +337,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .value
           .futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
-            class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
             None
@@ -425,14 +363,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
-        (mockClass2MAReceiptsConnector
-          .fetchClass2MAReceipts(
-            _: BenefitType,
-            _: Identifier
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, *)
-          .returning(EitherT.leftT(error1))
-
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
             _: BenefitType,
@@ -449,7 +379,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          DataRetrievalServiceError(List(error1, error2))
+          DataRetrievalServiceError(List(error2))
         )
       }
 
@@ -458,16 +388,6 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         val error1 = NpsClientError(new RuntimeException("error_1"))
         val error2 = NpsClientError(new RuntimeException("error_2"))
         val error3 = NpsClientError(new RuntimeException("error_3"))
-
-        (mockClass2MAReceiptsConnector
-          .fetchClass2MAReceipts(
-            _: BenefitType,
-            _: Identifier
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, *)
-          .returning(
-            EitherT.leftT(error1)
-          )
 
         (mockNiContributionsAndCreditsConnector
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
@@ -496,7 +416,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
           .futureValue shouldBe Left(
-          DataRetrievalServiceError(List(error1, error2, error3))
+          DataRetrievalServiceError(List(error2, error3))
         )
       }
     }
