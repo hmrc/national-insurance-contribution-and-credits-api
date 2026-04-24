@@ -255,10 +255,10 @@ object BenefitEligibilityRequestHandler {
       implicit headerCarrier: HeaderCarrier
   ): Either[ErrorReason, OriginatorIdType] = {
     logger.info("Validating Originator Id")
-    request.headers.get("OriginatorId") match {
+    request.headers.get("gov-uk-originator-id") match {
       case None =>
-        logger.error("Missing Originator Id")
-        Left(ErrorReason("Missing Originator Id"))
+        logger.error("Missing header 'gov-uk-originator-id'")
+        Left(ErrorReason("Missing header 'gov-uk-originator-id'"))
       case Some(acceptHeader) =>
         RequestValidations.validateOriginatorId(Some(acceptHeader))
     }
