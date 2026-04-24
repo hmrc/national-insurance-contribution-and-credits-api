@@ -32,7 +32,6 @@ sealed trait EligibilityCheckDataResult {
 object EligibilityCheckDataResult {
 
   case class EligibilityCheckDataResultMA(
-      class2MaReceiptsResult: Class2MaReceiptsResult,
       liabilityResult: List[LiabilityResult],
       contributionCreditResult: ContributionCreditResult,
       nextCursor: Option[PaginationCursor]
@@ -40,7 +39,7 @@ object EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.MA
 
     def allResults: List[ApiResult] =
-      liabilityResult ++ List(contributionCreditResult, class2MaReceiptsResult)
+      liabilityResult ++ List(contributionCreditResult)
 
   }
 

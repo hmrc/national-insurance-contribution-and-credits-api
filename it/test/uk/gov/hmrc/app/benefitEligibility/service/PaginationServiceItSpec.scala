@@ -108,7 +108,6 @@ class PaginationServiceItSpec
         play.api.inject.bind[CurrentTimeSource].toInstance(currentTimeSource)
       )
       .configure(
-        "microservice.services.hip.nps.class2MaReceipts.port"         -> server.port,
         "microservice.services.hip.nps.liabilities.port"              -> server.port,
         "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port,
         "microservice.services.hip.nps.schemeMembershipDetails.port"  -> server.port,
@@ -136,7 +135,6 @@ class PaginationServiceItSpec
       PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
       PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
     ),
-    Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
     nationalInsuranceNumber,
     currentTimeSource.instantNow()
   )
@@ -215,7 +213,6 @@ class PaginationServiceItSpec
             correlationId,
             PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
             List(),
-            None,
             nationalInsuranceNumber,
             Instant.now
           )
@@ -236,7 +233,6 @@ class PaginationServiceItSpec
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
           ),
-          Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
           nationalInsuranceNumber,
           currentTimeSource.instantNow()
         )
@@ -247,7 +243,6 @@ class PaginationServiceItSpec
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
             PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
           ),
-          Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
           nationalInsuranceNumber,
           currentTimeSource.instantNow()
         )
@@ -363,8 +358,6 @@ class PaginationServiceItSpec
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
-              class2MaReceiptsResult =
-                Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
@@ -455,7 +448,6 @@ class PaginationServiceItSpec
               paginationType = PaginationType.BspPagination,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -545,7 +537,6 @@ class PaginationServiceItSpec
               paginationType = PaginationType.BspPagination,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              class2MaReceiptsResult = None,
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -815,7 +806,6 @@ class PaginationServiceItSpec
               paginationType = PaginationType.GyspPagination,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -914,8 +904,6 @@ class PaginationServiceItSpec
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
-              class2MaReceiptsResult =
-                Some(NpsApiResult.SuccessResult(Class2MAReceipts, class2MAReceiptsSuccessResponse)),
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
@@ -1006,7 +994,6 @@ class PaginationServiceItSpec
               paginationType = PaginationType.BspPagination,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -1272,7 +1259,6 @@ class PaginationServiceItSpec
               paginationType = PaginationType.GyspPagination,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              class2MaReceiptsResult = None,
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
               contributionCreditResult = ContributionCreditPagingResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
@@ -1352,7 +1338,6 @@ class PaginationServiceItSpec
               paginationType = PaginationType.BspPagination,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
-              class2MaReceiptsResult = None,
               marriageDetailsResult = None,
               contributionCreditResult = ContributionCreditPagingResult(
                 contributionCreditResult =

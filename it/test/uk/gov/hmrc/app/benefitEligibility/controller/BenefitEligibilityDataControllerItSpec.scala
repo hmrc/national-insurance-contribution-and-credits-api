@@ -32,14 +32,12 @@ import play.api.mvc.{AnyContent, Result}
 import play.api.test.*
 import play.api.test.Helpers.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResponseStatus
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
@@ -119,7 +117,6 @@ class BenefitEligibilityDataControllerItSpec
         play.api.inject.bind[CurrentTimeSource].toInstance(currentTimeSource)
       )
       .configure(
-        "microservice.services.hip.nps.class2MaReceipts.port"           -> server.port,
         "microservice.services.hip.nps.liabilities.port"                -> server.port,
         "microservice.services.hip.nps.niContributionAndCredits.port"   -> server.port,
         "microservice.services.hip.nps.marriageDetails.port"            -> server.port,
@@ -149,7 +146,6 @@ class BenefitEligibilityDataControllerItSpec
   val npsIndividualMarriageDetailsPath       = s"/paye/individual/${nationalInsuranceNumber.value}/marriage-cp"
   val benefitSchemeDetailsPath               = "/ni/benefit-scheme/benefit-scheme-details/S2123456B"
   val schemeMembershipDetailsPath    = s"/ni/benefit-scheme/${nationalInsuranceNumber.value}/scheme-membership-details"
-  val npsClass2MaReceiptsPath        = s"/ni/class-2/${nationalInsuranceNumber.value}/maternity-allowance/receipts"
   val npsLongTermBenefitsCalculation = s"/ni/long-term-benefits/${nationalInsuranceNumber.value}/calculation"
 
   val npsLongTermBenefitsNotes =
@@ -167,7 +163,6 @@ class BenefitEligibilityDataControllerItSpec
           PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
           PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
         ),
-        Some(PaginationSource(Class2MAReceipts, npsClass2MaReceiptsPath)),
         nationalInsuranceNumber,
         currentTimeSource.instantNow()
       ),
@@ -223,12 +218,6 @@ class BenefitEligibilityDataControllerItSpec
       )
     ).foreach(pageTask => insert(pageTask).futureValue)
   }
-
-  val filteredClass2MaReceipts = FilteredClass2MaReceipts(
-    List(
-      ReceiptDate(LocalDate.parse("2025-12-10"))
-    )
-  )
 
   val filteredLiabilitySummaryDetails = FilteredLiabilitySummaryDetails(
     List(
@@ -304,27 +293,6 @@ class BenefitEligibilityDataControllerItSpec
         )
       )
     )
-  )
-
-  val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    Some(nationalInsuranceNumber),
-    Some(
-      List(
-        Class2MAReceiptDetails(
-          initials = Some(Initials("JP")),
-          surname = Some(Surname("van Cholmondley-warner")),
-          receivablePayment = Some(ReceivablePayment(10.56)),
-          receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
-          liabilityStart = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-          liabilityEnd = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-          billAmount = Some(BillAmount(9999.98)),
-          billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
-          isClosedRecord = Some(IsClosedRecord(true)),
-          weeksPaid = Some(WeeksPaid(2))
-        )
-      )
-    ),
-    callBack = None
   )
 
   val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
@@ -1423,7 +1391,6 @@ class BenefitEligibilityDataControllerItSpec
 
       "MA" - {
         "should Fetch MA Correctly" in {
-          val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
           val liabilitySummaryDetailsSuccessResponseBody =
             Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
           val niContributionsAndCreditsSuccessResponseBody =
@@ -1447,19 +1414,6 @@ class BenefitEligibilityDataControllerItSpec
                   .withStatus(OK)
                   .withHeader("Content-Type", "application/json")
                   .withBody(niContributionsAndCreditsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
-            WireMock
-              .get(urlEqualTo(npsClass2MaReceiptsPath))
-              .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdMa"))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
               )
           )
 
@@ -1499,7 +1453,6 @@ class BenefitEligibilityDataControllerItSpec
 
           val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber,
-            filteredClass2MaReceipts,
             List(filteredLiabilitySummaryDetails),
             niContributionsAndCreditsSuccessResponse,
             None
@@ -1548,7 +1501,6 @@ class BenefitEligibilityDataControllerItSpec
             ),
             callback = Some(Callback(Some(CallbackUrl("someUrl"))))
           )
-          val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
           val liabilitySummaryDetailsSuccessResponseBody =
             Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
           val niContributionsAndCreditsSuccessResponseBody =
@@ -1570,17 +1522,6 @@ class BenefitEligibilityDataControllerItSpec
                   .withStatus(OK)
                   .withHeader("Content-Type", "application/json")
                   .withBody(niContributionsAndCreditsSuccessResponseBody)
-              )
-          )
-          server.stubFor(
-            WireMock
-              .get(urlEqualTo(npsClass2MaReceiptsPath))
-              .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
               )
           )
           server.stubFor(
@@ -1618,7 +1559,6 @@ class BenefitEligibilityDataControllerItSpec
 
           val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber,
-            filteredClass2MaReceipts,
             List(filteredLiabilitySummaryDetails),
             niContributionsAndCreditsSuccessResponse,
             Some(
@@ -1660,18 +1600,6 @@ class BenefitEligibilityDataControllerItSpec
 
           server.stubFor(
             WireMock
-              .get(urlEqualTo(npsClass2MaReceiptsPath))
-              .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-              .willReturn(
-                aResponse()
-                  .withStatus(BAD_GATEWAY)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody("{}")
-              )
-          )
-
-          server.stubFor(
-            WireMock
               .get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
               .willReturn(
@@ -1708,9 +1636,9 @@ class BenefitEligibilityDataControllerItSpec
                                  |   "nationalInsuranceNumber":"AB123456C",
                                  |   "benefitType":"MA",
                                  |   "summary":{
-                                 |      "totalCalls":3,
+                                 |      "totalCalls":2,
                                  |      "successful":1,
-                                 |      "failed":2
+                                 |      "failed":1
                                  |   },
                                  |   "downStreams":[
                                  |      {
@@ -1719,15 +1647,6 @@ class BenefitEligibilityDataControllerItSpec
                                  |      },
                                  |      {
                                  |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Class2 MA Receipts",
                                  |         "status":"FAILURE",
                                  |         "error":{
                                  |            "code":"UNEXPECTED_STATUS_CODE",
@@ -1763,18 +1682,6 @@ class BenefitEligibilityDataControllerItSpec
                   .withStatus(BAD_GATEWAY)
                   .withHeader("Content-Type", "application/json")
                   .withBody(niContributionsAndCreditsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
-            WireMock
-              .get(urlEqualTo(npsClass2MaReceiptsPath))
-              .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-              .willReturn(
-                aResponse()
-                  .withStatus(BAD_GATEWAY)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody("{}")
               )
           )
 
@@ -1816,9 +1723,9 @@ class BenefitEligibilityDataControllerItSpec
                                  |   "nationalInsuranceNumber":"AB123456C",
                                  |   "benefitType":"MA",
                                  |   "summary":{
-                                 |      "totalCalls":3,
+                                 |      "totalCalls":2,
                                  |      "successful":0,
-                                 |      "failed":3
+                                 |      "failed":2
                                  |   },
                                  |   "downStreams":[
                                  |      {
@@ -1832,15 +1739,6 @@ class BenefitEligibilityDataControllerItSpec
                                  |      },
                                  |      {
                                  |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Class2 MA Receipts",
                                  |         "status":"FAILURE",
                                  |         "error":{
                                  |            "code":"UNEXPECTED_STATUS_CODE",
@@ -3592,7 +3490,6 @@ class BenefitEligibilityDataControllerItSpec
 
         val liabilitySummaryDetailsSuccessResponseBody =
           Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
-        val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
@@ -3616,18 +3513,6 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(npsClass2MaReceiptsPath))
-            .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(class2MAReceiptsSuccessResponseBody)
-            )
-        )
-
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
           "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
@@ -3644,9 +3529,6 @@ class BenefitEligibilityDataControllerItSpec
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
-          FilteredClass2MaReceipts(
-            List()
-          ),
           List(filteredLiabilitySummaryDetails, filteredLiabilitySummaryDetails),
           NiContributionsAndCreditsSuccessResponse(None, None, None),
           Some(
@@ -3704,18 +3586,6 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        server.stubFor(
-          WireMock
-            .get(urlEqualTo(npsClass2MaReceiptsPath))
-            .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-            .willReturn(
-              aResponse()
-                .withStatus(BAD_REQUEST)
-                .withHeader("Content-Type", "application/json")
-                .withBody(npsStandardErrorResponse400Body)
-            )
-        )
-
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
           "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
@@ -3734,15 +3604,10 @@ class BenefitEligibilityDataControllerItSpec
           OverallResultStatus.Failure,
           nationalInsuranceNumber,
           BenefitType.MA,
-          OverallResultSummary(3, 0, 3),
+          OverallResultSummary(2, 0, 2),
           List(
             SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest)),
-            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest)),
-            SanitizedApiResult(
-              ApiName.Class2MAReceipts,
-              NpsApiResponseStatus.Failure,
-              Some(NpsNormalizedError.BadRequest)
-            )
+            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest))
           )
         )
 

@@ -26,7 +26,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
@@ -196,12 +195,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
       )
     )
-  )
-
-  val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-    nationalInsuranceNumber = Some(Identifier("AB123456C")),
-    class2MAReceiptDetails = None,
-    callBack = None
   )
 
   val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
@@ -688,11 +681,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     niContributionsAndCreditsSuccessResponse
   )
 
-  val class2MAReceiptsResult = SuccessResult(
-    ApiName.Class2MAReceipts,
-    class2MAReceiptsSuccessResponse
-  )
-
   val liabilitySummaryDetailsResult = SuccessResult(
     ApiName.Liabilities,
     liabilitySummaryDetailsSuccessResponse
@@ -740,7 +728,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultMA(
-                class2MAReceiptsResult,
                 List(liabilitySummaryDetailsResult),
                 niContributionAndCreditsResult,
                 None
@@ -750,7 +737,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
         underTest.getEligibilityData(maEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
-            class2MAReceiptsResult,
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
             None

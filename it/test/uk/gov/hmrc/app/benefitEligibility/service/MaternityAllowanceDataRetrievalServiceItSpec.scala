@@ -46,8 +46,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
@@ -110,7 +108,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
         play.api.inject.bind[MongoComponent].toInstance(mongoComponent)
       )
       .configure(
-        "microservice.services.hip.nps.class2MaReceipts.port"         -> server.port,
         "microservice.services.hip.nps.liabilities.port"              -> server.port,
         "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port
       )
@@ -135,29 +132,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
     ".fetchEligibilityData" - {
 
       val npsCreditsAndContributionsPath = "/ni/national-insurance/contributions-and-credits"
-      val npsClass2MaReceiptsPath        = "/ni/class-2/GD379251T/maternity-allowance/receipts"
       val npsLiabilitySummaryDetailsPath = "/ni/person/GD379251T/liability-summary/ABROAD"
-
-      val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
-        Some(Identifier("AA000001A")),
-        Some(
-          List(
-            Class2MAReceiptDetails(
-              initials = Some(Initials("JP")),
-              surname = Some(Surname("van Cholmondley-warner")),
-              receivablePayment = Some(ReceivablePayment(10.56)),
-              receiptDate = Some(ReceiptDate(LocalDate.parse("2025-12-10"))),
-              liabilityStart = Some(Class2MAReceiptsSuccess.LiabilityStartDate(LocalDate.parse("2025-12-10"))),
-              liabilityEnd = Some(Class2MAReceiptsSuccess.LiabilityEndDate(LocalDate.parse("2025-12-10"))),
-              billAmount = Some(BillAmount(9999.98)),
-              billScheduleNumber = Some(Class2MAReceiptsSuccess.BillScheduleNumber(100)),
-              isClosedRecord = Some(IsClosedRecord(true)),
-              weeksPaid = Some(WeeksPaid(2))
-            )
-          )
-        ),
-        callBack = None
-      )
 
       val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
         Some(
@@ -194,8 +169,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
         ),
         None
       )
-
-      val class2MAReceiptsSuccessResponseBody = Json.toJson(class2MAReceiptsSuccessResponse).toString()
 
       val liabilitySummaryDetailsSuccessResponseBody = Json.toJson(liabilitySummaryDetailsSuccessResponse).toString()
 
@@ -261,16 +234,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -284,10 +247,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -304,9 +263,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -349,16 +305,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -376,10 +322,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -433,16 +375,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -460,10 +392,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -480,9 +408,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -513,16 +438,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -540,10 +455,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -560,10 +471,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -585,16 +492,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -609,10 +506,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -629,10 +522,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -667,16 +556,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -694,10 +573,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -717,10 +592,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
-          )
-
-          server.verify(
             getRequestedFor(urlEqualTo(npsLiabilitySummaryDetailsPath))
           )
         }
@@ -733,15 +604,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               .willReturn(
                 aResponse()
                   .withStatus(INTERNAL_SERVER_ERROR)
-              )
-          )
-          server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
               )
           )
 
@@ -760,10 +622,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -780,10 +638,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -823,16 +677,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -850,10 +694,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           result shouldBe Right(
             EligibilityCheckDataResultMA(
-              SuccessResult(
-                ApiName.Class2MAReceipts,
-                class2MAReceiptsSuccessResponse
-              ),
               List(
                 SuccessResult(
                   ApiName.Liabilities,
@@ -870,10 +710,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -898,16 +734,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
             )
 
             server.stubFor(
-              get(urlEqualTo(npsClass2MaReceiptsPath))
-                .willReturn(
-                  aResponse()
-                    .withStatus(OK)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(class2MAReceiptsSuccessResponseBody)
-                )
-            )
-
-            server.stubFor(
               get(urlEqualTo(npsLiabilitySummaryDetailsPath))
                 .willReturn(
                   aResponse()
@@ -922,10 +748,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
             result shouldBe Right(
               EligibilityCheckDataResultMA(
-                SuccessResult(
-                  ApiName.Class2MAReceipts,
-                  class2MAReceiptsSuccessResponse
-                ),
                 List(
                   SuccessResult(
                     ApiName.Liabilities,
@@ -943,10 +765,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
             server.verify(
               postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
             )
-
-            server.verify(
-              getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
-            )
           }
 
         }
@@ -961,15 +779,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
                   .withStatus(OK)
                   .withHeader("Content-Type", "application/json")
                   .withBody("{ invalid json structure")
-              )
-          )
-          server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
               )
           )
 
@@ -991,10 +800,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -1015,16 +820,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
           )
 
           server.stubFor(
-            get(urlEqualTo(npsClass2MaReceiptsPath))
-              .willReturn(
-                aResponse()
-                  .withStatus(OK)
-                  .withHeader("Content-Type", "application/json")
-                  .withBody(class2MAReceiptsSuccessResponseBody)
-              )
-          )
-
-          server.stubFor(
             get(urlEqualTo(npsLiabilitySummaryDetailsPath))
               .willReturn(
                 aResponse()
@@ -1042,10 +837,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
           server.verify(
             postRequestedFor(urlEqualTo(npsCreditsAndContributionsPath))
-          )
-
-          server.verify(
-            getRequestedFor(urlEqualTo(npsClass2MaReceiptsPath))
           )
 
           server.verify(
@@ -1140,16 +931,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
         )
 
         server.stubFor(
-          get(urlEqualTo(npsClass2MaReceiptsPath))
-            .willReturn(
-              aResponse()
-                .withStatus(OK)
-                .withHeader("Content-Type", "application/json")
-                .withBody(class2MAReceiptsSuccessResponseBody)
-            )
-        )
-
-        server.stubFor(
           get(urlEqualTo(npsLiabilitySummaryDetailsPath))
             .willReturn(
               aResponse()
@@ -1163,10 +944,6 @@ class MaternityAllowanceDataRetrievalServiceItSpec
 
         result shouldBe Right(
           EligibilityCheckDataResultMA(
-            SuccessResult(
-              ApiName.Class2MAReceipts,
-              class2MAReceiptsSuccessResponse
-            ),
             List(
               SuccessResult(
                 ApiName.Liabilities,
