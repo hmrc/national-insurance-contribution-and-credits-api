@@ -3424,7 +3424,52 @@ class BenefitEligibilityDataControllerItSpec
         r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
       }
 
-      "should include CorrelationId header as N/A when missing from request" in {
+      "should include CorrelationId header in internal server error responses" in {
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+        server.stubFor(
+          post(urlEqualTo(npsCreditsAndContributionsPath))
+            .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
+            .willReturn(
+              aResponse()
+                .withStatus(INTERNAL_SERVER_ERROR)
+            )
+        )
+
+        val esaEligibilityCheckDataRequest = ESAEligibilityCheckDataRequest(
+          nationalInsuranceNumber,
+          ContributionsAndCreditsRequestParams(
+            DateOfBirth(LocalDate.parse("2025-10-10")),
+            StartTaxYear(2024),
+            EndTaxYear(2025)
+          )
+        )
+        val request: FakeRequest[AnyContent] =
+          FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type" -> "application/json",
+              "Authorization" -> "Bearer token",
+              "CorrelationID" -> correlationId.value.toString,
+              "Accept" -> "application/json",
+              "OriginatorId" -> "DWP-CF-ESA-6"
+            )
+
+        val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
+
+        status(result) shouldBe 500
+        val r = Helpers.await(result)
+        r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
+      }
+
+      "should return BadRequest when CorrelationId header is missing" in {
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
             .willReturn(
@@ -3439,23 +3484,68 @@ class BenefitEligibilityDataControllerItSpec
           nationalInsuranceNumber,
           ContributionsAndCreditsRequestParams(
             DateOfBirth(LocalDate.parse("2025-10-10")),
-            StartTaxYear(2025),
-            EndTaxYear(2026)
+            StartTaxYear(2024),
+            EndTaxYear(2025)
           )
         )
-        val request: FakeRequest[AnyContent] = FakeRequest("POST", "/benefit-eligibility-info")
-          .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
-          .withHeaders(
-            "Content-Type"  -> "application/json",
-            "Authorization" -> "Bearer token",
-            "Accept"        -> "application/json"
-          )
+        val request: FakeRequest[AnyContent] =
+          FakeRequest("POST", "/benefit-eligibility-info")
+            .withJsonBody(Json.toJson(esaEligibilityCheckDataRequest))
+            .withHeaders(
+              "Content-Type" -> "application/json",
+              "Authorization" -> "Bearer token",
+              "Accept" -> "application/json",
+              "OriginatorId" -> "DWP-CF-ESA-6"
+            )
 
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 400
+      }
+
+      "should include CorrelationId header in not found responses for pagination" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val paginationCursor =
+          PaginationCursor(
+            PaginationType.GyspPagination,
+            PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
+          )
+
+        val cursorId = CursorId.from(paginationCursor)
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          s"/benefit-eligibility-info?cursorId=${cursorId.value}"
+        )
+          .withHeaders(
+            "Content-Type"  -> "application/json",
+            "Authorization" -> "Bearer token",
+            "CorrelationID" -> correlationId.value.toString,
+            "OriginatorId"  -> "DWP-CF-BSP-6",
+            "Accept"        -> "application/json"
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 404
         val r = Helpers.await(result)
-        r.header.headers.get("CorrelationId") shouldBe Some("N/A")
+        r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
+        contentAsJson(result) shouldBe Json.parse(
+          s"""{
+             |   "code":"NOT_FOUND",
+             |   "reason":"record not found for cursorId: ${cursorId.value}"
+             |}""".stripMargin
+        )
       }
 
       "should return 400 if request is missing originator id" in {
@@ -3657,6 +3747,8 @@ class BenefitEligibilityDataControllerItSpec
         )
 
         status(result) shouldBe 200
+        val r = Helpers.await(result)
+        r.header.headers.get("CorrelationId") shouldBe Some(correlationId.value.toString)
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
       }
       "should handle a MA request containing nextCursor successfully (502) " in {
