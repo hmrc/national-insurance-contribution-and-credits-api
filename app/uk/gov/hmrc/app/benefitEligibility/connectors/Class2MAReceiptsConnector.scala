@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Note: This connector is not being used as it has issues on the DWP side and
+// has been removed from the schema. It's been removed from all code however it's
+// not being completely deleted as in the future, it might be used again
+
 package uk.gov.hmrc.app.benefitEligibility.connectors
 
 import cats.data.EitherT

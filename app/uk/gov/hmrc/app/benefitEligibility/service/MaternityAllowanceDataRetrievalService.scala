@@ -43,7 +43,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 class MaternityAllowanceDataRetrievalService @Inject() (
-    class2MAReceiptsConnector: Class2MAReceiptsConnector,
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
     liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
     paginationService: PaginationService,
@@ -60,10 +59,6 @@ class MaternityAllowanceDataRetrievalService @Inject() (
       correlationId: CorrelationId
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] =
     (
-      class2MAReceiptsConnector.fetchClass2MAReceipts(
-        eligibilityCheckDataRequest.benefitType,
-        eligibilityCheckDataRequest.nationalInsuranceNumber
-      ),
       niContributionsAndCreditsConnector.fetchContributionsAndCredits(
         eligibilityCheckDataRequest.benefitType,
         NiContributionsAndCreditsRequest(
@@ -84,10 +79,9 @@ class MaternityAllowanceDataRetrievalService @Inject() (
         )
       }.sequence
     ).parTupled
-      .flatMap { case (class2MaReceiptsResult, contributionsAndCreditResult, liabilityResult) =>
+      .flatMap { case (contributionsAndCreditResult, liabilityResult) =>
 
         val result = EligibilityCheckDataResultMA(
-          class2MaReceiptsResult,
           liabilityResult,
           contributionsAndCreditResult,
           None
@@ -97,8 +91,7 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           if (result.allResults.exists(_.isFailure))
             false
           else
-            liabilityResult.exists(_.getSuccess.get.callback.isDefined) ||
-            class2MaReceiptsResult.getSuccess.get.callBack.isDefined
+            liabilityResult.exists(_.getSuccess.get.callback.isDefined)
 
         if (shouldPaginate) {
           val liabilityPages = liabilityResult.flatMap {
@@ -106,16 +99,12 @@ class MaternityAllowanceDataRetrievalService @Inject() (
             case NpsApiResult.SuccessResult(apiName, result) =>
               result.callback.flatMap(_.callbackURL.map(_.value)).map(url => PaginationSource(apiName, url))
           }
-          val class2MAReceiptsPage = class2MaReceiptsResult.getSuccess.flatMap {
-            _.callBack.flatMap(_.callbackURL).map(url => PaginationSource(Class2MAReceipts, url.value))
-          }
           paginationService
             .addTask(
               MaPageTask(
                 correlationId,
                 PageTaskId(uuidGenerator.generate),
                 liabilityPages,
-                class2MAReceiptsPage,
                 eligibilityCheckDataRequest.nationalInsuranceNumber,
                 currentTimeSource.instantNow()
               )

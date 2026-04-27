@@ -99,7 +99,6 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
             id,
             paginationType,
             liabilitiesPaging,
-            class2MaReceipts,
             nationalInsuranceNumber,
             createdAt
           ) =>
@@ -108,7 +107,6 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
           Updates.set("pageTaskId", Codecs.toBson(id)),
           Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
           Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
-          Updates.set("class2MaReceipts", Codecs.toBson(class2MaReceipts)),
           Updates.set("paginationType", Codecs.toBson(paginationType)),
           Updates.set("createdAt", Codecs.toBson(createdAt))
         )

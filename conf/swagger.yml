@@ -507,8 +507,6 @@ paths:
                   value:
                     benefitType: MA
                     nationalInsuranceNumber: KL890123M
-                    class2MAReceiptsResult:
-                      receiptDates: []
                     liabilitySummaryDetailsResult:
                       - liabilityDetails: []
                     niContributionsAndCreditsResult:
@@ -519,9 +517,6 @@ paths:
                   value:
                     benefitType: MA
                     nationalInsuranceNumber: AB123456C
-                    class2MAReceiptsResult:
-                      receiptDates:
-                        - "2025-12-10"
                     liabilitySummaryDetailsResult:
                       - liabilityDetails:
                           - startDate: "2026-01-01"
@@ -647,8 +642,6 @@ paths:
                     downStreams:
                       - apiName: "NiContributionsAndCredits"
                         status: "SUCCESS"
-                      - apiName: "Class2MAReceipts"
-                        status: "SUCCESS"
                       - apiName: "Liabilities"
                         status: "FAILURE"
                         error:
@@ -672,12 +665,6 @@ paths:
                           code: "FORBIDDEN"
                           message: "access denied to maternity allowance service"
                           downstreamStatus: 403
-                      - apiName: "Class2MAReceipts"
-                        status: "FAILURE"
-                        error:
-                          code: "INTERNAL_SERVER_ERROR"
-                          message: "class 2 MA receipts service internal error"
-                          downstreamStatus: 500
                       - apiName: "Liabilities"
                         status: "FAILURE"
                         error:
@@ -815,9 +802,6 @@ paths:
                   value:
                     benefitType: MA
                     nationalInsuranceNumber: AB123456C
-                    class2MAReceiptsResult:
-                      receiptDates:
-                        - "2025-12-10"
                     liabilitySummaryDetailsResult:
                       - liabilityDetails:
                           - startDate: "2026-01-01"
@@ -932,8 +916,6 @@ paths:
                     downStreams:
                       - apiName: "NiContributionsAndCredits"
                         status: "SUCCESS"
-                      - apiName: "Class2MAReceipts"
-                        status: "SUCCESS"
                       - apiName: "Liabilities"
                         status: "FAILURE"
                         error:
@@ -957,12 +939,6 @@ paths:
                           code: "FORBIDDEN"
                           message: "access denied to maternity allowance service"
                           downstreamStatus: 403
-                      - apiName: "Class2MAReceipts"
-                        status: "FAILURE"
-                        error:
-                          code: "INTERNAL_SERVER_ERROR"
-                          message: "class 2 MA receipts service internal error"
-                          downstreamStatus: 500
                       - apiName: "Liabilities"
                         status: "FAILURE"
                         error:

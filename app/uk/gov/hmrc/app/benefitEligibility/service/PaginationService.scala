@@ -57,7 +57,6 @@ class PaginationService @Inject() (
             m.correlationId,
             PageTaskId(uuidGenerator.generate),
             m.liabilitiesPaging,
-            m.class2MaReceipts,
             m.nationalInsuranceNumber,
             m.createdAt
           )
@@ -130,23 +129,18 @@ class PaginationService @Inject() (
       maPageTask: MaPageTask
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for MA")
-    (
-      maPageTask.liabilitiesPaging.map { pageSource =>
+    maPageTask.liabilitiesPaging
+      .map { pageSource =>
         liabilitySummaryDetailsConnector
           .fetchData(BenefitType.from(maPageTask.paginationType), pageSource.callBackURL)
-      }.sequence,
-      maPageTask.class2MaReceipts.map { pageSource =>
-        class2MAReceiptsConnector
-          .fetchData(BenefitType.from(maPageTask.paginationType), pageSource.callBackURL)
-      }.sequence
-    ).parTupled
-      .map { case (liabilityResult, class2MaReceiptsResult) =>
+      }
+      .sequence
+      .map { liabilityResult =>
         PaginationResult(
           correlationId = maPageTask.correlationId,
           paginationType = maPageTask.paginationType,
           nationalInsuranceNumber = maPageTask.nationalInsuranceNumber,
           liabilitiesResult = liabilityResult,
-          class2MaReceiptsResult = class2MaReceiptsResult,
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
@@ -180,7 +174,6 @@ class PaginationService @Inject() (
           correlationId = bspPageTask.correlationId,
           paginationType = bspPageTask.paginationType,
           liabilitiesResult = Nil,
-          None,
           nationalInsuranceNumber = bspPageTask.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult = ContributionCreditPagingResult(
@@ -213,7 +206,6 @@ class PaginationService @Inject() (
           correlationId = searchLightPageTask.correlationId,
           paginationType = searchLightPageTask.paginationType,
           liabilitiesResult = Nil,
-          None,
           nationalInsuranceNumber = searchLightPageTask.nationalInsuranceNumber,
           marriageDetailsResult = None,
           contributionCreditResult = ContributionCreditPagingResult(
@@ -293,7 +285,6 @@ class PaginationService @Inject() (
           paginationType = gyspPageTask.paginationType,
           gyspPageTask.nationalInsuranceNumber,
           liabilitiesResult = Nil,
-          None,
           marriageDetailsResult = marriageDetailsResult,
           contributionCreditResult = ContributionCreditPagingResult(
             contributionCreditResult,
