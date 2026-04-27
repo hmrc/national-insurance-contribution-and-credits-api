@@ -38,24 +38,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) {
 
-  private def getOriginatorId(benefitType: BenefitType, callSystem: Option[CallSystem] = None): String =
-    callSystem match {
-      case Some(_) =>
-        benefitType match {
-          case BenefitType.MA   => config.hipOriginatorIdMa.searchlightId
-          case BenefitType.ESA  => config.hipOriginatorIdEsa.searchlightId
-          case BenefitType.JSA  => config.hipOriginatorIdJsa.searchlightId
-          case BenefitType.GYSP => config.hipOriginatorIdGysp.searchlightId
-          case BenefitType.BSP  => config.hipOriginatorIdBsp.searchlightId
-        }
-      case None =>
-        benefitType match {
-          case BenefitType.MA   => config.hipOriginatorIdMa.standardId
-          case BenefitType.ESA  => config.hipOriginatorIdEsa.standardId
-          case BenefitType.JSA  => config.hipOriginatorIdJsa.standardId
-          case BenefitType.GYSP => config.hipOriginatorIdGysp.standardId
-          case BenefitType.BSP  => config.hipOriginatorIdBsp.standardId
-        }
+  private def getOriginatorId(benefitType: BenefitType): String =
+    benefitType match {
+      case BenefitType.MA   => config.hipOriginatorIdMa
+      case BenefitType.ESA  => config.hipOriginatorIdEsa
+      case BenefitType.JSA  => config.hipOriginatorIdJsa
+      case BenefitType.GYSP => config.hipOriginatorIdGysp
+      case BenefitType.BSP  => config.hipOriginatorIdBsp
     }
 
   private val commonHeaders: List[(String, String)] = List(
@@ -68,7 +57,7 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
       writes: Writes[A]
   ): EitherT[Future, NpsClientError, HttpResponse] = {
     val requestHeaders =
-      (ORIGINATING_SYSTEM, getOriginatorId(benefitType, callSystem)) +: (hc.headers(
+      (ORIGINATING_SYSTEM, getOriginatorId(benefitType)) +: (hc.headers(
         Seq("CorrelationId")
       ) ++ commonHeaders)
     EitherT(
