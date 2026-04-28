@@ -111,6 +111,7 @@ class PaginationServiceItSpec
         "microservice.services.hip.nps.liabilities.port"              -> server.port,
         "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port,
         "microservice.services.hip.nps.schemeMembershipDetails.port"  -> server.port,
+        "microservice.services.hip.nps.benefitSchemeDetails.port"     -> server.port,
         "microservice.services.hip.nps.marriageDetails.port"          -> server.port
       )
       .build()

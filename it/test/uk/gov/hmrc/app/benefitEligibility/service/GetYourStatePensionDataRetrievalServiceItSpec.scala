@@ -132,7 +132,9 @@ class GetYourStatePensionDataRetrievalServiceItSpec
         "microservice.services.hip.nps.marriageDetails.port"            -> server.port,
         "microservice.services.hip.nps.individualStatePension.port"     -> server.port,
         "microservice.services.hip.nps.schemeMembershipDetails.port"    -> server.port,
-        "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port
+        "microservice.services.hip.nps.benefitSchemeDetails.port"       -> server.port,
+        "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port,
+        "microservice.services.hip.nps.longTermBenefitNotes.port"       -> server.port
       )
       .build()
 

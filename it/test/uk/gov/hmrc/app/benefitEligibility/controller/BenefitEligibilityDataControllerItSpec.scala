@@ -123,6 +123,8 @@ class BenefitEligibilityDataControllerItSpec
         "microservice.services.hip.nps.individualStatePension.port"     -> server.port,
         "microservice.services.hip.nps.schemeMembershipDetails.port"    -> server.port,
         "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port,
+        "microservice.services.hip.nps.longTermBenefitNotes.port"       -> server.port,
+        "microservice.services.hip.nps.benefitSchemeDetails.port"       -> server.port,
         "benefitEligibilityInfoEndpointEnabled"                         -> true,
         "microservice.services.auth.port"                               -> server.port
       )
