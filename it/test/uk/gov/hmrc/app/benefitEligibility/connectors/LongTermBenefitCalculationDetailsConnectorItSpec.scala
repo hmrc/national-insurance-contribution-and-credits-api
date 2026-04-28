@@ -79,7 +79,8 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
-        "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port
+        "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port,
+        "microservice.services.hip.nps.longTermBenefitNotes.port"       -> server.port
       )
       .build()
 

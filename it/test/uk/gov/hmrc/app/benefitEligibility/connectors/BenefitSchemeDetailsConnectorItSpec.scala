@@ -68,7 +68,7 @@ class BenefitSchemeDetailsConnectorItSpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
-        "microservice.services.hip.nps.schemeMembershipDetails.port" -> server.port
+        "microservice.services.hip.nps.benefitSchemeDetails.port" -> server.port
       )
       .build()
 

@@ -28,13 +28,15 @@ class AppConfig @Inject() (config: ServicesConfig) {
 
   def baseUrl(apiName: ApiName): String = {
     val npsEndpointName: String = apiName match {
-      case ApiName.Class2MAReceipts                                                 => "class2MaReceipts"
-      case ApiName.Liabilities                                                      => "liabilities"
-      case ApiName.NiContributionAndCredits                                         => "niContributionAndCredits"
-      case ApiName.MarriageDetails                                                  => "marriageDetails"
-      case ApiName.IndividualStatePension                                           => "individualStatePension"
-      case ApiName.SchemeMembershipDetails | ApiName.BenefitSchemeDetails           => "schemeMembershipDetails"
-      case ApiName.LongTermBenefitNotes | ApiName.LongTermBenefitCalculationDetails => "longTermBenefitCalculation"
+      case ApiName.Class2MAReceipts                  => "class2MaReceipts"
+      case ApiName.Liabilities                       => "liabilities"
+      case ApiName.NiContributionAndCredits          => "niContributionAndCredits"
+      case ApiName.MarriageDetails                   => "marriageDetails"
+      case ApiName.IndividualStatePension            => "individualStatePension"
+      case ApiName.SchemeMembershipDetails           => "schemeMembershipDetails"
+      case ApiName.LongTermBenefitNotes              => "longTermBenefitNotes"
+      case ApiName.BenefitSchemeDetails              => "benefitSchemeDetails"
+      case ApiName.LongTermBenefitCalculationDetails => "longTermBenefitCalculation"
     }
     config.baseUrl(s"hip.nps.$npsEndpointName")
   }
