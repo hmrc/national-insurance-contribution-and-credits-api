@@ -2991,7 +2991,7 @@ class BenefitEligibilityDataControllerItSpec
           .withHeaders(
             "Content-Type"         -> "application/json",
             "Authorization"        -> "Bearer token",
-            "CorrelationID"        -> "notValidCorrelationId",
+            "CorrelationID"        -> "1-1-1-1-1",
             "Accept"               -> "application/json",
             "gov-uk-originator-id" -> "DWP-CF-ESA-6"
           )
