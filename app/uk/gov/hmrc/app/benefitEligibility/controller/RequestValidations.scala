@@ -89,11 +89,11 @@ object RequestValidations {
   }
 
   def validateCorrelationId(correlationId: String): Either[ErrorReason, CorrelationId] = {
-    val maybeCorrelationId = Try(UUID.fromString(correlationId)).toOption
+    val uuidRegex = """^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$""".r
     Validated
       .condNel(
-        maybeCorrelationId.isDefined,
-        CorrelationId(maybeCorrelationId.get),
+        uuidRegex.matches(correlationId),
+        CorrelationId(UUID.fromString(correlationId)),
         "Invalid correlationId value found, expected a valid UUID"
       ) match {
       case Validated.Valid(id)      => Right(id)
