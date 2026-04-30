@@ -1282,7 +1282,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdBsp"))
+              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdBspSearchlight"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)

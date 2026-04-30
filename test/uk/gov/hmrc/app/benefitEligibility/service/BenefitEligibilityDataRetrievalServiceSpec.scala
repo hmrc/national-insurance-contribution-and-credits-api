@@ -22,105 +22,44 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
-import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  ApiName,
-  AssociatedCalculationSequenceNumber,
-  BenefitEligibilityError,
-  BenefitType,
-  Callback,
-  CallbackUrl,
-  CorrelationId,
-  Country,
-  DateOfBirth,
-  EndTaxYear,
-  Identifier,
-  LongTermBenefitType,
-  ReceiptDate,
-  StartTaxYear,
-  TaxYear
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.{
-  AreaDiallingCode,
-  BenefitSchemeInstitutionType,
-  BenefitSchemeStatus,
-  RerouteToSchemeCessation,
-  SchemeAddressType,
-  StatementInhibitor
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
 }
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  ContributionCategoryLetter,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
-  ApparentUnnotifiedTerminationStatus,
-  Clercalc,
-  ContCatLetter,
-  Enfcment,
-  FurtherPaymentsConfirmation,
-  GuaranteedMinimumPensionReconciliationStatus,
-  MethodOfPreservation,
-  RevaluationRate,
-  SchemeMembershipDebitReason,
-  SchemeSuspensionType,
-  SspDeem,
-  StakeholderPensionSchemeType,
-  SurvivorStatus
-}
-import uk.gov.hmrc.app.benefitEligibility.model.request.{
-  BSPEligibilityCheckDataRequest,
-  ESAEligibilityCheckDataRequest,
-  GYSPEligibilityCheckDataRequest,
-  JSAEligibilityCheckDataRequest,
-  MAEligibilityCheckDataRequest,
-  SearchlightEligibilityCheckDataRequest
-}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
+import uk.gov.hmrc.app.benefitEligibility.model.request.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.util.UUID
@@ -128,38 +67,6 @@ import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
 class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
-
-  private val mockMaternityAllowanceDataRetrievalService: MaternityAllowanceDataRetrievalService =
-    mock[MaternityAllowanceDataRetrievalService]
-
-  private val mockEmploymentSupportAllowanceDataRetrievalService: EmploymentSupportAllowanceDataRetrievalService =
-    mock[EmploymentSupportAllowanceDataRetrievalService]
-
-  private val mockJobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService =
-    mock[JobSeekersAllowanceDataRetrievalService]
-
-  private val mockGetYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService =
-    mock[GetYourStatePensionDataRetrievalService]
-
-  private val mockBereavementSupportPaymentDataRetrievalService: BereavementSupportPaymentDataRetrievalService =
-    mock[BereavementSupportPaymentDataRetrievalService]
-
-  private val mockBspSearchlightDataRetrievalService: SearchlightDataRetrievalService =
-    mock[SearchlightDataRetrievalService]
-
-  private val underTest = new BenefitEligibilityDataRetrievalService(
-    mockMaternityAllowanceDataRetrievalService,
-    mockEmploymentSupportAllowanceDataRetrievalService,
-    mockJobSeekersAllowanceDataRetrievalService,
-    mockGetYourStatePensionDataRetrievalService,
-    mockBereavementSupportPaymentDataRetrievalService,
-    mockBspSearchlightDataRetrievalService
-  )
-
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  private implicit val ec: ExecutionContextExecutorService =
-    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
     totalGraduatedPensionUnits = Some(TotalGraduatedPensionUnits(53)),
@@ -602,6 +509,11 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     )
   )
 
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  private implicit val ec: ExecutionContextExecutorService =
+    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
+
   val longTermBenefitNotesSuccessResponse = LongTermBenefitNotesSuccessResponse(
     Some(
       List(
@@ -617,16 +529,6 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         Note("Retirement Position of UNKNOWN recorded on this account between NOT KNOWN.")
       )
     )
-  )
-
-  private val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
-    nationalInsuranceNumber = Identifier("GD379251T"),
-    contributionsAndCredits = ContributionsAndCreditsRequestParams(
-      DateOfBirth(LocalDate.parse("2025-10-10")),
-      StartTaxYear(2025),
-      EndTaxYear(2026)
-    ),
-    liabilities = LiabilitiesRequestParams(List(Abroad), None, None, None)
   )
 
   val jsaEligibilityCheckDataRequest = JSAEligibilityCheckDataRequest(
@@ -717,6 +619,43 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   )
 
   val correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+
+  private val mockMaternityAllowanceDataRetrievalService: MaternityAllowanceDataRetrievalService =
+    mock[MaternityAllowanceDataRetrievalService]
+
+  private val mockEmploymentSupportAllowanceDataRetrievalService: EmploymentSupportAllowanceDataRetrievalService =
+    mock[EmploymentSupportAllowanceDataRetrievalService]
+
+  private val mockJobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService =
+    mock[JobSeekersAllowanceDataRetrievalService]
+
+  private val mockGetYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService =
+    mock[GetYourStatePensionDataRetrievalService]
+
+  private val mockBereavementSupportPaymentDataRetrievalService: BereavementSupportPaymentDataRetrievalService =
+    mock[BereavementSupportPaymentDataRetrievalService]
+
+  private val mockBspSearchlightDataRetrievalService: SearchlightDataRetrievalService =
+    mock[SearchlightDataRetrievalService]
+
+  private val underTest = new BenefitEligibilityDataRetrievalService(
+    mockMaternityAllowanceDataRetrievalService,
+    mockEmploymentSupportAllowanceDataRetrievalService,
+    mockJobSeekersAllowanceDataRetrievalService,
+    mockGetYourStatePensionDataRetrievalService,
+    mockBereavementSupportPaymentDataRetrievalService,
+    mockBspSearchlightDataRetrievalService
+  )
+
+  private val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
+    nationalInsuranceNumber = Identifier("GD379251T"),
+    contributionsAndCredits = ContributionsAndCreditsRequestParams(
+      DateOfBirth(LocalDate.parse("2025-10-10")),
+      StartTaxYear(2025),
+      EndTaxYear(2026)
+    ),
+    liabilities = LiabilitiesRequestParams(List(Abroad), None, None, None)
+  )
 
   "BenefitEligibilityDataRetrievalService" - {
     ".getEligibilityData" - {
