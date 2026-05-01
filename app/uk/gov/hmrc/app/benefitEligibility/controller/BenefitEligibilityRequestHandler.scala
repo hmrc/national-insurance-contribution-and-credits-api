@@ -56,7 +56,7 @@ object BenefitEligibilityRequestHandler {
             case Some(requestJson) =>
               requestJson.validate[EligibilityCheckDataRequest] match {
                 case JsSuccess(eligibilityCheckDataRequest, _) =>
-                  if (OriginatorIdType.from(eligibilityCheckDataRequest.benefitType) == originatorId) {
+                  if (OriginatorIdType.from(eligibilityCheckDataRequest).contains(originatorId)) {
                     RequestValidations.validateRequest(eligibilityCheckDataRequest) match {
                       case Left(validationError) =>
                         logger.error(s"Validation Error: ${validationError.messages.mkString(",")}")

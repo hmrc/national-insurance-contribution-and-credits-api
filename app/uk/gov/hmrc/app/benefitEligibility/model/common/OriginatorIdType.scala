@@ -17,6 +17,16 @@
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
+import uk.gov.hmrc.app.benefitEligibility.model.request.{
+  BSPEligibilityCheckDataRequest,
+  ESAEligibilityCheckDataRequest,
+  EligibilityCheckDataRequest,
+  GYSPEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest,
+  MAEligibilityCheckDataRequest,
+  SearchlightEligibilityCheckDataRequest
+}
 
 import scala.collection.immutable
 
@@ -31,17 +41,21 @@ object OriginatorIdType extends Enum[OriginatorIdType] with PlayJsonEnum[Origina
 
   case object BspOriginatorId extends OriginatorIdType("DWP-CF-BSP-6")
 
+  case object BspSearchLightOriginatorId extends OriginatorIdType("DWP-SEARCHLIGHT-CF-BSP-6")
+
   case object JsaOriginatorId extends OriginatorIdType("DWP-CF-JSA-6")
 
   case object EsaOriginatorId extends OriginatorIdType("DWP-CF-ESA-6")
 
-  def from(benefitType: BenefitType): OriginatorIdType =
-    benefitType match {
-      case BenefitType.MA   => MaOriginatorId
-      case BenefitType.ESA  => EsaOriginatorId
-      case BenefitType.JSA  => JsaOriginatorId
-      case BenefitType.GYSP => GyspOriginatorId
-      case BenefitType.BSP  => BspOriginatorId
+  def from(eligibilityCheckDataRequest: EligibilityCheckDataRequest): Option[OriginatorIdType] =
+    eligibilityCheckDataRequest match {
+      case req: ESAEligibilityCheckDataRequest  => Some(EsaOriginatorId)
+      case req: JSAEligibilityCheckDataRequest  => Some(JsaOriginatorId)
+      case req: BSPEligibilityCheckDataRequest  => Some(BspOriginatorId)
+      case req: MAEligibilityCheckDataRequest   => Some(MaOriginatorId)
+      case req: GYSPEligibilityCheckDataRequest => Some(GyspOriginatorId)
+      case req: SearchlightEligibilityCheckDataRequest =>
+        if (req.benefitType == BSP) Some(BspSearchLightOriginatorId) else None
     }
 
 }
