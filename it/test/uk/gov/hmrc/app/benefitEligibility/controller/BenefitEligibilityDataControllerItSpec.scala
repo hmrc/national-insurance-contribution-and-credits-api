@@ -1282,7 +1282,7 @@ class BenefitEligibilityDataControllerItSpec
           server.stubFor(
             post(urlEqualTo(npsCreditsAndContributionsPath))
               .withHeader("CorrelationId", EqualToPattern(correlationId.value.toString))
-              .withHeader("gov-uk-originator-id", EqualToPattern("originatorIdBspSearchlight"))
+              .withHeader("gov-uk-originator-id", EqualToPattern("DWP-SEARCHLIGHT-CF-BSP-6"))
               .willReturn(
                 aResponse()
                   .withStatus(OK)
@@ -1307,7 +1307,7 @@ class BenefitEligibilityDataControllerItSpec
                 "Authorization"        -> "Bearer token",
                 "CorrelationID"        -> correlationId.value.toString,
                 "Accept"               -> "application/json",
-                "gov-uk-originator-id" -> "DWP-CF-BSP-6"
+                "gov-uk-originator-id" -> "DWP-SEARCHLIGHT-CF-BSP-6"
               )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
@@ -1359,7 +1359,7 @@ class BenefitEligibilityDataControllerItSpec
               "Authorization"        -> "Bearer token",
               "CorrelationID"        -> correlationId.value.toString,
               "Accept"               -> "application/json",
-              "gov-uk-originator-id" -> "DWP-CF-BSP-6"
+              "gov-uk-originator-id" -> "DWP-SEARCHLIGHT-CF-BSP-6"
             )
 
           val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
