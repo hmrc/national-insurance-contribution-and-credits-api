@@ -19,7 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 import cats.data.Validated
 import cats.implicits.catsSyntaxTuple6Semigroupal
 import play.api.libs.json.JsonValidationError
-import uk.gov.hmrc.app.benefitEligibility.model.common.{CorrelationId, Identifier, OriginatorIdType, PaginationType}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{CorrelationId, Identifier, OriginatorId, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 import uk.gov.hmrc.app.benefitEligibility.util.{
@@ -27,6 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.util.{
   RequestAwareLogger,
   SuccessfulResult
 }
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -115,9 +116,10 @@ object RequestValidations {
     }
 
   def validateOriginatorId(
-      originatorId: Option[String]
-  )(implicit hc: HeaderCarrier): Either[ErrorReason, OriginatorIdType] =
-    originatorId.flatMap(id => OriginatorIdType.withNameOption(id)) match {
+      originatorId: Option[String],
+      appConfig: AppConfig
+  )(implicit hc: HeaderCarrier): Either[ErrorReason, OriginatorId] =
+    originatorId.flatMap(id => OriginatorId.from(id, appConfig)) match {
       case None =>
         Left(ErrorReason("Originator Id is missing or invalid"))
       case Some(success) => Right(success)

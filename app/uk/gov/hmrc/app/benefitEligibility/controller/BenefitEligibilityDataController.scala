@@ -42,6 +42,7 @@ class BenefitEligibilityDataController @Inject() (
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
         BenefitEligibilityRequestHandler.handleStandardRequest(
+          appConfig,
           request,
           benefitEligibilityDataRetrievalService.getEligibilityData
         )
@@ -52,6 +53,7 @@ class BenefitEligibilityDataController @Inject() (
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
         BenefitEligibilityRequestHandler.handlePaginationRequest(
+          appConfig,
           request,
           paginationService.paginate
         )
