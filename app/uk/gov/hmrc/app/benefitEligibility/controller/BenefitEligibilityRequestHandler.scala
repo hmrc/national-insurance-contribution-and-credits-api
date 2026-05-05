@@ -92,7 +92,7 @@ object BenefitEligibilityRequestHandler {
                         Json.toJson(
                           ErrorResponse(
                             ErrorCode.BadRequest,
-                            ErrorReason(s"Originator Id doesnt match benefit type")
+                            ErrorReason(s"Invalid Originator Id")
                           )
                         )
                       )
@@ -197,7 +197,7 @@ object BenefitEligibilityRequestHandler {
                   Json.toJson(
                     ErrorResponse(
                       ErrorCode.BadRequest,
-                      ErrorReason("Originator Id doesnt match benefit type")
+                      ErrorReason("Invalid Originator Id")
                     )
                   )
                 )
