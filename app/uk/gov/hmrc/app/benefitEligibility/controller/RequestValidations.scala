@@ -43,7 +43,7 @@ object RequestValidations {
   ): Either[JsonValidationError, SuccessfulResult.type] = {
 
     val shouldPageForContributionsAndCredits =
-      PaginationType.from(request.benefitType).toList.diff(List(PaginationType.MaPagination)).nonEmpty
+      PaginationType.from(request).toList.diff(List(PaginationType.MaPagination)).nonEmpty
 
     val hasOneTaxWindow = ContributionCreditTaxWindowCalculator
       .createTaxWindows(

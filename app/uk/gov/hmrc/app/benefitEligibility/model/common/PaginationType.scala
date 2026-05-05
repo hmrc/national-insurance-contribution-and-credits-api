@@ -17,6 +17,15 @@
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import uk.gov.hmrc.app.benefitEligibility.model.request.{
+  BSPEligibilityCheckDataRequest,
+  ESAEligibilityCheckDataRequest,
+  EligibilityCheckDataRequest,
+  GYSPEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest,
+  MAEligibilityCheckDataRequest,
+  SearchlightEligibilityCheckDataRequest
+}
 
 import scala.collection.immutable
 
@@ -25,18 +34,22 @@ sealed abstract class PaginationType(override val entryName: String) extends Enu
 object PaginationType extends Enum[PaginationType] with PlayJsonEnum[PaginationType] {
   val values: immutable.IndexedSeq[PaginationType] = findValues
 
+  def from(eligibilityCheckDataRequest: EligibilityCheckDataRequest): Option[PaginationType] =
+    eligibilityCheckDataRequest match {
+      case req: BSPEligibilityCheckDataRequest  => Some(PaginationType.BspPagination)
+      case req: MAEligibilityCheckDataRequest   => Some(PaginationType.MaPagination)
+      case req: GYSPEligibilityCheckDataRequest => Some(PaginationType.GyspPagination)
+      case req: SearchlightEligibilityCheckDataRequest if req.benefitType == BenefitType.BSP =>
+        Some(PaginationType.BspSearchLightPagination)
+      case _ => None
+    }
+
   case object MaPagination extends PaginationType("MA")
 
   case object GyspPagination extends PaginationType("GYSP")
 
   case object BspPagination extends PaginationType("BSP")
 
-  def from(benefitType: BenefitType): Option[PaginationType] =
-    benefitType match {
-      case BenefitType.MA   => Some(PaginationType.MaPagination)
-      case BenefitType.GYSP => Some(PaginationType.GyspPagination)
-      case BenefitType.BSP  => Some(PaginationType.BspPagination)
-      case _                => None
-    }
+  case object BspSearchLightPagination extends PaginationType("BSP_SEARCHLIGHT")
 
 }

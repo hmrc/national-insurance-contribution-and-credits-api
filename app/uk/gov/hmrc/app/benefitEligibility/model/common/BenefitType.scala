@@ -33,9 +33,10 @@ object BenefitType extends Enum[BenefitType] with PlayJsonEnum[BenefitType] {
 
   def from(paginationType: PaginationType): BenefitType =
     paginationType match {
-      case PaginationType.MaPagination   => MA
-      case PaginationType.GyspPagination => GYSP
-      case PaginationType.BspPagination  => BSP
+      case PaginationType.MaPagination             => MA
+      case PaginationType.GyspPagination           => GYSP
+      case PaginationType.BspPagination            => BSP
+      case PaginationType.BspSearchLightPagination => BSP
     }
 
 }

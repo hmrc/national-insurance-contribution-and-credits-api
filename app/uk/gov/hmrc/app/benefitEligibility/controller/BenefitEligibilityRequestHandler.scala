@@ -175,20 +175,34 @@ object BenefitEligibilityRequestHandler {
               )
             )
           case Some(Success(nextCursor)) =>
-            paginationFunction(
-              nextCursor
-            )
-              .map { paginationResult =>
-                logger.info("Getting paginated data")
-                BenefitEligibilityInfoResponse.from(
-                  paginationResult
-                ) match {
-                  case Left(value) =>
-                    InternalServerError(Json.toJson(value))
-                  case Right(value) =>
-                    Ok(Json.toJson(value))
+            logger.info(OriginatorId.from(nextCursor.paginationType, appConfig).mkString)
+            if (OriginatorId.from(nextCursor.paginationType, appConfig).contains(originatorId)) {
+              paginationFunction(
+                nextCursor
+              )
+                .map { paginationResult =>
+                  logger.info("Getting paginated data")
+                  BenefitEligibilityInfoResponse.from(
+                    paginationResult
+                  ) match {
+                    case Left(value) =>
+                      InternalServerError(Json.toJson(value))
+                    case Right(value) =>
+                      Ok(Json.toJson(value))
+                  }
                 }
-              }
+            } else {
+              EitherT.rightT[Future, BenefitEligibilityError](
+                BadRequest(
+                  Json.toJson(
+                    ErrorResponse(
+                      ErrorCode.BadRequest,
+                      ErrorReason("Originator Id doesnt match benefit type")
+                    )
+                  )
+                )
+              )
+            }
           case None =>
             EitherT.rightT[Future, BenefitEligibilityError](
               BadRequest(
@@ -232,7 +246,8 @@ object BenefitEligibilityRequestHandler {
                     )
                   ).withHeaders("CorrelationId" -> correlationId.value.toString)
               }
-            case Right(response) => response.withHeaders("CorrelationId" -> correlationId.value.toString)
+            case Right(response) =>
+              response.withHeaders("CorrelationId" -> correlationId.value.toString)
           }
       }
     }
