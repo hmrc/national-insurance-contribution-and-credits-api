@@ -32,6 +32,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.response.{
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
 import uk.gov.hmrc.app.benefitEligibility.util.{RequestAwareLogger, SuccessfulResult}
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,6 +43,7 @@ object BenefitEligibilityRequestHandler {
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
   def handleStandardRequest(
+      appConfig: AppConfig,
       request: Request[AnyContent],
       fn: (EligibilityCheckDataRequest, CorrelationId) => EitherT[
         Future,
@@ -50,13 +52,13 @@ object BenefitEligibilityRequestHandler {
       ]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     (
-      validateHeaders(request) match {
+      validateHeaders(request, appConfig) match {
         case Right(correlationId, originatorId) =>
           request.body.asJson match {
             case Some(requestJson) =>
               requestJson.validate[EligibilityCheckDataRequest] match {
                 case JsSuccess(eligibilityCheckDataRequest, _) =>
-                  if (OriginatorIdType.from(eligibilityCheckDataRequest).contains(originatorId)) {
+                  if (OriginatorId.from(eligibilityCheckDataRequest, appConfig).contains(originatorId)) {
                     RequestValidations.validateRequest(eligibilityCheckDataRequest) match {
                       case Left(validationError) =>
                         logger.error(s"Validation Error: ${validationError.messages.mkString(",")}")
@@ -149,10 +151,11 @@ object BenefitEligibilityRequestHandler {
     }
 
   def handlePaginationRequest(
+      appConfig: AppConfig,
       request: Request[AnyContent],
       paginationFunction: PaginationCursor => EitherT[Future, BenefitEligibilityError, PaginationResult]
   )(implicit headerCarrier: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
-    (validateHeaders(request) match {
+    (validateHeaders(request, appConfig) match {
       case Right(correlationId, originatorId) =>
         val maybeNextCursor =
           request.queryString
@@ -234,12 +237,12 @@ object BenefitEligibilityRequestHandler {
       }
     }
 
-  private def validateHeaders(request: Request[AnyContent])(
+  private def validateHeaders(request: Request[AnyContent], appConfig: AppConfig)(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, (CorrelationId, OriginatorIdType)] =
+  ): Either[ErrorReason, (CorrelationId, OriginatorId)] =
     getAcceptHeader(request) match {
       case Right(_) =>
-        getOriginatorId(request) match {
+        getOriginatorId(request, appConfig) match {
           case Right(id) =>
             getCorrelationId(request) match {
               case Right(correlationId)     => Right(correlationId, id)
@@ -251,16 +254,16 @@ object BenefitEligibilityRequestHandler {
 
     }
 
-  private def getOriginatorId(request: Request[AnyContent])(
+  private def getOriginatorId(request: Request[AnyContent], appConfig: AppConfig)(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, OriginatorIdType] = {
+  ): Either[ErrorReason, OriginatorId] = {
     logger.info("Validating Originator Id")
     request.headers.get("gov-uk-originator-id") match {
       case None =>
         logger.error("Missing header 'gov-uk-originator-id'")
         Left(ErrorReason("Missing header 'gov-uk-originator-id'"))
-      case Some(acceptHeader) =>
-        RequestValidations.validateOriginatorId(Some(acceptHeader))
+      case Some(originatorId) =>
+        RequestValidations.validateOriginatorId(Some(originatorId), appConfig)
     }
   }
 
