@@ -49,7 +49,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, F
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
-import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BspPagination
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.{BspPagination, BspSearchLightPagination}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
   Class1ContributionStatus,
@@ -227,7 +227,7 @@ class SearchlightDataRetrievalServiceItSpec
                 ApiName.NiContributionAndCredits,
                 successResponse
               ),
-              Some(PaginationCursor(BspPagination, PageTaskId(uuidOne)))
+              Some(PaginationCursor(BspSearchLightPagination, PageTaskId(uuidOne)))
             )
           )
 

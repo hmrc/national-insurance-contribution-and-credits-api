@@ -207,7 +207,7 @@ class BenefitEligibilityDataControllerItSpec
       SearchLightPageTask(
         correlationId,
         PageTaskId(uuidFour),
-        PaginationType.BspPagination,
+        PaginationType.BspSearchLightPagination,
         Some(
           ContributionAndCreditsPaging(
             NonEmptyList
@@ -3428,7 +3428,7 @@ class BenefitEligibilityDataControllerItSpec
             "Content-Type"         -> "application/json",
             "Authorization"        -> "Bearer token",
             "CorrelationID"        -> correlationId.value.toString,
-            "gov-uk-originator-id" -> "originatorIdBsp",
+            "gov-uk-originator-id" -> "originatorIdGysp",
             "Accept"               -> "application/json"
           )
 
@@ -4197,31 +4197,30 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJlOGEwMGEyNS1iZWVjLTRmYzEtYWVlYS00YTAzYzhkYzU1YWMifQ=="
+          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUF9TRUFSQ0hMSUdIVCIsInBhZ2VUYXNrSWQiOiJlOGEwMGEyNS1iZWVjLTRmYzEtYWVlYS00YTAzYzhkYzU1YWMifQ=="
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
             "Authorization"        -> "Bearer token",
             "CorrelationID"        -> correlationId.value.toString,
-            "gov-uk-originator-id" -> "originatorIdBsp",
+            "gov-uk-originator-id" -> "originatorIdBspSearchlight",
             "Accept"               -> "application/json"
           )
 
         val result: Future[Result] = underTest.getNextPage()(request)
 
-        val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
+        val expectedResult = BenefitEligibilityInfoSuccessResponseSearchLight(
+          benefitType = BenefitType.BSP,
           nationalInsuranceNumber = nationalInsuranceNumber,
           niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
-          marriageDetailsResult = FilteredMarriageDetails(Nil),
           nextCursor = Some(
             CursorId(
-              "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiI1NjgzNjI1My1jZDlkLTRjNmYtOTI1MS05YjI3NWViZmY4NjMifQ=="
+              "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUF9TRUFSQ0hMSUdIVCIsInBhZ2VUYXNrSWQiOiI1NjgzNjI1My1jZDlkLTRjNmYtOTI1MS05YjI3NWViZmY4NjMifQ=="
             )
           )
         )
-
-        status(result) shouldBe 200
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
+        status(result) shouldBe 200
       }
       "should handle a SEARCHLIGHT request containing nextCursor successfully (502)" in {
 
@@ -4327,7 +4326,7 @@ class BenefitEligibilityDataControllerItSpec
             "Content-Type"         -> "application/json",
             "Authorization"        -> "Bearer token",
             "CorrelationID"        -> correlationId.value.toString,
-            "gov-uk-originator-id" -> "originatorIdBsp",
+            "gov-uk-originator-id" -> "originatorIdGysp",
             "Accept"               -> "application/json"
           )
 
@@ -4434,6 +4433,45 @@ class BenefitEligibilityDataControllerItSpec
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
           ErrorResponse(BadRequest, ErrorReason("Missing Header CorrelationId"))
+        )
+      }
+      "should return a 400 if originator id doesnt match benefit type" in {
+
+        server.stubFor(
+          post(urlEqualTo("/auth/authorise"))
+            .willReturn(
+              aResponse()
+                .withStatus(OK)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        )
+
+        val paginationCursor =
+          PaginationCursor(
+            PaginationType.GyspPagination,
+            PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
+          )
+
+        val cursorId = CursorId.from(paginationCursor)
+
+        val request: FakeRequest[AnyContent] = FakeRequest(
+          "GET",
+          s"/benefit-eligibility-info?cursorId=${cursorId.value}"
+        )
+          .withHeaders(
+            "Content-Type"         -> "application/json",
+            "Authorization"        -> "Bearer token",
+            "CorrelationID"        -> correlationId.value.toString,
+            "gov-uk-originator-id" -> "originatorIdBsp",
+            "Accept"               -> "application/json"
+          )
+
+        val result: Future[Result] = underTest.getNextPage()(request)
+
+        status(result) shouldBe 400
+        contentAsJson(result) shouldBe Json.toJson(
+          ErrorResponse(BadRequest, ErrorReason("Originator Id doesnt match benefit type"))
         )
       }
 

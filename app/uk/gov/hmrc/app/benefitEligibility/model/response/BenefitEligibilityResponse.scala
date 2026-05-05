@@ -125,7 +125,15 @@ object BenefitEligibilityInfoResponse {
               paginationResult.getNextCursor.map(CursorId.from)
             )
           )
-
+        case PaginationType.BspSearchLightPagination =>
+          Right(
+            BenefitEligibilityInfoSuccessResponseSearchLight(
+              BenefitType.from(paginationResult.paginationType),
+              paginationResult.nationalInsuranceNumber,
+              toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
+              paginationResult.getNextCursor.map(CursorId.from)
+            )
+          )
       }
 
   private def getFilteredMarriageDetails(paginationResult: PaginationResult) =

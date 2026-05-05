@@ -40,6 +40,17 @@ object OriginatorId {
     }
 
   def from(
+      paginationType: PaginationType,
+      appConfig: AppConfig
+  ): Option[OriginatorId] =
+    paginationType match {
+      case PaginationType.MaPagination             => Some(OriginatorId(appConfig.hipOriginatorIdMa.standardId))
+      case PaginationType.GyspPagination           => Some(OriginatorId(appConfig.hipOriginatorIdGysp.standardId))
+      case PaginationType.BspPagination            => Some(OriginatorId(appConfig.hipOriginatorIdBsp.standardId))
+      case PaginationType.BspSearchLightPagination => Some(OriginatorId(appConfig.hipOriginatorIdBsp.searchlightId))
+    }
+
+  def from(
       value: String,
       appConfig: AppConfig
   ): Option[OriginatorId] =

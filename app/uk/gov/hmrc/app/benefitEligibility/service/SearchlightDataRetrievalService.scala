@@ -85,7 +85,7 @@ class SearchlightDataRetrievalService @Inject() (
 
             val shouldPage = if (contributionCreditResult.isSuccess) taxWindows.length > 1 else false
 
-            (PaginationType.from(eligibilityCheckDataRequest.benefitType), shouldPage) match {
+            (PaginationType.from(eligibilityCheckDataRequest), shouldPage) match {
               case (Some(paginationType), true) =>
 
                 val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
