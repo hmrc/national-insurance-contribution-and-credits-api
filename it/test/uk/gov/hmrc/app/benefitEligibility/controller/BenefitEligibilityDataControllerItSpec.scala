@@ -3535,7 +3535,7 @@ class BenefitEligibilityDataControllerItSpec
 
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
-          ErrorResponse(BadRequest, ErrorReason("Originator Id doesnt match benefit type"))
+          ErrorResponse(BadRequest, ErrorReason("Invalid Originator Id"))
         )
       }
     }
@@ -4471,7 +4471,7 @@ class BenefitEligibilityDataControllerItSpec
 
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
-          ErrorResponse(BadRequest, ErrorReason("Originator Id doesnt match benefit type"))
+          ErrorResponse(BadRequest, ErrorReason("Invalid Originator Id"))
         )
       }
 
