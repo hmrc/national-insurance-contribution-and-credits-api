@@ -263,11 +263,10 @@ class BenefitEligibilityDataControllerItSpec
   val filteredSchemeMembershipDetails = FilteredSchemeMembershipDetails(
     List(
       FilteredSchemeMembershipDetailsItem(
-        None,
+        Some(BenefitSchemeName("EXAMPLE PENSION SCHEME")),
         Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
         Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
-        Some(SchemeCreatingContractedOutNumberDetails("S2123456B")),
-        Some(SchemeTerminatingContractedOutNumberDetails("S2123456B"))
+        Some(EmployersContractedOutNumberDetails("S2123456B"))
       )
     )
   )
@@ -499,7 +498,7 @@ class BenefitEligibilityDataControllerItSpec
       currentOptimisticLock = CurrentOptimisticLock(4),
       schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
       reconciliationDate = Some(BenefitSchemeDetailsSuccess.ReconciliationDate("2025-03-31")),
-      schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
+      schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2123456B")
     ),
     schemeAddressDetailsList = List(
       SchemeAddressDetails(

@@ -34,8 +34,7 @@ case class FilteredSchemeMembershipDetailsItem(
     schemeName: Option[BenefitSchemeName],
     schemeMembershipStartDate: Option[SchemeMembershipStartDate],
     schemeMembershipEndDate: Option[SchemeMembershipEndDate],
-    schemeCreatingContractedOutNumberDetails: Option[SchemeCreatingContractedOutNumberDetails],
-    schemeTerminatingContractedOutNumberDetails: Option[SchemeTerminatingContractedOutNumberDetails]
+    employersContractedOutNumberDetails: Option[EmployersContractedOutNumberDetails]
 )
 
 object FilteredSchemeMembershipDetailsItem {
@@ -64,17 +63,22 @@ object FilteredSchemeMembershipDetails {
     FilteredSchemeMembershipDetails(
       schemeMembershipDetailsSuccessResponse.schemeMembershipDetailsSummaryList match {
         case Some(schemeMembershipDetailsSummaryList) =>
-          schemeMembershipDetailsSummaryList.map { item =>
-            FilteredSchemeMembershipDetailsItem(
-              m.getOrElse(
-                item.schemeMembershipDetails.employersContractedOutNumberDetails.map(_.value).getOrElse(""),
-                None
-              ),
-              item.schemeMembershipDetails.schemeMembershipStartDate,
-              item.schemeMembershipDetails.schemeMembershipEndDate,
-              item.schemeMembershipDetails.schemeCreatingContractedOutNumberDetails,
-              item.schemeMembershipDetails.schemeTerminatingContractedOutNumberDetails
-            )
+          schemeMembershipDetailsSummaryList.flatMap { item =>
+            List(
+              item.schemeMembershipDetails.schemeCreatingContractedOutNumberDetails.map(_.value),
+              item.schemeMembershipDetails.schemeTerminatingContractedOutNumberDetails.map(_.value)
+            ).flatten
+              .flatMap(scon => m.get(scon))
+              .map { maybeSchemeName =>
+                FilteredSchemeMembershipDetailsItem(
+                  maybeSchemeName,
+                  item.schemeMembershipDetails.schemeMembershipStartDate,
+                  item.schemeMembershipDetails.schemeMembershipEndDate,
+                  item.schemeMembershipDetails.employersContractedOutNumberDetails
+                )
+              }
+              .distinct
+
           }
         case None => Nil
       }
