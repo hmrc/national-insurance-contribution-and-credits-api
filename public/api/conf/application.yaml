@@ -154,6 +154,7 @@ paths:
                 - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa"
                 - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa"
                 - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa"
+                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight"
               examples:
                 BSP_minimal_success:
                   summary: BSP - Minimal response
@@ -487,6 +488,74 @@ paths:
                         latePaymentPeriod: L
                         receiptDate: 2025-10-10
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                SEARCHLIGHT_maximal_success:
+                  summary: SEARCHLIGHT - Maximal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: AB234567C
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 1.2
+                      class1ContributionAndCredits:
+                      - taxYear: 2019
+                        numberOfContributionsAndCredits: 15
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: 2B
+                        primaryContribution: 1200
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 10000
+                        creditSource: JSA TAPE INPUT
+                        employerName: Temp
+                        latePaymentPeriod: L
+                      - taxYear: 2021
+                        numberOfContributionsAndCredits: 20
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: 2B
+                        primaryContribution: 1440
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 12000
+                        creditSource: JSA TAPE INPUT
+                        employerName: Temp
+                        latePaymentPeriod: L
+                      - taxYear: 2020
+                        numberOfContributionsAndCredits: 30
+                        contributionCategoryLetter: A
+                        contributionCategory: STANDARD RATE
+                        contributionCreditType: CR1
+                        primaryContribution: 0
+                        class1ContributionStatus: VALID
+                        primaryPaidEarnings: 0
+                        creditSource: JSA TAPE INPUT
+                        employerName: ""
+                        latePaymentPeriod: ZZ
+                      class2Or3ContributionAndCredits:
+                      - taxYear: 2022
+                        numberOfContributionsAndCredits: 30
+                        contributionCreditType: 2B
+                        class2Or3EarningsFactor: 1.1
+                        class2Or3NIContributionAmount: 44
+                        class2Or3CreditStatus: VALID
+                        creditSource: JSA TAPE INPUT
+                        latePaymentPeriod: ZZ
+                        receiptDate: 2025-10-10
+                      - taxYear: 2023
+                        numberOfContributionsAndCredits: 25
+                        contributionCreditType: 2B
+                        class2Or3EarningsFactor: 0.9
+                        class2Or3NIContributionAmount: 36
+                        class2Or3CreditStatus: VALID
+                        creditSource: JSA PAPER INPUT
+                        latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                SEARCHLIGHT_minimal_success:
+                  summary: SEARCHLIGHT - Minimal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: QR456789S
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: []
+                      class2Or3ContributionAndCredits: []
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
@@ -673,6 +742,7 @@ paths:
                 - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa"
                 - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa"
                 - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa"
+                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight"
               examples:
                 BSP_maximal_success:
                   summary: BSP - Maximal response
@@ -1532,6 +1602,28 @@ components:
       required:
       - code
       - reason
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight:
+      properties:
+        benefitType:
+          type: string
+          enum:
+          - BSP
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        niContributionsAndCreditsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
+        nextCursor:
+          nullable: true
+          type: string
+      required:
+      - benefitType
+      - nationalInsuranceNumber
+      - niContributionsAndCreditsResult
     uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem:
       properties:
         startDate:
@@ -1854,10 +1946,6 @@ components:
         benefitType:
           type: string
           enum:
-          - MA
-          - ESA
-          - JSA
-          - GYSP
           - BSP
         nationalInsuranceNumber:
           type: string

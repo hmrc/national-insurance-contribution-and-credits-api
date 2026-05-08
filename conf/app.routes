@@ -55,6 +55,7 @@
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa'
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa'
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight'
 #   '400':
 #     description: Bad Request
 #     content:
@@ -129,6 +130,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa'
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa'
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa'
+#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight'
 #   '400':
 #     description: Bad Request
 #     content:

@@ -32,11 +32,10 @@ object JsonToYaml {
       val jsonMapper = new ObjectMapper().registerModule(DefaultScalaModule)
       val yamlMapper = new YAMLMapper(yamlFactory).registerModule(DefaultScalaModule)
 
-      val jsonFile: File = baseDirectory.value / "target/swagger/swagger.json"
-      val yamlFile: File = baseDirectory.value / "target/swagger/application.yaml"
-      val publicYamlFile: File = baseDirectory.value / "public/api/conf/application.yaml"
+      val jsonFile: File                = baseDirectory.value / "target/swagger/swagger.json"
+      val yamlFile: File                = baseDirectory.value / "target/swagger/application.yaml"
+      val publicYamlFile: File          = baseDirectory.value / "public/api/conf/application.yaml"
       val versionedPublicYamlFile: File = baseDirectory.value / "resources/public/api/conf/1.0/application.yaml"
-
 
       val jsonString = IO.read(jsonFile)
       val parsedJson = Json.parse(jsonString)
@@ -158,6 +157,24 @@ object JsonToYaml {
             |          - MA""".stripMargin
         )
         .replace(
+          """    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight:
+            |      properties:
+            |        benefitType:
+            |          type: string
+            |          enum:
+            |          - MA
+            |          - ESA
+            |          - JSA
+            |          - GYSP
+            |          - BSP""".stripMargin,
+          """    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight:
+            |      properties:
+            |        benefitType:
+            |          type: string
+            |          enum:
+            |          - BSP""".stripMargin
+        )
+        .replace(
           """    uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataRequest:
             |      properties:
             |        benefitType:
@@ -228,6 +245,32 @@ object JsonToYaml {
             |          type: string
             |          enum:
             |          - GYSP""".stripMargin
+        )
+        .replace(
+          """    uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest:
+            |      properties:
+            |        system:
+            |          type: string
+            |          enum:
+            |          - SEARCHLIGHT
+            |        benefitType:
+            |          type: string
+            |          enum:
+            |          - MA
+            |          - ESA
+            |          - JSA
+            |          - GYSP
+            |          - BSP""".stripMargin,
+          """    uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest:
+            |      properties:
+            |        system:
+            |          type: string
+            |          enum:
+            |          - SEARCHLIGHT
+            |        benefitType:
+            |          type: string
+            |          enum:
+            |          - BSP""".stripMargin
         )
         .replace(
           """    uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataRequest:
