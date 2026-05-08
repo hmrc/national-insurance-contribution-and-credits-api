@@ -62,7 +62,7 @@ paths:
                     failures:
                       - reason: Bad request
                         code: "BAD_REQUEST"
-        403:
+        "403":
           description: "Forbidden"
           headers:
             correlationId:
@@ -545,6 +545,74 @@ paths:
                           latePaymentPeriod: L
                           receiptDate: "2025-10-10"
                     nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                SEARCHLIGHT_maximal_success:
+                  summary: SEARCHLIGHT - Maximal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: AB234567C
+                    niContributionsAndCreditsResult:
+                      totalGraduatedPensionUnits: 1.2
+                      class1ContributionAndCredits:
+                        - taxYear: 2019
+                          numberOfContributionsAndCredits: 15
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: 2B
+                          primaryContribution: 1200
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 10000
+                          creditSource: JSA TAPE INPUT
+                          employerName: Temp
+                          latePaymentPeriod: L
+                        - taxYear: 2021
+                          numberOfContributionsAndCredits: 20
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: 2B
+                          primaryContribution: 1440
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 12000
+                          creditSource: JSA TAPE INPUT
+                          employerName: Temp
+                          latePaymentPeriod: L
+                        - taxYear: 2020
+                          numberOfContributionsAndCredits: 30
+                          contributionCategoryLetter: A
+                          contributionCategory: STANDARD RATE
+                          contributionCreditType: CR1
+                          primaryContribution: 0
+                          class1ContributionStatus: VALID
+                          primaryPaidEarnings: 0
+                          creditSource: JSA TAPE INPUT
+                          employerName: ""
+                          latePaymentPeriod: ZZ
+                      class2Or3ContributionAndCredits:
+                        - taxYear: 2022
+                          numberOfContributionsAndCredits: 30
+                          contributionCreditType: 2B
+                          class2Or3EarningsFactor: 1.1
+                          class2Or3NIContributionAmount: 44
+                          class2Or3CreditStatus: VALID
+                          creditSource: JSA TAPE INPUT
+                          latePaymentPeriod: ZZ
+                          receiptDate: "2025-10-10"
+                        - taxYear: 2023
+                          numberOfContributionsAndCredits: 25
+                          contributionCreditType: 2B
+                          class2Or3EarningsFactor: 0.9
+                          class2Or3NIContributionAmount: 36
+                          class2Or3CreditStatus: VALID
+                          creditSource: JSA PAPER INPUT
+                          latePaymentPeriod: L
+                    nextCursor: 9bd6d1b0-26a9-4c1d-bfb3-03bfb0157689
+                SEARCHLIGHT_minimal_success:
+                  summary: SEARCHLIGHT - Minimal response
+                  value:
+                    benefitType: BSP
+                    nationalInsuranceNumber: QR456789S
+                    niContributionsAndCreditsResult:
+                      class1ContributionAndCredits: [ ]
+                      class2Or3ContributionAndCredits: [ ]
 
         '400':
           description: Bad Request
