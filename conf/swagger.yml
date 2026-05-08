@@ -334,8 +334,7 @@ paths:
                         - schemeName: ACME PENSION SCHEME
                           schemeMembershipStartDate: "2022-06-27"
                           schemeMembershipEndDate: "2022-06-27"
-                          schemeCreatingContractedOutNumberDetails: S3123456B
-                          schemeTerminatingContractedOutNumberDetails: S3123456B
+                          employersContractedOutNumberDetails: S3123456B
                     individualStatePensionInfoResult:
                       numberOfQualifyingYears: 35
                       contributionsByTaxYear:
@@ -560,6 +559,11 @@ paths:
                   value:
                     code: "BAD_REQUEST"
                     reason: "type field is required"
+                invalid_date_format:
+                  summary: Invalid date format
+                  value:
+                    code: "BAD_REQUEST"
+                    reason: "dateOfBirth must be in YYYY-MM-DD format"
         '401':
           description: Unauthorised
           headers:
@@ -591,11 +595,6 @@ paths:
                   value:
                     code: "UNPROCESSABLE_ENTITY"
                     reason: "invalid national insurance number format"
-                invalid_date_format:
-                  summary: Invalid date format
-                  value:
-                    code: "UNPROCESSABLE_ENTITY"
-                    reason: "dateOfBirth must be in YYYY-MM-DD format"
                 "422_StartYearAfterEndYear":
                   summary: Start Year After End Year
                   value:
@@ -770,7 +769,7 @@ paths:
                         - schemeName: ACME PENSION SCHEME
                           schemeMembershipStartDate: "2022-06-27"
                           schemeMembershipEndDate: "2022-06-27"
-                          schemeCreatingContractedOutNumberDetails: S3123456B
+                          employersContractedOutNumberDetails: S3123456B
                     individualStatePensionInfoResult: {}
                     niContributionsAndCreditsResult:
                       totalGraduatedPensionUnits: 53

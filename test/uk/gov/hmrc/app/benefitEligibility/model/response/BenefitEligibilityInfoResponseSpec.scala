@@ -178,8 +178,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         Some(BenefitSchemeName("EXAMPLE PENSION SCHEME")),
         Some(SchemeMembershipStartDate(LocalDate.of(2022, 6, 27))),
         Some(SchemeMembershipEndDate(LocalDate.of(2022, 6, 27))),
-        Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
-        Some(SchemeTerminatingContractedOutNumberDetails("S2123456B"))
+        Some(EmployersContractedOutNumberDetails("S3123456B"))
       )
     )
   )
@@ -187,7 +186,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
   val filteredSchemeMembershipDetailsOptionalsExcluded = FilteredSchemeMembershipDetails(
     List(
       FilteredSchemeMembershipDetailsItem(
-        None,
         None,
         None,
         None,
@@ -418,7 +416,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             actualTransferValue = Some(ActualTransferValue(BigDecimal("10.56"))),
             schemeSuspensionType = Some(SchemeSuspensionType.NoSuspension),
             guaranteedMinimumPensionConversionApplied = Some(GuaranteedMinimumPensionConversionApplied(true)),
-            employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S312345B")),
+            employersContractedOutNumberDetails = Some(EmployersContractedOutNumberDetails("S3123456B")),
             schemeCreatingContractedOutNumberDetails = Some(SchemeCreatingContractedOutNumberDetails("A7123456Q")),
             schemeTerminatingContractedOutNumberDetails =
               Some(SchemeTerminatingContractedOutNumberDetails("S2123456B")),
@@ -467,7 +465,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       currentOptimisticLock = CurrentOptimisticLock(4),
       schemeConversionDate = Some(SchemeConversionDate("2024-12-31")),
       reconciliationDate = Some(BenefitSchemeDetailsSuccess.ReconciliationDate("2025-03-31")),
-      schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S312345B")
+      schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2123456B")
     ),
     schemeAddressDetailsList = List(
       SchemeAddressDetails(
@@ -1056,8 +1054,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             |            "schemeName":"EXAMPLE PENSION SCHEME",
             |            "schemeMembershipStartDate":"2022-06-27",
             |            "schemeMembershipEndDate":"2022-06-27",
-            |            "schemeCreatingContractedOutNumberDetails":"A7123456Q",
-            |            "schemeTerminatingContractedOutNumberDetails":"S2123456B"
+            |            "employersContractedOutNumberDetails":"S3123456B"
             |         }
             |      ]
             |   },
