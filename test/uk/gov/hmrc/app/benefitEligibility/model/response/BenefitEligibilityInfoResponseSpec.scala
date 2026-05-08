@@ -988,7 +988,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             LongTermBenefitCalculationDetailsData(
               NpsApiResult
                 .SuccessResult(LongTermBenefitCalculationDetails, longTermBenefitCalculationDetailsSuccessResponse),
-              List(NpsApiResult.SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse))
+              List(
+                (
+                  AssociatedCalculationSequenceNumber(86),
+                  NpsApiResult.SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse)
+                )
+              )
             ),
             NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse),
             NpsApiResult.SuccessResult(IndividualStatePension, individualStatePensionInformationSuccessResponse),
@@ -1979,9 +1984,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               longTermBenefitCalculationDetailsSuccessResponse
             ),
             List(
-              NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitNotesSuccessResponse](
-                LongTermBenefitNotes,
-                longTermBenefitNotesSuccessResponse
+              (
+                AssociatedCalculationSequenceNumber(86),
+                NpsApiResult.SuccessResult[ErrorReport, LongTermBenefitNotesSuccessResponse](
+                  LongTermBenefitNotes,
+                  longTermBenefitNotesSuccessResponse
+                )
               )
             )
           ),

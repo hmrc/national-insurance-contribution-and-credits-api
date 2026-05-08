@@ -758,7 +758,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
                 BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, List(benefitSchemeDetailsResult)),
                 LongTermBenefitCalculationDetailsData(
                   longTermBenefitCalculationDetailsResult,
-                  List(longTermBenefitNotesResult)
+                  List((AssociatedCalculationSequenceNumber(86), longTermBenefitNotesResult))
                 ),
                 marriageDetailsResult,
                 individualStatePensionInformationResult,
@@ -773,7 +773,7 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             BenefitSchemeMembershipDetailsData(schemeMembershipDetailsResult, List(benefitSchemeDetailsResult)),
             LongTermBenefitCalculationDetailsData(
               longTermBenefitCalculationDetailsResult,
-              List(longTermBenefitNotesResult)
+              List((AssociatedCalculationSequenceNumber(86), longTermBenefitNotesResult))
             ),
             marriageDetailsResult,
             individualStatePensionInformationResult,

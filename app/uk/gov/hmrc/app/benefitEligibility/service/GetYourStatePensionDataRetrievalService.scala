@@ -67,7 +67,7 @@ final case class BenefitSchemeMembershipDetailsData(
 
 final case class LongTermBenefitCalculationDetailsData(
     longTermBenefitCalculationDetailsResult: LongTermBenefitCalculationDetailsResult,
-    longTermBenefitNotesResults: List[LongTermBenefitNotesResult]
+    longTermBenefitNotesResults: List[(AssociatedCalculationSequenceNumber, LongTermBenefitNotesResult)]
 )
 
 class GetYourStatePensionDataRetrievalService @Inject() (
@@ -274,12 +274,14 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
           longTermBenefitTypesAndSeqNumbers
             .map { case (longTermBenefitType, sequenceNumber) =>
-              longTermBenefitNotesConnector.fetchLongTermBenefitNotes(
-                requestKey.benefitType,
-                requestKey.nationalInsuranceNumber,
-                longTermBenefitType,
-                sequenceNumber
-              )
+              longTermBenefitNotesConnector
+                .fetchLongTermBenefitNotes(
+                  requestKey.benefitType,
+                  requestKey.nationalInsuranceNumber,
+                  longTermBenefitType,
+                  sequenceNumber
+                )
+                .map(res => (sequenceNumber, res))
             }
             .sequence
             .flatMap(i => EitherT.pure[Future, BenefitEligibilityError]((longTermBenefitCalculationDetailsResult, i)))

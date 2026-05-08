@@ -464,7 +464,9 @@ object BenefitEligibilityInfoSuccessResponseGysp {
           marriageDetailsResult = FilteredMarriageDetails.from(result.marriageDetailsResult.getSuccess.get),
           longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails.from(
             result.longTermBenefitCalculationDetailsData.longTermBenefitCalculationDetailsResult.getSuccess.get,
-            result.longTermBenefitCalculationDetailsData.longTermBenefitNotesResults.map(_.getSuccess.get)
+            result.longTermBenefitCalculationDetailsData.longTermBenefitNotesResults.map { case (seqNo, notesResult) =>
+              (seqNo, notesResult.getSuccess.get)
+            }.toMap
           ),
           schemeMembershipDetailsResult = FilteredSchemeMembershipDetails.from(
             result.benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get,
