@@ -189,7 +189,7 @@ class FilteredLongTermBenefitCalculationDetailsSpec extends AnyFreeSpec with Mat
 
         val result = FilteredLongTermBenefitCalculationDetails.from(
           longTermBenefitCalculationDetailsSuccessResponse,
-          List(longTermBenefitNotesSuccessResponse)
+          Map(AssociatedCalculationSequenceNumber(86) -> longTermBenefitNotesSuccessResponse)
         )
 
         val expected = FilteredLongTermBenefitCalculationDetails(
@@ -223,7 +223,7 @@ class FilteredLongTermBenefitCalculationDetailsSpec extends AnyFreeSpec with Mat
 
         val result = FilteredLongTermBenefitCalculationDetails.from(
           minimalLongTermBenefitCalculationDetailsSuccessResponse,
-          List()
+          Map()
         )
 
         val expected = FilteredLongTermBenefitCalculationDetails(List())

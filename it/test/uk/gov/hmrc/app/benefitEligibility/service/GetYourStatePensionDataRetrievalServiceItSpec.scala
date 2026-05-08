@@ -703,14 +703,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -875,14 +878,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1041,14 +1047,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1196,14 +1205,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1339,14 +1351,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1498,14 +1513,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1638,14 +1656,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1802,14 +1823,17 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 )
               ),
               LongTermBenefitCalculationDetailsData(
-                SuccessResult(
+                longTermBenefitCalculationDetailsResult = SuccessResult(
                   ApiName.LongTermBenefitCalculationDetails,
                   longTermBenefitCalculationDetailsSuccessResponse
                 ),
-                List(
-                  SuccessResult(
-                    ApiName.LongTermBenefitNotes,
-                    longTermBenefitNotesSuccessResponse
+                longTermBenefitNotesResults = List(
+                  (
+                    AssociatedCalculationSequenceNumber(86),
+                    SuccessResult(
+                      ApiName.LongTermBenefitNotes,
+                      longTermBenefitNotesSuccessResponse
+                    )
                   )
                 )
               ),
@@ -1954,9 +1978,12 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                     longTermBenefitCalculationDetailsSuccessResponse
                   ),
                   List(
-                    SuccessResult(
-                      ApiName.LongTermBenefitNotes,
-                      longTermBenefitNotesSuccessResponse
+                    (
+                      AssociatedCalculationSequenceNumber(86),
+                      SuccessResult(
+                        ApiName.LongTermBenefitNotes,
+                        longTermBenefitNotesSuccessResponse
+                      )
                     )
                   )
                 ),

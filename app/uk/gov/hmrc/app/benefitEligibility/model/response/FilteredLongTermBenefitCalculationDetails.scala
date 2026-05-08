@@ -17,6 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.app.benefitEligibility.model.common.AssociatedCalculationSequenceNumber
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
   LongTermBenefitNotesSuccessResponse,
@@ -54,7 +55,7 @@ object FilteredLongTermBenefitCalculationDetails {
 
   def from(
       longTermBenefitCalculationDetailsSuccessResponse: LongTermBenefitCalculationDetailsSuccessResponse,
-      longTermBenefitNotesSuccessResponse: List[LongTermBenefitNotesSuccessResponse]
+      longTermBenefitNotesSuccessResponse: Map[AssociatedCalculationSequenceNumber, LongTermBenefitNotesSuccessResponse]
   ): FilteredLongTermBenefitCalculationDetails = FilteredLongTermBenefitCalculationDetails(
     longTermBenefitCalculationDetailsSuccessResponse.benefitCalculationDetailsList match {
       case Some(benefitCalculationDetailsList) =>
@@ -64,7 +65,10 @@ object FilteredLongTermBenefitCalculationDetails {
             item.benefitCalculationDetail.flatMap(_.guaranteedMinimumPensionContractedOutDeductionsPost1988),
             item.benefitCalculationDetail.flatMap(_.contractedOutDeductionsPre1988),
             item.benefitCalculationDetail.flatMap(_.contractedOutDeductionsPost1988),
-            longTermBenefitNotesSuccessResponse.flatMap(_.longTermBenefitNotes.getOrElse(Nil))
+            item.benefitCalculationDetail
+              .map(_.associatedCalculationSequenceNumber)
+              .flatMap(seqNo => longTermBenefitNotesSuccessResponse.get(seqNo).flatMap(_.longTermBenefitNotes))
+              .getOrElse(Nil)
           )
         }
       case None => Nil

@@ -776,7 +776,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             ),
             LongTermBenefitCalculationDetailsData(
               longTermBenefitCalculationDetailsResult,
-              List(longTermBenefitNotesResult)
+              List((AssociatedCalculationSequenceNumber(86), longTermBenefitNotesResult))
             ),
             marriageDetailsResult,
             individualStatePensionInformationResult,

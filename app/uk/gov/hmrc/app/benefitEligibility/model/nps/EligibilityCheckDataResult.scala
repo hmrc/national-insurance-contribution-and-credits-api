@@ -66,7 +66,8 @@ object EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.GYSP
 
     override def allResults: List[ApiResult] =
-      benefitSchemeMembershipDetailsData.benefitSchemeDetailsResults ++ longTermBenefitCalculationDetailsData.longTermBenefitNotesResults ++ List(
+      benefitSchemeMembershipDetailsData.benefitSchemeDetailsResults ++ longTermBenefitCalculationDetailsData.longTermBenefitNotesResults
+        .map(_._2) ++ List(
         contributionCreditResult,
         marriageDetailsResult,
         benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult,
