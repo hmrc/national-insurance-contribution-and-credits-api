@@ -17,19 +17,19 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails
 
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.OfficeDetails
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   AssociatedCalculationSequenceNumber,
   DateOfBirth,
   Identifier,
   LongTermBenefitType
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.OfficeDetails
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
 }
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 import java.time.LocalDate
 

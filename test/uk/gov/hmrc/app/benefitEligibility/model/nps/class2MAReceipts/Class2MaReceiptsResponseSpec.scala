@@ -21,10 +21,10 @@ import com.networknt.schema.SpecVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, CallbackUrl, Identifier, NpsErrorReason, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 

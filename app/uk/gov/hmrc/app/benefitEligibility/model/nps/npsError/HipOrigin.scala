@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.npsError
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import HipOrigin.findValues
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.findValues
 
 import scala.collection.immutable
 

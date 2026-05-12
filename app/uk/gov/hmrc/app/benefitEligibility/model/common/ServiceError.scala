@@ -19,7 +19,6 @@ package uk.gov.hmrc.app.benefitEligibility.model.common
 import cats.Semigroup
 import io.scalaland.chimney.dsl.into
 
-import java.util.UUID
 import scala.collection.immutable
 
 trait WithLoggableDebugString {

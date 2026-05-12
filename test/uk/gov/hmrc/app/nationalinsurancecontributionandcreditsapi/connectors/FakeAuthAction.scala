@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.connectors
 
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.actions.AuthAction
 import uk.gov.hmrc.auth.core.AuthConnector
 

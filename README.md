@@ -12,9 +12,9 @@ The API operates through multiple endpoints to facilitate eligibility verificati
 - **BSP** - Bereavement Support Payment
 - **GYSP** - Get Your State Pension
 
-**Note**: Bereavement Support Payment (BSP) data may also be requested through **Searchlight** infrastructure, identified as **BSP_SEARCHLIGHT**.
+**Note**: Bereavement Support Payment (BSP) data may also be requested through **Searchlight** infrastructure, identified as **SEARCHLIGHT**.
 
-The enhanced service architecture is capable of processing and responding to requests for the following benefit types: MA, JSA, ESA, BSP, BSP_SEARCHLIGHT, and GYSP.
+The enhanced service architecture is capable of processing and responding to requests for the following request types: MA, JSA, ESA, BSP, SEARCHLIGHT, and GYSP.
 
 ## How to Run the Service
 
@@ -26,10 +26,10 @@ sbt "run 16105"
 
 ## Run Tests
 
-Run unit tests:
+The command below removes unused imports, formats files and runs all the tests for the project
 
 ```bash
-sbt test
+sbt "runTest"
 ```
 
 ## Endpoints

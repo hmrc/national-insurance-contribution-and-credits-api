@@ -18,14 +18,14 @@ package uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.*
-import MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.Identifier
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.{
   MarriageEndDateStatus,
   MarriageStartDateStatus,
   MarriageStatus
 }
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 import java.time.LocalDate
 import scala.collection.immutable

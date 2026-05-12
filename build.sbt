@@ -3,6 +3,13 @@ import uk.gov.hmrc.DefaultBuildSettings
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.3.6"
 
+inThisBuild(
+  List(
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
+  )
+)
+
 lazy val microservice = Project("national-insurance-contribution-and-credits-api", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, SwaggerPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
@@ -13,9 +20,10 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     // suppress warnings in generated routes files
     scalacOptions ++= Seq(
       "-feature",
-      "-Wconf:cat=unused-imports&src=routes/.*:s",
-      "-Wconf:cat=unused-imports&src=html/.*:s",
-      "-Wconf:cat=unused&src=routes/.*:s"
+      "-Wconf:cat=unused&src=routes/.*:s",
+      "-Wconf:cat=unused&src=html/.*:s",
+      "-Wconf:cat=unused&src=routes/.*:s",
+      if (scalaVersion.value.startsWith("2.12")) "-Ywarn-unused-import" else "-Wunused:imports"
     )
   )
   .settings(
@@ -41,3 +49,8 @@ lazy val it = project
 
 addCommandAlias("createOpenAPISpec", ";clean;routesToYamlOas; validateOas")
 addCommandAlias("publishTestOnlyOas", ";createOpenAPISpec; publishOas")
+
+addCommandAlias(
+  "runTest",
+  "scalafix;Test/scalafix;it/Test/scalafix;scalafmtAll;Test/scalafmtAll;it/Test/scalafmtAll;Test/compile;it/Test/compile;doc;test;it/test"
+)

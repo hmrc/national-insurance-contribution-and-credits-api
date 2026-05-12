@@ -20,26 +20,14 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxTuple2Parallel
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.{MarriageDetailsConnector, NiContributionsAndCreditsConnector}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.MarriageDetails
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  BenefitEligibilityError,
-  ContributionCreditTaxWindowCalculatorError,
-  CorrelationId,
-  DataRetrievalServiceError,
-  PaginationType
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  BspPageTask,
-  ContributionAndCreditsPaging,
-  PageTaskId,
-  PaginationCursor,
-  PaginationSource
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
 import uk.gov.hmrc.http.HeaderCarrier

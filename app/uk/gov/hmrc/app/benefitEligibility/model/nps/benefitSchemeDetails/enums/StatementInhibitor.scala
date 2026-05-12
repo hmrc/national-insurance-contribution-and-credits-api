@@ -17,6 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+
 import scala.collection.immutable
 
 sealed abstract class StatementInhibitor(override val entryName: String) extends EnumEntry

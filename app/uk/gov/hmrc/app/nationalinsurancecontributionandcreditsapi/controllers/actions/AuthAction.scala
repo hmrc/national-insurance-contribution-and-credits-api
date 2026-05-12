@@ -17,10 +17,10 @@
 package uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.actions
 
 import play.api.libs.json.Json
+import play.api.mvc.*
 import play.api.mvc.Results.{Forbidden, InternalServerError}
-import play.api.mvc._
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.Failure
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 

@@ -25,10 +25,7 @@ import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CallSystem, NpsClientError}
 import uk.gov.hmrc.app.config.AppConfig
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.{
-  CORRELATION_ID,
-  ORIGINATING_SYSTEM
-}
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.AdditionalHeaderNames.ORIGINATING_SYSTEM
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}

@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*

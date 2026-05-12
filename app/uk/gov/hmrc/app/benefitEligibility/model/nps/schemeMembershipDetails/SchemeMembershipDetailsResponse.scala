@@ -19,22 +19,8 @@ package uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails
 import enumeratum.EnumEntry.*
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
-  ApparentUnnotifiedTerminationStatus,
-  Clercalc,
-  ContCatLetter,
-  Enfcment,
-  FurtherPaymentsConfirmation,
-  GuaranteedMinimumPensionReconciliationStatus,
-  MethodOfPreservation,
-  RevaluationRate,
-  SchemeMembershipDebitReason,
-  SchemeSuspensionType,
-  SspDeem,
-  StakeholderPensionSchemeType,
-  SurvivorStatus
-}
 
 import java.time.LocalDate
 import scala.collection.immutable

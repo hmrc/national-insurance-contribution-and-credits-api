@@ -18,9 +18,9 @@ package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess._
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Identifier, ReceiptDate}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.*
 
 import java.time.LocalDate
 

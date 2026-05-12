@@ -22,7 +22,6 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   AccessForbidden,
@@ -34,9 +33,9 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   UnprocessableEntity
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.LongTermBenefitNotesResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.LongTermBenefitNotesSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponse400,
-  NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse
 }

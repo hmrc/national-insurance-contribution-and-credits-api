@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.connectors.util
 
-import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.NpsError
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResult, NpsSuccessfulApiResponse}
 

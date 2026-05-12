@@ -30,14 +30,8 @@ import play.api.test.Helpers.OK
 import play.api.test.Injecting
 import play.api.{Application, inject}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
-  Class2MAReceipts,
-  Liabilities,
-  MarriageDetails,
-  NiContributionAndCredits
-}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, MarriageDetails, NiContributionAndCredits}
 import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
-import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.{BspPagination, MaPagination}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*

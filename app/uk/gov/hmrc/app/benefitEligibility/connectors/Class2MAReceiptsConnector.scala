@@ -40,7 +40,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.Class2MaReceiptsResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponse400,
-  NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse
 }

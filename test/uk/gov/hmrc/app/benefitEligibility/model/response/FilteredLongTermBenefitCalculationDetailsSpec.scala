@@ -18,27 +18,27 @@ package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.{
-  OfficeDetails,
-  OfficeLocationDecode,
-  OfficeLocationValue
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   AssociatedCalculationSequenceNumber,
   DateOfBirth,
   Identifier,
   LongTermBenefitType
 }
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.{
+  OfficeDetails,
+  OfficeLocationDecode,
+  OfficeLocationValue
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.EnumOffidtp
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
   CalculationSource,
   CalculationStatus,
   Payday
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
 }
 
 import java.time.LocalDate

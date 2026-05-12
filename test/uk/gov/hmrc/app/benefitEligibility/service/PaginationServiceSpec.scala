@@ -26,12 +26,10 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.{
   ActiveMarriage,
@@ -82,8 +80,6 @@ class PaginationServiceSpec
   val mockUuidGenerator: UuidGenerator                                       = mock[UuidGenerator]
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
-  val mockClass2MAReceiptsConnector: Class2MAReceiptsConnector = mock[Class2MAReceiptsConnector]
-
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
@@ -99,7 +95,6 @@ class PaginationServiceSpec
 
   val underTest = new PaginationService(
     liabilitySummaryDetailsConnector = mockLiabilitySummaryDetailsConnector,
-    class2MAReceiptsConnector = mockClass2MAReceiptsConnector,
     niContributionsAndCreditsConnector = mockNiContributionsAndCreditsConnector,
     marriageDetailsConnector = mockMarriageDetailsConnector,
     schemeMembershipDetailsConnector = mockSchemeMembershipDetailsConnector,

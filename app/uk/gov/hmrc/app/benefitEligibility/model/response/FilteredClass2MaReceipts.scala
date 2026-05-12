@@ -17,8 +17,8 @@
 package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.ReceiptDate
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 
 case class FilteredClass2MaReceipts(
     receiptDates: List[ReceiptDate]

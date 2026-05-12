@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.util
 
 import com.google.inject.ImplementedBy
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
+import java.time.Instant
 import javax.inject.{Inject, Singleton}
 
 @ImplementedBy(classOf[CurrentTime])

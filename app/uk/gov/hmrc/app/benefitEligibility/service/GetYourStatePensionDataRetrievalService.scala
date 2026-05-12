@@ -19,44 +19,24 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.{
-  EligibilityCheckDataResultBSP,
-  EligibilityCheckDataResultGYSP
-}
+import uk.gov.hmrc.app.benefitEligibility.connectors.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{MarriageDetails, SchemeMembershipDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
+import uk.gov.hmrc.app.benefitEligibility.model.nps.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultGYSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.LongTermBenefitCalculationDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.connectors.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{MarriageDetails, SchemeMembershipDetails}
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
-import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{
-  BenefitSchemeDetailsResult,
-  LongTermBenefitCalculationDetailsResult,
-  LongTermBenefitNotesResult,
-  NpsApiResult,
-  SchemeMembershipDetailsResult
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.{
-  ContributionsAndCreditsRequestParams,
-  LongTermBenefitCalculationRequestParams
-}
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.LongTermBenefitCalculationRequestParams
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  ContributionAndCreditsPaging,
-  GyspPageTask,
-  PageTaskId,
-  PaginationCursor,
-  PaginationSource
-}
-import uk.gov.hmrc.app.benefitEligibility.util.ContributionCreditTaxWindowCalculator
+import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
+import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Instant, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
 final case class RequestKey(benefitType: BenefitType, nationalInsuranceNumber: Identifier)
 
