@@ -493,13 +493,10 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
             )
           )
 
@@ -548,13 +545,10 @@ class BenefitSchemeDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+              ErrorReport(NpsNormalizedError.InternalServerError, None)
             )
           )
         }

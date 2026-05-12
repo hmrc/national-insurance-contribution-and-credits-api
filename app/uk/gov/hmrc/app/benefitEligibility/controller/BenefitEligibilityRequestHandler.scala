@@ -254,7 +254,8 @@ object BenefitEligibilityRequestHandler {
 
   private def validateHeaders(request: Request[AnyContent], appConfig: AppConfig)(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, (CorrelationId, OriginatorId)] =
+  ): Either[ErrorReason, (CorrelationId, OriginatorId)] = {
+    logger.info("Validating headers")
     getAcceptHeader(request) match {
       case Right(_) =>
         getOriginatorId(request, appConfig) match {
@@ -268,11 +269,11 @@ object BenefitEligibilityRequestHandler {
       case Left(error: ErrorReason) => Left(error)
 
     }
+  }
 
   private def getOriginatorId(request: Request[AnyContent], appConfig: AppConfig)(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, OriginatorId] = {
-    logger.info("Validating Originator Id")
+  ): Either[ErrorReason, OriginatorId] =
     request.headers.get("gov-uk-originator-id") match {
       case None =>
         logger.error("Missing header 'gov-uk-originator-id'")
@@ -280,12 +281,10 @@ object BenefitEligibilityRequestHandler {
       case Some(originatorId) =>
         RequestValidations.validateOriginatorId(Some(originatorId), appConfig)
     }
-  }
 
   private def getAcceptHeader(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, SuccessfulResult.type] = {
-    logger.info("Validating Accept Header")
+  ): Either[ErrorReason, SuccessfulResult.type] =
     request.headers.get("Accept") match {
       case None =>
         logger.error("Missing header Accept")
@@ -293,12 +292,10 @@ object BenefitEligibilityRequestHandler {
       case Some(acceptHeader) =>
         RequestValidations.validateAcceptHeader(Some(acceptHeader))
     }
-  }
 
   private[controller] def getCorrelationId(request: Request[AnyContent])(
       implicit headerCarrier: HeaderCarrier
-  ): Either[ErrorReason, CorrelationId] = {
-    logger.info("Validating CorrelationId")
+  ): Either[ErrorReason, CorrelationId] =
     request.headers.get("CorrelationId") match {
       case None =>
         logger.error("Missing header CorrelationID")
@@ -308,13 +305,11 @@ object BenefitEligibilityRequestHandler {
       case Some(correlationId) =>
         RequestValidations.validateCorrelationId(correlationId) match {
           case Right(id) =>
-            logger.info("CorrelationId is Valid")
             Right(id)
           case Left(error) =>
             logger.error("Correlation Id is not a valid UUID")
             Left(error)
         }
     }
-  }
 
 }

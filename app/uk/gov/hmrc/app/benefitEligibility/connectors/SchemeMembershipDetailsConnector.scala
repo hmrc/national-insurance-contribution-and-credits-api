@@ -121,13 +121,12 @@ class SchemeMembershipDetailsConnector @Inject() (
 
         case INTERNAL_SERVER_ERROR =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-          attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-            toFailureResult(InternalServerError, Some(resp))
-          }
+          Right(toFailureResult(InternalServerError, None))
 
         case SERVICE_UNAVAILABLE =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-          attemptParse[NpsErrorResponseHipOrigin](response).map(resp => toFailureResult(ServiceUnavailable, Some(resp)))
+          Right(toFailureResult(ServiceUnavailable, None))
+
         case code => Right(toFailureResult(UnexpectedStatus(code), None))
       }
 

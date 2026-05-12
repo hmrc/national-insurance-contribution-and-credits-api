@@ -109,7 +109,6 @@ object RequestValidations {
       case None =>
         Left(ErrorReason("Accept header is required"))
       case Some(header) if header.trim.nonEmpty =>
-        logger.info("Accept Header Valid")
         Right(SuccessfulResult)
       case Some(_) =>
         Left(ErrorReason("Accept header cannot be empty"))

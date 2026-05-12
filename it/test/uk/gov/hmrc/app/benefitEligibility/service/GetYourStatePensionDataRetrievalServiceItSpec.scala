@@ -1801,14 +1801,11 @@ class GetYourStatePensionDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(gyspEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             EligibilityCheckDataResultGYSP(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+                ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
               ),
               BenefitSchemeMembershipDetailsData(
                 SuccessResult(

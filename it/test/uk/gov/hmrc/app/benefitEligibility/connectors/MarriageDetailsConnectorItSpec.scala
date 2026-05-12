@@ -461,13 +461,10 @@ class MarriageDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
             )
           )
 
@@ -516,13 +513,10 @@ class MarriageDetailsConnectorItSpec
               .value
               .futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+              ErrorReport(NpsNormalizedError.InternalServerError, None)
             )
           )
         }

@@ -634,15 +634,12 @@ class SearchlightDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspSearchlightEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             EligibilityCheckDataResultSearchLight(
               BenefitType.BSP,
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+                ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
               ),
               None
             )

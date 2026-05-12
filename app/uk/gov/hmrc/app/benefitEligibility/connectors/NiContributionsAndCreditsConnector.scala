@@ -102,9 +102,8 @@ class NiContributionsAndCreditsConnector @Inject() (
 
             case SERVICE_UNAVAILABLE =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-                toFailureResult(ServiceUnavailable, Some(resp))
-              }
+              Right(toFailureResult(ServiceUnavailable, None))
+
             case code =>
               logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")
               Right(toFailureResult(UnexpectedStatus(code), None))

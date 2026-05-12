@@ -388,13 +388,10 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+              ErrorReport(NpsNormalizedError.InternalServerError, None)
             )
           )
 
@@ -443,13 +440,10 @@ class LongTermBenefitNotesConnectorItSpec
           val result =
             connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
             )
           )
 
