@@ -499,14 +499,11 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(esaEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+                ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
               )
             )
           )

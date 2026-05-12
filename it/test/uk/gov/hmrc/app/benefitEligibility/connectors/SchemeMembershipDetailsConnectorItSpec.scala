@@ -530,13 +530,10 @@ class SchemeMembershipDetailsConnectorItSpec
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, Some(response))
+              ErrorReport(NpsNormalizedError.InternalServerError, None)
             )
           )
         }
@@ -577,13 +574,10 @@ class SchemeMembershipDetailsConnectorItSpec
           val result =
             connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
             )
           )
 

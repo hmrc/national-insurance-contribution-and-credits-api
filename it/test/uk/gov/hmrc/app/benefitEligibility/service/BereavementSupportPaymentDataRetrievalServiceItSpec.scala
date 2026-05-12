@@ -673,14 +673,11 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
           val result =
             service.fetchEligibilityData(bspEligibilityCheckDataRequest).value.futureValue
 
-          val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
-          val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
-
           result shouldBe Right(
             EligibilityCheckDataResultBSP(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+                ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
               ),
               SuccessResult(
                 ApiName.MarriageDetails,

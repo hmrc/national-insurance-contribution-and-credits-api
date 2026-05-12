@@ -105,15 +105,11 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
 
             case SERVICE_UNAVAILABLE =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-                toFailureResult(ServiceUnavailable, Some(resp))
-              }
+              Right(toFailureResult(ServiceUnavailable, None))
 
             case INTERNAL_SERVER_ERROR =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-                toFailureResult(InternalServerError, Some(resp))
-              }
+              Right(toFailureResult(InternalServerError, None))
 
             case code =>
               logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")

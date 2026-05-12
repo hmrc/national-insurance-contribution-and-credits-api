@@ -88,9 +88,7 @@ class IndividualStatePensionInformationConnector @Inject() (
 
             case SERVICE_UNAVAILABLE =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsErrorResponseHipOrigin](response).map { resp =>
-                toFailureResult(ServiceUnavailable, Some(resp))
-              }
+              Right(toFailureResult(ServiceUnavailable, None))
 
             case NOT_FOUND =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
