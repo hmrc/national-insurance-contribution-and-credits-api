@@ -21,9 +21,9 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, Ok, UnprocessableEntity}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.connectors.HipConnector
+import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.*
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.domain.NICCNino
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.errors.*
-import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject

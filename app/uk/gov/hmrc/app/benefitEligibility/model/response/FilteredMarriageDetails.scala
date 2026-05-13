@@ -17,8 +17,8 @@
 package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.Identifier
+import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.{
   MarriageEndDateStatus,
   MarriageStartDateStatus,

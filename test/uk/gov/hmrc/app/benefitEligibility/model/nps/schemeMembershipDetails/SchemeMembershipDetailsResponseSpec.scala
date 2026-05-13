@@ -22,12 +22,12 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, CallbackUrl, Identifier, NpsErrorReason}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess._
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums._
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 
 class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
 

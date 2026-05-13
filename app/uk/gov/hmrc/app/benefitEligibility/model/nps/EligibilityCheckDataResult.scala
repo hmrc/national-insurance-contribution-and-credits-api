@@ -17,7 +17,6 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps
 
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CallSystem}
-import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,

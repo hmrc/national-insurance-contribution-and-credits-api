@@ -2,7 +2,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.{YAMLFactory, YAMLGenerator, YAMLMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.iheart.sbtPlaySwagger.SwaggerPlugin.autoImport.swagger
-import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
 import play.api.libs.json.Reads.*
 import sbt.*

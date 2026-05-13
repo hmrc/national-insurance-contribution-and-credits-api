@@ -18,9 +18,9 @@ package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess._
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Identifier, TaxYear}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType

@@ -18,17 +18,8 @@ package uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails
 
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, Country, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp
-}
 
 import java.time.LocalDate
 

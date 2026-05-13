@@ -32,7 +32,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.*
 import play.api.test.Injecting
-import uk.gov.hmrc.app.benefitEligibility.connectors.LongTermBenefitCalculationDetailsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}

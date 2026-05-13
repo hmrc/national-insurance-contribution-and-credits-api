@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 case class NICCResponse(niClass1: Option[Seq[NICCContribution]], niClass2: Option[Seq[NICCCredit]])
 

@@ -36,7 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PaginationService @Inject() (
     liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
-    class2MAReceiptsConnector: Class2MAReceiptsConnector,
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
     marriageDetailsConnector: MarriageDetailsConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,

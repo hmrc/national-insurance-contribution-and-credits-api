@@ -17,15 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import uk.gov.hmrc.app.benefitEligibility.model.request.{
-  BSPEligibilityCheckDataRequest,
-  ESAEligibilityCheckDataRequest,
-  EligibilityCheckDataRequest,
-  GYSPEligibilityCheckDataRequest,
-  JSAEligibilityCheckDataRequest,
-  MAEligibilityCheckDataRequest,
-  SearchlightEligibilityCheckDataRequest
-}
+import uk.gov.hmrc.app.benefitEligibility.model.request.*
 
 import scala.collection.immutable
 

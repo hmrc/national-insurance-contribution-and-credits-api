@@ -21,8 +21,6 @@ import com.google.inject.Inject
 import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   AccessForbidden,
@@ -35,9 +33,10 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.ContributionCreditResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest.niContributionsAndCreditsRequestWrites
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponse400,
-  NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
   NpsSingleErrorResponse
 }

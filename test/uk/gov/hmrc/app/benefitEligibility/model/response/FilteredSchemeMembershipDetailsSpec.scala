@@ -18,35 +18,13 @@ package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
-
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, CallbackUrl, Country, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.{
-  AreaDiallingCode,
-  BenefitSchemeInstitutionType,
-  BenefitSchemeStatus,
-  RerouteToSchemeCessation,
-  SchemeAddressType,
-  StatementInhibitor
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.{
-  ApparentUnnotifiedTerminationStatus,
-  Clercalc,
-  ContCatLetter,
-  Enfcment,
-  FurtherPaymentsConfirmation,
-  GuaranteedMinimumPensionReconciliationStatus,
-  MethodOfPreservation,
-  RevaluationRate,
-  SchemeMembershipDebitReason,
-  SchemeSuspensionType,
-  SspDeem,
-  StakeholderPensionSchemeType,
-  SurvivorStatus
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 
 import java.time.LocalDate
 

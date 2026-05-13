@@ -31,9 +31,9 @@ import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.SessionKeys.authToken
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 

@@ -21,46 +21,28 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
-import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.{
   LiabilitySummaryDetailsConnector,
   NiContributionsAndCreditsConnector
 }
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.UnprocessableEntity
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.{
-  EnumAtcredfg,
-  EnumHrpIndicator,
-  EnumLcheadtp,
-  EnumLcruletp,
-  EnumLiabtp,
-  EnumLtpedttp,
-  EnumLtpsdttp,
-  EnumOffidtp,
-  LiabilitySearchCategoryHyphenated
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  ContributionCategoryLetter,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Instant, LocalDate, LocalDateTime}
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
@@ -346,7 +328,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for a subset the NPS APIs called" in {
 
-        val error1 = NpsClientError(new RuntimeException("error_2"))
+        NpsClientError(new RuntimeException("error_2"))
         val error2 = NpsClientError(new RuntimeException("error_2"))
 
         val niContributionAndCreditsResult = SuccessResult(
@@ -385,7 +367,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
       "should return a DataRetrievalServiceError if the service fails to retrieve results for all the NPS APIs called" in {
 
-        val error1 = NpsClientError(new RuntimeException("error_1"))
+        NpsClientError(new RuntimeException("error_1"))
         val error2 = NpsClientError(new RuntimeException("error_2"))
         val error3 = NpsClientError(new RuntimeException("error_3"))
 

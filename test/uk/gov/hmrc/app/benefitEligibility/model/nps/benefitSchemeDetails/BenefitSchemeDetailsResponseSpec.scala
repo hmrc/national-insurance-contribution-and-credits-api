@@ -22,13 +22,13 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Country, NpsErrorReason}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess._
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
-import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums._
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
-import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat._
+import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
 
 class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
 

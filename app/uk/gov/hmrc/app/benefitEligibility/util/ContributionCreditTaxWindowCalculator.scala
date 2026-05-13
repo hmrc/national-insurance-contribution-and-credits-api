@@ -16,14 +16,8 @@
 
 package uk.gov.hmrc.app.benefitEligibility.util
 
-import cats.data.{NonEmptyList, Validated}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  BenefitEligibilityError,
-  ContributionCreditTaxWindowCalculatorError,
-  EndTaxYear,
-  StartTaxYear,
-  TaxWindow
-}
+import cats.data.NonEmptyList
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 
 object ContributionCreditTaxWindowCalculator {
 

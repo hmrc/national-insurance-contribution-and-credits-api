@@ -19,12 +19,13 @@ package uk.gov.hmrc.app.benefitEligibility.repository
 import cats.data.NonEmptyList
 import io.scalaland.chimney.dsl.into
 import play.api.libs.json.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BspSearchLightPagination
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{Class2MaReceiptsResult, LiabilityResult, MarriageDetailsResult}
 import uk.gov.hmrc.app.benefitEligibility.service.{BenefitSchemeMembershipDetailsData, PaginationResult}
-import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, NonEmptyListFormat}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
+import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, NonEmptyListFormat}
 
 import java.time.Instant
 import java.util.{Base64, UUID}
@@ -274,6 +275,7 @@ object PageTask {
           case PaginationType.BspPagination  => BspPageTask.bspPageTaskformat.reads(json)
           case PaginationType.MaPagination   => MaPageTask.maPageTaskformat.reads(json)
           case PaginationType.GyspPagination => GyspPageTask.gyspPageTaskformat.reads(json)
+          case BspSearchLightPagination      => SearchLightPageTask.searchLightPageTaskFormat.reads(json)
         }
     }
 
@@ -333,6 +335,15 @@ object PageTask {
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             paginationResult.nationalInsuranceNumber,
             now
+          )
+        case (None, BspSearchLightPagination) =>
+          SearchLightPageTask(
+            correlationId = paginationResult.correlationId,
+            pageTaskId = cursor.pageTaskId,
+            paginationType = paginationResult.paginationType,
+            contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
+            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
+            createdAt = now
           )
       }
     }

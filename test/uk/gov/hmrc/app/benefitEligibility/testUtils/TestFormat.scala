@@ -16,16 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
-import play.api.libs.json.{JsError, JsNumber, JsObject, JsString, JsSuccess, Json, OWrites, Reads, Writes}
-import uk.gov.hmrc.app.benefitEligibility.model.common.MaternityAllowanceSortType
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
-import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
-import uk.gov.hmrc.app.benefitEligibility.model.request.*
-import uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoResponse
-import uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse
-import uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary
-import uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError
+import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   AccessForbidden,
   BadRequest,
@@ -34,6 +25,15 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   ServiceUnavailable,
   UnexpectedStatus,
   UnprocessableEntity
+}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{MaternityAllowanceSortType, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.*
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.benefitEligibility.model.response.{
+  BenefitEligibilityInfoErrorResponse,
+  OverallResultSummary,
+  SanitizedApiResult
 }
 
 object TestFormat {

@@ -20,11 +20,9 @@ import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.{
-  Class2MAReceiptsConnector,
   LiabilitySummaryDetailsConnector,
   NiContributionsAndCreditsConnector
 }
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Class2MAReceipts
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.benefitEligibilityErrorSemiGroup
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,

@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller.action
 
 import play.api.libs.json.Json
 import play.api.mvc.*
-import play.api.mvc.Results.{Forbidden, InternalServerError, Unauthorized}
+import play.api.mvc.Results.{InternalServerError, Unauthorized}
 import uk.gov.hmrc.app.benefitEligibility.model.response.{ErrorCode, ErrorReason, ErrorResponse}
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.auth.core.*

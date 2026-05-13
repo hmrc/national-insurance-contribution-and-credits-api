@@ -20,13 +20,13 @@ import cats.data.EitherT
 import cats.instances.future.*
 import com.google.inject.Inject
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   CorrelationId,
   DataRetrievalServiceError
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultJSA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger

@@ -21,14 +21,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.Benefit
   BenefitSchemeDetailsSuccessResponse,
   BenefitSchemeName
 }
-import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.{
-  EmployersContractedOutNumberDetails,
-  SchemeCreatingContractedOutNumberDetails,
-  SchemeMembershipDetailsSuccessResponse,
-  SchemeMembershipEndDate,
-  SchemeMembershipStartDate,
-  SchemeTerminatingContractedOutNumberDetails
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 
 case class FilteredSchemeMembershipDetailsItem(
     schemeName: Option[BenefitSchemeName],

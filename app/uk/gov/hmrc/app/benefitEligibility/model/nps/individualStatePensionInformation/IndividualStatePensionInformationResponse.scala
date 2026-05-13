@@ -17,13 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation
 
 import play.api.libs.json.*
-
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Identifier, TaxYear}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
   CreditSourceType,
   IndividualStatePensionContributionCreditType
 }
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 import scala.collection.immutable
 

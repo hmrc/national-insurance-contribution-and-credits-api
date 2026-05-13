@@ -22,21 +22,14 @@ import play.api.libs.json.JsonValidationError
 import uk.gov.hmrc.app.benefitEligibility.model.common.{CorrelationId, Identifier, OriginatorId, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
-import uk.gov.hmrc.app.benefitEligibility.util.{
-  ContributionCreditTaxWindowCalculator,
-  RequestAwareLogger,
-  SuccessfulResult
-}
+import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.util.UUID
-import scala.util.Try
 
 object RequestValidations {
-
-  private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
   def validateRequest(
       request: EligibilityCheckDataRequest

@@ -18,45 +18,12 @@ package uk.gov.hmrc.app.benefitEligibility.repository
 
 import cats.data.NonEmptyList
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import play.api.libs.json.{Json, Reads}
+import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.NiContributionAndCredits
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  DateOfBirth,
-  EndTaxYear,
-  NpsNormalizedError,
-  StartTaxYear,
-  TaxWindow,
-  TaxYear
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
-  Class1ContributionAndCredits,
-  Class2Or3EarningsFactor,
-  Class2Or3NIContributionAmount,
-  Class2or3ContributionAndCredits,
-  EmployerName,
-  NiContributionsAndCreditsSuccessResponse,
-  NumberOfCreditsAndContributions,
-  PrimaryContribution,
-  PrimaryPaidEarnings,
-  TotalGraduatedPensionUnits
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  ContributionCategoryLetter,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.NpsStandardErrorResponse400
-import uk.gov.hmrc.app.benefitEligibility.service.ContributionCreditPagingResult
 
 import java.time.LocalDate
 

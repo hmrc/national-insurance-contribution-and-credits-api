@@ -24,7 +24,7 @@ import org.scalatest.prop.Tables.Table
 import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, NpsErrorReason, NpsNormalizedError}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsSuccessfulApiResponse
-import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError._
+import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 
 import scala.util.Random
 

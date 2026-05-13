@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.{JsNumber, JsObject, JsString, Writes}
-
-import scala.collection.immutable
 
 sealed abstract class NpsNormalizedError(val code: String, val message: String, val downstreamStatus: Int)
 

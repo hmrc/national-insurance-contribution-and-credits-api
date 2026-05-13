@@ -504,7 +504,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable,None)
+              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
             )
           )
 

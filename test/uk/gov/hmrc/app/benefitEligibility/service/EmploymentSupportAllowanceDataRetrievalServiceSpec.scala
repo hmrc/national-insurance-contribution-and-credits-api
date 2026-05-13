@@ -21,52 +21,18 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
-import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
-import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultESA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.{
-  Class1ContributionAndCredits,
-  Class2Or3EarningsFactor,
-  Class2Or3NIContributionAmount,
-  Class2or3ContributionAndCredits,
-  EmployerName,
-  NiContributionsAndCreditsSuccessResponse,
-  NumberOfCreditsAndContributions,
-  PrimaryContribution,
-  PrimaryPaidEarnings,
-  TotalGraduatedPensionUnits
-}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  ApiName,
-  BenefitType,
-  CallSystem,
-  CorrelationId,
-  DataRetrievalServiceError,
-  DateOfBirth,
-  EndTaxYear,
-  Identifier,
-  InvalidJsonError,
-  JsonValidationError,
-  NpsClientError,
-  ReceiptDate,
-  StartTaxYear,
-  TaxYear
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  ContributionCategoryLetter,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.request.ESAEligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate

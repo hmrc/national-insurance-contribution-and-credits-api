@@ -17,8 +17,8 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts
 
 import play.api.libs.json.*
-import Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.common.{Callback, Identifier, ReceiptDate}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResponse, NpsSuccessfulApiResponse}
 
 import java.time.LocalDate

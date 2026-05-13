@@ -43,20 +43,12 @@ import play.api.test.Helpers.{
   UNPROCESSABLE_ENTITY
 }
 import play.api.test.Injecting
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultESA
+import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.{
-  Class1ContributionStatus,
-  Class2Or3CreditStatus,
-  ContributionCategory,
-  ContributionCategoryLetter,
-  CreditSource,
-  LatePaymentPeriod,
-  NiContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
   NpsErrorResponseHipOrigin,
   NpsMultiErrorResponse,
