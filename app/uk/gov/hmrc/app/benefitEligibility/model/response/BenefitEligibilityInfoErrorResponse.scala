@@ -1,0 +1,113 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.app.benefitEligibility.model.response
+
+import io.scalaland.chimney.dsl.into
+import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.npsNormalizedErrorWrites
+import uk.gov.hmrc.app.benefitEligibility.model.nps.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
+
+case class OverallResultSummary(totalCalls: Int, successful: Int, failed: Int)
+
+object OverallResultSummary {
+  implicit val writes: Writes[OverallResultSummary] = Json.writes[OverallResultSummary]
+
+  def from(allResults: List[ApiResult]): OverallResultSummary = OverallResultSummary(
+    totalCalls = allResults.size,
+    successful = allResults.count(_.isSuccess),
+    failed = allResults.count(_.isFailure)
+  )
+
+}
+
+case class SanitizedApiResult(
+    apiName: ApiName,
+    status: NpsApiResponseStatus,
+    error: Option[NpsNormalizedError]
+)
+
+object SanitizedApiResult {
+  implicit val sanitizedSuccessApiResult: Writes[SanitizedApiResult] = Json.writes[SanitizedApiResult]
+}
+
+case class BenefitEligibilityInfoErrorResponse(
+    status: OverallResultStatus,
+    nationalInsuranceNumber: Identifier,
+    benefitType: BenefitType,
+    summary: OverallResultSummary,
+    downStreams: List[SanitizedApiResult]
+)
+
+object BenefitEligibilityInfoErrorResponse {
+
+  implicit val benefitEligibilityInfoErrorResponseWrites: Writes[BenefitEligibilityInfoErrorResponse] =
+    Json.writes[BenefitEligibilityInfoErrorResponse]
+
+  def from(
+      benefitType: BenefitType,
+      nationalInsuranceNumber: Identifier,
+      allResults: List[ApiResult]
+  ): BenefitEligibilityInfoErrorResponse =
+
+    BenefitEligibilityInfoErrorResponse(
+      status = OverallResultStatus.fromApiResults(allResults),
+      nationalInsuranceNumber = nationalInsuranceNumber,
+      benefitType = benefitType,
+      summary = OverallResultSummary.from(allResults),
+      downStreams = allResults.map { result =>
+        SanitizedApiResult(
+          result.apiName,
+          if (result.isSuccess) NpsApiResponseStatus.Success else NpsApiResponseStatus.Failure,
+          result.getFailure.map(_.normalizedError)
+        )
+      }
+    )
+
+  def from(
+      nationalInsuranceNumber: Identifier,
+      eligibilityCheckDataResult: EligibilityCheckDataResult
+  ): BenefitEligibilityInfoErrorResponse = {
+
+    val allResults = eligibilityCheckDataResult.allResults
+
+    eligibilityCheckDataResult
+      .into[BenefitEligibilityInfoErrorResponse]
+      .withFieldComputed(_.status, _ => OverallResultStatus.fromApiResults(allResults))
+      .withFieldConst(_.nationalInsuranceNumber, nationalInsuranceNumber)
+      .withFieldComputed(_.benefitType, _.benefitType)
+      .withFieldComputed(_.summary, _ => OverallResultSummary.from(allResults))
+      .withFieldComputed(
+        _.downStreams,
+        _ =>
+          allResults
+            .map(
+              _.into[SanitizedApiResult]
+                .withFieldComputed(_.apiName, _.apiName)
+                .withFieldComputed(
+                  _.status,
+                  result => if (result.isSuccess) NpsApiResponseStatus.Success else NpsApiResponseStatus.Failure
+                )
+                .withFieldComputed(_.error, result => result.getFailure.map(_.normalizedError))
+                .transform
+            )
+      )
+      .transform
+  }
+
+}

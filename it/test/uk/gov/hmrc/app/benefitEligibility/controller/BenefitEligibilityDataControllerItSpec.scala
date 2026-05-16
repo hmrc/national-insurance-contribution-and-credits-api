@@ -753,38 +753,34 @@ class BenefitEligibilityDataControllerItSpec
       "ESA" - {
         "should fetch ESA Data correctly" in {
 
-          val successResponse = NiContributionsAndCreditsSuccessResponse(
+          val successResponse = ContributionsAndCreditsResponse(
             Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
-            Some(
-              List(
-                Class1ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCategoryLetter = Some(ContributionCategoryLetter.U),
-                  contributionCategory = Some(ContributionCategory.None),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                  creditSource = Some(CreditSource.NotKnown),
-                  employerName = Some(EmployerName("ipOpMs")),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L)
-                )
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter.U),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
               )
             ),
-            Some(
-              List(
-                Class2or3ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                  class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
-                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                  creditSource = Some(CreditSource.NotKnown),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L),
-                  receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
-                )
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L),
+                receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
               )
             )
           )
@@ -974,38 +970,34 @@ class BenefitEligibilityDataControllerItSpec
       "JSA" - {
         "should fetch JSA Data correctly" in {
 
-          val successResponse = NiContributionsAndCreditsSuccessResponse(
+          val successResponse = ContributionsAndCreditsResponse(
             Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
-            Some(
-              List(
-                Class1ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCategoryLetter = Some(ContributionCategoryLetter.U),
-                  contributionCategory = Some(ContributionCategory.None),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                  creditSource = Some(CreditSource.NotKnown),
-                  employerName = Some(EmployerName("ipOpMs")),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L)
-                )
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter.U),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
               )
             ),
-            Some(
-              List(
-                Class2or3ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                  class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
-                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                  creditSource = Some(CreditSource.NotKnown),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L),
-                  receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
-                )
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L),
+                receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
               )
             )
           )
@@ -1201,38 +1193,34 @@ class BenefitEligibilityDataControllerItSpec
 
         "should fetch Searchlight Data correctly" in {
 
-          val successResponse = NiContributionsAndCreditsSuccessResponse(
+          val successResponse = ContributionsAndCreditsResponse(
             Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
-            Some(
-              List(
-                Class1ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCategoryLetter = Some(ContributionCategoryLetter.U),
-                  contributionCategory = Some(ContributionCategory.None),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
-                  class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
-                  primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
-                  creditSource = Some(CreditSource.NotKnown),
-                  employerName = Some(EmployerName("ipOpMs")),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L)
-                )
+            List(
+              Class1ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCategoryLetter = Some(ContributionCategoryLetter.U),
+                contributionCategory = Some(ContributionCategory.None),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                primaryContribution = Some(PrimaryContribution(BigDecimal("99999999999999.98"))),
+                class1ContributionStatus = Some(Class1ContributionStatus.ComplianceAndYieldIncomplete),
+                primaryPaidEarnings = Some(PrimaryPaidEarnings(BigDecimal("99999999999999.98"))),
+                creditSource = Some(CreditSource.NotKnown),
+                employerName = Some(EmployerName("ipOpMs")),
+                latePaymentPeriod = Some(LatePaymentPeriod.L)
               )
             ),
-            Some(
-              List(
-                Class2or3ContributionAndCredits(
-                  taxYear = Some(TaxYear(2022)),
-                  numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
-                  contributionCreditType = Some(NiContributionCreditType.C1),
-                  class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
-                  class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
-                  class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
-                  creditSource = Some(CreditSource.NotKnown),
-                  latePaymentPeriod = Some(LatePaymentPeriod.L),
-                  receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
-                )
+            List(
+              Class2or3ContributionAndCredits(
+                taxYear = Some(TaxYear(2022)),
+                numberOfContributionsAndCredits = Some(NumberOfCreditsAndContributions(53)),
+                contributionCreditType = Some(NiContributionCreditType.C1),
+                class2Or3EarningsFactor = Some(Class2Or3EarningsFactor(BigDecimal("99999999999999.98"))),
+                class2Or3NIContributionAmount = Some(Class2Or3NIContributionAmount(BigDecimal("99999999999999.98"))),
+                class2Or3CreditStatus = Some(Class2Or3CreditStatus.NotKnowNotApplicable),
+                creditSource = Some(CreditSource.NotKnown),
+                latePaymentPeriod = Some(LatePaymentPeriod.L),
+                receiptDate = Some(ReceiptDate(LocalDate.parse("2025-10-10")))
               )
             )
           )
@@ -1455,7 +1443,7 @@ class BenefitEligibilityDataControllerItSpec
           val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber,
             List(filteredLiabilitySummaryDetails),
-            niContributionsAndCreditsSuccessResponse,
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             None
           )
 
@@ -1561,7 +1549,7 @@ class BenefitEligibilityDataControllerItSpec
           val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber,
             List(filteredLiabilitySummaryDetails),
-            niContributionsAndCreditsSuccessResponse,
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             Some(
               CursorId(
                 "eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6ImRmOTRkN2JkLTcyNjktNGZjOC1iY2Y4LTQwYWU5NTVhYzc2ZSJ9"
@@ -1858,7 +1846,8 @@ class BenefitEligibilityDataControllerItSpec
 
           val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
             nationalInsuranceNumber = nationalInsuranceNumber,
-            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+            niContributionsAndCreditsResult =
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             marriageDetailsResult = filteredMarriageDetails,
             nextCursor = None
           )
@@ -1960,7 +1949,8 @@ class BenefitEligibilityDataControllerItSpec
 
           val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
             nationalInsuranceNumber = nationalInsuranceNumber,
-            niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+            niContributionsAndCreditsResult =
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             marriageDetailsResult = filteredMarriageDetails,
             nextCursor = Some(
               CursorId(
@@ -2292,7 +2282,7 @@ class BenefitEligibilityDataControllerItSpec
             filteredLongTermBenefitCalculationDetails,
             filteredSchemeMembershipDetails,
             filteredIndividualStatePensionInfo,
-            niContributionsAndCreditsSuccessResponse,
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             None
           )
 
@@ -2520,7 +2510,7 @@ class BenefitEligibilityDataControllerItSpec
             filteredLongTermBenefitCalculationDetails,
             filteredSchemeMembershipDetails,
             filteredIndividualStatePensionInfo,
-            niContributionsAndCreditsSuccessResponse,
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             Some(
               CursorId(
                 "eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiZGY5NGQ3YmQtNzI2OS00ZmM4LWJjZjgtNDBhZTk1NWFjNzZlIn0="
@@ -3619,7 +3609,7 @@ class BenefitEligibilityDataControllerItSpec
         val expectedResult = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
           List(filteredLiabilitySummaryDetails, filteredLiabilitySummaryDetails),
-          NiContributionsAndCreditsSuccessResponse(None, None, None),
+          ContributionsAndCreditsResponse(None, Nil, Nil),
           Some(
             CursorId(
               "eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
@@ -3792,7 +3782,8 @@ class BenefitEligibilityDataControllerItSpec
 
         val expectedResult = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber = nationalInsuranceNumber,
-          niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+          niContributionsAndCreditsResult =
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           marriageDetailsResult = filteredMarriageDetails,
           nextCursor = Some(
             CursorId(
@@ -4049,7 +4040,8 @@ class BenefitEligibilityDataControllerItSpec
           longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails(List()),
           schemeMembershipDetailsResult = filteredSchemeMembershipDetails,
           individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, List()),
-          niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+          niContributionsAndCreditsResult =
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           nextCursor = Some(
             CursorId(
               "eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
@@ -4211,7 +4203,8 @@ class BenefitEligibilityDataControllerItSpec
         val expectedResult = BenefitEligibilityInfoSuccessResponseSearchLight(
           benefitType = BenefitType.BSP,
           nationalInsuranceNumber = nationalInsuranceNumber,
-          niContributionsAndCreditsResult = niContributionsAndCreditsSuccessResponse,
+          niContributionsAndCreditsResult =
+            ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           nextCursor = Some(
             CursorId(
               "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUF9TRUFSQ0hMSUdIVCIsInBhZ2VUYXNrSWQiOiI1NjgzNjI1My1jZDlkLTRjNmYtOTI1MS05YjI3NWViZmY4NjMifQ=="
