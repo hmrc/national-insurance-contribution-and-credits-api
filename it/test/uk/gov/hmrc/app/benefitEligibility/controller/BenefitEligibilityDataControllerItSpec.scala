@@ -3136,7 +3136,7 @@ class BenefitEligibilityDataControllerItSpec
         contentAsJson(result) shouldBe Json.toJson(
           ErrorResponse(
             BadRequest,
-            ErrorReason("incompatible json, request body does not match schema - [\"{}\" is not an object]")
+            ErrorReason("incompatible JSON, request body does not match schema - [\"{}\" is not an object]")
           )
         )
       }
@@ -3166,7 +3166,7 @@ class BenefitEligibilityDataControllerItSpec
         val result: Future[Result] = underTest.fetchBenefitEligibilityData()(request)
 
         status(result) shouldBe 400
-        contentAsJson(result) shouldBe Json.toJson(ErrorResponse(BadRequest, ErrorReason("invalid json")))
+        contentAsJson(result) shouldBe Json.toJson(ErrorResponse(BadRequest, ErrorReason("invalid JSON")))
 
       }
 
@@ -4360,7 +4360,7 @@ class BenefitEligibilityDataControllerItSpec
 
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
-          ErrorResponse(BadRequest, ErrorReason("Paginate request sent with no next cursor"))
+          ErrorResponse(BadRequest, ErrorReason("Pagination request sent without cursorId"))
         )
       }
       "should return 400 if invalid next cursor is passed" in {
@@ -4393,7 +4393,7 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(
             BadRequest,
             ErrorReason(
-              "invalid nextCursor Unexpected character ('�' (code 65533 / 0xfffd)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n at [Source: (String)\"�m�㞻��t\"; line: 1, column: 2]"
+              "invalid cursorId - Unexpected character ('�' (code 65533 / 0xfffd)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n at [Source: (String)\"�m�㞻��t\"; line: 1, column: 2]"
             )
           )
         )

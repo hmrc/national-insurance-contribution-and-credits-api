@@ -185,13 +185,13 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
           ))
           .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
           .returning(
-            EitherT.leftT(JsonValidationError(List.empty))
+            EitherT.leftT(JsonParsingError(List.empty))
           )
 
         underTest
           .fetchEligibilityData(eligibilityCheckDataRequest)
           .value
-          .futureValue shouldBe Left(DataRetrievalServiceError(List(JsonValidationError(List.empty))))
+          .futureValue shouldBe Left(DataRetrievalServiceError(List(JsonParsingError(List.empty))))
       }
 
       "should propagate the error returned from the connector (ParsingError)" in {

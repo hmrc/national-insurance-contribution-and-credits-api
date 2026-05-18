@@ -16,8 +16,21 @@
 
 package uk.gov.hmrc.app.benefitEligibility.controller
 
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.app.benefitEligibility.service.{BenefitEligibilityDataRetrievalService, PaginationService}
+import cats.data.EitherT
+import play.api.libs.json.Json
+import play.api.mvc.Results.{InternalServerError, Ok}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityResultHandler.*
+import uk.gov.hmrc.app.benefitEligibility.controller.RequestHelper.*
+import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
+import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoResponse
+import uk.gov.hmrc.app.benefitEligibility.service.{
+  BenefitEligibilityDataRetrievalService,
+  PaginationResult,
+  PaginationService
+}
+
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -37,23 +50,56 @@ class BenefitEligibilityDataController @Inject() (
   def fetchBenefitEligibilityData(): Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
-        BenefitEligibilityRequestHandler.handleStandardRequest(
-          appConfig,
-          request,
-          benefitEligibilityDataRetrievalService.getEligibilityData
-        )
+        val result = for {
+          headerValues <- EitherT.fromEither[Future](validateHeaders(request, appConfig))
+          (correlationId, originatorId) = headerValues
+          eligibilityRequest <- EitherT.fromEither[Future](parseAndValidateRequest(request))
+          _ <- EitherT.fromEither[Future](validateOriginatorMatch(eligibilityRequest, originatorId, appConfig))
+          eligibilityCheckDataResult <- benefitEligibilityDataRetrievalService.getEligibilityData(
+            eligibilityRequest,
+            correlationId
+          )
+        } yield buildResponse(eligibilityRequest, eligibilityCheckDataResult)
+
+        result.value.map(handleFinalResult(_, request))
       }
     } else identity.async(_ => Future.successful(NotFound))
 
   def getNextPage(): Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
-        BenefitEligibilityRequestHandler.handlePaginationRequest(
-          appConfig,
-          request,
-          paginationService.paginate
-        )
+        val result = for {
+          headerValues <- EitherT.fromEither[Future](validateHeaders(request, appConfig))
+          (correlationId, originatorId) = headerValues
+          nextCursor <- EitherT.fromEither[Future](parsePaginationCursor(request))
+          _ <- EitherT.fromEither[Future](validatePaginationOriginatorMatch(nextCursor, originatorId, appConfig))
+          paginationResult <- paginationService.paginate(nextCursor)
+        } yield buildResponse(paginationResult)
+
+        result.value.map(handleFinalResult(_, request))
       }
     } else identity.async(_ => Future.successful(NotFound))
+
+  private def buildResponse(
+      eligibilityRequest: EligibilityCheckDataRequest,
+      result: EligibilityCheckDataResult
+  ): Result =
+    BenefitEligibilityInfoResponse
+      .from(
+        eligibilityRequest.nationalInsuranceNumber,
+        result
+      ) match {
+      case Left(errorResponse)    => InternalServerError(Json.toJson(errorResponse))
+      case Right(successResponse) => Ok(Json.toJson(successResponse))
+    }
+
+  private def buildResponse(
+      paginationResult: PaginationResult
+  ): Result =
+    BenefitEligibilityInfoResponse
+      .from(paginationResult) match {
+      case Left(errorResponse)    => InternalServerError(Json.toJson(errorResponse))
+      case Right(successResponse) => Ok(Json.toJson(successResponse))
+    }
 
 }

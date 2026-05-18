@@ -609,7 +609,7 @@ class IndividualStatePensionInformationConnectorItSpec
             connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
-          result.left.value shouldBe a[JsonValidationError]
+          result.left.value shouldBe a[JsonParsingError]
         }
       }
 
