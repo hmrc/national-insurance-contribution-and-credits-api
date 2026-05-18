@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.util
 
 import cats.implicits.catsSyntaxEitherId
 import play.api.libs.json.Reads
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, InvalidJsonError, JsonValidationError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, InvalidJsonError, JsonParsingError}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -37,7 +37,7 @@ object HttpParsing {
         value
           .validate[T]
           .fold(
-            errors => JsonValidationError(List(errors.mkString(","))).asLeft[T],
+            errors => JsonParsingError(List(errors.mkString(","))).asLeft[T],
             value => Right(value)
           )
       case Failure(exception) => InvalidJsonError(exception).asLeft[T]

@@ -100,7 +100,7 @@ class IndividualStatePensionInformationConnector @Inject() (
           }
 
         EitherT.fromEither[Future](individualStatePensionResult).leftMap {
-          case error: JsonValidationError =>
+          case error: JsonParsingError =>
             logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
             error
           case error: InvalidJsonError =>
@@ -111,8 +111,8 @@ class IndividualStatePensionInformationConnector @Inject() (
 
       }
       .leftMap {
-        case error: JsonValidationError => error
-        case error: InvalidJsonError    => error
+        case error: JsonParsingError => error
+        case error: InvalidJsonError => error
         case error =>
           logger.error(s"call to downstream service $apiName failed: ${error.toString}")
           error
