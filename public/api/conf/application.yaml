@@ -1112,6 +1112,438 @@ paths:
           $ref: "#/components/responses/internalServerErrorResponse"
 components:
   schemas:
+    ? uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
+    : properties:
+        totalGraduatedPensionUnits:
+          nullable: true
+          type: number
+          format: double
+          description: "Denotes the total number of graduated pension units paid to an individual. Value precision allows for up to 6 decimal places - i.e. 10, 10.5, 10.56, 10.567, 10.5678, 10.56789, 10.567890 are all accepted values."
+          maximum: 100
+          minimum: 0
+          example: 10
+        class1ContributionAndCredits:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class1ContributionAndCredits"
+        class2Or3ContributionAndCredits:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class2or3ContributionAndCredits"
+    uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        downstreamStatus:
+          type: integer
+          format: int32
+      required:
+      - code
+      - message
+      - downstreamStatus
+    uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult:
+      properties:
+        apiName:
+          type: string
+          enum:
+          - Class2 MA Receipts
+          - Liabilities
+          - NI Contributions and credits
+          - Marriage Details
+          - Scheme Membership Details
+          - Individual State Pension Information
+          - Long Term Benefit Notes
+          - Benefit Scheme Details
+          - Long Term Benefit Calculation Details
+        status:
+          type: string
+          enum:
+          - SUCCESS
+          - FAILURE
+        error:
+          nullable: true
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError"
+      required:
+      - apiName
+      - status
+    uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary:
+      properties:
+        totalCalls:
+          type: integer
+          format: int32
+        successful:
+          type: integer
+          format: int32
+        failed:
+          type: integer
+          format: int32
+      required:
+      - totalCalls
+      - successful
+      - failed
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse:
+      properties:
+        status:
+          type: string
+          enum:
+          - FAILURE
+          - PARTIAL FAILURE
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        benefitType:
+          type: string
+          enum:
+          - MA
+          - ESA
+          - JSA
+          - GYSP
+          - BSP
+        summary:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary"
+        downStreams:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult"
+      required:
+      - status
+      - nationalInsuranceNumber
+      - benefitType
+      - summary
+      - downStreams
+    uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse:
+      properties:
+        code:
+          type: string
+          enum:
+          - BAD_REQUEST
+          - UNAUTHORIZED
+          - UNPROCESSABLE_ENTITY
+          - INTERNAL_SERVER_ERROR
+          - NOT_FOUND
+        reason:
+          type: string
+      required:
+      - code
+      - reason
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight:
+      properties:
+        benefitType:
+          type: string
+          enum:
+          - BSP
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        niContributionsAndCreditsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse"
+        nextCursor:
+          nullable: true
+          type: string
+      required:
+      - benefitType
+      - nationalInsuranceNumber
+      - niContributionsAndCreditsResult
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem:
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          nullable: true
+          type: string
+          format: date
+      required:
+      - startDate
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetails:
+      properties:
+        liabilityDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem"
+      required:
+      - liabilityDetails
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa:
+      properties:
+        benefitType:
+          type: string
+          enum:
+          - MA
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        liabilitySummaryDetailsResult:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetails"
+        niContributionsAndCreditsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse"
+        nextCursor:
+          nullable: true
+          type: string
+      required:
+      - benefitType
+      - nationalInsuranceNumber
+      - liabilitySummaryDetailsResult
+      - niContributionsAndCreditsResult
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa:
+      properties:
+        benefitType:
+          type: string
+          enum:
+          - JSA
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        niContributionsAndCreditsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse"
+      required:
+      - benefitType
+      - nationalInsuranceNumber
+      - niContributionsAndCreditsResult
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa:
+      properties:
+        benefitType:
+          type: string
+          enum:
+          - ESA
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        niContributionsAndCreditsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse"
+      required:
+      - benefitType
+      - nationalInsuranceNumber
+      - niContributionsAndCreditsResult
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionContributionsByTaxYear:
+      properties:
+        totalPrimaryPaidEarnings:
+          nullable: true
+          type: number
+        qualifyingTaxYear:
+          nullable: true
+          type: boolean
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionInfo:
+      properties:
+        numberOfQualifyingYears:
+          nullable: true
+          type: integer
+          description: Denotes the number of qualifying years an individual has for receiving their basic pension.
+          maximum: 100
+          minimum: 0
+          example: 5
+        contributionsByTaxYear:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionContributionsByTaxYear"
+      required:
+      - contributionsByTaxYear
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetailsItem:
+      properties:
+        schemeName:
+          nullable: true
+          type: string
+          description: The name of the scheme used for the institution details of a benefit scheme.
+          maxLength: 54
+          minLength: 1
+          pattern: "^[a-zA-Z0-9\\/,'.&() -]+$"
+          example: ACME PENSION SCHEME
+        schemeMembershipStartDate:
+          nullable: true
+          type: string
+          format: date
+        schemeMembershipEndDate:
+          nullable: true
+          type: string
+          format: date
+        employersContractedOutNumberDetails:
+          nullable: true
+          type: string
+          description: Denotes the Employer's Contracting-Out Number with prefix and suffix - used where an employer has an occupational pension scheme that is contracted-out of the State Second Pension.
+          maxLength: 9
+          minLength: 7
+          pattern: "^([A-Z]{0,1}[3]\\d{6}[A-Z ^GIO SUVZ]{0,1})$"
+          example: S3123456B
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetails:
+      properties:
+        schemeMembershipDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetailsItem"
+      required:
+      - schemeMembershipDetails
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetailsItem:
+      properties:
+        guaranteedMinimumPensionContractedOutDeductionsPre1988:
+          nullable: true
+          type: number
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) pre 1988
+          multipleOf: 0.01
+          maximum: 9.999999999999998E13
+          minimum: -9.999999999999998E13
+          example: 10.56
+        guaranteedMinimumPensionContractedOutDeductionsPost1988:
+          nullable: true
+          type: number
+          description: Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) post 1988
+          multipleOf: 0.01
+          maximum: 9.999999999999998E13
+          minimum: -9.999999999999998E13
+          example: 10.56
+        contractedOutDeductionsPre1988:
+          nullable: true
+          type: number
+          description: Denotes the value of the Contracted-Out Deductions (COD) pre 1988
+          multipleOf: 0.01
+          maximum: 9.999999999999998E13
+          minimum: -9.999999999999998E13
+          example: 10.56
+        contractedOutDeductionsPost1988:
+          nullable: true
+          type: number
+          description: Denotes the value of the Contracted-Out Deductions (COD) post 1988
+          multipleOf: 0.01
+          maximum: 9.999999999999998E13
+          minimum: -9.999999999999998E13
+          example: 10.56
+        longTermBenefitNotes:
+          type: array
+          items:
+            type: string
+      required:
+      - longTermBenefitNotes
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetails:
+      properties:
+        benefitCalculationDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetailsItem"
+      required:
+      - benefitCalculationDetails
+    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp:
+      properties:
+        benefitType:
+          type: string
+          enum:
+          - GYSP
+        nationalInsuranceNumber:
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        marriageDetailsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetails"
+        longTermBenefitCalculationDetailsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetails"
+        schemeMembershipDetailsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetails"
+        individualStatePensionInfoResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionInfo"
+        niContributionsAndCreditsResult:
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse"
+        nextCursor:
+          nullable: true
+          type: string
+      required:
+      - benefitType
+      - nationalInsuranceNumber
+      - marriageDetailsResult
+      - longTermBenefitCalculationDetailsResult
+      - schemeMembershipDetailsResult
+      - individualStatePensionInfoResult
+      - niContributionsAndCreditsResult
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetailsItem:
+      properties:
+        status:
+          type: string
+          enum:
+          - CIVIL PARTNER
+          - CIVIL PARTNERSHIP ANNULLED
+          - CIVIL PARTNERSHIP DISSOLVED
+          - CIVIL PARTNERSHIP TERMINATED - REASON N/K
+          - DIVORCED
+          - MARRIAGE ANNULLED
+          - MARRIAGE TERMINATED - REASON NOT KNOWN
+          - MARRIED
+          - SINGLE
+          - SURVIVING CIVIL PARTNER
+          - VOID
+          - WIDOWED
+        startDate:
+          nullable: true
+          type: string
+          format: date
+        startDateStatus:
+          type: string
+          nullable: true
+          enum:
+          - COEG CONFIRMED
+          - NOT KNOWN
+          - NOT VERIFIED
+          - VERIFIED
+        endDate:
+          nullable: true
+          type: string
+          format: date
+        endDateStatus:
+          type: string
+          nullable: true
+          enum:
+          - IN EFFECT
+          - NOT KNOWN
+          - UNVERIFIED
+          - VERIFIED
+        spouseIdentifier:
+          nullable: true
+          type: string
+          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
+          maxLength: 9
+          minLength: 8
+          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
+          example: AB123456A
+        spouseForename:
+          nullable: true
+          type: string
+        spouseSurname:
+          nullable: true
+          type: string
+      required:
+      - status
+    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetails:
+      properties:
+        marriageDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetailsItem"
+      required:
+      - marriageDetails
     ? uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class2or3ContributionAndCredits
     : properties:
         taxYear:
@@ -1480,8 +1912,8 @@ components:
           - LX
           - ZY
           - ZZ
-    ? uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
-    : properties:
+    uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse:
+      properties:
         totalGraduatedPensionUnits:
           nullable: true
           type: number
@@ -1492,426 +1924,15 @@ components:
           example: 10
         class1ContributionAndCredits:
           type: array
-          nullable: true
           items:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class1ContributionAndCredits"
         class2Or3ContributionAndCredits:
           type: array
-          nullable: true
           items:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class2or3ContributionAndCredits"
-    uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError:
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        downstreamStatus:
-          type: integer
-          format: int32
       required:
-      - code
-      - message
-      - downstreamStatus
-    uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult:
-      properties:
-        apiName:
-          type: string
-          enum:
-          - Class2 MA Receipts
-          - Liabilities
-          - NI Contributions and credits
-          - Marriage Details
-          - Scheme Membership Details
-          - Individual State Pension Information
-          - Long Term Benefit Notes
-          - Benefit Scheme Details
-          - Long Term Benefit Calculation Details
-        status:
-          type: string
-          enum:
-          - SUCCESS
-          - FAILURE
-        error:
-          nullable: true
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError"
-      required:
-      - apiName
-      - status
-    uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary:
-      properties:
-        totalCalls:
-          type: integer
-          format: int32
-        successful:
-          type: integer
-          format: int32
-        failed:
-          type: integer
-          format: int32
-      required:
-      - totalCalls
-      - successful
-      - failed
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse:
-      properties:
-        status:
-          type: string
-          enum:
-          - FAILURE
-          - PARTIAL FAILURE
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        benefitType:
-          type: string
-          enum:
-          - MA
-          - ESA
-          - JSA
-          - GYSP
-          - BSP
-        summary:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary"
-        downStreams:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult"
-      required:
-      - status
-      - nationalInsuranceNumber
-      - benefitType
-      - summary
-      - downStreams
-    uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse:
-      properties:
-        code:
-          type: string
-          enum:
-          - BAD_REQUEST
-          - UNAUTHORIZED
-          - UNPROCESSABLE_ENTITY
-          - INTERNAL_SERVER_ERROR
-          - NOT_FOUND
-        reason:
-          type: string
-      required:
-      - code
-      - reason
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseSearchLight:
-      properties:
-        benefitType:
-          type: string
-          enum:
-          - BSP
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        niContributionsAndCreditsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
-        nextCursor:
-          nullable: true
-          type: string
-      required:
-      - benefitType
-      - nationalInsuranceNumber
-      - niContributionsAndCreditsResult
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem:
-      properties:
-        startDate:
-          type: string
-          format: date
-        endDate:
-          nullable: true
-          type: string
-          format: date
-      required:
-      - startDate
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetails:
-      properties:
-        liabilityDetails:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetailItem"
-      required:
-      - liabilityDetails
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa:
-      properties:
-        benefitType:
-          type: string
-          enum:
-          - MA
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        liabilitySummaryDetailsResult:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLiabilitySummaryDetails"
-        niContributionsAndCreditsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
-        nextCursor:
-          nullable: true
-          type: string
-      required:
-      - benefitType
-      - nationalInsuranceNumber
-      - liabilitySummaryDetailsResult
-      - niContributionsAndCreditsResult
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa:
-      properties:
-        benefitType:
-          type: string
-          enum:
-          - JSA
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        niContributionsAndCreditsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
-      required:
-      - benefitType
-      - nationalInsuranceNumber
-      - niContributionsAndCreditsResult
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa:
-      properties:
-        benefitType:
-          type: string
-          enum:
-          - ESA
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        niContributionsAndCreditsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
-      required:
-      - benefitType
-      - nationalInsuranceNumber
-      - niContributionsAndCreditsResult
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionContributionsByTaxYear:
-      properties:
-        totalPrimaryPaidEarnings:
-          nullable: true
-          type: number
-        qualifyingTaxYear:
-          nullable: true
-          type: boolean
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionInfo:
-      properties:
-        numberOfQualifyingYears:
-          nullable: true
-          type: integer
-          description: Denotes the number of qualifying years an individual has for receiving their basic pension.
-          maximum: 100
-          minimum: 0
-          example: 5
-        contributionsByTaxYear:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionContributionsByTaxYear"
-      required:
-      - contributionsByTaxYear
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetailsItem:
-      properties:
-        schemeName:
-          nullable: true
-          type: string
-          description: The name of the scheme used for the institution details of a benefit scheme.
-          maxLength: 54
-          minLength: 1
-          pattern: "^[a-zA-Z0-9\\/,'.&() -]+$"
-          example: ACME PENSION SCHEME
-        schemeMembershipStartDate:
-          nullable: true
-          type: string
-          format: date
-        schemeMembershipEndDate:
-          nullable: true
-          type: string
-          format: date
-        employersContractedOutNumberDetails:
-          nullable: true
-          type: string
-          description: Denotes the Employer's Contracting-Out Number with prefix and suffix - used where an employer has an occupational pension scheme that is contracted-out of the State Second Pension.
-          maxLength: 9
-          minLength: 7
-          pattern: "^([A-Z]{0,1}[3]\\d{6}[A-Z ^GIO SUVZ]{0,1})$"
-          example: S3123456B
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetails:
-      properties:
-        schemeMembershipDetails:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetailsItem"
-      required:
-      - schemeMembershipDetails
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetailsItem:
-      properties:
-        guaranteedMinimumPensionContractedOutDeductionsPre1988:
-          nullable: true
-          type: number
-          description: Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) pre 1988
-          multipleOf: 0.01
-          maximum: 9.999999999999998E13
-          minimum: -9.999999999999998E13
-          example: 10.56
-        guaranteedMinimumPensionContractedOutDeductionsPost1988:
-          nullable: true
-          type: number
-          description: Denotes the value of the Guaranteed Minimum Pension (GMP) / Contracted-Out Deductions (COD) post 1988
-          multipleOf: 0.01
-          maximum: 9.999999999999998E13
-          minimum: -9.999999999999998E13
-          example: 10.56
-        contractedOutDeductionsPre1988:
-          nullable: true
-          type: number
-          description: Denotes the value of the Contracted-Out Deductions (COD) pre 1988
-          multipleOf: 0.01
-          maximum: 9.999999999999998E13
-          minimum: -9.999999999999998E13
-          example: 10.56
-        contractedOutDeductionsPost1988:
-          nullable: true
-          type: number
-          description: Denotes the value of the Contracted-Out Deductions (COD) post 1988
-          multipleOf: 0.01
-          maximum: 9.999999999999998E13
-          minimum: -9.999999999999998E13
-          example: 10.56
-        longTermBenefitNotes:
-          type: array
-          items:
-            type: string
-      required:
-      - longTermBenefitNotes
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetails:
-      properties:
-        benefitCalculationDetails:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetailsItem"
-      required:
-      - benefitCalculationDetails
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp:
-      properties:
-        benefitType:
-          type: string
-          enum:
-          - GYSP
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        marriageDetailsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetails"
-        longTermBenefitCalculationDetailsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredLongTermBenefitCalculationDetails"
-        schemeMembershipDetailsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredSchemeMembershipDetails"
-        individualStatePensionInfoResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredIndividualStatePensionInfo"
-        niContributionsAndCreditsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
-        nextCursor:
-          nullable: true
-          type: string
-      required:
-      - benefitType
-      - nationalInsuranceNumber
-      - marriageDetailsResult
-      - longTermBenefitCalculationDetailsResult
-      - schemeMembershipDetailsResult
-      - individualStatePensionInfoResult
-      - niContributionsAndCreditsResult
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetailsItem:
-      properties:
-        status:
-          type: string
-          enum:
-          - CIVIL PARTNER
-          - CIVIL PARTNERSHIP ANNULLED
-          - CIVIL PARTNERSHIP DISSOLVED
-          - CIVIL PARTNERSHIP TERMINATED - REASON N/K
-          - DIVORCED
-          - MARRIAGE ANNULLED
-          - MARRIAGE TERMINATED - REASON NOT KNOWN
-          - MARRIED
-          - SINGLE
-          - SURVIVING CIVIL PARTNER
-          - VOID
-          - WIDOWED
-        startDate:
-          nullable: true
-          type: string
-          format: date
-        startDateStatus:
-          type: string
-          nullable: true
-          enum:
-          - COEG CONFIRMED
-          - NOT KNOWN
-          - NOT VERIFIED
-          - VERIFIED
-        endDate:
-          nullable: true
-          type: string
-          format: date
-        endDateStatus:
-          type: string
-          nullable: true
-          enum:
-          - IN EFFECT
-          - NOT KNOWN
-          - UNVERIFIED
-          - VERIFIED
-        spouseIdentifier:
-          nullable: true
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        spouseForename:
-          nullable: true
-          type: string
-        spouseSurname:
-          nullable: true
-          type: string
-      required:
-      - status
-    uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetails:
-      properties:
-        marriageDetails:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetailsItem"
-      required:
-      - marriageDetails
+      - class1ContributionAndCredits
+      - class2Or3ContributionAndCredits
     uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp:
       properties:
         benefitType:
@@ -1926,7 +1947,7 @@ components:
           pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
           example: AB123456A
         niContributionsAndCreditsResult:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse"
+          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ContributionsAndCreditsResponse"
         marriageDetailsResult:
           $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.FilteredMarriageDetails"
         nextCursor:

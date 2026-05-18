@@ -734,7 +734,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val expected = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
           List(filteredLiabilitySummaryDetails),
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -746,7 +746,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val benefitEligibilityInfoSuccessResponseMa = BenefitEligibilityInfoSuccessResponseMa(
           nationalInsuranceNumber,
           List(filteredLiabilitySummaryDetails),
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -811,7 +811,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       val successResponse = BenefitEligibilityInfoSuccessResponseMa(
         nationalInsuranceNumber,
         List(filteredLiabilitySummaryDetails),
-        niContributionsAndCreditsSuccessResponse,
+        ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
         None
       )
 
@@ -832,7 +832,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       val successResponse = BenefitEligibilityInfoSuccessResponseMa(
         nationalInsuranceNumber,
         List(filteredLiabilitySummaryDetailsOptionalsExcluded),
-        niContributionsAndCreditsSuccessResponseOptionalsExcluded,
+        ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponseOptionalsExcluded),
         None
       )
 
@@ -858,7 +858,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expected = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           filteredMarriageDetails,
           None
         )
@@ -870,7 +870,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val benefitEligibilityInfoSuccessResponseBsp = BenefitEligibilityInfoSuccessResponseBsp(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           filteredMarriageDetails,
           None
         )
@@ -940,7 +940,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       val successResponse = BenefitEligibilityInfoSuccessResponseBsp(
         nationalInsuranceNumber,
-        niContributionsAndCreditsSuccessResponse,
+        ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
         filteredMarriageDetails,
         None
       )
@@ -961,7 +961,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       val successResponse = BenefitEligibilityInfoSuccessResponseBsp(
         nationalInsuranceNumber,
-        niContributionsAndCreditsSuccessResponseOptionalsExcluded,
+        ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponseOptionalsExcluded),
         filteredMarriageDetailsOptionalsExcluded,
         None
       )
@@ -1007,7 +1007,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           filteredLongTermBenefitCalculationDetails,
           filteredSchemeMembershipDetails,
           filteredIndividualStatePensionInfo,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -1115,7 +1115,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           filteredLongTermBenefitCalculationDetails,
           filteredSchemeMembershipDetails,
           filteredIndividualStatePensionInfo,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -1136,7 +1136,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           filteredLongTermBenefitCalculationDetails,
           filteredSchemeMembershipDetails,
           filteredIndividualStatePensionInfo,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -1160,7 +1160,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           filteredLongTermBenefitCalculationDetailsOptionalExluded,
           filteredSchemeMembershipDetailsOptionalsExcluded,
           filteredIndividualStatePensionInfoOptionalsExcluded,
-          niContributionsAndCreditsSuccessResponseOptionalsExcluded,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponseOptionalsExcluded),
           None
         )
 
@@ -1185,7 +1185,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expected = BenefitEligibilityInfoSuccessResponseEsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
         )
 
         result.value shouldBe expected
@@ -1195,7 +1195,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val benefitEligibilityInfoSuccessResponseEsa = BenefitEligibilityInfoSuccessResponseEsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
         )
 
         val expectedJson =
@@ -1248,7 +1248,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val successResponse = BenefitEligibilityInfoSuccessResponseEsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
         )
 
         successResponseEsaJsonSchema.validateAndGetErrors(
@@ -1267,7 +1267,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val successResponse = BenefitEligibilityInfoSuccessResponseEsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponseOptionalsExcluded
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponseOptionalsExcluded)
         )
 
         successResponseEsaJsonSchema.validateAndGetErrors(
@@ -1294,7 +1294,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val expected = BenefitEligibilityInfoSuccessResponseSearchLight(
           BenefitType.BSP,
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -1306,7 +1306,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val benefitEligibilityInfoSuccessResponseBspSearchlight = BenefitEligibilityInfoSuccessResponseSearchLight(
           BenefitType.BSP,
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse,
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           None
         )
 
@@ -1365,7 +1365,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val expected = BenefitEligibilityInfoSuccessResponseJsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
         )
 
         result.value shouldBe expected
@@ -1375,7 +1375,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val benefitEligibilityInfoSuccessResponseJsa = BenefitEligibilityInfoSuccessResponseJsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
         )
 
         val expectedJson =
@@ -1428,7 +1428,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val successResponse = BenefitEligibilityInfoSuccessResponseJsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponse
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
         )
 
         successResponseEsaJsonSchema.validateAndGetErrors(
@@ -1447,7 +1447,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         val successResponse = BenefitEligibilityInfoSuccessResponseJsa(
           nationalInsuranceNumber,
-          niContributionsAndCreditsSuccessResponseOptionalsExcluded
+          ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponseOptionalsExcluded)
         )
 
         successResponseEsaJsonSchema.validateAndGetErrors(
@@ -1883,7 +1883,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             BenefitEligibilityInfoSuccessResponseMa(
               nationalInsuranceNumber,
               List(filteredLiabilitySummaryDetails),
-              niContributionsAndCreditsSuccessResponse,
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
               None
             )
           )
@@ -1905,7 +1905,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseJsa(
               nationalInsuranceNumber,
-              niContributionsAndCreditsSuccessResponse
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
             )
           )
 
@@ -1926,7 +1926,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseEsa(
               nationalInsuranceNumber,
-              niContributionsAndCreditsSuccessResponse
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse)
             )
           )
 
@@ -1952,7 +1952,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           Right(
             BenefitEligibilityInfoSuccessResponseBsp(
               nationalInsuranceNumber,
-              niContributionsAndCreditsSuccessResponse,
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
               filteredMarriageDetails,
               None
             )
@@ -2015,7 +2015,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               filteredLongTermBenefitCalculationDetails,
               filteredSchemeMembershipDetails,
               filteredIndividualStatePensionInfo,
-              niContributionsAndCreditsSuccessResponse,
+              ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
               None
             )
           )
@@ -2043,7 +2043,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           BenefitEligibilityInfoSuccessResponseMa(
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitySummaryDetailsResult = List(FilteredLiabilitySummaryDetails(List())),
-            niContributionsAndCreditsResult = NiContributionsAndCreditsSuccessResponse(None, None, None),
+            niContributionsAndCreditsResult = ContributionsAndCreditsResponse(None, Nil, Nil),
             nextCursor = None
           )
         )
@@ -2071,7 +2071,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         val expectedResult = Right(
           BenefitEligibilityInfoSuccessResponseBsp(
             nationalInsuranceNumber = nationalInsuranceNumber,
-            NiContributionsAndCreditsSuccessResponse(None, None, None),
+            ContributionsAndCreditsResponse(None, Nil, Nil),
             FilteredMarriageDetails(List()),
             None
           )
@@ -2104,7 +2104,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails(List()),
             schemeMembershipDetailsResult = FilteredSchemeMembershipDetails(List()),
             individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, List()),
-            niContributionsAndCreditsResult = NiContributionsAndCreditsSuccessResponse(None, None, None),
+            niContributionsAndCreditsResult = ContributionsAndCreditsResponse(None, Nil, Nil),
             nextCursor = None
           )
         )
