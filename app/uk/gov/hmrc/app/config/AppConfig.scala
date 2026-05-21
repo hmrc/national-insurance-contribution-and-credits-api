@@ -84,4 +84,13 @@ class AppConfig @Inject() (config: ServicesConfig) {
   val base64HipAuthToken: String =
     Base64.getEncoder.encode(s"$hipClientId:$hipClientSecret".getBytes(StandardCharsets.UTF_8)).map(_.toChar).mkString
 
+  private val newHipClientId: String     = config.getString(s"$hipServicePrefix.benefitEligibilityClientId")
+  private val newHipClientSecret: String = config.getString(s"$hipServicePrefix.benefitEligibilityClientSecret")
+
+  val newBase64HipAuthToken: String =
+    Base64.getEncoder
+      .encode(s"$newHipClientId:$newHipClientSecret".getBytes(StandardCharsets.UTF_8))
+      .map(_.toChar)
+      .mkString
+
 }

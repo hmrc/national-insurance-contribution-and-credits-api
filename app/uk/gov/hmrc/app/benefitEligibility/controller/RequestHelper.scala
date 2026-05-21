@@ -24,12 +24,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
-import uk.gov.hmrc.app.benefitEligibility.util.{
-  ContributionCreditTaxWindowCalculator,
-  RequestAwareLogger,
-  SuccessfulResult
-}
-import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -59,14 +54,12 @@ object RequestHelper {
     }
 
   def validateHeaders(
-      request: Request[AnyContent],
-      appConfig: AppConfig
-  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, (CorrelationId, OriginatorId)] =
+      request: Request[AnyContent]
+  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] =
     for {
       _             <- validateAcceptHeader(request)
-      originatorId  <- getAndValidateOriginatorId(request, appConfig)
       correlationId <- getAndValidateCorrelationId(request)
-    } yield (correlationId, originatorId)
+    } yield correlationId
 
   def parsePaginationCursor(
       request: Request[AnyContent]
@@ -81,28 +74,6 @@ object RequestHelper {
         case Success(cursor) =>
           Right(cursor)
       }
-
-  def validateOriginatorMatch(
-      eligibilityRequest: EligibilityCheckDataRequest,
-      originatorId: OriginatorId,
-      appConfig: AppConfig
-  ): Either[BenefitEligibilityError, Unit] =
-    if (OriginatorId.from(eligibilityRequest, appConfig).contains(originatorId)) {
-      Right(())
-    } else {
-      Left(InvalidOriginatorId(ErrorReason("Invalid Originator Id")))
-    }
-
-  def validatePaginationOriginatorMatch(
-      cursor: PaginationCursor,
-      originatorId: OriginatorId,
-      appConfig: AppConfig
-  ): Either[BenefitEligibilityError, Unit] =
-    if (OriginatorId.from(cursor.paginationType, appConfig).contains(originatorId)) {
-      Right(())
-    } else {
-      Left(InvalidOriginatorId(ErrorReason("Invalid Originator Id")))
-    }
 
   def addCorrelationIdHeader(
       result: Result,
@@ -196,16 +167,6 @@ object RequestHelper {
         Left(InvalidOrMissingHeaderError(ErrorReason("Accept header cannot be empty")))
     }
 
-  private def validateOriginatorId(
-      originatorId: Option[String],
-      appConfig: AppConfig
-  )(implicit hc: HeaderCarrier): Either[InvalidOrMissingHeaderError, OriginatorId] =
-    originatorId.flatMap(id => OriginatorId.from(id, appConfig)) match {
-      case None =>
-        Left(InvalidOrMissingHeaderError(ErrorReason("Originator Id is missing or invalid")))
-      case Some(success) => Right(success)
-    }
-
   private def validateAcceptHeader(
       request: Request[AnyContent]
   )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, Unit] =
@@ -213,15 +174,6 @@ object RequestHelper {
       case None => Left(InvalidOrMissingHeaderError(ErrorReason("Missing Header Accept")))
       case Some(acceptHeader) =>
         RequestHelper.validateAcceptHeader(Some(acceptHeader)).map(_ => ())
-    }
-
-  private def getAndValidateOriginatorId(
-      request: Request[AnyContent],
-      appConfig: AppConfig
-  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, OriginatorId] =
-    request.headers.get("gov-uk-originator-id") match {
-      case None               => Left(InvalidOrMissingHeaderError(ErrorReason("Missing header 'gov-uk-originator-id'")))
-      case Some(originatorId) => validateOriginatorId(Some(originatorId), appConfig)
     }
 
   private def formatJsonErrors(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])]): String =

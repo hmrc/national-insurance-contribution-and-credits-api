@@ -28,6 +28,10 @@ class AppConfigSpec extends AnyFreeSpec with should.Matchers {
   private class Setup {
     when(mockServicesConfig.getString("microservice.services.hip.clientId")).thenReturn("clientId")
     when(mockServicesConfig.getString("microservice.services.hip.clientSecret")).thenReturn("clientSecret")
+    when(mockServicesConfig.getString("microservice.services.hip.benefitEligibility.clientId")).thenReturn("clientId")
+
+    when(mockServicesConfig.getString("microservice.services.hip.benefitEligibility.clientSecret"))
+      .thenReturn("clientSecret")
 
     val appConfig: AppConfig = new AppConfig(config = mockServicesConfig)
   }

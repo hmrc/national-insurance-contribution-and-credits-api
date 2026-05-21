@@ -30,7 +30,6 @@ import uk.gov.hmrc.app.benefitEligibility.service.{
   PaginationResult,
   PaginationService
 }
-
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -51,10 +50,9 @@ class BenefitEligibilityDataController @Inject() (
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
         val result = for {
-          headerValues <- EitherT.fromEither[Future](validateHeaders(request, appConfig))
-          (correlationId, originatorId) = headerValues
+          headerValues <- EitherT.fromEither[Future](validateHeaders(request))
+          correlationId = headerValues
           eligibilityRequest <- EitherT.fromEither[Future](parseAndValidateRequest(request))
-          _ <- EitherT.fromEither[Future](validateOriginatorMatch(eligibilityRequest, originatorId, appConfig))
           eligibilityCheckDataResult <- benefitEligibilityDataRetrievalService.getEligibilityData(
             eligibilityRequest,
             correlationId
@@ -65,14 +63,13 @@ class BenefitEligibilityDataController @Inject() (
       }
     } else identity.async(_ => Future.successful(NotFound))
 
-  def getNextPage(): Action[AnyContent] =
+  def getNextPage: Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
         val result = for {
-          headerValues <- EitherT.fromEither[Future](validateHeaders(request, appConfig))
-          (correlationId, originatorId) = headerValues
-          nextCursor <- EitherT.fromEither[Future](parsePaginationCursor(request))
-          _ <- EitherT.fromEither[Future](validatePaginationOriginatorMatch(nextCursor, originatorId, appConfig))
+          headerValues <- EitherT.fromEither[Future](validateHeaders(request))
+          correlationId = headerValues
+          nextCursor       <- EitherT.fromEither[Future](parsePaginationCursor(request))
           paginationResult <- paginationService.paginate(nextCursor)
         } yield buildResponse(paginationResult)
 

@@ -56,7 +56,7 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
     }
 
   private val commonHeaders: List[(String, String)] = List(
-    AUTHORIZATION -> s"Basic ${config.base64HipAuthToken}",
+    AUTHORIZATION -> s"Basic ${config.newBase64HipAuthToken}",
     CONTENT_TYPE  -> JSON
   )
 
