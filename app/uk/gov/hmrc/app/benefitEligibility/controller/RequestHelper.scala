@@ -136,7 +136,7 @@ object RequestHelper {
 
   private def getAndValidateCorrelationId(
       request: Request[AnyContent]
-  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] =
+  ): Either[BenefitEligibilityError, CorrelationId] =
     request.headers.get("CorrelationId") match {
       case None                => Left(InvalidOrMissingHeaderError(ErrorReason("Missing Header CorrelationId")))
       case Some(correlationId) => RequestHelper.validateCorrelationId(correlationId)
@@ -157,7 +157,7 @@ object RequestHelper {
 
   private def validateAcceptHeader(
       acceptHeader: Option[String]
-  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, SuccessfulResult.type] =
+  ): Either[BenefitEligibilityError, SuccessfulResult.type] =
     acceptHeader match {
       case None =>
         Left(InvalidOrMissingHeaderError(ErrorReason("Accept header is required")))
@@ -169,7 +169,7 @@ object RequestHelper {
 
   private def validateAcceptHeader(
       request: Request[AnyContent]
-  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, Unit] =
+  ): Either[BenefitEligibilityError, Unit] =
     request.headers.get("Accept") match {
       case None => Left(InvalidOrMissingHeaderError(ErrorReason("Missing Header Accept")))
       case Some(acceptHeader) =>

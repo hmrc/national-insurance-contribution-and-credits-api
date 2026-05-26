@@ -28,6 +28,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   RecordNotFound
 }
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -53,7 +54,7 @@ trait BenefitEligibilityRepository {
 }
 
 @Singleton
-class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent)(
+class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent, config: AppConfig)(
     implicit ec: ExecutionContext
 ) extends PlayMongoRepository[PageTask](
       collectionName = "page-tasks",
@@ -64,7 +65,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
         IndexModel(
           Indexes.ascending("createdAt"),
           IndexOptions()
-            .expireAfter(5000, TimeUnit.SECONDS)
+            .expireAfter(config.pageTaskTtlSeconds.toLong, TimeUnit.SECONDS)
             .unique(false)
         )
       ),
