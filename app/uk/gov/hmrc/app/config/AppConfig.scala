@@ -45,6 +45,8 @@ class AppConfig @Inject() (config: ServicesConfig) {
 
   private val hipServicePrefix = "microservice.services.hip"
 
+  val pageTaskTtlSeconds: Int = config.getInt("mongodb.pageTaskTtlSeconds")
+
   val benefitEligibilityInfoEndpointEnabled: Boolean = config.getBoolean("benefitEligibilityInfoEndpointEnabled")
   val hipBaseUrl: String                             = config.baseUrl("hip")
 
