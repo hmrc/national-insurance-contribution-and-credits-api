@@ -15,14 +15,6 @@
 #    required: true
 #    schema:
 #     type: string
-#  - name: gov-uk-originator-id
-#    in: header
-#    description: Identity of the Originating System that made the API call.
-#    required: tr
-#    schema:  
-#     type: string
-#     maxLength: 40
-#     minLength: 3
 #  - name: Accept
 #    description: Request the version of the API you want to use by including an Accept header with a media type of.
 #    in: header

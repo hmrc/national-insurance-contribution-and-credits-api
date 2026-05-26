@@ -24,14 +24,9 @@ import play.api.libs.json.*
 import play.api.mvc.Results.*
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
-import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.util.{Failure, Success}
 
 object BenefitEligibilityResultHandler {
 
