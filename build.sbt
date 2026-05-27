@@ -38,7 +38,6 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
   .settings(PlayKeys.playDefaultPort := 16105)
   .settings(JsonToYaml.settings *)
   .settings(Validate.settings *)
-  .settings(PublishTestOnlyOas.settings *)
   .settings(PlaySwagger.settings *)
 
 lazy val it = project
@@ -48,9 +47,9 @@ lazy val it = project
   .settings(libraryDependencies ++= AppDependencies.it)
 
 addCommandAlias("createOpenAPISpec", ";clean;routesToYamlOas; validateOas")
-addCommandAlias("publishTestOnlyOas", ";createOpenAPISpec; publishOas")
+addCommandAlias("runCoverage", ";clean;compile;coverage;test;it/test;coverageAggregate")
 
 addCommandAlias(
   "runTest",
-  "scalafix;Test/scalafix;it/Test/scalafix;scalafmtAll;Test/scalafmtAll;it/Test/scalafmtAll;Test/compile;it/Test/compile;doc;test;it/test"
+  "scalafix;Test/scalafix;it/Test/scalafix;scalafmtAll;Test/scalafmtAll;it/Test/scalafmtAll;Test/compile;it/Test/compile;test;it/test"
 )

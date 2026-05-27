@@ -32,6 +32,24 @@ The command below removes unused imports, formats files and runs all the tests f
 sbt "runTest"
 ```
 
+
+## Generate test coverage report 
+
+The command below will run scoverage generating a report in /target/scala-3.3.6/scoverage-report
+
+```bash
+sbt "runCoverage"
+```
+
+## Generating openApiSpec (application.yaml)
+
+The command below will run generate updated openApiSpec in /public/api/conf/application.yaml and /resources/public/api/conf/1.0/application.yaml
+
+```bash
+sbt "createOpenAPISpec"
+```
+
+
 ## Endpoints
 
 ### POST /contributions-and-credits
