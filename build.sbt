@@ -20,9 +20,8 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
     // suppress warnings in generated routes files
     scalacOptions ++= Seq(
       "-feature",
-      "-Wconf:cat=unused&src=routes/.*:s",
-      "-Wconf:cat=unused&src=html/.*:s",
-      "-Wconf:cat=unused&src=routes/.*:s",
+      "-Wconf:src=.*/html/.*:s",
+      "-Wconf:src=.*/routes/.*:s",
       if (scalaVersion.value.startsWith("2.12")) "-Ywarn-unused-import" else "-Wunused:imports"
     )
   )
