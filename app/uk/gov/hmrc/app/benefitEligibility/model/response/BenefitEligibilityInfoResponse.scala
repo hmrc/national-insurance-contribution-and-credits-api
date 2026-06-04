@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.app.benefitEligibility.model.response
 
-import io.scalaland.chimney.dsl.into
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
@@ -45,14 +44,7 @@ object BenefitEligibilityInfoResponse {
       paginationResult: PaginationResult
   ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponse] =
     if (paginationResult.allResults.exists(_.isFailure))
-      Left(
-        BenefitEligibilityInfoErrorResponse
-          .from(
-            BenefitType.from(paginationResult.paginationType),
-            paginationResult.nationalInsuranceNumber,
-            paginationResult.allResults
-          )
-      )
+      Left(BenefitEligibilityInfoErrorResponse.from(paginationResult))
     else
       paginationResult.paginationType match {
         case PaginationType.MaPagination =>

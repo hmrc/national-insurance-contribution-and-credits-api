@@ -17,7 +17,6 @@
 package uk.gov.hmrc.app.benefitEligibility.repository
 
 import cats.data.NonEmptyList
-import io.scalaland.chimney.dsl.into
 import play.api.libs.json.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}

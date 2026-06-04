@@ -17,7 +17,6 @@
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
 import cats.Semigroup
-import io.scalaland.chimney.dsl.into
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
 
 import scala.collection.immutable
@@ -76,19 +75,19 @@ case class InvalidOrMissingHeaderError(errorReason: ErrorReason) extends Benefit
 
 case class JsonParsingError(errors: List[String]) extends BenefitEligibilityError {
   override def getMessage: String = errors.mkString(",")
-} //TODO - should return as a 500 to DWP
+}
 
 case class InvalidRequestJson(errorReason: ErrorReason) extends BenefitEligibilityError {
   override def getMessage: String = errorReason.value
-} //TODO - should return as a 500 to DWP
+}
 
 case class InvalidJsonError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage
-} //TODO - should return as a 500 to DWP
+}
 
 case class NpsClientError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage
-} //TODO - should return as a 500 to DWP
+}
 
 case class DataRetrievalServiceError(errors: List[BenefitEligibilityError]) extends BenefitEligibilityError
 
