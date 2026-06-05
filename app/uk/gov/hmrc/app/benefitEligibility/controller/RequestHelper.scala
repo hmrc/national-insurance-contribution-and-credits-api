@@ -55,11 +55,7 @@ object RequestHelper {
 
   def validateHeaders(
       request: Request[AnyContent]
-  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] =
-    for {
-      _             <- validateAcceptHeader(request)
-      correlationId <- getAndValidateCorrelationId(request)
-    } yield correlationId
+  )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] = getAndValidateCorrelationId(request)
 
   def parsePaginationCursor(
       request: Request[AnyContent]
@@ -154,27 +150,6 @@ object RequestHelper {
       case Validated.Invalid(error) => Left(InvalidOrMissingHeaderError(ErrorReason(error.toList.mkString(","))))
     }
   }
-
-  private def validateAcceptHeader(
-      acceptHeader: Option[String]
-  ): Either[BenefitEligibilityError, SuccessfulResult.type] =
-    acceptHeader match {
-      case None =>
-        Left(InvalidOrMissingHeaderError(ErrorReason("Accept header is required")))
-      case Some(header) if header.trim.nonEmpty =>
-        Right(SuccessfulResult)
-      case Some(_) =>
-        Left(InvalidOrMissingHeaderError(ErrorReason("Accept header cannot be empty")))
-    }
-
-  private def validateAcceptHeader(
-      request: Request[AnyContent]
-  ): Either[BenefitEligibilityError, Unit] =
-    request.headers.get("Accept") match {
-      case None => Left(InvalidOrMissingHeaderError(ErrorReason("Missing Header Accept")))
-      case Some(acceptHeader) =>
-        RequestHelper.validateAcceptHeader(Some(acceptHeader)).map(_ => ())
-    }
 
   private def formatJsonErrors(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])]): String =
     errors

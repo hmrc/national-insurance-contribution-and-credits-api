@@ -19,7 +19,6 @@ package uk.gov.hmrc.app.benefitEligibility.connectors
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
-import io.scalaland.chimney.dsl.into
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*

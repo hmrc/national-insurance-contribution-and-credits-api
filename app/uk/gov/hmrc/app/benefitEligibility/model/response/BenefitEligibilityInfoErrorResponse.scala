@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.app.benefitEligibility.model.response
 
-import io.scalaland.chimney.dsl.into
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.npsNormalizedErrorWrites
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
+import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
 
 case class OverallResultSummary(totalCalls: Int, successful: Int, failed: Int)
 
@@ -59,7 +59,7 @@ object BenefitEligibilityInfoErrorResponse {
   implicit val benefitEligibilityInfoErrorResponseWrites: Writes[BenefitEligibilityInfoErrorResponse] =
     Json.writes[BenefitEligibilityInfoErrorResponse]
 
-  def from(
+  private def from(
       benefitType: BenefitType,
       nationalInsuranceNumber: Identifier,
       allResults: List[ApiResult]
@@ -82,32 +82,22 @@ object BenefitEligibilityInfoErrorResponse {
   def from(
       nationalInsuranceNumber: Identifier,
       eligibilityCheckDataResult: EligibilityCheckDataResult
-  ): BenefitEligibilityInfoErrorResponse = {
+  ): BenefitEligibilityInfoErrorResponse =
 
-    val allResults = eligibilityCheckDataResult.allResults
+    BenefitEligibilityInfoErrorResponse.from(
+      eligibilityCheckDataResult.benefitType,
+      nationalInsuranceNumber,
+      eligibilityCheckDataResult.allResults
+    )
 
-    eligibilityCheckDataResult
-      .into[BenefitEligibilityInfoErrorResponse]
-      .withFieldComputed(_.status, _ => OverallResultStatus.fromApiResults(allResults))
-      .withFieldConst(_.nationalInsuranceNumber, nationalInsuranceNumber)
-      .withFieldComputed(_.benefitType, _.benefitType)
-      .withFieldComputed(_.summary, _ => OverallResultSummary.from(allResults))
-      .withFieldComputed(
-        _.downStreams,
-        _ =>
-          allResults
-            .map(
-              _.into[SanitizedApiResult]
-                .withFieldComputed(_.apiName, _.apiName)
-                .withFieldComputed(
-                  _.status,
-                  result => if (result.isSuccess) NpsApiResponseStatus.Success else NpsApiResponseStatus.Failure
-                )
-                .withFieldComputed(_.error, result => result.getFailure.map(_.normalizedError))
-                .transform
-            )
-      )
-      .transform
-  }
+  def from(
+      paginationResult: PaginationResult
+  ): BenefitEligibilityInfoErrorResponse =
+
+    BenefitEligibilityInfoErrorResponse.from(
+      BenefitType.from(paginationResult.paginationType),
+      paginationResult.nationalInsuranceNumber,
+      paginationResult.allResults
+    )
 
 }

@@ -94,10 +94,10 @@ class PaginationService @Inject() (
     pageTaskRepo.insert(pageTask).recoverWith {
       case DatabaseError(dbError: com.mongodb.MongoWriteException)
           if dbError.getError.getCategory == com.mongodb.ErrorCategory.DUPLICATE_KEY =>
-        logger.info("MongoWriteException: Duplicate key error")
+        logger.warn("MongoWriteException: Duplicate key error")
         createNewPageTask(pageTask)
       case DatabaseError(dbError: com.mongodb.DuplicateKeyException) =>
-        logger.info("DuplicateKeyException: Duplicate key error")
+        logger.warn("DuplicateKeyException: Duplicate key error")
         createNewPageTask(pageTask)
       case error =>
         EitherT.leftT(error)
@@ -106,23 +106,28 @@ class PaginationService @Inject() (
 
   def paginate(
       paginationCursor: PaginationCursor
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
-    logger.info("Paginate has been called")
-
+  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] =
     for {
       existingPageTask <- pageTaskRepo.getItem(paginationCursor)
       paginationResult <- existingPageTask match {
-        case task: MaPageTask          => processMaPageTask(task)
-        case task: BspPageTask         => processBspPageTask(task)
-        case task: GyspPageTask        => processGyspPageTask(task)
-        case task: SearchLightPageTask => processSearchlightPageTask(task)
+        case task: MaPageTask =>
+          logger.info("processing MaPageTask")
+          processMaPageTask(task)
+        case task: BspPageTask =>
+          logger.info("processing BspPageTask")
+          processBspPageTask(task)
+        case task: GyspPageTask =>
+          logger.info("processing GyspPageTask")
+          processGyspPageTask(task)
+        case task: SearchLightPageTask =>
+          logger.info("processing SearchLightPageTask")
+          processSearchlightPageTask(task)
       }
       pageTask = PageTask.createPaginatingTask(paginationResult, currentTime)
       _ <- pageTask.fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>
         pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask).map(_ => ())
       )
     } yield paginationResult
-  }
 
   private[service] def processMaPageTask(
       maPageTask: MaPageTask
