@@ -217,7 +217,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           EligibilityCheckDataResultBSP(
             niContributionAndCreditsResult,
             marriageDetailsResult,
-            Some(PaginationCursor(PaginationType.BspPagination, paging.pageTaskId))
+            Some(paging.pageTaskId)
           )
         )
 

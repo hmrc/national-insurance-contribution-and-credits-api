@@ -59,12 +59,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.BSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  BenefitEligibilityRepositoryImpl,
-  PageTask,
-  PageTaskId,
-  PaginationCursor
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PageTaskId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -250,12 +245,7 @@ class BereavementSupportPaymentDataRetrievalServiceItSpec
                 ApiName.MarriageDetails,
                 marriageDetailsSuccessResponse
               ),
-              Some(
-                PaginationCursor(
-                  PaginationType.BspPagination,
-                  PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
-                )
-              )
+              Some(PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
             )
           )
 

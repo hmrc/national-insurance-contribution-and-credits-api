@@ -27,8 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.b
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   CorrelationId,
-  DataRetrievalServiceError,
-  PaginationType
+  DataRetrievalServiceError
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
@@ -107,7 +106,7 @@ class MaternityAllowanceDataRetrievalService @Inject() (
                 currentTimeSource.instantNow()
               )
             )
-            .map(id => result.copy(nextCursor = Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(id)))))
+            .map(id => result.copy(pageTaskId = Some(PageTaskId(id))))
         } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }
       .leftMap {

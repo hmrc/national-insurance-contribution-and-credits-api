@@ -17,15 +17,15 @@
 package uk.gov.hmrc.app.benefitEligibility.testUtils
 
 import cats.data.ValidatedNel
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.networknt.schema.{Schema, SchemaRegistry, SchemaRegistryConfig, SpecificationVersion}
+import tools.jackson.databind.{JsonNode, ObjectMapper}
+import tools.jackson.dataformat.yaml.YAMLFactory
 import com.networknt.schema.regex.JDKRegularExpressionFactory
-import com.networknt.schema.{JsonSchema, JsonSchemaFactory, SchemaValidatorsConfig, SpecVersion}
 import org.scalactic.source.Position
 import org.scalatest.Assertions.fail
 import org.scalatest.matchers.should.Matchers.*
 import play.api.libs.json.{JsString, JsValue, Json}
+import tools.jackson.databind.node.ObjectNode
 
 import java.util.Locale
 import scala.io.Source
@@ -88,7 +88,7 @@ object SchemaValidation {
 
   final class SimpleJsonSchema(
       jsonSchemaFilePath: String,
-      version: SpecVersion.VersionFlag,
+      version: SpecificationVersion,
       schemaComponent: Option[String],
       metaSchemaValidation: Option[ValidatedNel[String, Unit]]
   ) extends SchemaValidation {
@@ -105,10 +105,9 @@ object SchemaValidation {
         }
     }
 
-    private val jsonSchema: JsonSchema = {
-      val schemaFactory: JsonSchemaFactory = JsonSchemaFactory.getInstance(version)
+    private val jsonSchema: Schema = {
 
-      val config = SchemaValidatorsConfig
+      val config = SchemaRegistryConfig
         .builder()
         .regularExpressionFactory(
           // Without depending on other libraries, it's not possible to validate ECMAScript regular expressions.
@@ -117,24 +116,29 @@ object SchemaValidation {
         )
         .build()
 
-      schemaFactory.getSchema(
-        InternalUtils.readJsonNode(jsonOrYamlPath = jsonSchemaFilePath),
-        config
-      )
+      val schemaRegistry: SchemaRegistry =
+        SchemaRegistry.withDefaultDialect(version, builder => builder.schemaRegistryConfig(config))
+
+      schemaRegistry.getSchema(InternalUtils.readJsonNode(jsonOrYamlPath = jsonSchemaFilePath))
     }
 
-    def getSchemaWithComponents(schemaComponent: String): Either[String, JsonSchema] = {
+    def getSchemaWithComponents(schemaComponent: String): Either[String, Schema] = {
 
       val openApiNode = InternalUtils.readJsonNode(jsonSchemaFilePath)
 
-      val schemaNode = openApiNode
+      val schemaNode: JsonNode = openApiNode
         .path("components")
         .path("schemas")
         .path(schemaComponent)
 
-      if (schemaNode.isMissingNode) {
+      if (openApiNode.isMissingNode) {
         Left(s"Schema $schemaComponent not found in OpenAPI spec")
       } else {
+
+        val config = SchemaRegistryConfig
+          .builder()
+          .regularExpressionFactory(JDKRegularExpressionFactory.getInstance())
+          .build()
 
         schemaNode match {
           case objectNode: ObjectNode =>
@@ -142,8 +146,10 @@ object SchemaValidation {
             schemaWithComponents.set("components", openApiNode.path("components"))
             schemaWithComponents.setAll(objectNode)
 
-            val factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
-            val schema  = factory.getSchema(schemaWithComponents)
+            val schemaRegistry: SchemaRegistry =
+              SchemaRegistry.withDefaultDialect(version, builder => builder.schemaRegistryConfig(config))
+
+            val schema = schemaRegistry.getSchema(schemaWithComponents)
 
             Right(schema)
 
@@ -169,20 +175,20 @@ object SchemaValidation {
 
   object MetaSchema {
 
-    def jsonSchemaSchema(version: SpecVersion.VersionFlag)(implicit pos: Position): SimpleJsonSchema =
+    def jsonSchemaSchema(version: SpecificationVersion)(implicit pos: Position): SimpleJsonSchema =
       version match {
-        case SpecVersion.VersionFlag.V4 =>
+        case SpecificationVersion.DRAFT_4 =>
           new SimpleJsonSchema(
             jsonSchemaFilePath = "test/resources/schemas/general/json-meta-schema-v4.json",
             // This version is independent of parameter. It's file-specific.
-            SpecVersion.VersionFlag.V4,
+            SpecificationVersion.DRAFT_4,
             schemaComponent = None,
             metaSchemaValidation = None
           )
-        case SpecVersion.VersionFlag.V7 =>
+        case SpecificationVersion.DRAFT_7 =>
           new SimpleJsonSchema(
             jsonSchemaFilePath = "test/resources/schemas/general/json-meta-schema-v7.json",
-            SpecVersion.VersionFlag.V7,
+            SpecificationVersion.DRAFT_7,
             schemaComponent = None,
             metaSchemaValidation = None
           )

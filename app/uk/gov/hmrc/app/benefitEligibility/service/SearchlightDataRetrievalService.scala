@@ -30,12 +30,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  ContributionAndCreditsPaging,
-  PageTaskId,
-  PaginationCursor,
-  SearchLightPageTask
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsPaging, PageTaskId, SearchLightPageTask}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -110,7 +105,7 @@ class SearchlightDataRetrievalService @Inject() (
                     EligibilityCheckDataResultSearchLight(
                       benefitType = result.benefitType,
                       contributionCreditResult = result.contributionCreditResult,
-                      nextCursor = Some(PaginationCursor(paginationType, PageTaskId(id)))
+                      pageTaskId = Some(PageTaskId(id))
                     )
                   }
 

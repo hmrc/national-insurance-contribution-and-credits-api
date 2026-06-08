@@ -23,15 +23,20 @@ import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
-import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, SuccessfulResult}
+import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
+import uk.gov.hmrc.app.benefitEligibility.util.{
+  ContributionCreditTaxWindowCalculator,
+  RequestAwareLogger,
+  SuccessfulResult
+}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.util.UUID
-import scala.util.{Failure, Success}
 
 object RequestHelper {
+
+  private val logger = new RequestAwareLogger(this.getClass)
 
   def parseAndValidateRequest(
       request: Request[AnyContent]
@@ -57,18 +62,20 @@ object RequestHelper {
       request: Request[AnyContent]
   )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] = getAndValidateCorrelationId(request)
 
-  def parsePaginationCursor(
+  def parsePageTaskId(
       request: Request[AnyContent]
-  ): Either[BenefitEligibilityError, PaginationCursor] =
+  )(implicit headerCarrier: HeaderCarrier): Either[BenefitEligibilityError, PageTaskId] =
     request.queryString
       .get("cursorId")
       .flatMap(_.headOption)
-      .map(id => PaginationCursor.from(CursorId(id)))
+      .map(id => PageTaskId.from(CursorId(id)))
       .toRight(MissingCursorId(ErrorReason("Pagination request sent without cursorId")))
       .flatMap {
-        case Failure(e) => Left(InvalidCursorId(ErrorReason(s"invalid cursorId - ${e.getMessage}")))
-        case Success(cursor) =>
-          Right(cursor)
+        case Some(pageTaskId) => Right(pageTaskId)
+        case None =>
+          logger.error(s"invalid uuid used as cursor id value")
+          Left(InvalidCursorId(ErrorReason(s"invalid cursorId")))
+
       }
 
   def addCorrelationIdHeader(

@@ -94,12 +94,7 @@ class PageTaskSpec
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = Some(
-            PaginationCursor(
-              PaginationType.MaPagination,
-              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
-            )
-          )
+          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
@@ -139,12 +134,7 @@ class PageTaskSpec
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = Some(
-            PaginationCursor(
-              PaginationType.BspPagination,
-              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
-            )
-          )
+          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
@@ -187,12 +177,7 @@ class PageTaskSpec
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = Some(
-            PaginationCursor(
-              PaginationType.BspPagination,
-              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
-            )
-          )
+          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
@@ -346,12 +331,7 @@ class PageTaskSpec
             )
           ),
           callSystem = None,
-          nextCursor = Some(
-            PaginationCursor(
-              PaginationType.GyspPagination,
-              PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
-            )
-          )
+          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
@@ -380,7 +360,7 @@ class PageTaskSpec
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = None
+          pageTaskId = None
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
@@ -410,7 +390,7 @@ class PageTaskSpec
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = None
+          pageTaskId = None
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
@@ -551,25 +531,25 @@ class PageTaskSpec
             )
           ),
           callSystem = None,
-          nextCursor = None
+          pageTaskId = None
         )
 
         val result = createPaginatingTask(paginationResult, currentTimeSource)
         result shouldBe None
       }
     }
-    ".PaginationCursor" - {
+    ".PageTaskId" - {
       ".from" - {
-        "should return pagination cursor if should page is true" in {
+        "should return a page taskId if a valid UUID is used as cursorId" in {
           val uuidOne = UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")
-          val result  = PaginationCursor.from(PaginationType.MaPagination, true, uuidOne)
+          val result  = PageTaskId.from(CursorId(uuidOne.toString))
 
-          result shouldBe Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(uuidOne)))
+          result shouldBe Some(PageTaskId(uuidOne))
         }
 
-        "should return none if should page is false" in {
-          val uuidOne = UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")
-          val result  = PaginationCursor.from(PaginationType.MaPagination, false, uuidOne)
+        "should return none if an invalid UUID is used as cursorId" in {
+          val invalidId = "some-invalid-cursor-id"
+          val result    = PageTaskId.from(CursorId(invalidId))
 
           result shouldBe None
         }

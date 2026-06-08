@@ -736,7 +736,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             ),
             marriageDetailsResult,
             individualStatePensionInformationResult,
-            Some(PaginationCursor(PaginationType.GyspPagination, paging.pageTaskId))
+            Some(paging.pageTaskId)
           )
         )
 

@@ -24,7 +24,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDeta
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
 import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
 
 object BenefitEligibilityInfoResponse {
@@ -53,7 +52,7 @@ object BenefitEligibilityInfoResponse {
               paginationResult.nationalInsuranceNumber,
               paginationResult.liabilitiesResult.map(toFilteredLiabilitySummaryDetails),
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getNextCursor.map(CursorId.from)
+              paginationResult.getPageTaskId.map(CursorId.from)
             )
           )
 
@@ -71,7 +70,7 @@ object BenefitEligibilityInfoResponse {
               individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, Nil),
               niContributionsAndCreditsResult =
                 toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getNextCursor.map(CursorId.from)
+              paginationResult.getPageTaskId.map(CursorId.from)
             )
           )
         case PaginationType.BspPagination =>
@@ -82,7 +81,7 @@ object BenefitEligibilityInfoResponse {
               paginationResult.nationalInsuranceNumber,
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
               filteredMarriageDetails,
-              paginationResult.getNextCursor.map(CursorId.from)
+              paginationResult.getPageTaskId.map(CursorId.from)
             )
           )
         case PaginationType.BspSearchLightPagination =>
@@ -91,7 +90,7 @@ object BenefitEligibilityInfoResponse {
               BenefitType.from(paginationResult.paginationType),
               paginationResult.nationalInsuranceNumber,
               toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getNextCursor.map(CursorId.from)
+              paginationResult.getPageTaskId.map(CursorId.from)
             )
           )
       }

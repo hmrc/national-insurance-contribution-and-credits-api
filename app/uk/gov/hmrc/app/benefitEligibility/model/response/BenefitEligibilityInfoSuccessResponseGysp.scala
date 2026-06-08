@@ -82,7 +82,7 @@ object BenefitEligibilityInfoSuccessResponseGysp {
             FilteredIndividualStatePensionInfo.from(result.statePensionData.getSuccess.get),
           niContributionsAndCreditsResult =
             ContributionsAndCreditsResponse.from(result.contributionCreditResult.getSuccess.get),
-          nextCursor = result.nextCursor.map(CursorId.from)
+          nextCursor = result.pageTaskId.map(CursorId.from)
         )
       )
     }

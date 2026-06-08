@@ -227,7 +227,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           EligibilityCheckDataResultMA(
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
-            Some(PaginationCursor(PaginationType.MaPagination, paging.pageTaskId))
+            Some(paging.pageTaskId)
           )
         )
 

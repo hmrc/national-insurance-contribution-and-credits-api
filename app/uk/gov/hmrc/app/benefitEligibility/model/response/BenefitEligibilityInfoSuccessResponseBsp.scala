@@ -64,7 +64,7 @@ object BenefitEligibilityInfoSuccessResponseBsp {
             niContributionsAndCreditsResult =
               ContributionsAndCreditsResponse.from(contributionsAndCreditsSuccessResponse),
             marriageDetailsResult = FilteredMarriageDetails.from(marriageDetailsSuccessResponse),
-            nextCursor = result.nextCursor.map(CursorId.from)
+            nextCursor = result.pageTaskId.map(CursorId.from)
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))

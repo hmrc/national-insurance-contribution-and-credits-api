@@ -1552,7 +1552,7 @@ class BenefitEligibilityDataControllerItSpec
             ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             Some(
               CursorId(
-                "eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6ImRmOTRkN2JkLTcyNjktNGZjOC1iY2Y4LTQwYWU5NTVhYzc2ZSJ9"
+                "df94d7bd-7269-4fc8-bcf8-40ae955ac76e"
               )
             )
           )
@@ -1954,7 +1954,7 @@ class BenefitEligibilityDataControllerItSpec
             marriageDetailsResult = filteredMarriageDetails,
             nextCursor = Some(
               CursorId(
-                "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJkZjk0ZDdiZC03MjY5LTRmYzgtYmNmOC00MGFlOTU1YWM3NmUifQ=="
+                "df94d7bd-7269-4fc8-bcf8-40ae955ac76e"
               )
             )
           )
@@ -2513,7 +2513,7 @@ class BenefitEligibilityDataControllerItSpec
             ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
             Some(
               CursorId(
-                "eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiZGY5NGQ3YmQtNzI2OS00ZmM4LWJjZjgtNDBhZTk1NWFjNzZlIn0="
+                "df94d7bd-7269-4fc8-bcf8-40ae955ac76e"
               )
             )
           )
@@ -3365,13 +3365,9 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        val paginationCursor =
-          PaginationCursor(
-            PaginationType.GyspPagination,
-            PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
-          )
+        val pageTaskId = PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
 
-        val cursorId = CursorId.from(paginationCursor)
+        val cursorId = CursorId.from(pageTaskId)
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
@@ -3464,7 +3460,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+          "/benefit-eligibility-info?cursorId=839642e0-d985-4c26-bf2f-eea2364042ba"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -3482,7 +3478,7 @@ class BenefitEligibilityDataControllerItSpec
           ContributionsAndCreditsResponse(None, Nil, Nil),
           Some(
             CursorId(
-              "eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+              "839642e0-d985-4c26-bf2f-eea2364042ba"
             )
           )
         )
@@ -3538,7 +3534,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6Ik1BIiwicGFnZVRhc2tJZCI6IjgzOTY0MmUwLWQ5ODUtNGMyNi1iZjJmLWVlYTIzNjQwNDJiYSJ9"
+          "/benefit-eligibility-info?cursorId=839642e0-d985-4c26-bf2f-eea2364042ba"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -3638,7 +3634,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+          "/benefit-eligibility-info?cursorId=f678d869-7922-4a11-82e2-5cf4e235cfee"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -3657,7 +3653,7 @@ class BenefitEligibilityDataControllerItSpec
           marriageDetailsResult = filteredMarriageDetails,
           nextCursor = Some(
             CursorId(
-              "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+              "f678d869-7922-4a11-82e2-5cf4e235cfee"
             )
           )
         )
@@ -3724,7 +3720,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+          "/benefit-eligibility-info?cursorId=f678d869-7922-4a11-82e2-5cf4e235cfee"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -3892,7 +3888,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+          "/benefit-eligibility-info?cursorId=9b0de48f-b995-4c61-aeab-8b02273a8f26"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -3914,7 +3910,7 @@ class BenefitEligibilityDataControllerItSpec
             ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           nextCursor = Some(
             CursorId(
-              "eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+              "9b0de48f-b995-4c61-aeab-8b02273a8f26"
             )
           )
         )
@@ -4010,7 +4006,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkdZU1AiLCJwYWdlVGFza0lkIjoiOWIwZGU0OGYtYjk5NS00YzYxLWFlYWItOGIwMjI3M2E4ZjI2In0="
+          "/benefit-eligibility-info?cursorId=9b0de48f-b995-4c61-aeab-8b02273a8f26"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -4058,7 +4054,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUF9TRUFSQ0hMSUdIVCIsInBhZ2VUYXNrSWQiOiJlOGEwMGEyNS1iZWVjLTRmYzEtYWVlYS00YTAzYzhkYzU1YWMifQ=="
+          "/benefit-eligibility-info?cursorId=e8a00a25-beec-4fc1-aeea-4a03c8dc55ac"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -4077,7 +4073,7 @@ class BenefitEligibilityDataControllerItSpec
             ContributionsAndCreditsResponse.from(niContributionsAndCreditsSuccessResponse),
           nextCursor = Some(
             CursorId(
-              "eyJwYWdpbmF0aW9uVHlwZSI6IkJTUF9TRUFSQ0hMSUdIVCIsInBhZ2VUYXNrSWQiOiI1NjgzNjI1My1jZDlkLTRjNmYtOTI1MS05YjI3NWViZmY4NjMifQ=="
+              "56836253-cd9d-4c6f-9251-9b275ebff863"
             )
           )
         )
@@ -4143,7 +4139,7 @@ class BenefitEligibilityDataControllerItSpec
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
-          "/benefit-eligibility-info?cursorId=eyJwYWdpbmF0aW9uVHlwZSI6IkJTUCIsInBhZ2VUYXNrSWQiOiJmNjc4ZDg2OS03OTIyLTRhMTEtODJlMi01Y2Y0ZTIzNWNmZWUifQ=="
+          "/benefit-eligibility-info?cursorId=f678d869-7922-4a11-82e2-5cf4e235cfee"
         )
           .withHeaders(
             "Content-Type"         -> "application/json",
@@ -4172,13 +4168,9 @@ class BenefitEligibilityDataControllerItSpec
             )
         )
 
-        val paginationCursor =
-          PaginationCursor(
-            PaginationType.GyspPagination,
-            PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
-          )
+        val pageTaskId = PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
 
-        val cursorId = CursorId.from(paginationCursor)
+        val cursorId = CursorId.from(pageTaskId)
 
         val request: FakeRequest[AnyContent] = FakeRequest(
           "GET",
@@ -4263,7 +4255,7 @@ class BenefitEligibilityDataControllerItSpec
           ErrorResponse(
             BadRequest,
             ErrorReason(
-              "invalid cursorId - Unexpected character ('�' (code 65533 / 0xfffd)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n at [Source: (String)\"�m�㞻��t\"; line: 1, column: 2]"
+              "invalid cursorId"
             )
           )
         )

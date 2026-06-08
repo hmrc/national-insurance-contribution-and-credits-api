@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -39,7 +39,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
   def liabilitySummaryDetailsOpenApi: SimpleJsonSchema =
     SimpleJsonSchema(
       liabilitySummaryDetailsOpenApiSpec,
-      SpecVersion.VersionFlag.V7,
+      SpecificationVersion.DRAFT_7,
       Some("GetLiabilitySummaryResponseHIP"),
       metaSchemaValidation = Some(Valid(()))
     )
@@ -146,7 +146,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         liabilitySummaryDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_400"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -217,7 +217,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         liabilitySummaryDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -284,7 +284,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails403JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         liabilitySummaryDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_403_ForbiddenOnly"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -332,7 +332,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails422JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         liabilitySummaryDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponseOverrideable"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -400,7 +400,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         liabilitySummaryDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -469,7 +469,7 @@ class LiabilitySummaryDetailsResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails503JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         liabilitySummaryDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -49,7 +49,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
   def benefitCalculationDetailsOpenApi: SimpleJsonSchema =
     SimpleJsonSchema(
       benefitCalculationDetailsOpenApiSpec,
-      SpecVersion.VersionFlag.V7,
+      SpecificationVersion.DRAFT_7,
       Some("GetLongTermBenefitCalculationDetailsResponse"),
       metaSchemaValidation = Some(Valid(()))
     )
@@ -308,7 +308,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
     def benefitCalculationDetails400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         benefitCalculationDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_400"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -379,7 +379,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
     def benefitCalculationDetails400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         benefitCalculationDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -446,7 +446,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
     def benefitCalculationDetails403JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         benefitCalculationDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_403"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -517,7 +517,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
     def benefitCalculationDetails422JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         benefitCalculationDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_422"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -577,7 +577,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
     def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         benefitCalculationDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -646,7 +646,7 @@ class LongTermBenefitCalculationDetailsResponseSpec extends AnyFreeSpec with Mat
     def benefitCalculationDetails503JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         benefitCalculationDetailsOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )

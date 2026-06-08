@@ -22,6 +22,7 @@ lazy val microservice = Project("national-insurance-contribution-and-credits-api
       "-feature",
       "-Wconf:src=.*/html/.*:s",
       "-Wconf:src=.*/routes/.*:s",
+      "-Wconf:msg=Flag .* set repeatedly:s",
       if (scalaVersion.value.startsWith("2.12")) "-Ywarn-unused-import" else "-Wunused:imports"
     )
   )

@@ -44,7 +44,6 @@ import play.api.test.Helpers.{
 }
 import play.api.test.Injecting
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.PaginationType.BspSearchLightPagination
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
@@ -58,12 +57,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  BenefitEligibilityRepositoryImpl,
-  PageTask,
-  PageTaskId,
-  PaginationCursor
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PageTaskId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -217,7 +211,7 @@ class SearchlightDataRetrievalServiceItSpec
                 ApiName.NiContributionAndCredits,
                 successResponse
               ),
-              Some(PaginationCursor(BspSearchLightPagination, PageTaskId(uuidOne)))
+              Some(PageTaskId(uuidOne))
             )
           )
 

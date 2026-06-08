@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -42,7 +42,7 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
       def niContributionsAndCreditsResponseSuccessResponseJsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           niContributionsAndCreditsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("PostNIContCredResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -247,7 +247,6 @@ class NiContributionsAndCreditsResponseSpec extends AnyFreeSpec with Matchers {
       }
     }
 
-    // TODO - replicate these test across all the response specs where appropriate
     "NiContributionsAndCreditsResponse (400 HipErrorResponse) " - {
 
       val jsonFormat = implicitly[Format[NpsErrorResponseHipOrigin]]

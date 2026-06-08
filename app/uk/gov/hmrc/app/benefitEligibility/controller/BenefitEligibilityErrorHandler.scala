@@ -28,20 +28,11 @@ import uk.gov.hmrc.app.benefitEligibility.model.response.*
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.http.HeaderCarrier
 
-object BenefitEligibilityResultHandler {
+object BenefitEligibilityErrorHandler {
 
   private val logger = new RequestAwareLogger(this.getClass)
 
-  def handleFinalResult(
-      either: Either[BenefitEligibilityError, Result],
-      request: Request[AnyContent]
-  )(implicit hc: HeaderCarrier): Result =
-    either match {
-      case Right(result) => RequestHelper.addCorrelationIdHeader(result, request)
-      case Left(error)   => handleError(error, request)
-    }
-
-  private def handleError(
+  def handleError(
       error: BenefitEligibilityError,
       request: Request[AnyContent]
   )(implicit hc: HeaderCarrier): Result = {

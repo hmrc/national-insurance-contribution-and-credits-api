@@ -26,7 +26,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, NiC
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.repository.{PageTaskId, PaginationCursor}
+import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
 
 import java.util.UUID
 
@@ -58,12 +58,7 @@ class PaginationResultSpec
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      nextCursor = Some(
-        PaginationCursor(
-          PaginationType.MaPagination,
-          PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
-        )
-      )
+      pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
     )
 
     val paginationResultWithoutNextCursor = PaginationResult(
@@ -80,7 +75,7 @@ class PaginationResultSpec
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      nextCursor = None
+      pageTaskId = None
     )
 
     val paginationResultNoPaging = PaginationResult(
@@ -92,7 +87,7 @@ class PaginationResultSpec
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      nextCursor = None
+      pageTaskId = None
     )
 
     val paginationResultWithFailure = PaginationResult(
@@ -110,35 +105,30 @@ class PaginationResultSpec
       contributionCreditResult = ContributionCreditPagingResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      nextCursor = None
+      pageTaskId = None
     )
 
     ".setNextCursor" - {
       "should return pagination result with a next cursor if paging should happen " in {
         val newResult =
-          paginationResultWithoutNextCursor.setNextCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+          paginationResultWithoutNextCursor.setPageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
 
         newResult shouldBe paginationResultWithNextCursor
       }
       "should return pagination result with no next cursor if paging should not happen " in {
-        val newResult = paginationResultNoPaging.setNextCursor(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+        val newResult = paginationResultNoPaging.setPageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
 
         newResult shouldBe paginationResultNoPaging
       }
     }
     ".getNextCursor" - {
       "should return next cursor if next cursor exists" in {
-        val nextCursor = paginationResultWithNextCursor.getNextCursor
+        val pageTaskId = paginationResultWithNextCursor.getPageTaskId
 
-        nextCursor shouldBe Some(
-          PaginationCursor(
-            PaginationType.MaPagination,
-            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
-          )
-        )
+        pageTaskId shouldBe Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
       }
       "should return none if no next cursor" in {
-        val nextCursor = paginationResultWithoutNextCursor.getNextCursor
+        val nextCursor = paginationResultWithoutNextCursor.getPageTaskId
 
         nextCursor shouldBe None
       }

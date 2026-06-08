@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -36,7 +36,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
   def longTermBenefitNotesOpenApi: SimpleJsonSchema =
     SimpleJsonSchema(
       longTermBenefitNotesOpenApiSpec,
-      SpecVersion.VersionFlag.V7,
+      SpecificationVersion.DRAFT_7,
       Some("LongTermBenefitNotesResponse"),
       metaSchemaValidation = Some(Valid(()))
     )
@@ -339,7 +339,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     def longTermBenefitNotes400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_400"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -410,7 +410,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     def longTermBenefitNotes400JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -477,7 +477,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     def longTermBenefitNotes403JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_403"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -548,7 +548,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     def longTermBenefitNotes422JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("errorResponse_422"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -608,7 +608,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -677,7 +677,7 @@ class LongTermBenefitNotesResponseSpec extends AnyFreeSpec with Matchers {
     def longTermBenefitNotes503JsonSchema: SimpleJsonSchema =
       SimpleJsonSchema(
         longTermBenefitNotesOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("HIP-originResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
