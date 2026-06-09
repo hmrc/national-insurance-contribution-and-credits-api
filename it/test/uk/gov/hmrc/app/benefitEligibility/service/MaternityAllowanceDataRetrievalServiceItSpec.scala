@@ -59,12 +59,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  BenefitEligibilityRepositoryImpl,
-  PageTask,
-  PageTaskId,
-  PaginationCursor
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PageTaskId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -951,12 +946,7 @@ class MaternityAllowanceDataRetrievalServiceItSpec
               ApiName.NiContributionAndCredits,
               niContributionsAndCreditsSuccessResponse
             ),
-            Some(
-              PaginationCursor(
-                PaginationType.MaPagination,
-                PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
-              )
-            )
+            Some(PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
           )
         )
       }

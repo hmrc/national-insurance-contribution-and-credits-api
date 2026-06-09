@@ -27,23 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSynta
 import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, NonEmptyListFormat}
 
 import java.time.Instant
-import java.util.{Base64, UUID}
-import scala.util.Try
-
-case class PaginationCursor(paginationType: PaginationType, pageTaskId: PageTaskId)
-
-object PaginationCursor {
-  implicit val format: Format[PaginationCursor] = Json.format[PaginationCursor]
-
-  def from(paginationType: PaginationType, shouldPage: Boolean, uuid: UUID): Option[PaginationCursor] =
-    if (shouldPage) Some(PaginationCursor(paginationType, PageTaskId(uuid))) else None
-
-  def from(cursorId: CursorId): Try[PaginationCursor] = {
-    val maybePaginationCursor = new String(Base64.getDecoder.decode(cursorId.value))
-    scala.util.Try(Json.parse(maybePaginationCursor).as[PaginationCursor])
-  }
-
-}
+import java.util.UUID
 
 final case class PaginationSource(
     apiName: ApiName,
@@ -119,6 +103,13 @@ case class PageTaskId(value: UUID) extends AnyVal
 
 object PageTaskId {
   implicit val pageTaskIdFormat: Format[PageTaskId] = Json.valueFormat[PageTaskId]
+
+  def from(cursorId: CursorId): Option[PageTaskId] = {
+    val uuidRegex = """^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$""".r
+    val id        = cursorId.value
+    if (uuidRegex.matches(id)) Some(PageTaskId(UUID.fromString(id))) else None
+  }
+
 }
 
 sealed trait PageTask {
@@ -293,13 +284,13 @@ object PageTask {
       paginationResult: PaginationResult,
       currentTime: CurrentTimeSource
   ): Option[PageTask] =
-    paginationResult.getNextCursor.map { cursor =>
+    paginationResult.getPageTaskId.map { pageTaskId =>
       val now = currentTime.instantNow()
       (paginationResult.callSystem, paginationResult.paginationType) match {
         case (Some(callSystem), paginationType) =>
           SearchLightPageTask(
             correlationId = paginationResult.correlationId,
-            pageTaskId = cursor.pageTaskId,
+            pageTaskId = pageTaskId,
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             paginationType = paginationType,
             nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
@@ -309,7 +300,7 @@ object PageTask {
         case (_, PaginationType.MaPagination) =>
           MaPageTask(
             correlationId = paginationResult.correlationId,
-            pageTaskId = cursor.pageTaskId,
+            pageTaskId = pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
             nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
             createdAt = now
@@ -317,7 +308,7 @@ object PageTask {
         case (_, PaginationType.GyspPagination) =>
           GyspPageTask(
             correlationId = paginationResult.correlationId,
-            pageTaskId = cursor.pageTaskId,
+            pageTaskId = pageTaskId,
             benefitSchemeMembershipDetailsPaging = PaginationSource.fromBenefitSchemeMembershipDetails(
               paginationResult.benefitSchemeMembershipDetailsData
             ),
@@ -329,7 +320,7 @@ object PageTask {
         case (_, PaginationType.BspPagination) =>
           BspPageTask(
             correlationId = paginationResult.correlationId,
-            pageTaskId = cursor.pageTaskId,
+            pageTaskId = pageTaskId,
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             paginationResult.nationalInsuranceNumber,
@@ -338,7 +329,7 @@ object PageTask {
         case (None, BspSearchLightPagination) =>
           SearchLightPageTask(
             correlationId = paginationResult.correlationId,
-            pageTaskId = cursor.pageTaskId,
+            pageTaskId = pageTaskId,
             paginationType = paginationResult.paginationType,
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,

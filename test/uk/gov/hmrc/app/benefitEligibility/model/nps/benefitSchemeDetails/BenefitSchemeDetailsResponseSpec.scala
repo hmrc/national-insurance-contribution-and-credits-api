@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -42,7 +42,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def benefitSchemeDetailsSuccessResponseJsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("GetFullBenefitSchemeDetailsResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -207,8 +207,8 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
           Json.toJson(invalidResponse)
         ) shouldBe
           List(
-            """$.benefitSchemeDetails.schemeName: does not match the regex pattern ^[a-zA-Z0-9\/,'.&() -]+$""",
-            """$.benefitSchemeDetails.schemeName: must be at least 1 characters long"""
+            """/benefitSchemeDetails/schemeName: does not match the regex pattern ^[a-zA-Z0-9\/,'.&() -]+$""",
+            """/benefitSchemeDetails/schemeName: must be at least 1 characters long"""
           )
       }
 
@@ -244,7 +244,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def benefitSchemeDetails400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_400"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -315,7 +315,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def benefitSchemeDetails400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -382,7 +382,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def benefitSchemeDetails403JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_403"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -453,7 +453,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def benefitSchemeDetails422JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_422"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -513,7 +513,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -582,7 +582,7 @@ class BenefitSchemeDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def benefitSchemeDetails503JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           benefitSchemeDetailsResponseOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )

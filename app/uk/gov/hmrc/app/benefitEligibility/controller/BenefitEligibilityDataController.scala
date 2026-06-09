@@ -20,7 +20,7 @@ import cats.data.EitherT
 import play.api.libs.json.Json
 import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityResultHandler.*
+import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityErrorHandler.*
 import uk.gov.hmrc.app.benefitEligibility.controller.RequestHelper.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
@@ -49,7 +49,7 @@ class BenefitEligibilityDataController @Inject() (
   def fetchBenefitEligibilityData(): Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
-        val result = for {
+        val maybeResult = for {
           headerValues <- EitherT.fromEither[Future](validateHeaders(request))
           correlationId = headerValues
           eligibilityRequest <- EitherT.fromEither[Future](parseAndValidateRequest(request))
@@ -57,23 +57,31 @@ class BenefitEligibilityDataController @Inject() (
             eligibilityRequest,
             correlationId
           )
-        } yield buildResponse(eligibilityRequest, eligibilityCheckDataResult)
+        } yield buildResponse(eligibilityRequest, eligibilityCheckDataResult).withHeaders(
+          "CorrelationId" -> correlationId.value.toString
+        )
 
-        result.value.map(handleFinalResult(_, request))
+        maybeResult.value.map {
+          case Right(result) => result
+          case Left(error)   => handleError(error, request)
+        }
       }
     } else identity.async(_ => Future.successful(NotFound))
 
   def getNextPage: Action[AnyContent] =
     if (appConfig.benefitEligibilityInfoEndpointEnabled) {
       identity.async { implicit request =>
-        val result = for {
+        val maybeResult = for {
           headerValues <- EitherT.fromEither[Future](validateHeaders(request))
           correlationId = headerValues
-          nextCursor       <- EitherT.fromEither[Future](parsePaginationCursor(request))
-          paginationResult <- paginationService.paginate(nextCursor)
-        } yield buildResponse(paginationResult)
+          pageTaskId       <- EitherT.fromEither[Future](parsePageTaskId(request))
+          paginationResult <- paginationService.paginate(pageTaskId)
+        } yield buildResponse(paginationResult).withHeaders("CorrelationId" -> correlationId.value.toString)
 
-        result.value.map(handleFinalResult(_, request))
+        maybeResult.value.map {
+          case Right(result) => result
+          case Left(error)   => handleError(error, request)
+        }
       }
     } else identity.async(_ => Future.successful(NotFound))
 

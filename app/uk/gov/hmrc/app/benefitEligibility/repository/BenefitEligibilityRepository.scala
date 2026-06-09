@@ -41,7 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BenefitEligibilityRepositoryImpl])
 trait BenefitEligibilityRepository {
 
-  def getItem(paginationCursor: PaginationCursor)(
+  def getItem(pageTaskId: PageTaskId)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, PageTask]
 
@@ -76,16 +76,16 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
   private val logger = new RequestAwareLogger(this.getClass)
 
   def getItem(
-      paginationCursor: PaginationCursor
+      pageTaskId: PageTaskId
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PageTask] = {
     logger.info("getItem called - Retrieving page task from Database ")
     collection
-      .find(Filters.equal("pageTaskId", Codecs.toBson(paginationCursor.pageTaskId)))
+      .find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId)))
       .headOption()
       .attemptT
       .leftMap(error => DatabaseError(error))
       .flatMap {
-        case None           => EitherT.leftT(RecordNotFound(CursorId.from(paginationCursor)))
+        case None           => EitherT.leftT(RecordNotFound(CursorId.from(pageTaskId)))
         case Some(pageTask) => EitherT.rightT(pageTask)
       }
   }

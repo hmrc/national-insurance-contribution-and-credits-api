@@ -105,10 +105,10 @@ class PaginationService @Inject() (
   }
 
   def paginate(
-      paginationCursor: PaginationCursor
+      pageTaskId: PageTaskId
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] =
     for {
-      existingPageTask <- pageTaskRepo.getItem(paginationCursor)
+      existingPageTask <- pageTaskRepo.getItem(pageTaskId)
       paginationResult <- existingPageTask match {
         case task: MaPageTask =>
           logger.info("processing MaPageTask")
@@ -149,8 +149,8 @@ class PaginationService @Inject() (
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = None
-        ).setNextCursor(uuidGenerator.generate)
+          pageTaskId = None
+        ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process MA task with $error")
@@ -186,8 +186,8 @@ class PaginationService @Inject() (
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = None
-        ).setNextCursor(uuidGenerator.generate)
+          pageTaskId = None
+        ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process BSP task with $error")
@@ -218,8 +218,8 @@ class PaginationService @Inject() (
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = Some(SEARCHLIGHT),
-          nextCursor = None
-        ).setNextCursor(uuidGenerator.generate)
+          pageTaskId = None
+        ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process ${searchLightPageTask.paginationType} searchlight task with $error")
@@ -296,8 +296,8 @@ class PaginationService @Inject() (
           ),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
           callSystem = None,
-          nextCursor = None
-        ).setNextCursor(uuidGenerator.generate)
+          pageTaskId = None
+        ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process GYSP task with $error")

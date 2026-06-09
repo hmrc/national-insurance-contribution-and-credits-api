@@ -79,12 +79,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
   LongTermBenefitCalculationRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  BenefitEligibilityRepositoryImpl,
-  PageTask,
-  PageTaskId,
-  PaginationCursor
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PageTaskId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -725,12 +720,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
               ),
-              Some(
-                PaginationCursor(
-                  PaginationType.GyspPagination,
-                  PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba"))
-                )
-              )
+              Some(PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
             )
           )
 

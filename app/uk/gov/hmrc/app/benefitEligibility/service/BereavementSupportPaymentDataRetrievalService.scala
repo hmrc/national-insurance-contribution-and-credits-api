@@ -108,9 +108,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
                     currentTimeSource.instantNow()
                   )
                 )
-                .map(id =>
-                  result.copy(nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(id))))
-                )
+                .map(id => result.copy(pageTaskId = Some(PageTaskId(id))))
             } else {
               EitherT
                 .rightT[Future, BenefitEligibilityError](result)

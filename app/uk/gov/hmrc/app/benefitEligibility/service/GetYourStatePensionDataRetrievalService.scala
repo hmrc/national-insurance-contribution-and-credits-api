@@ -146,9 +146,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
                       currentTimeSource.instantNow()
                     )
                   )
-                  .map(id =>
-                    result.copy(nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, PageTaskId(id))))
-                  )
+                  .map(id => result.copy(pageTaskId = Some(PageTaskId(id))))
 
               } else EitherT.rightT[Future, BenefitEligibilityError](result)
 

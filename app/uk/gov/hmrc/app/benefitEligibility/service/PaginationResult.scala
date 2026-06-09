@@ -18,12 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import uk.gov.hmrc.app.benefitEligibility.model.common.{CallSystem, CorrelationId, Identifier, PaginationType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  ContributionAndCreditsPaging,
-  PageTaskId,
-  PaginationCursor,
-  PaginationSource
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsPaging, PageTaskId, PaginationSource}
 
 import java.util.UUID
 
@@ -41,7 +36,7 @@ final case class PaginationResult(
     contributionCreditResult: ContributionCreditPagingResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
     callSystem: Option[CallSystem],
-    nextCursor: Option[PaginationCursor]
+    pageTaskId: Option[PageTaskId]
 ) {
 
   private def shouldPage: Boolean =
@@ -50,15 +45,15 @@ final case class PaginationResult(
       PaginationSource.fromMarriageDetails(marriageDetailsResult)
     ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsPaging.isDefined
 
-  def setNextCursor(uuid: UUID): PaginationResult = {
-    val cursor = if (shouldPage) {
-      Some(PaginationCursor(paginationType, PageTaskId(uuid)))
+  def setPageTaskId(uuid: UUID): PaginationResult = {
+    val pageTaskId = if (shouldPage) {
+      Some(PageTaskId(uuid))
     } else None
 
-    this.copy(nextCursor = cursor)
+    this.copy(pageTaskId = pageTaskId)
   }
 
-  def getNextCursor: Option[PaginationCursor] = this.nextCursor
+  def getPageTaskId: Option[PageTaskId] = this.pageTaskId
 
   def allResults: List[ApiResult] = liabilitiesResult ++ List(
     marriageDetailsResult,

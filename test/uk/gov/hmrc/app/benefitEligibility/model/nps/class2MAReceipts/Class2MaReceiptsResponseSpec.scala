@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -42,7 +42,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       def class2MaReceiptsSuccessResponseJsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           class2MaReceiptsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("GetClass2MAReceiptsResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -122,7 +122,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       def class2MaReceipts400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           class2MaReceiptsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_400"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -193,7 +193,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       def class2MaReceipts400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           class2MaReceiptsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -260,7 +260,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       def class2MaReceipts403JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           class2MaReceiptsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_403"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -331,7 +331,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       def class2MaReceipts422JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           class2MaReceiptsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_422"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -391,7 +391,7 @@ class Class2MaReceiptsResponseSpec extends AnyFreeSpec with Matchers {
       def class2MaReceipts503JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           class2MaReceiptsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )

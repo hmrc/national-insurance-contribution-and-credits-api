@@ -349,8 +349,8 @@ class PaginationServiceSpec
           LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
 
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor)(_: HeaderCarrier))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
 
         (mockLiabilitySummaryDetailsConnector
@@ -377,15 +377,10 @@ class PaginationServiceSpec
           contributionCreditResult = ContributionCreditPagingResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = Some(
-            PaginationCursor(
-              PaginationType.MaPagination,
-              PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-            )
-          )
+          pageTaskId = Some(PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")))
         )
         underTest
-          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .paginate(pageTask.pageTaskId)
           .value
           .futureValue shouldBe Right(
           expectedResult
@@ -425,8 +420,8 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor)(_: HeaderCarrier))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
@@ -473,11 +468,11 @@ class PaginationServiceSpec
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuid)))
+          pageTaskId = Some(PageTaskId(uuid))
         )
 
         underTest
-          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .paginate(pageTask.pageTaskId)
           .value
           .futureValue shouldBe Right(expected)
       }
@@ -510,8 +505,8 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor)(_: HeaderCarrier))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
@@ -546,11 +541,11 @@ class PaginationServiceSpec
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = Some(SEARCHLIGHT),
-          nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuid)))
+          pageTaskId = Some(PageTaskId(uuid))
         )
 
         underTest
-          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .paginate(pageTask.pageTaskId)
           .value
           .futureValue shouldBe Right(expected)
       }
@@ -710,8 +705,8 @@ class PaginationServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor)(_: HeaderCarrier))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
@@ -891,11 +886,11 @@ class PaginationServiceSpec
             )
           ),
           callSystem = None,
-          nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, pageTaskId))
+          pageTaskId = Some(pageTaskId)
         )
 
         underTest
-          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .paginate(pageTask.pageTaskId)
           .value
           .futureValue shouldBe Right(expected)
       }
@@ -918,8 +913,8 @@ class PaginationServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor)(_: HeaderCarrier))
-          .expects(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId), *)
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
 
         (mockLiabilitySummaryDetailsConnector
@@ -928,28 +923,24 @@ class PaginationServiceSpec
           .returning(EitherT.leftT(NpsClientError(error)))
 
         underTest
-          .paginate(PaginationCursor(pageTask.paginationType, pageTask.pageTaskId))
+          .paginate(pageTask.pageTaskId)
           .value
           .futureValue shouldBe Left(
           NpsClientError(error)
         )
       }
       "should error if database returns error" in {
-        val paginationCursor =
-          PaginationCursor(
-            PaginationType.BspPagination,
-            PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-          )
+        val pageTaskId = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: PaginationCursor)(_: HeaderCarrier))
-          .expects(paginationCursor, *)
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTaskId, *)
           .returning(EitherT.leftT(DatabaseError(error)))
 
-        underTest.paginate(paginationCursor).value.futureValue shouldBe Left(
+        underTest.paginate(pageTaskId).value.futureValue shouldBe Left(
           DatabaseError(error)
         )
       }

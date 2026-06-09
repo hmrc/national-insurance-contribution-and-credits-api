@@ -17,18 +17,13 @@
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationCursor
-
-import java.util.Base64
+import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
 
 case class CursorId(value: String) extends AnyVal
 
 object CursorId {
   implicit val format: Format[CursorId] = Json.valueFormat[CursorId]
 
-  def from(paginationCursor: PaginationCursor): CursorId = {
-    val byteArray = Base64.getEncoder.encode(Json.toJson(paginationCursor).toString.replaceAll("\\s", "").getBytes)
-    CursorId(new String(byteArray))
-  }
+  def from(pageTaskId: PageTaskId): CursorId = CursorId(pageTaskId.value.toString)
 
 }

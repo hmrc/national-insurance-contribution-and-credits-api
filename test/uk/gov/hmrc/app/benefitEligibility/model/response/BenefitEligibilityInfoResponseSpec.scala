@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.freespec.AnyFreeSpec
@@ -803,7 +803,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       def successResponseMaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -824,7 +824,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       def successResponseMaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseMa"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -933,7 +933,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       def successResponseBspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -954,7 +954,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       def successResponseBspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseBsp"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -1125,7 +1125,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         def successResponseGyspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -1149,7 +1149,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         def successResponseGyspJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseGysp"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -1241,7 +1241,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -1260,7 +1260,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseEsa"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -1421,7 +1421,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -1440,7 +1440,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
         def successResponseEsaJsonSchema: SimpleJsonSchema = SimpleJsonSchema(
           applicationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoSuccessResponseJsa"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -1648,7 +1648,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       def application502JsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
-        SpecVersion.VersionFlag.V7,
+        SpecificationVersion.DRAFT_7,
         Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
@@ -2036,7 +2036,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             contributionCreditResult = creditsAndContributionsPagingResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
-            nextCursor = None
+            pageTaskId = None
           )
 
         val expectedResult = Right(
@@ -2065,7 +2065,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             contributionCreditResult = creditsAndContributionsPagingResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
-            nextCursor = None
+            pageTaskId = None
           )
 
         val expectedResult = Right(
@@ -2094,7 +2094,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             contributionCreditResult = creditsAndContributionsPagingResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
-            nextCursor = None
+            pageTaskId = None
           )
 
         val expectedResult = Right(

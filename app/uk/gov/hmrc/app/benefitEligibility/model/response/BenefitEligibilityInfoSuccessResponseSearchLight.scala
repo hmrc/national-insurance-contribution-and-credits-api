@@ -49,7 +49,7 @@ object BenefitEligibilityInfoSuccessResponseSearchLight {
             nationalInsuranceNumber = nationalInsuranceNumber,
             niContributionsAndCreditsResult =
               ContributionsAndCreditsResponse.from(contributionsAndCreditsSuccessResponse),
-            result.nextCursor.map(CursorId.from)
+            result.pageTaskId.map(CursorId.from)
           )
         )
       case _ => Left(BenefitEligibilityInfoErrorResponse.from(nationalInsuranceNumber, result))

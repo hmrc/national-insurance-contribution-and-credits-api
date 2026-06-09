@@ -266,7 +266,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
@@ -343,7 +343,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId = correlationId,
@@ -357,7 +357,7 @@ class PaginationServiceItSpec
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              nextCursor = Some(PaginationCursor(PaginationType.MaPagination, PageTaskId(uuidOne)))
+              pageTaskId = Some(PageTaskId(uuidOne))
             )
           )
 
@@ -436,7 +436,7 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo))).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId = correlationId,
@@ -450,7 +450,7 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo)))
+              pageTaskId = Some(PageTaskId(uuidTwo))
             )
           )
       }
@@ -523,7 +523,7 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidFour)))
+          .paginate(PageTaskId(uuidFour))
           .value
           .futureValue shouldBe
           Right(
@@ -544,7 +544,7 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = Some(SEARCHLIGHT),
-              nextCursor = Some(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidFour)))
+              pageTaskId = Some(PageTaskId(uuidFour))
             )
           )
       }
@@ -792,7 +792,7 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidThree)))
+          .paginate(PageTaskId(uuidThree))
           .value
           .futureValue shouldBe
           Right(
@@ -808,7 +808,7 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
               callSystem = None,
-              nextCursor = Some(PaginationCursor(PaginationType.GyspPagination, PageTaskId(uuidThree)))
+              pageTaskId = Some(PageTaskId(uuidThree))
             )
           )
       }
@@ -889,7 +889,7 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidOne))).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId = correlationId,
@@ -903,7 +903,7 @@ class PaginationServiceItSpec
               contributionCreditResult = ContributionCreditPagingResult(None, None),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              nextCursor = None
+              pageTaskId = None
             )
           )
 
@@ -982,7 +982,7 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidTwo))).value.futureValue shouldBe
+        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
           Right(
             PaginationResult(
               correlationId = correlationId,
@@ -996,7 +996,7 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              nextCursor = None
+              pageTaskId = None
             )
           )
 
@@ -1245,7 +1245,7 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidThree)))
+          .paginate(PageTaskId(uuidThree))
           .value
           .futureValue shouldBe
           Right(
@@ -1261,7 +1261,7 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
               callSystem = None,
-              nextCursor = None
+              pageTaskId = None
             )
           )
 
@@ -1324,7 +1324,7 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PaginationCursor(PaginationType.BspPagination, PageTaskId(uuidFour)))
+          .paginate(PageTaskId(uuidFour))
           .value
           .futureValue shouldBe
           Right(
@@ -1341,7 +1341,7 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = Some(SEARCHLIGHT),
-              nextCursor = None
+              pageTaskId = None
             )
           )
 

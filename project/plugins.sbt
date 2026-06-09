@@ -7,10 +7,10 @@ resolvers += Resolver.url("HMRC-open-artefacts-ivy2", url("https://open.artefact
 resolvers += Resolver.typesafeRepo("releases")
 
 libraryDependencies ++= Seq(
-  "com.fasterxml.jackson.module"    %% "jackson-module-scala"    % "2.20.0",
-  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.20.0",
-  "io.swagger.parser.v3"             % "swagger-parser"          % "2.1.34",
-  "org.playframework"               %% "play-json"               % "3.0.5"
+  "com.fasterxml.jackson.module"    %% "jackson-module-scala"    % "2.22.0",
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.22.0",
+  "io.swagger.parser.v3"             % "swagger-parser"          % "2.1.43",
+  "org.playframework"               %% "play-json"               % "3.0.6"
 )
 
 addSbtPlugin("uk.gov.hmrc"            % "sbt-auto-build"     % "3.24.0")

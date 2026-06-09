@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -44,7 +44,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       def individualStatePensionInformationSuccessResponseJsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           individualStatePensionInformationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("GetNIRecordResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -263,7 +263,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       def individualStatePensionInformationOpenApiSpec400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           individualStatePensionInformationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_400"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -334,7 +334,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       def individualStatePensionInformationOpenApiSpec400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           individualStatePensionInformationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -401,7 +401,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       def individualStatePensionInformationOpenApiSpec403JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           individualStatePensionInformationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResourceObj_403_Forbidden"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -450,7 +450,7 @@ class IndividualStatePensionInformationResponseSpec extends AnyFreeSpec with Mat
       def individualStatePensionInformationOpenApiSpec503JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           individualStatePensionInformationOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )

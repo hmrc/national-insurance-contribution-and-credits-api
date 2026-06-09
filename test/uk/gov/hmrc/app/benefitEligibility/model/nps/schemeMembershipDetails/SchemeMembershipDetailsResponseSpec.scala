@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{Format, JsValue, Json}
@@ -41,7 +41,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def schemeMembershipDetailsSuccessResponseJsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("GetSchemeMembershipDetailsResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -236,7 +236,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def schemeMembershipDetails400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_400"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -307,7 +307,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def schemeMembershipDetails400JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -374,7 +374,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def schemeMembershipDetails403JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_403"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -445,7 +445,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def schemeMembershipDetails422JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("errorResponse_422"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -505,7 +505,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def liabilitySummaryDetails500JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
@@ -574,7 +574,7 @@ class SchemeMembershipDetailsResponseSpec extends AnyFreeSpec with Matchers {
       def schemeMembershipDetails503JsonSchema: SimpleJsonSchema =
         SimpleJsonSchema(
           schemeMembershipDetailsOpenApiSpec,
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           Some("HIP-originResponse"),
           metaSchemaValidation = Some(Valid(()))
         )
