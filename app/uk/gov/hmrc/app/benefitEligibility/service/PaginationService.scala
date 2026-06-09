@@ -153,7 +153,7 @@ class PaginationService @Inject() (
         ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
-        logger.error(s"Failed to process MA task with $error")
+        logger.error(s"Failed to process MA task", error)
         error
       }
   }
@@ -190,7 +190,7 @@ class PaginationService @Inject() (
         ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
-        logger.error(s"Failed to process BSP task with $error")
+        logger.error(s"Failed to process BSP task", error)
         error
       }
   }
@@ -222,7 +222,7 @@ class PaginationService @Inject() (
         ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
-        logger.error(s"Failed to process ${searchLightPageTask.paginationType} searchlight task with $error")
+        logger.error(s"Failed to process ${searchLightPageTask.paginationType} searchlight task", error)
         error
       }
   }
@@ -300,7 +300,7 @@ class PaginationService @Inject() (
         ).setPageTaskId(uuidGenerator.generate)
       }
       .leftMap { error =>
-        logger.error(s"Failed to process GYSP task with $error")
+        logger.error(s"Failed to process GYSP task", error)
         error
       }
   }

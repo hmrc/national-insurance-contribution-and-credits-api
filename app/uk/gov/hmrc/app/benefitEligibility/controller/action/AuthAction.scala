@@ -46,10 +46,10 @@ class AuthAction @Inject() (
       block(request)
     }.recover {
       case e: (BearerTokenExpired | MissingBearerToken | InvalidBearerToken | UnsupportedAuthProvider) =>
-        logger.error(e.getMessage)
+        logger.error("Unauthorized", e)
         Unauthorized(Json.toJson(ErrorResponse(ErrorCode.Unauthorised, ErrorReason(e.getMessage))))
       case e =>
-        logger.error(e.getMessage)
+        logger.error("unexpected error occurred", e)
         InternalServerError(
           Json.toJson(ErrorResponse(ErrorCode.InternalServerError, ErrorReason("unexpected internal failure")))
         )
