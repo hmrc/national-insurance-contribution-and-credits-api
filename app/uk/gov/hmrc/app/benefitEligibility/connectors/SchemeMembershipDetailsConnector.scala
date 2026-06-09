@@ -88,7 +88,7 @@ class SchemeMembershipDetailsConnector @Inject() (
         case error: JsonParsingError => error
         case error: InvalidJsonError => error
         case error =>
-          logger.error(s"call to downstream service $apiName failed: ${error.toString}")
+          logger.error(s"call to downstream service $apiName failed", error)
           error
       }
 
@@ -130,10 +130,10 @@ class SchemeMembershipDetailsConnector @Inject() (
 
     EitherT.fromEither[Future](schemeMembershipDetailsResult).leftMap {
       case error: JsonParsingError =>
-        logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+        logger.error(s"failed to process ${response.status} response from $apiName", error)
         error
       case error: InvalidJsonError =>
-        logger.error(s"failed to process ${response.status} response from $apiName: ${error.toString}")
+        logger.error(s"failed to process ${response.status} response from $apiName", error)
         error
       case error => error
     }

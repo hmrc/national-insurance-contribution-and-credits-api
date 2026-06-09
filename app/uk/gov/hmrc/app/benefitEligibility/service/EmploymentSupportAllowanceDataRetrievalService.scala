@@ -59,7 +59,7 @@ class EmploymentSupportAllowanceDataRetrievalService @Inject() (
       )
       .map(EligibilityCheckDataResultESA(_))
       .leftMap { error =>
-        logger.info("Fetch ESA eligibility data failed: " + error.getMessage)
+        logger.error("Fetch ESA eligibility data failed", error)
         DataRetrievalServiceError(List(error))
       }
 

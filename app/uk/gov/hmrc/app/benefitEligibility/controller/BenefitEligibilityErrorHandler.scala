@@ -74,7 +74,7 @@ object BenefitEligibilityErrorHandler {
           )
         )
       case err =>
-        logger.error(s"Error processing request: ${err.toStringSafeToLogInProd}")
+        logger.error(s"Error processing request", err)
         InternalServerError(
           Json.toJson(
             ErrorResponse(ErrorCode.InternalServerError, ErrorReason("Unexpected internal failure"))
