@@ -47,8 +47,7 @@ class AppConfig @Inject() (config: ServicesConfig) {
 
   val pageTaskTtlSeconds: Int = config.getInt("mongodb.pageTaskTtlSeconds")
 
-  val benefitEligibilityInfoEndpointEnabled: Boolean = config.getBoolean("benefitEligibilityInfoEndpointEnabled")
-  val hipBaseUrl: String                             = config.baseUrl("hip")
+  val hipBaseUrl: String = config.baseUrl("hip")
 
   val hipOriginatorId: String = config.getString(s"$hipServicePrefix.originatorId")
 
@@ -94,5 +93,12 @@ class AppConfig @Inject() (config: ServicesConfig) {
       .encode(s"$newHipClientId:$newHipClientSecret".getBytes(StandardCharsets.UTF_8))
       .map(_.toChar)
       .mkString
+
+  val maEnabled: Boolean          = config.getBoolean("maEnabled")
+  val esaEnabled: Boolean         = config.getBoolean("esaEnabled")
+  val jsaEnabled: Boolean         = config.getBoolean("jsaEnabled")
+  val bspEnabled: Boolean         = config.getBoolean("bspEnabled")
+  val gyspEnabled: Boolean        = config.getBoolean("gyspEnabled")
+  val searchlightEnabled: Boolean = config.getBoolean("searchlightEnabled")
 
 }

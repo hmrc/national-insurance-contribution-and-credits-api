@@ -22,8 +22,17 @@ import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityErrorHandler.*
 import uk.gov.hmrc.app.benefitEligibility.controller.RequestHelper.*
+import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
-import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
+import uk.gov.hmrc.app.benefitEligibility.model.request.{
+  BSPEligibilityCheckDataRequest,
+  ESAEligibilityCheckDataRequest,
+  EligibilityCheckDataRequest,
+  GYSPEligibilityCheckDataRequest,
+  JSAEligibilityCheckDataRequest,
+  MAEligibilityCheckDataRequest,
+  SearchlightEligibilityCheckDataRequest
+}
 import uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoResponse
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitEligibilityDataRetrievalService,
@@ -47,29 +56,46 @@ class BenefitEligibilityDataController @Inject() (
     extends BackendController(cc) {
 
   def fetchBenefitEligibilityData(): Action[AnyContent] =
-    if (appConfig.benefitEligibilityInfoEndpointEnabled) {
-      identity.async { implicit request =>
-        val maybeResult = for {
-          headerValues <- EitherT.fromEither[Future](validateHeaders(request))
-          correlationId = headerValues
-          eligibilityRequest <- EitherT.fromEither[Future](parseAndValidateRequest(request))
-          eligibilityCheckDataResult <- benefitEligibilityDataRetrievalService.getEligibilityData(
-            eligibilityRequest,
-            correlationId
-          )
-        } yield buildResponse(eligibilityRequest, eligibilityCheckDataResult).withHeaders(
-          "CorrelationId" -> correlationId.value.toString
-        )
-
-        maybeResult.value.map {
-          case Right(result) => result
-          case Left(error)   => handleError(error, request)
+    identity.async { implicit request =>
+      val maybeResult = for {
+        headerValues <- EitherT.fromEither[Future](validateHeaders(request))
+        correlationId = headerValues
+        eligibilityRequest <- EitherT.fromEither[Future](parseAndValidateRequest(request))
+        shouldProcess = {
+          eligibilityRequest match {
+            case req: ESAEligibilityCheckDataRequest         => appConfig.esaEnabled
+            case req: JSAEligibilityCheckDataRequest         => appConfig.jsaEnabled
+            case req: BSPEligibilityCheckDataRequest         => appConfig.bspEnabled
+            case req: MAEligibilityCheckDataRequest          => appConfig.maEnabled
+            case req: GYSPEligibilityCheckDataRequest        => appConfig.gyspEnabled
+            case req: SearchlightEligibilityCheckDataRequest => appConfig.searchlightEnabled
+          }
         }
+        response <-
+          if (shouldProcess) {
+            benefitEligibilityDataRetrievalService
+              .getEligibilityData(
+                eligibilityRequest,
+                correlationId
+              )
+              .map { eligibilityCheckDataResult =>
+                buildResponse(eligibilityRequest, eligibilityCheckDataResult).withHeaders(
+                  "CorrelationId" -> correlationId.value.toString
+                )
+              }
+
+          } else EitherT.rightT[Future, BenefitEligibilityError](NotFound)
+
+      } yield response
+
+      maybeResult.value.map {
+        case Right(result) => result
+        case Left(error)   => handleError(error, request)
       }
-    } else identity.async(_ => Future.successful(NotFound))
+    }
 
   def getNextPage: Action[AnyContent] =
-    if (appConfig.benefitEligibilityInfoEndpointEnabled) {
+    if (appConfig.gyspEnabled || appConfig.bspEnabled || appConfig.maEnabled) {
       identity.async { implicit request =>
         val maybeResult = for {
           headerValues <- EitherT.fromEither[Future](validateHeaders(request))

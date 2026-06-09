@@ -125,7 +125,12 @@ class BenefitEligibilityDataControllerItSpec
         "microservice.services.hip.nps.longTermBenefitCalculation.port" -> server.port,
         "microservice.services.hip.nps.longTermBenefitNotes.port"       -> server.port,
         "microservice.services.hip.nps.benefitSchemeDetails.port"       -> server.port,
-        "benefitEligibilityInfoEndpointEnabled"                         -> true,
+        "maEnabled"                                                     -> true,
+        "esaEnabled"                                                    -> true,
+        "jsaEnabled"                                                    -> true,
+        "bspEnabled"                                                    -> true,
+        "gyspEnabled"                                                   -> true,
+        "searchlightEnabled"                                            -> true,
         "microservice.services.auth.port"                               -> server.port
       )
       .build()
