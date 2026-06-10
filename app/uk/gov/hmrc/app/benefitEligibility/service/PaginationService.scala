@@ -20,7 +20,13 @@ import cats.data.EitherT
 import cats.implicits.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, BenefitType, DatabaseError, Identifier}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  BenefitType,
+  DatabaseError,
+  FeatureDisabled,
+  Identifier
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.SchemeContractedOutNumberDetails
@@ -28,6 +34,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.Ni
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, RequestAwareLogger}
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.UUID
@@ -42,7 +49,8 @@ class PaginationService @Inject() (
     benefitSchemeDetailsConnector: BenefitSchemeDetailsConnector,
     pageTaskRepo: BenefitEligibilityRepository,
     currentTime: CurrentTimeSource,
-    uuidGenerator: UuidGenerator
+    uuidGenerator: UuidGenerator,
+    appConfig: AppConfig
 )(implicit ec: ExecutionContext) {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
@@ -110,18 +118,26 @@ class PaginationService @Inject() (
     for {
       existingPageTask <- pageTaskRepo.getItem(pageTaskId)
       paginationResult <- existingPageTask match {
-        case task: MaPageTask =>
+        case task: MaPageTask if appConfig.maEnabled =>
           logger.info("processing MaPageTask")
           processMaPageTask(task)
-        case task: BspPageTask =>
+        case task: BspPageTask if appConfig.bspEnabled =>
           logger.info("processing BspPageTask")
           processBspPageTask(task)
-        case task: GyspPageTask =>
+        case task: GyspPageTask if appConfig.gyspEnabled =>
           logger.info("processing GyspPageTask")
           processGyspPageTask(task)
-        case task: SearchLightPageTask =>
+        case task: SearchLightPageTask if appConfig.searchlightEnabled =>
           logger.info("processing SearchLightPageTask")
           processSearchlightPageTask(task)
+        case task: SearchLightPageTask if !appConfig.searchlightEnabled =>
+          EitherT.left[PaginationResult](
+            Future.successful(FeatureDisabled("feature disabled: SEARCHLIGHT"))
+          )
+        case task: PageTask =>
+          EitherT.left[PaginationResult](
+            Future.successful(FeatureDisabled(s"feature disabled: ${task.paginationType.entryName}"))
+          )
       }
       pageTask = PageTask.createPaginatingTask(paginationResult, currentTime)
       _ <- pageTask.fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>

@@ -18,8 +18,8 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.Validated
 import cats.implicits.catsSyntaxTuple6Semigroupal
-import play.api.libs.json.{JsError, JsPath, JsSuccess, JsonValidationError}
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.libs.json.{JsError, JsPath, JsSuccess, JsValue, JsonValidationError}
+import play.api.mvc.{Headers, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
@@ -39,35 +39,28 @@ object RequestHelper {
   private val logger = new RequestAwareLogger(this.getClass)
 
   def parseAndValidateRequest(
-      request: Request[AnyContent]
+      request: Request[JsValue]
   )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, EligibilityCheckDataRequest] =
-    request.body.asJson match {
-      case None =>
-        Left(InvalidRequestJson(ErrorReason("invalid JSON")))
-      case Some(json) =>
-        json.validate[EligibilityCheckDataRequest] match {
-          case JsSuccess(eligibilityRequest, _) =>
-            RequestHelper
-              .validateRequestData(eligibilityRequest)
-              .map(_ => eligibilityRequest)
-          case JsError(errors) =>
-            val errorMessage = formatJsonErrors(errors)
-            Left(
-              InvalidRequestJson(ErrorReason(s"incompatible JSON, request body does not match schema - $errorMessage"))
-            )
-        }
+    request.body.validate[EligibilityCheckDataRequest] match {
+      case JsSuccess(eligibilityRequest, _) =>
+        RequestHelper
+          .validateRequestData(eligibilityRequest)
+          .map(_ => eligibilityRequest)
+      case JsError(errors) =>
+        val errorMessage = formatJsonErrors(errors)
+        Left(
+          InvalidRequestJson(ErrorReason(s"incompatible JSON, request body does not match schema - $errorMessage"))
+        )
     }
 
   def validateHeaders(
-      request: Request[AnyContent]
+      request: Headers
   )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] = getAndValidateCorrelationId(request)
 
   def parsePageTaskId(
-      request: Request[AnyContent]
+      cursorId: Option[String]
   )(implicit headerCarrier: HeaderCarrier): Either[BenefitEligibilityError, PageTaskId] =
-    request.queryString
-      .get("cursorId")
-      .flatMap(_.headOption)
+    cursorId
       .map(id => PageTaskId.from(CursorId(id)))
       .toRight(MissingCursorId(ErrorReason("Pagination request sent without cursorId")))
       .flatMap {
@@ -80,9 +73,9 @@ object RequestHelper {
 
   def addCorrelationIdHeader(
       result: Result,
-      request: Request[AnyContent]
-  )(implicit hc: HeaderCarrier): Result =
-    getAndValidateCorrelationId(request)
+      requestHeaders: Headers
+  ): Result =
+    getAndValidateCorrelationId(requestHeaders)
       .map(correlationId => result.withHeaders("CorrelationId" -> correlationId.value.toString))
       .getOrElse(result)
 
@@ -137,10 +130,10 @@ object RequestHelper {
     }
   }
 
-  private def getAndValidateCorrelationId(
-      request: Request[AnyContent]
+  def getAndValidateCorrelationId(
+      requestHeaders: Headers
   ): Either[BenefitEligibilityError, CorrelationId] =
-    request.headers.get("CorrelationId") match {
+    requestHeaders.get("CorrelationId") match {
       case None                => Left(InvalidOrMissingHeaderError(ErrorReason("Missing Header CorrelationId")))
       case Some(correlationId) => RequestHelper.validateCorrelationId(correlationId)
     }

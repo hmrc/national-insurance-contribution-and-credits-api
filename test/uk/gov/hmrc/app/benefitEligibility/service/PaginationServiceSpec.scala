@@ -52,6 +52,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.SurvivorStatus.NotApplicable
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Instant, LocalDate}
@@ -91,6 +92,8 @@ class PaginationServiceSpec
 
   val mockBenefitEligibilityRepository: BenefitEligibilityRepository = mock[BenefitEligibilityRepository]
 
+  private val mockAppConfig: AppConfig = mock[AppConfig]
+
   val nationalInsuranceNumber = Identifier("AB123456C")
 
   val underTest = new PaginationService(
@@ -101,7 +104,8 @@ class PaginationServiceSpec
     benefitSchemeDetailsConnector = mockBenefitSchemeDetailsConnector,
     pageTaskRepo = mockBenefitEligibilityRepository,
     currentTime = currentTimeSource,
-    uuidGenerator = mockUuidGenerator
+    uuidGenerator = mockUuidGenerator,
+    appConfig = mockAppConfig
   )
 
   "PaginationService" - {
@@ -363,6 +367,8 @@ class PaginationServiceSpec
           .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
+        (() => mockAppConfig.maEnabled).expects().returning(true)
+
         val expectedResult = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.MaPagination,
@@ -446,6 +452,8 @@ class PaginationServiceSpec
             )
           )
 
+        (() => mockAppConfig.bspEnabled).expects().returning(true)
+
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.BspPagination,
@@ -523,6 +531,8 @@ class PaginationServiceSpec
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
             )
           )
+
+        (() => mockAppConfig.searchlightEnabled).expects().returning(true)
 
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -753,6 +763,8 @@ class PaginationServiceSpec
             )
           )
 
+        (() => mockAppConfig.gyspEnabled).expects().returning(true)
+
         val expected = PaginationResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
           paginationType = PaginationType.GyspPagination,
@@ -922,6 +934,8 @@ class PaginationServiceSpec
           .expects(BenefitType.MA, liabilitiesCallBackUrl, *)
           .returning(EitherT.leftT(NpsClientError(error)))
 
+        (() => mockAppConfig.maEnabled).expects().returning(true)
+
         underTest
           .paginate(pageTask.pageTaskId)
           .value
@@ -942,6 +956,103 @@ class PaginationServiceSpec
 
         underTest.paginate(pageTaskId).value.futureValue shouldBe Left(
           DatabaseError(error)
+        )
+      }
+
+      "should fail with FeatureDisabled is bsp is disabled" in {
+
+        (() => mockAppConfig.bspEnabled).expects().returning(false)
+
+        val pageTask = BspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          marriageDetailsPaging = None,
+          contributionAndCreditsPaging = None,
+          nationalInsuranceNumber = nationalInsuranceNumber,
+          createdAt = currentTimeSource.instantNow()
+        )
+
+        (mockBenefitEligibilityRepository
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
+          .returning(EitherT.rightT(pageTask))
+
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: BSP")
+        )
+      }
+
+      "should fail with FeatureDisabled is searchlight is disabled" in {
+
+        (() => mockAppConfig.searchlightEnabled).expects().returning(false).twice()
+
+        val pageTask = SearchLightPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          paginationType = PaginationType.BspPagination,
+          contributionAndCreditsPaging = None,
+          nationalInsuranceNumber,
+          Instant.now
+        )
+
+        (mockBenefitEligibilityRepository
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
+          .returning(EitherT.rightT(pageTask))
+
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: SEARCHLIGHT")
+        )
+      }
+
+      "should fail with FeatureDisabled is ma is disabled" in {
+        (() => mockAppConfig.maEnabled).expects().returning(false)
+
+        val pageTask = MaPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          liabilitiesPaging = Nil,
+          nationalInsuranceNumber,
+          Instant.now
+        )
+
+        (mockBenefitEligibilityRepository
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
+          .returning(EitherT.rightT(pageTask))
+
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: MA")
+        )
+      }
+
+      "should fail with FeatureDisabled is GYSP is disabled" in {
+
+        (() => mockAppConfig.gyspEnabled).expects().returning(false)
+
+        val pageTask = GyspPageTask(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+          benefitSchemeMembershipDetailsPaging = None,
+          marriageDetailsPaging = None,
+          contributionAndCreditsPaging = Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList
+                .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          nationalInsuranceNumber,
+          Instant.now
+        )
+
+        (mockBenefitEligibilityRepository
+          .getItem(_: PageTaskId)(_: HeaderCarrier))
+          .expects(pageTask.pageTaskId, *)
+          .returning(EitherT.rightT(pageTask))
+
+        underTest.paginate(pageTask.pageTaskId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: GYSP")
         )
       }
     }

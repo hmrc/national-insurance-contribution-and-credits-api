@@ -59,6 +59,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -638,13 +639,16 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   private val mockBspSearchlightDataRetrievalService: SearchlightDataRetrievalService =
     mock[SearchlightDataRetrievalService]
 
+  private val mockAppConfig: AppConfig = mock[AppConfig]
+
   private val underTest = new BenefitEligibilityDataRetrievalService(
     mockMaternityAllowanceDataRetrievalService,
     mockEmploymentSupportAllowanceDataRetrievalService,
     mockJobSeekersAllowanceDataRetrievalService,
     mockGetYourStatePensionDataRetrievalService,
     mockBereavementSupportPaymentDataRetrievalService,
-    mockBspSearchlightDataRetrievalService
+    mockBspSearchlightDataRetrievalService,
+    mockAppConfig
   )
 
   private val maEligibilityCheckDataRequest = MAEligibilityCheckDataRequest(
@@ -674,6 +678,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
+        (() => mockAppConfig.maEnabled).expects().returning(true)
+
         underTest.getEligibilityData(maEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultMA(
             List(liabilitySummaryDetailsResult),
@@ -695,6 +701,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
+        (() => mockAppConfig.jsaEnabled).expects().returning(true)
+
         underTest.getEligibilityData(jsaEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultJSA(
             niContributionAndCreditsResult
@@ -713,6 +721,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
               )
             )
           )
+
+        (() => mockAppConfig.esaEnabled).expects().returning(true)
 
         underTest.getEligibilityData(esaEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultESA(
@@ -734,6 +744,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
               )
             )
           )
+
+        (() => mockAppConfig.searchlightEnabled).expects().returning(true)
 
         underTest
           .getEligibilityData(bspSearchlightEligibilityCheckDataRequest, correlationId)
@@ -767,6 +779,8 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
+        (() => mockAppConfig.gyspEnabled).expects().returning(true)
+
         underTest.getEligibilityData(gyspEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultGYSP(
             niContributionAndCreditsResult,
@@ -791,8 +805,67 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             )
           )
 
+        (() => mockAppConfig.bspEnabled).expects().returning(true)
+
         underTest.getEligibilityData(bspEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Right(
           EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
+        )
+      }
+
+      "should fail with FeatureDisabled is bsp is disabled" in {
+
+        (() => mockAppConfig.bspEnabled).expects().returning(false)
+
+        underTest.getEligibilityData(bspEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: BSP")
+        )
+      }
+
+      "should fail with FeatureDisabled is esa is disabled" in {
+
+        (() => mockAppConfig.esaEnabled).expects().returning(false)
+
+        underTest.getEligibilityData(esaEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: ESA")
+        )
+      }
+
+      "should fail with FeatureDisabled is jsa is disabled" in {
+
+        (() => mockAppConfig.jsaEnabled).expects().returning(false)
+
+        underTest.getEligibilityData(jsaEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: JSA")
+        )
+      }
+
+      "should fail with FeatureDisabled is GYSP is disabled" in {
+
+        (() => mockAppConfig.gyspEnabled).expects().returning(false)
+
+        underTest.getEligibilityData(gyspEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: GYSP")
+        )
+      }
+
+      "should fail with FeatureDisabled is MA is disabled" in {
+
+        (() => mockAppConfig.maEnabled).expects().returning(false)
+
+        underTest.getEligibilityData(maEligibilityCheckDataRequest, correlationId).value.futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: MA")
+        )
+      }
+
+      "should fail with FeatureDisabled is SEARCHLIGHT is disabled" in {
+
+        (() => mockAppConfig.searchlightEnabled).expects().returning(false).twice()
+
+        underTest
+          .getEligibilityData(bspSearchlightEligibilityCheckDataRequest, correlationId)
+          .value
+          .futureValue shouldBe Left(
+          FeatureDisabled("feature disabled: SEARCHLIGHT")
         )
       }
     }

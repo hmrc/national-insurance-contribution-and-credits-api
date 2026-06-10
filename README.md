@@ -136,6 +136,8 @@ in addition to the above benefit types this service also supports SEARCHLIGHT re
 
 **POST /benefit-eligibility-info**
 
+All requests must include a `correlationId` header.
+
 | Parameter                                    | Type    | Description                                                 | Mandatory |
 |:---------------------------------------------|:--------|:------------------------------------------------------------|:----------|
 | benefitType                                  | String  | Type of benefit for eligibility check (BSP, JSA, ESA)       | Yes       |
@@ -267,6 +269,8 @@ Following successful data retrieval from all relevant NPS endpoints, the system 
 
 ### GET /benefit-eligibility-info?cursorId=\<someId\>
 
+All requests must include a `correlationId` header.
+
 Retrieves paginated benefit eligibility data using a cursor reference. Use this endpoint when a previous POST request returned a `nextCursor` value, indicating additional data is available.
 
 **Query Parameters:**
@@ -276,7 +280,8 @@ Retrieves paginated benefit eligibility data using a cursor reference. Use this 
 | nextCursor | Cursor reference for retrieving paginated data | Yes       |
 
 
-See OAS documentation for further detail (application.yaml)
+All responses include a `correlationId` header for request tracing throughout the request journey.
+See OAS documentation for further detail (resources/public/api/conf/1.0/application.yaml)
 
 ## Pagination Management and Data Continuity
 

@@ -156,7 +156,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
 ###
-GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextPage()
+GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextPage(cursorId: Option[String])
 
 
 POST /contribution-and-credits  uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.NICCController.postContributionsAndCredits
