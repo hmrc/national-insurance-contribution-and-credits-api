@@ -22,7 +22,7 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import play.api.libs.json.*
 import play.api.mvc.Results.*
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{Headers, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
@@ -34,7 +34,7 @@ object BenefitEligibilityErrorHandler {
 
   def handleError(
       error: BenefitEligibilityError,
-      request: Request[AnyContent]
+      requestHeaders: Headers
   )(implicit hc: HeaderCarrier): Result = {
 
     val response = error match {
@@ -73,6 +73,9 @@ object BenefitEligibilityErrorHandler {
             ErrorResponse(ErrorCode.NotFound, ErrorReason(s"record not found for cursorId: ${cursorId.value}"))
           )
         )
+      case FeatureDisabled(message) =>
+        logger.error(s"could not process request, $message")
+        NotFound
       case err =>
         logger.error(s"Error processing request", err)
         InternalServerError(
@@ -82,7 +85,8 @@ object BenefitEligibilityErrorHandler {
         )
     }
 
-    RequestHelper.addCorrelationIdHeader(response, request)
+    RequestHelper.addCorrelationIdHeader(response, requestHeaders)
+
   }
 
 }

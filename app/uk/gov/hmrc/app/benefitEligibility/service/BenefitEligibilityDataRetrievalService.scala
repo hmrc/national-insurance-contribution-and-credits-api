@@ -18,9 +18,10 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.syntax.all.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId, FeatureDisabled}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
+import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -32,7 +33,8 @@ class BenefitEligibilityDataRetrievalService @Inject() (
     jobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService,
     getYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService,
     bspDataRetrievalService: BereavementSupportPaymentDataRetrievalService,
-    searchlightDataRetrievalService: SearchlightDataRetrievalService
+    searchlightDataRetrievalService: SearchlightDataRetrievalService,
+    appConfig: AppConfig
 )(implicit ec: ExecutionContext) {
 
   def getEligibilityData(
@@ -43,18 +45,26 @@ class BenefitEligibilityDataRetrievalService @Inject() (
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult] = {
     implicit val cid: CorrelationId = correlationId
     request match {
-      case request: MAEligibilityCheckDataRequest =>
+      case request: MAEligibilityCheckDataRequest if appConfig.maEnabled =>
         maternityAllowanceDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
-      case request: ESAEligibilityCheckDataRequest =>
+      case request: ESAEligibilityCheckDataRequest if appConfig.esaEnabled =>
         employmentSupportAllowanceDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
-      case request: JSAEligibilityCheckDataRequest =>
+      case request: JSAEligibilityCheckDataRequest if appConfig.jsaEnabled =>
         jobSeekersAllowanceDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
-      case request: GYSPEligibilityCheckDataRequest =>
+      case request: GYSPEligibilityCheckDataRequest if appConfig.gyspEnabled =>
         getYourStatePensionDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
-      case request: BSPEligibilityCheckDataRequest =>
+      case request: BSPEligibilityCheckDataRequest if appConfig.bspEnabled =>
         bspDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
-      case request: SearchlightEligibilityCheckDataRequest =>
+      case request: SearchlightEligibilityCheckDataRequest if appConfig.searchlightEnabled =>
         searchlightDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]
+      case request: SearchlightEligibilityCheckDataRequest if !appConfig.searchlightEnabled =>
+        EitherT.left[EligibilityCheckDataResult](
+          Future.successful(FeatureDisabled(s"feature disabled: SEARCHLIGHT"))
+        )
+      case request =>
+        EitherT.left[EligibilityCheckDataResult](
+          Future.successful(FeatureDisabled(s"feature disabled: ${request.benefitType.entryName}"))
+        )
     }
   }
 

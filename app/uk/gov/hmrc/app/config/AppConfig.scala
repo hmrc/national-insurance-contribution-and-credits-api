@@ -43,62 +43,63 @@ class AppConfig @Inject() (config: ServicesConfig) {
     config.baseUrl(s"hip.nps.$npsEndpointName")
   }
 
-  private val hipServicePrefix = "microservice.services.hip"
+  private lazy val hipServicePrefix = "microservice.services.hip"
 
-  val pageTaskTtlSeconds: Int = config.getInt("mongodb.pageTaskTtlSeconds")
+  lazy val pageTaskTtlSeconds: Int = config.getInt("mongodb.pageTaskTtlSeconds")
 
-  val hipBaseUrl: String = config.baseUrl("hip")
+  lazy val hipBaseUrl: String = config.baseUrl("hip")
 
-  val hipOriginatorId: String = config.getString(s"$hipServicePrefix.originatorId")
+  lazy val hipOriginatorId: String = config.getString(s"$hipServicePrefix.originatorId")
 
-  val npsOriginatorIdPrefix = s"$hipServicePrefix.nps.originatorId"
+  lazy val npsOriginatorIdPrefix = s"$hipServicePrefix.nps.originatorId"
 
-  val hipOriginatorIdBsp =
+  lazy val hipOriginatorIdBsp =
     OriginatorIdConfig(
       standardId = config.getString(s"$npsOriginatorIdPrefix.bsp.standard"),
       searchlightId = config.getString(s"$npsOriginatorIdPrefix.bsp.searchlight")
     )
 
-  val hipOriginatorIdGysp = OriginatorIdConfig(
+  lazy val hipOriginatorIdGysp = OriginatorIdConfig(
     standardId = config.getString(s"$npsOriginatorIdPrefix.gysp.standard"),
     searchlightId = config.getString(s"$npsOriginatorIdPrefix.gysp.searchlight")
   )
 
-  val hipOriginatorIdMa = OriginatorIdConfig(
+  lazy val hipOriginatorIdMa = OriginatorIdConfig(
     standardId = config.getString(s"$npsOriginatorIdPrefix.ma.standard"),
     searchlightId = config.getString(s"$npsOriginatorIdPrefix.ma.searchlight")
   )
 
-  val hipOriginatorIdEsa = OriginatorIdConfig(
+  lazy val hipOriginatorIdEsa = OriginatorIdConfig(
     standardId = config.getString(s"$npsOriginatorIdPrefix.esa.standard"),
     searchlightId = config.getString(s"$npsOriginatorIdPrefix.esa.searchlight")
   )
 
-  val hipOriginatorIdJsa = OriginatorIdConfig(
+  lazy val hipOriginatorIdJsa = OriginatorIdConfig(
     standardId = config.getString(s"$npsOriginatorIdPrefix.jsa.standard"),
     searchlightId = config.getString(s"$npsOriginatorIdPrefix.jsa.searchlight")
   )
 
-  private val hipClientId: String     = config.getString(s"$hipServicePrefix.clientId")
-  private val hipClientSecret: String = config.getString(s"$hipServicePrefix.clientSecret")
+  private lazy val hipClientId: String     = config.getString(s"$hipServicePrefix.clientId")
+  private lazy val hipClientSecret: String = config.getString(s"$hipServicePrefix.clientSecret")
 
-  val base64HipAuthToken: String =
+  lazy val base64HipAuthToken: String =
     Base64.getEncoder.encode(s"$hipClientId:$hipClientSecret".getBytes(StandardCharsets.UTF_8)).map(_.toChar).mkString
 
-  private val newHipClientId: String     = config.getString(s"$hipServicePrefix.benefitEligibilityClientId")
-  private val newHipClientSecret: String = config.getString(s"$hipServicePrefix.benefitEligibilityClientSecret")
+  private lazy val newHipClientId: String     = config.getString(s"$hipServicePrefix.benefitEligibilityClientId")
+  private lazy val newHipClientSecret: String = config.getString(s"$hipServicePrefix.benefitEligibilityClientSecret")
 
-  val newBase64HipAuthToken: String =
+  lazy val newBase64HipAuthToken: String =
     Base64.getEncoder
       .encode(s"$newHipClientId:$newHipClientSecret".getBytes(StandardCharsets.UTF_8))
       .map(_.toChar)
       .mkString
 
-  val maEnabled: Boolean          = config.getBoolean("maEnabled")
-  val esaEnabled: Boolean         = config.getBoolean("esaEnabled")
-  val jsaEnabled: Boolean         = config.getBoolean("jsaEnabled")
-  val bspEnabled: Boolean         = config.getBoolean("bspEnabled")
-  val gyspEnabled: Boolean        = config.getBoolean("gyspEnabled")
-  val searchlightEnabled: Boolean = config.getBoolean("searchlightEnabled")
+  lazy val encryptData            = config.getBoolean("encryptData")
+  def maEnabled: Boolean          = config.getBoolean("maEnabled")
+  def esaEnabled: Boolean         = config.getBoolean("esaEnabled")
+  def jsaEnabled: Boolean         = config.getBoolean("jsaEnabled")
+  def bspEnabled: Boolean         = config.getBoolean("bspEnabled")
+  def gyspEnabled: Boolean        = config.getBoolean("gyspEnabled")
+  def searchlightEnabled: Boolean = config.getBoolean("searchlightEnabled")
 
 }

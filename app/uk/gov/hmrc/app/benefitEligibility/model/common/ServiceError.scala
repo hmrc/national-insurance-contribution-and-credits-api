@@ -97,4 +97,8 @@ case class DatabaseError(throwable: Throwable) extends BenefitEligibilityError {
   override def getMessage: String = throwable.getMessage
 }
 
+case class FeatureDisabled(message: String) extends BenefitEligibilityError {
+  override def getMessage: String = message
+}
+
 case class ContributionCreditTaxWindowCalculatorError(message: String) extends BenefitEligibilityError
