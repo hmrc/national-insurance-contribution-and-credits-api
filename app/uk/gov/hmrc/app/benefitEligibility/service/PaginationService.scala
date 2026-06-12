@@ -23,6 +23,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   BenefitType,
+  CorrelationId,
   DatabaseError,
   FeatureDisabled,
   Identifier
@@ -55,58 +56,25 @@ class PaginationService @Inject() (
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
-  def addTask(pageTask: PageTask)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
-    def createNewPageTask(pageTask: PageTask) = {
+  def addTask(
+      pageTaskDocument: PageTaskDocument
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
+    def createNewPageTask(pageTaskDocument: PageTaskDocument) = {
       logger.info("Creating new page task")
-      val newPageTask: PageTask = pageTask match {
-        case m: MaPageTask =>
-          MaPageTask(
-            m.correlationId,
-            PageTaskId(uuidGenerator.generate),
-            m.liabilitiesPaging,
-            m.nationalInsuranceNumber,
-            m.createdAt
-          )
-        case b: BspPageTask =>
-          BspPageTask(
-            b.correlationId,
-            PageTaskId(uuidGenerator.generate),
-            b.marriageDetailsPaging,
-            b.contributionAndCreditsPaging,
-            b.nationalInsuranceNumber,
-            b.createdAt
-          )
-        case g: GyspPageTask =>
-          GyspPageTask(
-            g.correlationId,
-            PageTaskId(uuidGenerator.generate),
-            g.benefitSchemeMembershipDetailsPaging,
-            g.marriageDetailsPaging,
-            g.contributionAndCreditsPaging,
-            g.nationalInsuranceNumber,
-            g.createdAt
-          )
-        case s: SearchLightPageTask =>
-          SearchLightPageTask(
-            s.correlationId,
-            PageTaskId(uuidGenerator.generate),
-            s.paginationType,
-            s.contributionAndCreditsPaging,
-            s.nationalInsuranceNumber,
-            s.createdAt
-          )
-      }
-      addTask(newPageTask)
+      val newPageTaskDocument = pageTaskDocument.copy(
+        pageTaskId = PageTaskId(uuidGenerator.generate)
+      )
+      addTask(newPageTaskDocument)
     }
 
-    pageTaskRepo.insert(pageTask).recoverWith {
+    pageTaskRepo.insert(pageTaskDocument).recoverWith {
       case DatabaseError(dbError: com.mongodb.MongoWriteException)
           if dbError.getError.getCategory == com.mongodb.ErrorCategory.DUPLICATE_KEY =>
         logger.warn("MongoWriteException: Duplicate key error")
-        createNewPageTask(pageTask)
+        createNewPageTask(pageTaskDocument)
       case DatabaseError(dbError: com.mongodb.DuplicateKeyException) =>
         logger.warn("DuplicateKeyException: Duplicate key error")
-        createNewPageTask(pageTask)
+        createNewPageTask(pageTaskDocument)
       case error =>
         EitherT.leftT(error)
     }
@@ -116,20 +84,20 @@ class PaginationService @Inject() (
       pageTaskId: PageTaskId
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] =
     for {
-      existingPageTask <- pageTaskRepo.getItem(pageTaskId)
-      paginationResult <- existingPageTask match {
+      existingPageTaskDocument <- pageTaskRepo.getItem(pageTaskId)
+      paginationResult <- existingPageTaskDocument.data.as[PageTask] match {
         case task: MaPageTask if appConfig.maEnabled =>
           logger.info("processing MaPageTask")
-          processMaPageTask(task)
+          processMaPageTask(existingPageTaskDocument.correlationId, task)
         case task: BspPageTask if appConfig.bspEnabled =>
           logger.info("processing BspPageTask")
-          processBspPageTask(task)
+          processBspPageTask(existingPageTaskDocument.correlationId, task)
         case task: GyspPageTask if appConfig.gyspEnabled =>
           logger.info("processing GyspPageTask")
-          processGyspPageTask(task)
+          processGyspPageTask(existingPageTaskDocument.correlationId, task)
         case task: SearchLightPageTask if appConfig.searchlightEnabled =>
           logger.info("processing SearchLightPageTask")
-          processSearchlightPageTask(task)
+          processSearchlightPageTask(existingPageTaskDocument.correlationId, task)
         case task: SearchLightPageTask if !appConfig.searchlightEnabled =>
           EitherT.left[PaginationResult](
             Future.successful(FeatureDisabled("feature disabled: SEARCHLIGHT"))
@@ -139,13 +107,17 @@ class PaginationService @Inject() (
             Future.successful(FeatureDisabled(s"feature disabled: ${task.paginationType.entryName}"))
           )
       }
-      pageTask = PageTask.createPaginatingTask(paginationResult, currentTime)
-      _ <- pageTask.fold(pageTaskRepo.delete(existingPageTask.pageTaskId.value).map(_ => ()))(newPageTask =>
-        pageTaskRepo.upsert(Some(existingPageTask.pageTaskId.value), newPageTask).map(_ => ())
-      )
+      pageTaskDoc = PageTask.createPageTaskDocument(paginationResult, currentTime)
+
+      _ <- pageTaskDoc
+        .fold(pageTaskRepo.delete(existingPageTaskDocument.pageTaskId.value).map(_ => ()))(newPageTaskDoc =>
+          pageTaskRepo.upsert(Some(existingPageTaskDocument.pageTaskId.value), newPageTaskDoc)
+        )
+        .map(_ => ())
     } yield paginationResult
 
   private[service] def processMaPageTask(
+      correlationId: CorrelationId,
       maPageTask: MaPageTask
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for MA")
@@ -157,7 +129,7 @@ class PaginationService @Inject() (
       .sequence
       .map { liabilityResult =>
         PaginationResult(
-          correlationId = maPageTask.correlationId,
+          correlationId = correlationId,
           paginationType = maPageTask.paginationType,
           nationalInsuranceNumber = maPageTask.nationalInsuranceNumber,
           liabilitiesResult = liabilityResult,
@@ -174,7 +146,7 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processBspPageTask(bspPageTask: BspPageTask)(
+  private[service] def processBspPageTask(correlationId: CorrelationId, bspPageTask: BspPageTask)(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for BSP")
@@ -191,7 +163,7 @@ class PaginationService @Inject() (
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult) =>
         PaginationResult(
-          correlationId = bspPageTask.correlationId,
+          correlationId = correlationId,
           paginationType = bspPageTask.paginationType,
           liabilitiesResult = Nil,
           nationalInsuranceNumber = bspPageTask.nationalInsuranceNumber,
@@ -211,7 +183,10 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processSearchlightPageTask(searchLightPageTask: SearchLightPageTask)(
+  private[service] def processSearchlightPageTask(
+      correlationId: CorrelationId,
+      searchLightPageTask: SearchLightPageTask
+  )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for BSP")
@@ -223,7 +198,7 @@ class PaginationService @Inject() (
     )
       .map { contributionCreditResult =>
         PaginationResult(
-          correlationId = searchLightPageTask.correlationId,
+          correlationId = correlationId,
           paginationType = searchLightPageTask.paginationType,
           liabilitiesResult = Nil,
           nationalInsuranceNumber = searchLightPageTask.nationalInsuranceNumber,
@@ -243,7 +218,7 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processGyspPageTask(gyspPageTask: GyspPageTask)(
+  private[service] def processGyspPageTask(correlationId: CorrelationId, gyspPageTask: GyspPageTask)(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
     logger.info("Paginating for GYSP")
@@ -301,7 +276,7 @@ class PaginationService @Inject() (
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult, benefitSchemeMembershipDetailsData) =>
         PaginationResult(
-          correlationId = gyspPageTask.correlationId,
+          correlationId = correlationId,
           paginationType = gyspPageTask.paginationType,
           gyspPageTask.nationalInsuranceNumber,
           liabilitiesResult = Nil,

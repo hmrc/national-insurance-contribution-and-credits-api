@@ -20,15 +20,13 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxApplicativeError
 import com.google.inject.{ImplementedBy, Inject}
 import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{
-  BenefitEligibilityError,
-  CursorId,
-  DatabaseError,
-  RecordNotFound
-}
+import play.api.libs.json.JsObject
+import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.util.RequestAwareLogger
 import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -43,23 +41,27 @@ trait BenefitEligibilityRepository {
 
   def getItem(pageTaskId: PageTaskId)(
       implicit hc: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, PageTask]
+  ): EitherT[Future, BenefitEligibilityError, PageTaskDocument]
 
-  def upsert(id: Option[UUID], update: PageTask)(
+  def upsert(id: Option[UUID], update: PageTaskDocument)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, UUID]
 
-  def insert(pageTask: PageTask)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID]
+  def insert(pageTask: PageTaskDocument)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID]
   def delete(id: UUID)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, Long]
 }
 
 @Singleton
-class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent, config: AppConfig)(
+class BenefitEligibilityRepositoryImpl @Inject() (
+    mongoComponent: MongoComponent,
+    encrypterDecrypter: Encrypter & Decrypter,
+    config: AppConfig
+)(
     implicit ec: ExecutionContext
-) extends PlayMongoRepository[PageTask](
+) extends PlayMongoRepository[PageTaskDocument](
       collectionName = "page-tasks",
       mongoComponent = mongoComponent,
-      domainFormat = PageTask.pageTaskFormat,
+      domainFormat = PageTaskDocument.pageTaskDocumentFormat,
       indexes = Seq(
         IndexModel(Indexes.ascending("pageTaskId"), IndexOptions().unique(true)),
         IndexModel(
@@ -77,7 +79,7 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
 
   def getItem(
       pageTaskId: PageTaskId
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PageTask] = {
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PageTaskDocument] = {
     logger.info("getItem called - Retrieving page task from Database ")
     collection
       .find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId)))
@@ -85,112 +87,68 @@ class BenefitEligibilityRepositoryImpl @Inject() (mongoComponent: MongoComponent
       .attemptT
       .leftMap(error => DatabaseError(error))
       .flatMap {
-        case None           => EitherT.leftT(RecordNotFound(CursorId.from(pageTaskId)))
-        case Some(pageTask) => EitherT.rightT(pageTask)
+        case None => EitherT.leftT(RecordNotFound(CursorId.from(pageTaskId)))
+        case Some(pageTaskDoc) =>
+          val maybePageTaskDoc =
+            if (config.encryptData) {
+              pageTaskDoc.decrypt(encrypterDecrypter)
+
+            } else {
+              Some(pageTaskDoc)
+            }
+
+          EitherT.fromOption[Future](maybePageTaskDoc, RecordNotFound(CursorId(pageTaskId.value.toString)))
       }
   }
 
-  def upsert(existingPageTaskId: Option[UUID], pageTask: PageTask)(
+  def upsert(existingPageTaskId: Option[UUID], pageTaskDocument: PageTaskDocument)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, UUID] = {
     logger.info("Upsert called - Updating page task in database")
-    val updates = pageTask match {
-      case MaPageTask(
-            correlationId,
-            id,
-            paginationType,
-            liabilitiesPaging,
-            nationalInsuranceNumber,
-            createdAt
-          ) =>
-        Updates.combine(
-          Updates.set("correlationId", Codecs.toBson(correlationId)),
-          Updates.set("pageTaskId", Codecs.toBson(id)),
-          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
-          Updates.set("liabilitiesPaging", Codecs.toBson(liabilitiesPaging)),
-          Updates.set("paginationType", Codecs.toBson(paginationType)),
-          Updates.set("createdAt", Codecs.toBson(createdAt))
-        )
-      case BspPageTask(
-            correlationId,
-            id,
-            paginationType,
-            marriageDetailsPaging,
-            contributionAndCreditsPaging,
-            nationalInsuranceNumber,
-            createdAt
-          ) =>
-        Updates.combine(
-          Updates.set("correlationId", Codecs.toBson(correlationId)),
-          Updates.set("pageTaskId", Codecs.toBson(id)),
-          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
-          Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
-          Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
-          Updates.set("paginationType", Codecs.toBson(paginationType)),
-          Updates.set("createdAt", Codecs.toBson(createdAt))
-        )
-      case GyspPageTask(
-            correlationId,
-            id,
-            paginationType,
-            benefitSchemeMembershipDetailsPaging,
-            marriageDetailsPaging,
-            contributionAndCreditsPaging,
-            nationalInsuranceNumber,
-            createdAt
-          ) =>
-        Updates.combine(
-          Updates.set("correlationId", Codecs.toBson(correlationId)),
-          Updates.set("pageTaskId", Codecs.toBson(id)),
-          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
-          Updates.set("benefitSchemeMembershipDetailsPaging", Codecs.toBson(benefitSchemeMembershipDetailsPaging)),
-          Updates.set("marriageDetailsPaging", Codecs.toBson(marriageDetailsPaging)),
-          Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
-          Updates.set("paginationType", Codecs.toBson(paginationType)),
-          Updates.set("createdAt", Codecs.toBson(createdAt))
-        )
 
-      case SearchLightPageTask(
-            callSystem,
-            correlationId,
-            id,
-            paginationType,
-            contributionAndCreditsPaging,
-            nationalInsuranceNumber,
-            createdAt
-          ) =>
-        Updates.combine(
-          Updates.set("callSystem", Codecs.toBson(callSystem)),
-          Updates.set("correlationId", Codecs.toBson(correlationId)),
-          Updates.set("pageTaskId", Codecs.toBson(id)),
-          Updates.set("nationalInsuranceNumber", Codecs.toBson(nationalInsuranceNumber)),
-          Updates.set("contributionAndCreditsPaging", Codecs.toBson(contributionAndCreditsPaging)),
-          Updates.set("paginationType", Codecs.toBson(paginationType)),
-          Updates.set("createdAt", Codecs.toBson(createdAt))
-        )
+    val documentData = if (config.encryptData) {
+      pageTaskDocument.encrypt(encrypterDecrypter).data
+    } else {
+      pageTaskDocument.data
     }
+
+    val updatedDocumentBson = Updates.combine(
+      Updates.set("correlationId", Codecs.toBson(pageTaskDocument.correlationId)),
+      Updates.set("pageTaskId", Codecs.toBson(pageTaskDocument.pageTaskId)),
+      Updates.set("data", Codecs.toBson(documentData)),
+      Updates.set("createdAt", Codecs.toBson(pageTaskDocument.createdAt))
+    )
+
     collection
       .findOneAndUpdate(
         Filters.equal("pageTaskId", Codecs.toBson(existingPageTaskId.map(_.toString))),
-        updates,
+        updatedDocumentBson,
         FindOneAndUpdateOptions().upsert(true)
       )
       .toFuture()
       .attemptT
-      .map(_ => pageTask.pageTaskId.value)
+      .map(_ => pageTaskDocument.pageTaskId.value)
       .leftMap(error => DatabaseError(error))
   }
 
-  def insert(pageTask: PageTask)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
+  def insert(
+      pageTaskDocument: PageTaskDocument
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
     logger.info("insert called - inserting page task in database")
+
+    val document = if (config.encryptData) {
+      pageTaskDocument.encrypt(encrypterDecrypter)
+    } else {
+      pageTaskDocument
+    }
 
     collection
       .insertOne(
-        pageTask
+        document
       )
       .toFuture()
       .attemptT
-      .map(_ => pageTask.pageTaskId.value)
+      .map(_ => document.pageTaskId.value)
       .leftMap(error => DatabaseError(error))
   }
 

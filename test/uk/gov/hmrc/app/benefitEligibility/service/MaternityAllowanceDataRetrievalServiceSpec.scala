@@ -21,6 +21,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.{
   LiabilitySummaryDetailsConnector,
   NiContributionsAndCreditsConnector
@@ -169,11 +170,17 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     Some(Callback(Some(CallbackUrl("/some/url"))))
   )
 
-  val paging = MaPageTask(
+  val paging = PageTaskDocument(
     correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
-    List(PaginationSource(ApiName.Liabilities, "/some/url")),
-    identifier,
+    Json
+      .toJson(
+        MaPageTask(
+          List(PaginationSource(ApiName.Liabilities, "/some/url")),
+          identifier
+        )
+      )
+      .as[JsObject],
     testInstant
   )
 
@@ -213,10 +220,12 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
 
-        (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
+        (() => mockUUIDService.generate)
+          .expects()
+          .returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
         (mockPaginationService
-          .addTask(_: PageTask)(_: HeaderCarrier))
+          .addTask(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(paging, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 

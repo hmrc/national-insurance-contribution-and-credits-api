@@ -24,6 +24,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
@@ -114,16 +115,22 @@ class PaginationServiceSpec
         val pageTaskId1       = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
-        val pageTask = MaPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId1,
-          liabilitiesPaging = paginationSource3,
-          nationalInsuranceNumber,
-          Instant.now
+          pageTaskId1,
+          Json
+            .toJson(
+              MaPageTask(
+                liabilitiesPaging = paginationSource3,
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(pageTask, *)
           .returning(EitherT.rightT(pageTask.pageTaskId.value))
 
@@ -132,20 +139,26 @@ class PaginationServiceSpec
         )
       }
       "should return a Benefit eligibility error if upsert fails" in {
-        val pageTaskId1       = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
-        val pageTask = MaPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId1,
-          liabilitiesPaging = paginationSource3,
-          nationalInsuranceNumber,
-          Instant.now
+          PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+          Json
+            .toJson(
+              MaPageTask(
+                liabilitiesPaging = paginationSource3,
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
 
@@ -153,40 +166,54 @@ class PaginationServiceSpec
 
       }
       "should return a new uuid if current uuid already exists in database for MA" in {
-        val uuidOne           = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val pageTaskIdOne     = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val pageTaskIdTwo     = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val paginationSource3 = List(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
-        val pageTask = MaPageTask(
-          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidOne,
-          liabilitiesPaging = paginationSource3,
-          nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+        val pageTask = PageTaskDocument(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb775")),
+          pageTaskIdOne,
+          Json
+            .toJson(
+              MaPageTask(
+                liabilitiesPaging = paginationSource3,
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
-        val newPageTask = MaPageTask(
-          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidTwo,
-          liabilitiesPaging = paginationSource3,
-          nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+
+        val newPageTask = PageTaskDocument(
+          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb775")),
+          pageTaskIdTwo,
+          Json
+            .toJson(
+              MaPageTask(
+                liabilitiesPaging = paginationSource3,
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
+
         val serverAddress              = new ServerAddress()
         val errorDetails: BsonDocument = new BsonDocument()
         val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
         val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
           .noMoreThanOnce()
 
         // Note: This verifies that a new uuid is being generated if we get a duplicate key error
-        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+        (() => mockUuidGenerator.generate).expects().returning(pageTaskIdTwo.value)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(newPageTask, *)
           .returning(EitherT.rightT(newPageTask.pageTaskId.value))
           .noMoreThanOnce()
@@ -198,29 +225,43 @@ class PaginationServiceSpec
         val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val paginationSource3 = Some(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
-        val pageTask = BspPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidOne,
-          marriageDetailsPaging = paginationSource3,
-          contributionAndCreditsPaging = None,
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+          uuidOne,
+          Json
+            .toJson(
+              BspPageTask(
+                marriageDetailsPaging = paginationSource3,
+                contributionAndCreditsPaging = None,
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
-        val newPageTask = BspPageTask(
+
+        val newPageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidTwo,
-          marriageDetailsPaging = paginationSource3,
-          contributionAndCreditsPaging = None,
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+          uuidTwo,
+          Json
+            .toJson(
+              BspPageTask(
+                marriageDetailsPaging = paginationSource3,
+                contributionAndCreditsPaging = None,
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
+
         val serverAddress              = new ServerAddress()
         val errorDetails: BsonDocument = new BsonDocument()
         val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
         val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
           .noMoreThanOnce()
@@ -229,7 +270,7 @@ class PaginationServiceSpec
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(newPageTask, *)
           .returning(EitherT.rightT(newPageTask.pageTaskId.value))
           .noMoreThanOnce()
@@ -241,31 +282,45 @@ class PaginationServiceSpec
         val uuidTwo           = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val paginationSource3 = Some(PaginationSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
-        val pageTask = GyspPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidOne,
-          benefitSchemeMembershipDetailsPaging = paginationSource3,
-          marriageDetailsPaging = None,
-          contributionAndCreditsPaging = None,
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+          uuidOne,
+          Json
+            .toJson(
+              GyspPageTask(
+                benefitSchemeMembershipDetailsPaging = paginationSource3,
+                marriageDetailsPaging = None,
+                contributionAndCreditsPaging = None,
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
-        val newPageTask = GyspPageTask(
+
+        val newPageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidTwo,
-          benefitSchemeMembershipDetailsPaging = paginationSource3,
-          marriageDetailsPaging = None,
-          contributionAndCreditsPaging = None,
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+          uuidTwo,
+          Json
+            .toJson(
+              GyspPageTask(
+                benefitSchemeMembershipDetailsPaging = paginationSource3,
+                marriageDetailsPaging = None,
+                contributionAndCreditsPaging = None,
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
+
         val serverAddress              = new ServerAddress()
         val errorDetails: BsonDocument = new BsonDocument()
         val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
         val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
           .noMoreThanOnce()
@@ -274,7 +329,7 @@ class PaginationServiceSpec
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(newPageTask, *)
           .returning(EitherT.rightT(newPageTask.pageTaskId.value))
           .noMoreThanOnce()
@@ -291,29 +346,44 @@ class PaginationServiceSpec
               .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
             dob
           )
-        val pageTask = SearchLightPageTask(
+
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidOne,
-          paginationType = PaginationType.MaPagination,
-          contributionAndCreditsPaging = Some(paginationSource2),
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+          uuidOne,
+          Json
+            .toJson(
+              SearchLightPageTask(
+                paginationType = PaginationType.MaPagination,
+                contributionAndCreditsPaging = Some(paginationSource2),
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
-        val newPageTask = SearchLightPageTask(
+
+        val newPageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = uuidTwo,
-          paginationType = PaginationType.MaPagination,
-          contributionAndCreditsPaging = Some(paginationSource2),
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
+          uuidTwo,
+          Json
+            .toJson(
+              SearchLightPageTask(
+                paginationType = PaginationType.MaPagination,
+                contributionAndCreditsPaging = Some(paginationSource2),
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
+
         val serverAddress              = new ServerAddress()
         val errorDetails: BsonDocument = new BsonDocument()
         val writeConcernResult         = WriteConcernResult.acknowledged(1, true, null)
         val error = new com.mongodb.DuplicateKeyException(errorDetails, serverAddress, writeConcernResult)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(pageTask, *)
           .returning(EitherT.leftT(DatabaseError(error)))
           .noMoreThanOnce()
@@ -322,7 +392,7 @@ class PaginationServiceSpec
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
 
         (mockBenefitEligibilityRepository
-          .insert(_: PageTask)(_: HeaderCarrier))
+          .insert(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(newPageTask, *)
           .returning(EitherT.rightT(newPageTask.pageTaskId.value))
           .noMoreThanOnce()
@@ -332,20 +402,26 @@ class PaginationServiceSpec
     }
     ".paginate" - {
       "should return pagination result for MA" in {
-        val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val pageTaskId              = PageTaskId(uuid)
+        val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        PageTaskId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
         val paginationSource1       = List(PaginationSource(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
-        val pageTask = MaPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId,
-          liabilitiesPaging = paginationSource1,
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = Instant.now
+          PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+          Json
+            .toJson(
+              MaPageTask(
+                liabilitiesPaging = paginationSource1,
+                nationalInsuranceNumber = nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
@@ -363,7 +439,7 @@ class PaginationServiceSpec
           .returning(EitherT.rightT(NpsApiResult.SuccessResult(ApiName.Liabilities, liabilitiesSuccessResponse)))
 
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .upsert(_: Option[UUID], _: PageTaskDocument)(_: HeaderCarrier))
           .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
@@ -393,8 +469,8 @@ class PaginationServiceSpec
         )
       }
       "should return pagination result for BSP" in {
-        val uuid                               = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val pageTaskId                         = PageTaskId(uuid)
+        val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        PageTaskId(uuid)
         val marriageDetailsCallBackUrl: String = "SomeCallBackURL1"
         val nationalInsuranceNumber            = Identifier("GD379251T")
         val dob                                = DateOfBirth(LocalDate.parse("2025-10-10"))
@@ -415,13 +491,19 @@ class PaginationServiceSpec
 
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(None, None, None)
 
-        val pageTask = BspPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId,
-          marriageDetailsPaging = Some(paginationSource1),
-          contributionAndCreditsPaging = Some(paginationSource2),
-          nationalInsuranceNumber,
-          Instant.now
+          PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+          Json
+            .toJson(
+              BspPageTask(
+                marriageDetailsPaging = Some(paginationSource1),
+                contributionAndCreditsPaging = Some(paginationSource2),
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
@@ -430,13 +512,13 @@ class PaginationServiceSpec
           .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .upsert(_: Option[UUID], _: PageTaskDocument)(_: HeaderCarrier))
           .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetailsData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.from(pageTask.paginationType), marriageDetailsCallBackUrl, *)
+          .expects(BenefitType.BSP, marriageDetailsCallBackUrl, *)
           .returning(
             EitherT.rightT(NpsApiResult.SuccessResult(ApiName.MarriageDetails, marriageDetailsSuccessResponse))
           )
@@ -485,8 +567,8 @@ class PaginationServiceSpec
           .futureValue shouldBe Right(expected)
       }
       "should return pagination result for SEARCHLIGHT" in {
-        val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val pageTaskId              = PageTaskId(uuid)
+        val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        PageTaskId(uuid)
         val nationalInsuranceNumber = Identifier("GD379251T")
         val dob                     = DateOfBirth(LocalDate.parse("2025-10-10"))
 
@@ -502,13 +584,19 @@ class PaginationServiceSpec
 
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(None, None, None)
 
-        val pageTask = SearchLightPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId,
-          paginationType = PaginationType.BspPagination,
-          contributionAndCreditsPaging = Some(paginationSource),
-          nationalInsuranceNumber,
-          Instant.now
+          PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+          Json
+            .toJson(
+              SearchLightPageTask(
+                paginationType = PaginationType.BspPagination,
+                contributionAndCreditsPaging = Some(paginationSource),
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
@@ -517,7 +605,7 @@ class PaginationServiceSpec
           .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .upsert(_: Option[UUID], _: PageTaskDocument)(_: HeaderCarrier))
           .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
@@ -697,20 +785,29 @@ class PaginationServiceSpec
         val benefitSchemeDetailsSuccessResponse =
           BenefitSchemeDetailsSuccessResponse(benefitSchemeDetails, List())
 
-        val pageTask = GyspPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId,
-          benefitSchemeMembershipDetailsPaging = Some(paginationSource3),
-          marriageDetailsPaging = Some(paginationSource1),
-          contributionAndCreditsPaging = Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList
-                .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
+          PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+          Json
+            .toJson(
+              GyspPageTask(
+                benefitSchemeMembershipDetailsPaging = Some(paginationSource3),
+                marriageDetailsPaging = Some(paginationSource1),
+                contributionAndCreditsPaging = Some(
+                  ContributionAndCreditsPaging(
+                    NonEmptyList
+                      .of(
+                        TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
+                        TaxWindow(StartTaxYear(2021), EndTaxYear(2025))
+                      ),
+                    DateOfBirth(LocalDate.parse("2025-10-10"))
+                  )
+                ),
+                nationalInsuranceNumber
+              )
             )
-          ),
-          nationalInsuranceNumber,
-          Instant.now
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
@@ -719,13 +816,13 @@ class PaginationServiceSpec
           .expects(pageTask.pageTaskId, *)
           .returning(EitherT.rightT(pageTask))
         (mockBenefitEligibilityRepository
-          .upsert(_: Option[UUID], _: PageTask)(_: HeaderCarrier))
+          .upsert(_: Option[UUID], _: PageTaskDocument)(_: HeaderCarrier))
           .expects(Some(pageTask.pageTaskId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
         (mockMarriageDetailsConnector
           .fetchMarriageDetailsData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.from(pageTask.paginationType), marriageDetailsCallBackUrl, *)
+          .expects(BenefitType.GYSP, marriageDetailsCallBackUrl, *)
           .returning(
             EitherT.rightT(NpsApiResult.SuccessResult(ApiName.MarriageDetails, marriageDetailsSuccessResponse))
           )
@@ -734,7 +831,7 @@ class PaginationServiceSpec
           .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
             _: HeaderCarrier
           ))
-          .expects(BenefitType.from(pageTask.paginationType), niContributionsAndCreditsRequest, None, *)
+          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
@@ -907,21 +1004,28 @@ class PaginationServiceSpec
           .futureValue shouldBe Right(expected)
       }
       "should error if connector call fails" in {
-        val uuid                    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
-        val pageTaskId              = PageTaskId(uuid)
+        val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        PageTaskId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
         val paginationSource1       = List(PaginationSource(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
 
-        val pageTask = MaPageTask(
-          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = pageTaskId,
-          liabilitiesPaging = paginationSource1,
-          nationalInsuranceNumber,
-          Instant.now
-        )
+        val pageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+            Json
+              .toJson(
+                MaPageTask(
+                  liabilitiesPaging = paginationSource1,
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
@@ -963,14 +1067,21 @@ class PaginationServiceSpec
 
         (() => mockAppConfig.bspEnabled).expects().returning(false)
 
-        val pageTask = BspPageTask(
-          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          marriageDetailsPaging = None,
-          contributionAndCreditsPaging = None,
-          nationalInsuranceNumber = nationalInsuranceNumber,
-          createdAt = currentTimeSource.instantNow()
-        )
+        val pageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+            Json
+              .toJson(
+                BspPageTask(
+                  marriageDetailsPaging = None,
+                  contributionAndCreditsPaging = None,
+                  nationalInsuranceNumber = nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         (mockBenefitEligibilityRepository
           .getItem(_: PageTaskId)(_: HeaderCarrier))
@@ -986,14 +1097,21 @@ class PaginationServiceSpec
 
         (() => mockAppConfig.searchlightEnabled).expects().returning(false).twice()
 
-        val pageTask = SearchLightPageTask(
-          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BspPagination,
-          contributionAndCreditsPaging = None,
-          nationalInsuranceNumber,
-          Instant.now
-        )
+        val pageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+            Json
+              .toJson(
+                SearchLightPageTask(
+                  paginationType = PaginationType.BspPagination,
+                  contributionAndCreditsPaging = None,
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         (mockBenefitEligibilityRepository
           .getItem(_: PageTaskId)(_: HeaderCarrier))
@@ -1008,12 +1126,18 @@ class PaginationServiceSpec
       "should fail with FeatureDisabled is ma is disabled" in {
         (() => mockAppConfig.maEnabled).expects().returning(false)
 
-        val pageTask = MaPageTask(
+        val pageTask = PageTaskDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          liabilitiesPaging = Nil,
-          nationalInsuranceNumber,
-          Instant.now
+          PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+          Json
+            .toJson(
+              MaPageTask(
+                liabilitiesPaging = Nil,
+                nationalInsuranceNumber
+              )
+            )
+            .as[JsObject],
+          currentTimeSource.instantNow()
         )
 
         (mockBenefitEligibilityRepository
@@ -1030,21 +1154,31 @@ class PaginationServiceSpec
 
         (() => mockAppConfig.gyspEnabled).expects().returning(false)
 
-        val pageTask = GyspPageTask(
-          correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          pageTaskId = PageTaskId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          benefitSchemeMembershipDetailsPaging = None,
-          marriageDetailsPaging = None,
-          contributionAndCreditsPaging = Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList
-                .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          Instant.now
-        )
+        val pageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+            Json
+              .toJson(
+                GyspPageTask(
+                  benefitSchemeMembershipDetailsPaging = None,
+                  marriageDetailsPaging = None,
+                  contributionAndCreditsPaging = Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList
+                        .of(
+                          TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
+                          TaxWindow(StartTaxYear(2021), EndTaxYear(2025))
+                        ),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         (mockBenefitEligibilityRepository
           .getItem(_: PageTaskId)(_: HeaderCarrier))

@@ -26,7 +26,6 @@ import uk.gov.hmrc.app.benefitEligibility.service.{BenefitSchemeMembershipDetail
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, NonEmptyListFormat}
 
-import java.time.Instant
 import java.util.UUID
 
 final case class PaginationSource(
@@ -113,20 +112,14 @@ object PageTaskId {
 }
 
 sealed trait PageTask {
-  def correlationId: CorrelationId
-  def pageTaskId: PageTaskId
   def paginationType: PaginationType
   def nationalInsuranceNumber: Identifier
-  def createdAt: Instant
 }
 
 final case class MaPageTask private (
-    correlationId: CorrelationId,
-    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     liabilitiesPaging: List[PaginationSource],
-    nationalInsuranceNumber: Identifier,
-    createdAt: Instant
+    nationalInsuranceNumber: Identifier
 ) extends PageTask
 
 object MaPageTask {
@@ -134,31 +127,22 @@ object MaPageTask {
   implicit val maPageTaskformat: OFormat[MaPageTask] = Json.format[MaPageTask]
 
   def apply(
-      correlationId: CorrelationId,
-      pageTaskId: PageTaskId,
       liabilitiesPaging: List[PaginationSource],
-      nationalInsuranceNumber: Identifier,
-      createdAt: Instant
+      nationalInsuranceNumber: Identifier
   ) =
     new MaPageTask(
-      correlationId,
-      pageTaskId,
       PaginationType.MaPagination,
       liabilitiesPaging,
-      nationalInsuranceNumber,
-      createdAt
+      nationalInsuranceNumber
     )
 
 }
 
 final case class BspPageTask private (
-    correlationId: CorrelationId,
-    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
-    nationalInsuranceNumber: Identifier,
-    createdAt: Instant
+    nationalInsuranceNumber: Identifier
 ) extends PageTask
 
 object BspPageTask {
@@ -166,67 +150,49 @@ object BspPageTask {
   implicit val bspPageTaskformat: OFormat[BspPageTask] = Json.format[BspPageTask]
 
   def apply(
-      correlationId: CorrelationId,
-      pageTaskId: PageTaskId,
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
-      nationalInsuranceNumber: Identifier,
-      createdAt: Instant
+      nationalInsuranceNumber: Identifier
   ) =
     new BspPageTask(
-      correlationId,
-      pageTaskId,
       PaginationType.BspPagination,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
-      nationalInsuranceNumber,
-      createdAt
+      nationalInsuranceNumber
     )
 
 }
 
 final case class SearchLightPageTask private (
     system: CallSystem,
-    correlationId: CorrelationId,
-    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
-    nationalInsuranceNumber: Identifier,
-    createdAt: Instant
+    nationalInsuranceNumber: Identifier
 ) extends PageTask
 
 object SearchLightPageTask {
   implicit val searchLightPageTaskFormat: OFormat[SearchLightPageTask] = Json.format[SearchLightPageTask]
 
   def apply(
-      correlationId: CorrelationId,
-      pageTaskId: PageTaskId,
       paginationType: PaginationType,
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
-      nationalInsuranceNumber: Identifier,
-      createdAt: Instant
+      nationalInsuranceNumber: Identifier
   ) =
     new SearchLightPageTask(
       CallSystem.SEARCHLIGHT,
-      correlationId,
-      pageTaskId,
       paginationType,
       contributionAndCreditsPaging,
-      nationalInsuranceNumber,
-      createdAt
+      nationalInsuranceNumber
     )
 
 }
 
 final case class GyspPageTask private (
-    correlationId: CorrelationId,
-    pageTaskId: PageTaskId,
     paginationType: PaginationType,
     benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
     marriageDetailsPaging: Option[PaginationSource],
     contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
-    nationalInsuranceNumber: Identifier,
-    createdAt: Instant
+    nationalInsuranceNumber: Identifier
 ) extends PageTask
 
 object GyspPageTask {
@@ -234,23 +200,17 @@ object GyspPageTask {
   implicit val gyspPageTaskformat: OFormat[GyspPageTask] = Json.format[GyspPageTask]
 
   def apply(
-      correlationId: CorrelationId,
-      pageTaskId: PageTaskId,
       benefitSchemeMembershipDetailsPaging: Option[PaginationSource],
       marriageDetailsPaging: Option[PaginationSource],
       contributionAndCreditsPaging: Option[ContributionAndCreditsPaging],
-      nationalInsuranceNumber: Identifier,
-      createdAt: Instant
+      nationalInsuranceNumber: Identifier
   ) =
     new GyspPageTask(
-      correlationId,
-      pageTaskId,
       PaginationType.GyspPagination,
       benefitSchemeMembershipDetailsPaging,
       marriageDetailsPaging,
       contributionAndCreditsPaging,
-      nationalInsuranceNumber,
-      createdAt
+      nationalInsuranceNumber
     )
 
 }
@@ -280,62 +240,54 @@ object PageTask {
 
   implicit val pageTaskFormat: OFormat[PageTask] = OFormat(pageTaskReads, pageTaskWrites)
 
-  def createPaginatingTask(
+  def createPageTaskDocument(
       paginationResult: PaginationResult,
       currentTime: CurrentTimeSource
-  ): Option[PageTask] =
+  ): Option[PageTaskDocument] =
     paginationResult.getPageTaskId.map { pageTaskId =>
       val now = currentTime.instantNow()
-      (paginationResult.callSystem, paginationResult.paginationType) match {
+
+      val pageTask = (paginationResult.callSystem, paginationResult.paginationType) match {
         case (Some(callSystem), paginationType) =>
           SearchLightPageTask(
-            correlationId = paginationResult.correlationId,
-            pageTaskId = pageTaskId,
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
             paginationType = paginationType,
-            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
-            createdAt = now
+            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber
           )
 
         case (_, PaginationType.MaPagination) =>
           MaPageTask(
-            correlationId = paginationResult.correlationId,
-            pageTaskId = pageTaskId,
             liabilitiesPaging = PaginationSource.fromLiabilities(paginationResult.liabilitiesResult),
-            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
-            createdAt = now
+            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber
           )
         case (_, PaginationType.GyspPagination) =>
           GyspPageTask(
-            correlationId = paginationResult.correlationId,
-            pageTaskId = pageTaskId,
             benefitSchemeMembershipDetailsPaging = PaginationSource.fromBenefitSchemeMembershipDetails(
               paginationResult.benefitSchemeMembershipDetailsData
             ),
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
-            paginationResult.nationalInsuranceNumber,
-            now
+            paginationResult.nationalInsuranceNumber
           )
         case (_, PaginationType.BspPagination) =>
           BspPageTask(
-            correlationId = paginationResult.correlationId,
-            pageTaskId = pageTaskId,
             marriageDetailsPaging = PaginationSource.fromMarriageDetails(paginationResult.marriageDetailsResult),
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
-            paginationResult.nationalInsuranceNumber,
-            now
+            paginationResult.nationalInsuranceNumber
           )
         case (None, BspSearchLightPagination) =>
           SearchLightPageTask(
-            correlationId = paginationResult.correlationId,
-            pageTaskId = pageTaskId,
             paginationType = paginationResult.paginationType,
             contributionAndCreditsPaging = paginationResult.contributionCreditResult.contributionAndCreditsPaging,
-            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
-            createdAt = now
+            nationalInsuranceNumber = paginationResult.nationalInsuranceNumber
           )
       }
+      PageTaskDocument(
+        correlationId = paginationResult.correlationId,
+        pageTaskId = pageTaskId,
+        data = Json.toJson(pageTask).as[JsObject],
+        createdAt = now
+      )
     }
 
 }

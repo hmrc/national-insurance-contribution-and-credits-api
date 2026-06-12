@@ -16,12 +16,22 @@
 
 package uk.gov.hmrc.app.config
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides, Singleton}
+import play.api.Configuration
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 
 class Module extends AbstractModule {
 
-  override def configure(): Unit =
+  @Provides
+  @Singleton
+  def crypto(configuration: Configuration): Encrypter & Decrypter =
+    SymmetricCryptoFactory.aesCryptoFromConfig("json.encryption", configuration.underlying)
 
+  def encrypter(crypto: Encrypter & Decrypter): Encrypter = crypto
+
+  def decrypter(crypto: Encrypter & Decrypter): Decrypter = crypto
+
+  override def configure(): Unit =
     bind(classOf[AppConfig]).asEagerSingleton()
 
 }

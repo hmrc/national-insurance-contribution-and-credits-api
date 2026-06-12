@@ -37,6 +37,7 @@ import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalcu
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.json.{JsObject, Json}
 
 final case class RequestKey(benefitType: BenefitType, nationalInsuranceNumber: Identifier)
 
@@ -134,15 +135,18 @@ class GetYourStatePensionDataRetrievalService @Inject() (
                   )
                 }
 
+                val pageTask = GyspPageTask(
+                  benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
+                  marriageDetailsPaging = marriageDetailsPaginate,
+                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                  eligibilityCheckDataRequest.nationalInsuranceNumber
+                )
                 paginationService
                   .addTask(
-                    GyspPageTask(
+                    PageTaskDocument(
                       correlationId,
                       PageTaskId(uuidGenerator.generate),
-                      benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
-                      marriageDetailsPaging = marriageDetailsPaginate,
-                      contributionAndCreditsPaging = niContributionsCreditsPaginate,
-                      eligibilityCheckDataRequest.nationalInsuranceNumber,
+                      Json.toJson(pageTask).as[JsObject],
                       currentTimeSource.instantNow()
                     )
                   )

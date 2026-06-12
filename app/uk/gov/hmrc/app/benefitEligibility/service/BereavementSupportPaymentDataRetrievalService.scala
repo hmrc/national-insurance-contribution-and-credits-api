@@ -19,6 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.catsSyntaxTuple2Parallel
 import com.google.inject.Inject
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.{MarriageDetailsConnector, NiContributionsAndCreditsConnector}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.MarriageDetails
@@ -97,14 +98,17 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
                 )
               }
 
+              val pageTask = BspPageTask(
+                marriageDetailsPaging = marriageDetailsPaginate,
+                contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                eligibilityCheckDataRequest.nationalInsuranceNumber
+              )
               paginationService
                 .addTask(
-                  BspPageTask(
+                  PageTaskDocument(
                     correlationId,
                     PageTaskId(uuidGenerator.generate),
-                    marriageDetailsPaging = marriageDetailsPaginate,
-                    contributionAndCreditsPaging = niContributionsCreditsPaginate,
-                    eligibilityCheckDataRequest.nationalInsuranceNumber,
+                    Json.toJson(pageTask).as[JsObject],
                     currentTimeSource.instantNow()
                   )
                 )

@@ -22,6 +22,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.Liabilities
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
@@ -51,7 +52,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
   RevaluationRate,
   SchemeMembershipDebitReason
 }
-import uk.gov.hmrc.app.benefitEligibility.repository.PageTask.createPaginatingTask
+import uk.gov.hmrc.app.benefitEligibility.repository.PageTask.createPageTaskDocument
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
   ContributionCreditPagingResult,
@@ -97,13 +98,19 @@ class PageTaskSpec
           pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe Some(
-          MaPageTask(
+          PageTaskDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
-            List(PaginationSource(Liabilities, "SomeUrl1")),
-            nationalInsuranceNumber,
+            Json
+              .toJson(
+                MaPageTask(
+                  List(PaginationSource(Liabilities, "SomeUrl1")),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
             currentTimeSource.instantNow()
           )
         )
@@ -137,17 +144,23 @@ class PageTaskSpec
           pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe Some(
-          BspPageTask(
+          PageTaskDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
-            marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
-            contributionAndCreditsPaging = Some(
-              ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
-            ),
-            nationalInsuranceNumber,
-            createdAt = currentTimeSource.instantNow()
+            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            Json
+              .toJson(
+                BspPageTask(
+                  marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionAndCreditsPaging = Some(
+                    ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
         )
       }
@@ -180,17 +193,23 @@ class PageTaskSpec
           pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe Some(
-          BspPageTask(
+          PageTaskDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
-            marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
-            contributionAndCreditsPaging = Some(
-              ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
-            ),
-            nationalInsuranceNumber,
-            createdAt = currentTimeSource.instantNow()
+            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            Json
+              .toJson(
+                BspPageTask(
+                  marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionAndCreditsPaging = Some(
+                    ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
         )
       }
@@ -334,18 +353,25 @@ class PageTaskSpec
           pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe Some(
-          GyspPageTask(
+          PageTaskDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId = PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
-            benefitSchemeMembershipDetailsPaging = Some(PaginationSource(ApiName.BenefitSchemeDetails, "SomeURL2")),
-            marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
-            contributionAndCreditsPaging = Some(
-              ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
-            ),
-            nationalInsuranceNumber,
-            createdAt = currentTimeSource.instantNow()
+            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            Json
+              .toJson(
+                GyspPageTask(
+                  benefitSchemeMembershipDetailsPaging =
+                    Some(PaginationSource(ApiName.BenefitSchemeDetails, "SomeURL2")),
+                  marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionAndCreditsPaging = Some(
+                    ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
         )
       }
@@ -363,7 +389,7 @@ class PageTaskSpec
           pageTaskId = None
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe None
       }
       "should return None if BSP pagination result without next cursor" in {
@@ -393,7 +419,7 @@ class PageTaskSpec
           pageTaskId = None
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe None
       }
       "should return None if GYSP pagination result without next cursor" in {
@@ -534,7 +560,7 @@ class PageTaskSpec
           pageTaskId = None
         )
 
-        val result = createPaginatingTask(paginationResult, currentTimeSource)
+        val result = createPageTaskDocument(paginationResult, currentTimeSource)
         result shouldBe None
       }
     }

@@ -27,8 +27,10 @@ import org.scalatest.prop.Tables.Table
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import play.api.inject
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Class2MAReceipts, Liabilities, MarriageDetails}
+import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.Codecs
@@ -39,7 +41,7 @@ import java.util.UUID
 
 class BenefitEligibilityDataRepositoryItSpec
     extends AnyFreeSpecLike
-    with DefaultPlayMongoRepositorySupport[PageTask]
+    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
@@ -64,6 +66,10 @@ class BenefitEligibilityDataRepositoryItSpec
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
   implicit val headerCarrier: HeaderCarrier = new HeaderCarrier()
 
+  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
+    override def instantNow(): Instant = testInstant
+  }
+
   "BenefitEligibilityRepository" - {
     ".getItem" - {
       "should successfully return an item by id" in {
@@ -76,46 +82,64 @@ class BenefitEligibilityDataRepositoryItSpec
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
         val paginationSource3 = PaginationSource(MarriageDetails, "SomeCallBackURLThree")
 
-        val pageTasksList = List(
-          MaPageTask(
-            correlationId,
+        val pageTaskDocList = List(
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId1,
-            List(paginationSource2, paginationSource2),
-            nationalInsuranceNumber,
-            testInstant
+            Json
+              .toJson(
+                MaPageTask(
+                  List(paginationSource2, paginationSource2),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
           ),
-          BspPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId2,
-            Some(paginationSource2),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource2),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
               )
-            ),
-            nationalInsuranceNumber,
-            testInstant
+              .as[JsObject],
+            currentTimeSource.instantNow()
           ),
-          GyspPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId3,
-            Some(paginationSource3),
-            Some(paginationSource1),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource3),
+                  Some(paginationSource1),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
               )
-            ),
-            nationalInsuranceNumber,
-            testInstant
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
         )
 
-        pageTasksList.foreach(task => insert(task).futureValue)
+        pageTaskDocList.foreach(task => insert(task).futureValue)
 
-        val pageTasks = Table("page_task", pageTasksList: _*)
+        val pageTasks = Table("page_task", pageTaskDocList: _*)
 
         forAll(pageTasks) { pageTask =>
           repository
@@ -138,19 +162,26 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val bspPageTask = BspPageTask(
-          correlationId,
-          pageTaskId,
-          Some(paginationSource1),
-          Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val bspPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId,
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource1),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.upsert(None, bspPageTask).value.futureValue shouldBe Right(pageTaskId.value)
       }
@@ -158,13 +189,20 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val maPageTask = MaPageTask(
-          correlationId,
-          pageTaskId,
-          List(paginationSource1, paginationSource1),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val maPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId,
+            Json
+              .toJson(
+                MaPageTask(
+                  List(paginationSource1, paginationSource1),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.upsert(None, maPageTask).value.futureValue shouldBe Right(pageTaskId.value)
       }
@@ -173,20 +211,27 @@ class BenefitEligibilityDataRepositoryItSpec
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val gyspPageTask = GyspPageTask(
-          correlationId,
-          pageTaskId,
-          Some(paginationSource1),
-          Some(paginationSource2),
-          Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val gyspPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId,
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource1),
+                  Some(paginationSource2),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.upsert(None, gyspPageTask).value.futureValue shouldBe Right(pageTaskId.value)
       }
@@ -195,20 +240,28 @@ class BenefitEligibilityDataRepositoryItSpec
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val gyspPageTask = GyspPageTask(
-          correlationId,
-          pageTaskId,
-          Some(paginationSource1),
-          Some(paginationSource2),
-          Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val gyspPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId,
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource1),
+                  Some(paginationSource2),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
+
         dropDatabase()
 
         repository.upsert(None, gyspPageTask).value.futureValue shouldBe a[Left[DatabaseError, _]]
@@ -221,32 +274,46 @@ class BenefitEligibilityDataRepositoryItSpec
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val maPageTask1 = MaPageTask(
-          correlationId,
-          pageTaskId1,
-          List(paginationSource1, paginationSource1),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val maPageTask1 =
+          PageTaskDocument(
+            correlationId,
+            pageTaskId1,
+            Json
+              .toJson(
+                MaPageTask(
+                  List(paginationSource1, paginationSource1),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         deleteAll().futureValue
         insert(maPageTask1).futureValue
 
-        val maPageTask2 = MaPageTask(
-          correlationId,
-          pageTaskId2,
-          List(paginationSource2, paginationSource2),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val maPageTask2 =
+          PageTaskDocument(
+            correlationId,
+            pageTaskId2,
+            Json
+              .toJson(
+                MaPageTask(
+                  List(paginationSource2, paginationSource2),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.upsert(Some(pageTaskId1.value), maPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
         findAll().futureValue shouldBe List(maPageTask2)
       }
       "should overwrite an existing BspPageTask" in {
 
-        val pageTask1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTask2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
+        val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
@@ -260,34 +327,47 @@ class BenefitEligibilityDataRepositoryItSpec
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
 
-        val bspPageTask1 = BspPageTask(
-          correlationId,
-          pageTask1,
-          Some(paginationSource1),
-          Some(contributionAndCreditsPaging1),
-          nationalInsuranceNumber,
-          testInstant
-        )
-
+        val bspPageTask1 =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId1,
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource1),
+                  Some(contributionAndCreditsPaging1),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
         deleteAll().futureValue
         insert(bspPageTask1).futureValue
 
-        val bspPageTask2 = BspPageTask(
-          correlationId,
-          pageTask2,
-          Some(paginationSource2),
-          Some(contributionAndCreditsPaging2),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val bspPageTask2 =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId2,
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource2),
+                  Some(contributionAndCreditsPaging2),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
-        repository.upsert(Some(pageTask1.value), bspPageTask2).value.futureValue shouldBe Right(pageTask2.value)
+        repository.upsert(Some(pageTaskId1.value), bspPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
         findAll().futureValue shouldBe List(bspPageTask2)
       }
       "should overwrite an existing GyspPageTask" in {
 
-        val pageTask1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTask2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
+        val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
@@ -300,30 +380,45 @@ class BenefitEligibilityDataRepositoryItSpec
           NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2020))),
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
-        val gyspPageTask1 = GyspPageTask(
-          correlationId,
-          pageTask1,
-          Some(paginationSource1),
-          Some(paginationSource1),
-          Some(contributionAndCreditsPaging1),
-          nationalInsuranceNumber,
-          testInstant
-        )
+
+        val gyspPageTask1 =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId1,
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource1),
+                  Some(paginationSource1),
+                  Some(contributionAndCreditsPaging1),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         deleteAll().futureValue
         insert(gyspPageTask1).futureValue
 
-        val gyspPageTask2 = GyspPageTask(
-          correlationId,
-          pageTask2,
-          Some(paginationSource2),
-          Some(paginationSource2),
-          Some(contributionAndCreditsPaging2),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val gyspPageTask2 =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId2,
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource2),
+                  Some(paginationSource2),
+                  Some(contributionAndCreditsPaging2),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
-        repository.upsert(Some(pageTask1.value), gyspPageTask2).value.futureValue shouldBe Right(pageTask2.value)
+        repository.upsert(Some(pageTaskId1.value), gyspPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
         findAll().futureValue should contain theSameElementsAs List(gyspPageTask2)
       }
     }
@@ -332,19 +427,26 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val bspPageTask = BspPageTask(
-          correlationId,
-          pageTaskId1,
-          Some(paginationSource1),
-          Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val bspPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId1,
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource1),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.insert(bspPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
         find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(bspPageTask)
@@ -353,13 +455,20 @@ class BenefitEligibilityDataRepositoryItSpec
         val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val maPageTask = MaPageTask(
-          correlationId,
-          pageTaskId1,
-          List(paginationSource1, paginationSource1),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val maPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId1,
+            Json
+              .toJson(
+                MaPageTask(
+                  List(paginationSource1, paginationSource1),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.insert(maPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
         find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(maPageTask)
@@ -370,20 +479,27 @@ class BenefitEligibilityDataRepositoryItSpec
         val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
         val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
 
-        val gyspPageTask = GyspPageTask(
-          correlationId,
-          pageTaskId1,
-          Some(paginationSource1),
-          Some(paginationSource2),
-          Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          testInstant
-        )
+        val gyspPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskId1,
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource1),
+                  Some(paginationSource2),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
 
         repository.insert(gyspPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
         find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(gyspPageTask)
@@ -401,68 +517,98 @@ class BenefitEligibilityDataRepositoryItSpec
         val paginationSource3 = PaginationSource(MarriageDetails, "SomeCallBackURLThree")
 
         val pageTasksList = List(
-          MaPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId1,
-            List(paginationSource2, paginationSource2),
-            nationalInsuranceNumber,
-            testInstant
+            Json
+              .toJson(
+                MaPageTask(
+                  List(paginationSource2, paginationSource2),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
           ),
-          BspPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId2,
-            Some(paginationSource2),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource2),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
               )
-            ),
-            nationalInsuranceNumber,
-            testInstant
+              .as[JsObject],
+            currentTimeSource.instantNow()
           ),
-          GyspPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId3,
-            Some(paginationSource3),
-            Some(paginationSource1),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource3),
+                  Some(paginationSource1),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
               )
-            ),
-            nationalInsuranceNumber,
-            testInstant
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
         )
         val newPageTasksList = List(
-          BspPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId2,
-            Some(paginationSource2),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
+            Json
+              .toJson(
+                BspPageTask(
+                  Some(paginationSource2),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
               )
-            ),
-            nationalInsuranceNumber,
-            testInstant
+              .as[JsObject],
+            currentTimeSource.instantNow()
           ),
-          GyspPageTask(
-            correlationId,
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             pageTaskId3,
-            Some(paginationSource3),
-            Some(paginationSource1),
-            Some(
-              ContributionAndCreditsPaging(
-                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-                DateOfBirth(LocalDate.parse("2025-10-10"))
+            Json
+              .toJson(
+                GyspPageTask(
+                  Some(paginationSource3),
+                  Some(paginationSource1),
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
               )
-            ),
-            nationalInsuranceNumber,
-            testInstant
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
         )
 
