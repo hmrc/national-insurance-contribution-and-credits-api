@@ -94,7 +94,7 @@ class AppConfig @Inject() (config: ServicesConfig) {
       .map(_.toChar)
       .mkString
 
-  lazy val encryptData            = config.getBoolean("encryptData")
+  lazy val encryptData            = config.getBoolean("mongodb.encryptData")
   def maEnabled: Boolean          = config.getBoolean("maEnabled")
   def esaEnabled: Boolean         = config.getBoolean("esaEnabled")
   def jsaEnabled: Boolean         = config.getBoolean("jsaEnabled")

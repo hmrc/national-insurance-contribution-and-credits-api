@@ -25,7 +25,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.OK
 import play.api.test.Injecting
 import play.api.{Application, inject}
@@ -63,7 +63,7 @@ import scala.concurrent.ExecutionContext
 
 class PaginationServiceItSpec
     extends AnyFreeSpec
-    with DefaultPlayMongoRepositorySupport[PageTask]
+    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
     with EitherValues
     with WireMockHelper
     with Injecting
@@ -106,7 +106,8 @@ class PaginationServiceItSpec
         "microservice.services.hip.nps.niContributionAndCredits.port" -> server.port,
         "microservice.services.hip.nps.schemeMembershipDetails.port"  -> server.port,
         "microservice.services.hip.nps.benefitSchemeDetails.port"     -> server.port,
-        "microservice.services.hip.nps.marriageDetails.port"          -> server.port
+        "microservice.services.hip.nps.marriageDetails.port"          -> server.port,
+        "mongodb.encryptData"                                         -> false
       )
       .build()
 
@@ -123,71 +124,98 @@ class PaginationServiceItSpec
 
   override protected def checkTtlIndex = false
 
-  val maPageTask = MaPageTask(
-    correlationId,
-    PageTaskId(uuidOne),
-    List(
-      PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-      PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-    ),
-    nationalInsuranceNumber,
-    currentTimeSource.instantNow()
-  )
+  val maPageTask =
+    PageTaskDocument(
+      correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+      PageTaskId(uuidOne),
+      Json
+        .toJson(
+          MaPageTask(
+            List(
+              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+            ),
+            nationalInsuranceNumber
+          )
+        )
+        .as[JsObject],
+      currentTimeSource.instantNow()
+    )
 
-  val bspPageTask = BspPageTask(
-    correlationId,
-    PageTaskId(uuidTwo),
-    Some(
-      PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
-    ),
-    Some(
-      ContributionAndCreditsPaging(
-        NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-        DateOfBirth(LocalDate.parse("2025-10-10"))
-      )
-    ),
-    nationalInsuranceNumber,
-    currentTimeSource.instantNow()
-  )
+  val bspPageTask =
+    PageTaskDocument(
+      correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+      PageTaskId(uuidTwo),
+      Json
+        .toJson(
+          BspPageTask(
+            Some(
+              PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+            ),
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber
+          )
+        )
+        .as[JsObject],
+      currentTimeSource.instantNow()
+    )
 
-  val gyspPageTask = GyspPageTask(
-    correlationId,
+  val gyspPageTask = PageTaskDocument(
+    correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
     PageTaskId(uuidThree),
-    Some(
-      PaginationSource(
-        ApiName.SchemeMembershipDetails,
-        schemeMembershipDetailsPath
+    Json
+      .toJson(
+        GyspPageTask(
+          Some(
+            PaginationSource(
+              ApiName.SchemeMembershipDetails,
+              schemeMembershipDetailsPath
+            )
+          ),
+          Some(
+            PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+          ),
+          Some(
+            ContributionAndCreditsPaging(
+              NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+              DateOfBirth(LocalDate.parse("2025-10-10"))
+            )
+          ),
+          nationalInsuranceNumber
+        )
       )
-    ),
-    Some(
-      PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
-    ),
-    Some(
-      ContributionAndCreditsPaging(
-        NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-        DateOfBirth(LocalDate.parse("2025-10-10"))
-      )
-    ),
-    nationalInsuranceNumber,
+      .as[JsObject],
     currentTimeSource.instantNow()
   )
 
-  val searchLightPageTask = SearchLightPageTask(
-    correlationId,
-    PageTaskId(uuidFour),
-    PaginationType.BspPagination,
-    Some(
-      ContributionAndCreditsPaging(
-        NonEmptyList
-          .one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
-        DateOfBirth(LocalDate.parse("2025-10-10"))
-      )
-    ),
-    nationalInsuranceNumber,
-    currentTimeSource.instantNow()
-  )
+  val searchLightPageTask =
+    PageTaskDocument(
+      correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+      PageTaskId(uuidFour),
+      Json
+        .toJson(
+          SearchLightPageTask(
+            PaginationType.BspPagination,
+            Some(
+              ContributionAndCreditsPaging(
+                NonEmptyList
+                  .one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
+                DateOfBirth(LocalDate.parse("2025-10-10"))
+              )
+            ),
+            nationalInsuranceNumber
+          )
+        )
+        .as[JsObject],
+      currentTimeSource.instantNow()
+    )
 
-  val listOfPages: List[PageTask] = List(
+  val listOfPages: List[PageTaskDocument] = List(
     maPageTask,
     bspPageTask,
     gyspPageTask,
@@ -203,13 +231,19 @@ class PaginationServiceItSpec
     ".addTask" - {
       "should successfully add a new task" in {
         deleteAll().futureValue
-        val pageTask: MaPageTask =
-          MaPageTask(
-            correlationId,
+        val pageTask: PageTaskDocument =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
             PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
-            List(),
-            nationalInsuranceNumber,
-            Instant.now
+            Json
+              .toJson(
+                MaPageTask(
+                  List(),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
           )
 
         service.addTask(pageTask).value.futureValue shouldBe Right(
@@ -218,36 +252,50 @@ class PaginationServiceItSpec
 
         findAll().futureValue shouldBe List(pageTask)
       }
-      "should return a new uuid if current uuid already exists in database" in {
-        val uuidTwo = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
 
-        val pageTask = MaPageTask(
-          correlationId,
-          PageTaskId(uuidOne),
-          List(
-            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-          ),
-          nationalInsuranceNumber,
-          currentTimeSource.instantNow()
-        )
-        val newPageTask = MaPageTask(
-          correlationId,
-          uuidTwo,
-          List(
-            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-            PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-          ),
-          nationalInsuranceNumber,
-          currentTimeSource.instantNow()
-        )
-        (() => mockUuidGenerator.generate).expects().returning(uuidTwo.value)
+      "should return a new uuid if current uuid already exists in database" in {
+        val pageTaskIdTwo = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+
+        val pageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            PageTaskId(uuidOne),
+            Json
+              .toJson(
+                MaPageTask(
+                  List(
+                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
+        val newPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            pageTaskIdTwo,
+            Json
+              .toJson(
+                MaPageTask(
+                  List(
+                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
+        (() => mockUuidGenerator.generate).expects().returning(pageTaskIdTwo.value)
 
         findAll().futureValue should contain theSameElementsAs listOfPages
-        service.addTask(pageTask).value.futureValue shouldBe Right(uuidTwo.value)
+        service.addTask(pageTask).value.futureValue shouldBe Right(pageTaskIdTwo.value)
         findAll().futureValue should contain theSameElementsAs listOfPages :+ newPageTask
       }
-
     }
     ".paginate" - {
       "should return a BenefitEligibilityError if paginate fails" in {
@@ -457,20 +505,31 @@ class PaginationServiceItSpec
       "should process Searchlight pagination task successfully" in {
         deleteAll().futureValue
 
-        val searchLightPageTask = SearchLightPageTask(
-          correlationId,
-          PageTaskId(uuidFour),
-          PaginationType.BspPagination,
-          Some(
-            ContributionAndCreditsPaging(
-              NonEmptyList
-                .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2020), EndTaxYear(2022))),
-              DateOfBirth(LocalDate.parse("2025-10-10"))
-            )
-          ),
-          nationalInsuranceNumber,
-          currentTimeSource.instantNow()
-        )
+        val searchLightPageTask =
+          PageTaskDocument(
+            correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
+            PageTaskId(uuidFour),
+            Json
+              .toJson(
+                SearchLightPageTask(
+                  PaginationType.BspPagination,
+                  Some(
+                    ContributionAndCreditsPaging(
+                      NonEmptyList
+                        .of(
+                          TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
+                          TaxWindow(StartTaxYear(2020), EndTaxYear(2022))
+                        ),
+                      DateOfBirth(LocalDate.parse("2025-10-10"))
+                    )
+                  ),
+                  nationalInsuranceNumber
+                )
+              )
+              .as[JsObject],
+            currentTimeSource.instantNow()
+          )
+
         List(maPageTask, bspPageTask, searchLightPageTask, gyspPageTask).foreach(pageTask =>
           insert(pageTask).futureValue
         )

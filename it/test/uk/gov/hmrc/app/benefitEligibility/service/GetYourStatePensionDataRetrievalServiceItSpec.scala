@@ -79,7 +79,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
   LongTermBenefitCalculationRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTask, PageTaskId}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTaskDocument, PageTaskId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -92,7 +92,7 @@ import scala.concurrent.ExecutionContext
 
 class GetYourStatePensionDataRetrievalServiceItSpec
     extends AnyFreeSpec
-    with DefaultPlayMongoRepositorySupport[PageTask]
+    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
     with EitherValues
     with WireMockHelper
     with Injecting

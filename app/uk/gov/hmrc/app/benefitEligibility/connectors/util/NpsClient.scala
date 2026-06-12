@@ -68,14 +68,13 @@ class NpsClient @Inject() (httpClientV2: HttpClientV2, config: AppConfig)(implic
       (ORIGINATING_SYSTEM, getOriginatorId(benefitType, callSystem)) +: (hc.headers(
         Seq("CorrelationId")
       ) ++ commonHeaders)
-    EitherT(
-      httpClientV2
-        .post(url"$path")
-        .setHeader(requestHeaders *)
-        .withBody(Json.toJson(body))
-        .execute[HttpResponse]
-        .attempt
-    ).leftMap(NpsClientError(_))
+    httpClientV2
+      .post(url"$path")
+      .setHeader(requestHeaders *)
+      .withBody(Json.toJson(body))
+      .execute[HttpResponse]
+      .attemptT
+      .leftMap(NpsClientError(_))
   }
 
   def get(benefitType: BenefitType, path: String)(

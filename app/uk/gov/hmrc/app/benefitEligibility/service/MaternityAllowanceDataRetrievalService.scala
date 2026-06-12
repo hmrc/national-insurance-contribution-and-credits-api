@@ -19,6 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.EitherT
 import cats.implicits.*
 import com.google.inject.Inject
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.{
   LiabilitySummaryDetailsConnector,
   NiContributionsAndCreditsConnector
@@ -96,13 +97,17 @@ class MaternityAllowanceDataRetrievalService @Inject() (
             case NpsApiResult.SuccessResult(apiName, result) =>
               result.callback.flatMap(_.callbackURL.map(_.value)).map(url => PaginationSource(apiName, url))
           }
+
+          val pageTask = MaPageTask(
+            liabilityPages,
+            eligibilityCheckDataRequest.nationalInsuranceNumber
+          )
           paginationService
             .addTask(
-              MaPageTask(
+              PageTaskDocument(
                 correlationId,
                 PageTaskId(uuidGenerator.generate),
-                liabilityPages,
-                eligibilityCheckDataRequest.nationalInsuranceNumber,
+                Json.toJson(pageTask).as[JsObject],
                 currentTimeSource.instantNow()
               )
             )

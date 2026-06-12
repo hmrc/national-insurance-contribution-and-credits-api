@@ -21,6 +21,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.{MarriageDetailsConnector, NiContributionsAndCreditsConnector}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
@@ -162,12 +163,18 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
     )
   )
 
-  val paging = BspPageTask(
+  val paging = PageTaskDocument(
     correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
-    Some(PaginationSource(ApiName.MarriageDetails, "")),
-    None,
-    identifier,
+    Json
+      .toJson(
+        BspPageTask(
+          Some(PaginationSource(ApiName.MarriageDetails, "")),
+          None,
+          identifier
+        )
+      )
+      .as[JsObject],
     testInstant
   )
 
@@ -203,10 +210,12 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
             EitherT.rightT(marriageDetailsResult)
           )
 
-        (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
+        (() => mockUUIDService.generate)
+          .expects()
+          .returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
         (mockPaginationService
-          .addTask(_: PageTask)(_: HeaderCarrier))
+          .addTask(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(paging, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 

@@ -22,6 +22,7 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.*
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
@@ -587,13 +588,19 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
-  val paging = GyspPageTask(
+  val paging = PageTaskDocument(
     correlationId,
     PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
-    Some(PaginationSource(ApiName.SchemeMembershipDetails, "some-url")),
-    Some(PaginationSource(ApiName.MarriageDetails, "")),
-    None,
-    identifier,
+    Json
+      .toJson(
+        GyspPageTask(
+          Some(PaginationSource(ApiName.SchemeMembershipDetails, "some-url")),
+          Some(PaginationSource(ApiName.MarriageDetails, "")),
+          None,
+          identifier
+        )
+      )
+      .as[JsObject],
     testInstant
   )
 
@@ -713,10 +720,12 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             EitherT.rightT(individualStatePensionInformationResult)
           )
 
-        (() => mockUUIDService.generate).expects().returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
+        (() => mockUUIDService.generate)
+          .expects()
+          .returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
         (mockPaginationService
-          .addTask(_: PageTask)(_: HeaderCarrier))
+          .addTask(_: PageTaskDocument)(_: HeaderCarrier))
           .expects(paging, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 

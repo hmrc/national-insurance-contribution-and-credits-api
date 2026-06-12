@@ -19,6 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 import cats.data.{EitherT, NonEmptyList}
 import cats.instances.future.*
 import com.google.inject.Inject
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
@@ -30,7 +31,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsPaging, PageTaskId, SearchLightPageTask}
+import uk.gov.hmrc.app.benefitEligibility.repository.{
+  ContributionAndCreditsPaging,
+  PageTaskDocument,
+  PageTaskId,
+  SearchLightPageTask
+}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -90,14 +96,18 @@ class SearchlightDataRetrievalService @Inject() (
                   )
                 }
 
+                val pageTask = SearchLightPageTask(
+                  paginationType,
+                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                  eligibilityCheckDataRequest.nationalInsuranceNumber
+                )
+
                 paginationService
                   .addTask(
-                    SearchLightPageTask(
+                    PageTaskDocument(
                       correlationId,
                       PageTaskId(uuidGenerator.generate),
-                      paginationType,
-                      contributionAndCreditsPaging = niContributionsCreditsPaginate,
-                      eligibilityCheckDataRequest.nationalInsuranceNumber,
+                      Json.toJson(pageTask).as[JsObject],
                       currentTimeSource.instantNow()
                     )
                   )

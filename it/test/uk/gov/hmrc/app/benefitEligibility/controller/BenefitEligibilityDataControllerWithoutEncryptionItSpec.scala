@@ -27,7 +27,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsSuccess, JsValue, Json, Writes}
+import play.api.libs.json.{JsObject, JsSuccess, JsValue, Json, Writes}
 import play.api.mvc.Result
 import play.api.test.*
 import play.api.test.Helpers.*
@@ -91,10 +91,10 @@ import scala.concurrent.Future
 
 //ADD TESTS FOR CONFIG DISABLED CHECK THAT WE GET NOT FOUND
 
-class BenefitEligibilityDataControllerItSpec
+class BenefitEligibilityDataControllerWithoutEncryptionItSpec
     extends AnyFreeSpec
     with EitherValues
-    with DefaultPlayMongoRepositorySupport[PageTask]
+    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
     with WireMockHelper
     with Injecting
     with Matchers
@@ -162,65 +162,92 @@ class BenefitEligibilityDataControllerItSpec
   override protected def beforeEach(): Unit = {
     super.beforeEach()
     List(
-      MaPageTask(
-        correlationId,
+      PageTaskDocument(
+        correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
         PageTaskId(uuidOne),
-        List(
-          PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-          PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
-        ),
-        nationalInsuranceNumber,
-        currentTimeSource.instantNow()
+        Json
+          .toJson(
+            MaPageTask(
+              List(
+                PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
+                PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+              ),
+              nationalInsuranceNumber
+            )
+          )
+          .as[JsObject],
+        Instant.now
       ),
-      BspPageTask(
-        correlationId,
+      PageTaskDocument(
+        correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
         PageTaskId(uuidTwo),
-        Some(
-          PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
-        ),
-        Some(
-          ContributionAndCreditsPaging(
-            NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-            DateOfBirth(LocalDate.parse("2025-10-10"))
+        Json
+          .toJson(
+            BspPageTask(
+              Some(
+                PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+              ),
+              Some(
+                ContributionAndCreditsPaging(
+                  NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                  DateOfBirth(LocalDate.parse("2025-10-10"))
+                )
+              ),
+              nationalInsuranceNumber
+            )
           )
-        ),
-        nationalInsuranceNumber,
-        currentTimeSource.instantNow()
+          .as[JsObject],
+        Instant.now
       ),
-      GyspPageTask(
-        correlationId,
+      PageTaskDocument(
+        correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
         PageTaskId(uuidThree),
-        Some(
-          PaginationSource(
-            ApiName.SchemeMembershipDetails,
-            schemeMembershipDetailsPath
+        Json
+          .toJson(
+            GyspPageTask(
+              Some(
+                PaginationSource(
+                  ApiName.SchemeMembershipDetails,
+                  schemeMembershipDetailsPath
+                )
+              ),
+              Some(
+                PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+              ),
+              Some(
+                ContributionAndCreditsPaging(
+                  NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
+                  DateOfBirth(LocalDate.parse("2025-10-10"))
+                )
+              ),
+              nationalInsuranceNumber
+            )
           )
-        ),
-        Some(
-          PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
-        ),
-        Some(
-          ContributionAndCreditsPaging(
-            NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
-            DateOfBirth(LocalDate.parse("2025-10-10"))
-          )
-        ),
-        nationalInsuranceNumber,
-        currentTimeSource.instantNow()
+          .as[JsObject],
+        Instant.now
       ),
-      SearchLightPageTask(
-        correlationId,
+      PageTaskDocument(
+        correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
         PageTaskId(uuidFour),
-        PaginationType.BspSearchLightPagination,
-        Some(
-          ContributionAndCreditsPaging(
-            NonEmptyList
-              .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2020), EndTaxYear(2022))),
-            DateOfBirth(LocalDate.parse("2025-10-10"))
+        Json
+          .toJson(
+            SearchLightPageTask(
+              PaginationType.BspSearchLightPagination,
+              Some(
+                ContributionAndCreditsPaging(
+                  NonEmptyList
+                    .of(
+                      TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
+                      TaxWindow(StartTaxYear(2020), EndTaxYear(2022))
+                    ),
+                  DateOfBirth(LocalDate.parse("2025-10-10"))
+                )
+              ),
+              nationalInsuranceNumber
+            )
           )
-        ),
-        nationalInsuranceNumber,
-        currentTimeSource.instantNow()
+          .as[JsObject],
+        Instant.now
       )
     ).foreach(pageTask => insert(pageTask).futureValue)
   }
@@ -1864,6 +1891,7 @@ class BenefitEligibilityDataControllerItSpec
           (() => mockUuidGenerator.generate)
             .expects()
             .returning(UUID.fromString("df94d7bd-7269-4fc8-bcf8-40ae955ac76e"))
+
           val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
             MarriageDetailsSuccess.MarriageDetails(
               MarriageDetailsSuccess.ActiveMarriage(true),
@@ -3487,8 +3515,8 @@ class BenefitEligibilityDataControllerItSpec
           )
         )
 
-//        status(result) shouldBe 200
-//        header("CorrelationId", result) shouldBe Some(correlationId.value.toString)
+        status(result) shouldBe 200
+        header("CorrelationId", result) shouldBe Some(correlationId.value.toString)
         contentAsJson(result) shouldBe Json.toJson(expectedResult)
       }
       "should handle a MA request containing nextCursor successfully (502) " in {
