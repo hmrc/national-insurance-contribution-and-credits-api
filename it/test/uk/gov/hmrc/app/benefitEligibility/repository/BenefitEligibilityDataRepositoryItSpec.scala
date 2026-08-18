@@ -78,9 +78,9 @@ class BenefitEligibilityDataRepositoryItSpec
         val batchId2 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val batchId3 = BatchId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val batchSource1 = BatchSource(Class2MAReceipts, "SomeCallBackURLOne")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
-        val batchSource3 = BatchSource(MarriageDetails, "SomeCallBackURLThree")
+        val batchSource1 = BatchCallback(Class2MAReceipts, "SomeCallBackURLOne")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource3 = BatchCallback(MarriageDetails, "SomeCallBackURLThree")
 
         val batchDocumentList = List(
           BatchDocument(
@@ -160,7 +160,7 @@ class BenefitEligibilityDataRepositoryItSpec
     ".upsert" - {
       "should insert a new BspBatch" in {
         val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val bspBatch =
           BatchDocument(
@@ -187,7 +187,7 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new MaBatch" in {
         val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val maBatch =
           BatchDocument(
@@ -208,8 +208,8 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new GyspBatch" in {
         val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val gyspBatch =
           BatchDocument(
@@ -237,8 +237,8 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should return a failure if mongo database fails" in {
         val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val gyspBatch =
           BatchDocument(
@@ -271,8 +271,8 @@ class BenefitEligibilityDataRepositoryItSpec
         val batchId1 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val batchId2 = BatchId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLOne")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLOne")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val maBatch1 =
           BatchDocument(
@@ -315,8 +315,8 @@ class BenefitEligibilityDataRepositoryItSpec
         val batchId1 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val batchId2 = BatchId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLOne")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLOne")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val contributionAndCreditsBatching1 = ContributionAndCreditsBatching(
           NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
@@ -369,8 +369,8 @@ class BenefitEligibilityDataRepositoryItSpec
         val batchId1 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val batchId2 = BatchId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLOne")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLOne")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val contributionAndCreditsBatching1 = ContributionAndCreditsBatching(
           NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
@@ -425,7 +425,7 @@ class BenefitEligibilityDataRepositoryItSpec
     ".insert" - {
       "should insert a new BspBatch" in {
         val batchId1       = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val bspBatch =
           BatchDocument(
@@ -453,7 +453,7 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new MaBatch" in {
         val batchId1       = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val maBatch =
           BatchDocument(
@@ -476,8 +476,8 @@ class BenefitEligibilityDataRepositoryItSpec
       }
       "should insert a new GyspBatch" in {
         val batchId1       = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val batchSource1 = BatchSource(Liabilities, "SomeCallBackURLTwo")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
 
         val gyspBatch =
           BatchDocument(
@@ -512,9 +512,9 @@ class BenefitEligibilityDataRepositoryItSpec
         val batchId2 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
         val batchId3 = BatchId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val batchSource1 = BatchSource(Class2MAReceipts, "SomeCallBackURLOne")
-        val batchSource2 = BatchSource(Liabilities, "SomeCallBackURLTwo")
-        val batchSource3 = BatchSource(MarriageDetails, "SomeCallBackURLThree")
+        val batchSource1 = BatchCallback(Class2MAReceipts, "SomeCallBackURLOne")
+        val batchSource2 = BatchCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource3 = BatchCallback(MarriageDetails, "SomeCallBackURLThree")
 
         val batchesList = List(
           BatchDocument(

@@ -132,8 +132,8 @@ class BatchServiceItSpec
         .toJson(
           MaBatch(
             List(
-              BatchSource(Liabilities, npsLiabilitySummaryDetailsPath),
-              BatchSource(Liabilities, npsLiabilitySummaryDetailsPath)
+              BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+              BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
             nationalInsuranceNumber
           )
@@ -150,7 +150,7 @@ class BatchServiceItSpec
         .toJson(
           BspBatch(
             Some(
-              BatchSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+              BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
             ),
             Some(
               ContributionAndCreditsBatching(
@@ -172,13 +172,13 @@ class BatchServiceItSpec
       .toJson(
         GyspBatch(
           Some(
-            BatchSource(
+            BatchCallback(
               ApiName.SchemeMembershipDetails,
               schemeMembershipDetailsPath
             )
           ),
           Some(
-            BatchSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+            BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
           ),
           Some(
             ContributionAndCreditsBatching(
@@ -264,8 +264,8 @@ class BatchServiceItSpec
               .toJson(
                 MaBatch(
                   List(
-                    BatchSource(Liabilities, npsLiabilitySummaryDetailsPath),
-                    BatchSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
                   ),
                   nationalInsuranceNumber
                 )
@@ -281,8 +281,8 @@ class BatchServiceItSpec
               .toJson(
                 MaBatch(
                   List(
-                    BatchSource(Liabilities, npsLiabilitySummaryDetailsPath),
-                    BatchSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
                   ),
                   nationalInsuranceNumber
                 )
@@ -322,7 +322,7 @@ class BatchServiceItSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
         val batchSource2 =
-          BatchSource(Liabilities, npsLiabilitySummaryDetailsPath)
+          BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
         val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
           Some(
             List(
@@ -413,7 +413,7 @@ class BatchServiceItSpec
       "should process Bsp batch task successfully" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
 
-        val batchSource1 = BatchSource(MarriageDetails, "/CallBackUrl1")
+        val batchSource1 = BatchCallback(MarriageDetails, "/CallBackUrl1")
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),

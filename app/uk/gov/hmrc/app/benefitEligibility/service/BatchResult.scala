@@ -18,7 +18,7 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import uk.gov.hmrc.app.benefitEligibility.model.common.{CallSystem, CorrelationId, Identifier, BatchType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
-import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsBatching, BatchId, BatchSource}
+import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsBatching, BatchId, BatchCallback}
 
 import java.util.UUID
 
@@ -40,9 +40,9 @@ final case class BatchResult(
 ) {
 
   private def shouldBatch: Boolean =
-    (BatchSource.fromLiabilities(liabilitiesResult) ++ List(
-      BatchSource.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
-      BatchSource.fromMarriageDetails(marriageDetailsResult)
+    (BatchCallback.fromLiabilities(liabilitiesResult) ++ List(
+      BatchCallback.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
+      BatchCallback.fromMarriageDetails(marriageDetailsResult)
     ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsBatching.isDefined
 
   def setBatchId(uuid: UUID): BatchResult = {

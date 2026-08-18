@@ -169,7 +169,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
     Json
       .toJson(
         BspBatch(
-          Some(BatchSource(ApiName.MarriageDetails, "")),
+          Some(BatchCallback(ApiName.MarriageDetails, "")),
           None,
           identifier
         )

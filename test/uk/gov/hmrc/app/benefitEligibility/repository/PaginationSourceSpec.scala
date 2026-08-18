@@ -36,7 +36,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.Marria
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.NpsStandardErrorResponse400
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
-import uk.gov.hmrc.app.benefitEligibility.repository.BatchSource.{
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchCallback.{
   fromBenefitSchemeMembershipDetails,
   fromLiabilities,
   fromMarriageDetails
@@ -45,7 +45,7 @@ import uk.gov.hmrc.app.benefitEligibility.service.BenefitSchemeMembershipDetails
 
 import java.time.LocalDate
 
-class BatchSourceSpec
+class BatchCallbackSpec
     extends AnyFreeSpec
     with MockFactory
     with ScalaFutures
@@ -199,7 +199,7 @@ class BatchSourceSpec
         )
 
         val result = fromBenefitSchemeMembershipDetails(Some(benefitSchemeMembershipDetailsData))
-        result shouldBe Some(BatchSource(ApiName.BenefitSchemeDetails, "SomeURL"))
+        result shouldBe Some(BatchCallback(ApiName.BenefitSchemeDetails, "SomeURL"))
       }
       "should return None if successful BenefitSchemeMembershipDetailsData with No callback url" in {
         val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
@@ -473,7 +473,7 @@ class BatchSourceSpec
         )
 
         val result = fromMarriageDetails(Some(marriageDetailsResult))
-        result shouldBe Some(BatchSource(ApiName.MarriageDetails, "SomeUrl"))
+        result shouldBe Some(BatchCallback(ApiName.MarriageDetails, "SomeUrl"))
       }
       "should return None if successful MarriageDetailsResult with no callback url" in {
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
@@ -532,7 +532,7 @@ class BatchSourceSpec
         )
 
         val result = fromLiabilities(liabilitiesResult)
-        result shouldBe List(BatchSource(Liabilities, "SomeUrl"))
+        result shouldBe List(BatchCallback(Liabilities, "SomeUrl"))
       }
       "should return EmptyList if successful LiabilityResult with no callback url" in {
         val liabilitiesResult =

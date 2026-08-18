@@ -95,7 +95,7 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           val liabilityBatchs = liabilityResult.flatMap {
             case NpsApiResult.FailureResult(apiName, result) => None
             case NpsApiResult.SuccessResult(apiName, result) =>
-              result.callback.flatMap(_.callbackURL.map(_.value)).map(url => BatchSource(apiName, url))
+              result.callback.flatMap(_.callbackURL.map(_.value)).map(url => BatchCallback(apiName, url))
           }
 
           val batch = MaBatch(

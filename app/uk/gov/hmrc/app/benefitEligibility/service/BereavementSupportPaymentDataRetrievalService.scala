@@ -87,8 +87,8 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
               }
 
             if (shouldBatch) {
-              val marriageDetailsBatch: Option[BatchSource] = marriageDetailsResult.getSuccess.flatMap(
-                _.marriageDetails._links.flatMap(_.self.href).map(url => BatchSource(MarriageDetails, url.value))
+              val marriageDetailsBatchCallback: Option[BatchCallback] = marriageDetailsResult.getSuccess.flatMap(
+                _.marriageDetails._links.flatMap(_.self.href).map(url => BatchCallback(MarriageDetails, url.value))
               )
 
               val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
@@ -99,7 +99,7 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
               }
 
               val batch = BspBatch(
-                marriageDetailsBatching = marriageDetailsBatch,
+                marriageDetailsBatchCallback = marriageDetailsBatchCallback,
                 contributionAndCreditsBatching = niContributionsCreditsBatch,
                 eligibilityCheckDataRequest.nationalInsuranceNumber
               )

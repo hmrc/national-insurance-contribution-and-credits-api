@@ -121,7 +121,7 @@ class BatchService @Inject() (
       maBatch: MaBatch
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] = {
     logger.info("Batching for MA")
-    maBatch.liabilitiesBatching
+    maBatch.liabilitiesBatchCallback
       .map { batchSource =>
         liabilitySummaryDetailsConnector
           .fetchData(BenefitType.from(maBatch.batchType), batchSource.callBackURL)
@@ -153,7 +153,7 @@ class BatchService @Inject() (
     (
       marriageDetailsConnectorFetchData(
         BenefitType.from(bspBatch.batchType),
-        bspBatch.marriageDetailsBatching
+        bspBatch.marriageDetailsBatchCallback
       ),
       fetchContributionsAndCreditsData(
         BenefitType.from(bspBatch.batchType),
@@ -228,7 +228,7 @@ class BatchService @Inject() (
     )(
         implicit headerCarrier: HeaderCarrier
     ): EitherT[Future, BenefitEligibilityError, Option[BenefitSchemeMembershipDetailsData]] =
-      batch.benefitSchemeMembershipDetailsBatching
+      batch.benefitSchemeMembershipDetailsBatchCallback
         .map { batchSource =>
           schemeMembershipDetailsConnector
             .fetchData(
@@ -265,7 +265,7 @@ class BatchService @Inject() (
     (
       marriageDetailsConnectorFetchData(
         BenefitType.from(gyspBatch.batchType),
-        gyspBatch.marriageDetailsBatching
+        gyspBatch.marriageDetailsBatchCallback
       ),
       fetchContributionsAndCreditsData(
         BenefitType.from(gyspBatch.batchType),
@@ -298,12 +298,12 @@ class BatchService @Inject() (
 
   private def marriageDetailsConnectorFetchData(
       benefitType: BenefitType,
-      marriageDetailsBatching: Option[BatchSource]
+      marriageDetailsBatchCallback: Option[BatchCallback]
   )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
-    marriageDetailsBatching
+    marriageDetailsBatchCallback
       .map(batchSource =>
         marriageDetailsConnector.fetchMarriageDetailsData(benefitType, batchSource.callBackURL)
       )

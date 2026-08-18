@@ -173,8 +173,8 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .toJson(
             MaBatch(
               List(
-                BatchSource(Liabilities, npsLiabilitySummaryDetailsPath),
-                BatchSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
               ),
               nationalInsuranceNumber
             )
@@ -189,7 +189,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .toJson(
             BspBatch(
               Some(
-                BatchSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+                BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
               ),
               Some(
                 ContributionAndCreditsBatching(
@@ -210,13 +210,13 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .toJson(
             GyspBatch(
               Some(
-                BatchSource(
+                BatchCallback(
                   ApiName.SchemeMembershipDetails,
                   schemeMembershipDetailsPath
                 )
               ),
               Some(
-                BatchSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+                BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
               ),
               Some(
                 ContributionAndCreditsBatching(

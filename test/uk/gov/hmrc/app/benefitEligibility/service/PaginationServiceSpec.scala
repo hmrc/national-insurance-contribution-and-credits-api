@@ -113,7 +113,7 @@ class BatchServiceSpec
     ".addTask" - {
       "should successfully add a new batch" in {
         val batchId1       = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val batchSource3 = List(BatchSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = List(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -121,7 +121,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatching = batchSource3,
+                liabilitiesBatchCallback = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -140,7 +140,7 @@ class BatchServiceSpec
       }
       "should return a Benefit eligibility error if upsert fails" in {
         BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val batchSource3 = List(BatchSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = List(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -148,7 +148,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatching = batchSource3,
+                liabilitiesBatchCallback = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -168,7 +168,7 @@ class BatchServiceSpec
       "should return a new uuid if current uuid already exists in database for MA" in {
         val batchIdOne     = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val batchIdTwo     = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val batchSource3 = List(BatchSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = List(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb775")),
@@ -176,7 +176,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatching = batchSource3,
+                liabilitiesBatchCallback = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -190,7 +190,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatching = batchSource3,
+                liabilitiesBatchCallback = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -223,7 +223,7 @@ class BatchServiceSpec
       "should return a new uuid if current uuid already exists in database for BSP" in {
         val uuidOne           = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val uuidTwo           = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val batchSource3 = Some(BatchSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = Some(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -231,7 +231,7 @@ class BatchServiceSpec
           Json
             .toJson(
               BspBatch(
-                marriageDetailsBatching = batchSource3,
+                marriageDetailsBatchCallback = batchSource3,
                 contributionAndCreditsBatching = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
@@ -246,7 +246,7 @@ class BatchServiceSpec
           Json
             .toJson(
               BspBatch(
-                marriageDetailsBatching = batchSource3,
+                marriageDetailsBatchCallback = batchSource3,
                 contributionAndCreditsBatching = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
@@ -280,7 +280,7 @@ class BatchServiceSpec
       "should return a new uuid if current uuid already exists in database for GYSP" in {
         val uuidOne           = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val uuidTwo           = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val batchSource3 = Some(BatchSource(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = Some(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -288,8 +288,8 @@ class BatchServiceSpec
           Json
             .toJson(
               GyspBatch(
-                benefitSchemeMembershipDetailsBatching = batchSource3,
-                marriageDetailsBatching = None,
+                benefitSchemeMembershipDetailsBatchcallback = batchSource3,
+                marriageDetailsBatchCallback = None,
                 contributionAndCreditsBatching = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
@@ -304,8 +304,8 @@ class BatchServiceSpec
           Json
             .toJson(
               GyspBatch(
-                benefitSchemeMembershipDetailsBatching = batchSource3,
-                marriageDetailsBatching = None,
+                benefitSchemeMembershipDetailsBatchcallback = batchSource3,
+                marriageDetailsBatchCallback = None,
                 contributionAndCreditsBatching = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
@@ -405,7 +405,7 @@ class BatchServiceSpec
         val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         BatchId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val batchSource1       = List(BatchSource(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val batchSource1       = List(BatchCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -416,7 +416,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatching = batchSource1,
+                liabilitiesBatchCallback = batchSource1,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -475,7 +475,7 @@ class BatchServiceSpec
         val nationalInsuranceNumber            = Identifier("GD379251T")
         val dob                                = DateOfBirth(LocalDate.parse("2025-10-10"))
 
-        val batchSource1 = BatchSource(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
+        val batchSource1 = BatchCallback(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
         val batchSource2 =
           ContributionAndCreditsBatching(
             NonEmptyList
@@ -497,7 +497,7 @@ class BatchServiceSpec
           Json
             .toJson(
               BspBatch(
-                marriageDetailsBatching = Some(batchSource1),
+                marriageDetailsBatchCallback = Some(batchSource1),
                 contributionAndCreditsBatching = Some(batchSource2),
                 nationalInsuranceNumber
               )
@@ -658,9 +658,9 @@ class BatchServiceSpec
 
         val schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
 
-        val batchSource1 = BatchSource(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
+        val batchSource1 = BatchCallback(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
 
-        val batchSource3 = BatchSource(ApiName.BenefitSchemeDetails, BenefitSchemeCallBackUrl)
+        val batchSource3 = BatchCallback(ApiName.BenefitSchemeDetails, BenefitSchemeCallBackUrl)
 
         val marriageDetailsSuccessResponse =
           MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
@@ -791,8 +791,8 @@ class BatchServiceSpec
           Json
             .toJson(
               GyspBatch(
-                benefitSchemeMembershipDetailsBatching = Some(batchSource3),
-                marriageDetailsBatching = Some(batchSource1),
+                benefitSchemeMembershipDetailsBatchcallback = Some(batchSource3),
+                marriageDetailsBatchCallback = Some(batchSource1),
                 contributionAndCreditsBatching = Some(
                   ContributionAndCreditsBatching(
                     NonEmptyList
@@ -1007,7 +1007,7 @@ class BatchServiceSpec
         val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         BatchId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val batchSource1       = List(BatchSource(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val batchSource1       = List(BatchCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -1019,7 +1019,7 @@ class BatchServiceSpec
             Json
               .toJson(
                 MaBatch(
-                  liabilitiesBatching = batchSource1,
+                  liabilitiesBatchCallback = batchSource1,
                   nationalInsuranceNumber
                 )
               )
@@ -1074,7 +1074,7 @@ class BatchServiceSpec
             Json
               .toJson(
                 BspBatch(
-                  marriageDetailsBatching = None,
+                  marriageDetailsBatchCallback = None,
                   contributionAndCreditsBatching = None,
                   nationalInsuranceNumber = nationalInsuranceNumber
                 )
@@ -1132,7 +1132,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatching = Nil,
+                liabilitiesBatchCallback = Nil,
                 nationalInsuranceNumber
               )
             )
@@ -1161,8 +1161,8 @@ class BatchServiceSpec
             Json
               .toJson(
                 GyspBatch(
-                  benefitSchemeMembershipDetailsBatching = None,
-                  marriageDetailsBatching = None,
+                  benefitSchemeMembershipDetailsBatchcallback = None,
+                  marriageDetailsBatchCallback = None,
                   contributionAndCreditsBatching = Some(
                     ContributionAndCreditsBatching(
                       NonEmptyList

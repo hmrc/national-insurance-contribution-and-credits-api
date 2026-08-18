@@ -594,8 +594,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     Json
       .toJson(
         GyspBatch(
-          Some(BatchSource(ApiName.SchemeMembershipDetails, "some-url")),
-          Some(BatchSource(ApiName.MarriageDetails, "")),
+          Some(BatchCallback(ApiName.SchemeMembershipDetails, "some-url")),
+          Some(BatchCallback(ApiName.MarriageDetails, "")),
           None,
           identifier
         )

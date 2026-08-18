@@ -106,7 +106,7 @@ class BatchSpec
             Json
               .toJson(
                 MaBatch(
-                  List(BatchSource(Liabilities, "SomeUrl1")),
+                  List(BatchCallback(Liabilities, "SomeUrl1")),
                   nationalInsuranceNumber
                 )
               )
@@ -152,7 +152,7 @@ class BatchSpec
             Json
               .toJson(
                 BspBatch(
-                  marriageDetailsBatching = Some(BatchSource(ApiName.MarriageDetails, "SomeURL1")),
+                  marriageDetailsBatchCallback = Some(BatchCallback(ApiName.MarriageDetails, "SomeURL1")),
                   contributionAndCreditsBatching = Some(
                     ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
@@ -201,7 +201,7 @@ class BatchSpec
             Json
               .toJson(
                 BspBatch(
-                  marriageDetailsBatching = Some(BatchSource(ApiName.MarriageDetails, "SomeURL1")),
+                  marriageDetailsBatchCallback = Some(BatchCallback(ApiName.MarriageDetails, "SomeURL1")),
                   contributionAndCreditsBatching = Some(
                     ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
@@ -361,9 +361,9 @@ class BatchSpec
             Json
               .toJson(
                 GyspBatch(
-                  benefitSchemeMembershipDetailsBatching =
-                    Some(BatchSource(ApiName.BenefitSchemeDetails, "SomeURL2")),
-                  marriageDetailsBatching = Some(BatchSource(ApiName.MarriageDetails, "SomeURL1")),
+                  benefitSchemeMembershipDetailsBatchcallback =
+                    Some(BatchCallback(ApiName.BenefitSchemeDetails, "SomeURL2")),
+                  marriageDetailsBatchCallback = Some(BatchCallback(ApiName.MarriageDetails, "SomeURL1")),
                   contributionAndCreditsBatching = Some(
                     ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
