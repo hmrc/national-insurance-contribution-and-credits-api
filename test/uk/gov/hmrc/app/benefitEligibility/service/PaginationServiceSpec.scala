@@ -429,7 +429,7 @@ class BatchServiceSpec
           LiabilitySummaryDetailsSuccessResponse(None, Some(Callback(Some(CallbackUrl(liabilitiesCallBackUrl)))))
 
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
 
@@ -508,7 +508,7 @@ class BatchServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
         (mockBenefitEligibilityRepository
@@ -601,7 +601,7 @@ class BatchServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
         (mockBenefitEligibilityRepository
@@ -812,7 +812,7 @@ class BatchServiceSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuid)
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
         (mockBenefitEligibilityRepository
@@ -1029,7 +1029,7 @@ class BatchServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
 
@@ -1054,7 +1054,7 @@ class BatchServiceSpec
 
         val error = new RuntimeException()
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchId, *)
           .returning(EitherT.leftT(DatabaseError(error)))
 
@@ -1084,7 +1084,7 @@ class BatchServiceSpec
           )
 
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
 
@@ -1114,7 +1114,7 @@ class BatchServiceSpec
           )
 
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
 
@@ -1141,7 +1141,7 @@ class BatchServiceSpec
         )
 
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batch.batchId, *)
           .returning(EitherT.rightT(batch))
 
@@ -1181,7 +1181,7 @@ class BatchServiceSpec
           )
 
         (mockBenefitEligibilityRepository
-          .getItem(_: BatchId)(_: HeaderCarrier))
+          .get(_: BatchId)(_: HeaderCarrier))
           .expects(batch.batchId, *)
           .returning(EitherT.rightT(batch))
 

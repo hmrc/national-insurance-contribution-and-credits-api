@@ -84,7 +84,7 @@ class BatchService @Inject() (
       batchId: BatchId
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] =
     for {
-      existingBatchDocument <- batchRepository.getItem(batchId)
+      existingBatchDocument <- batchRepository.get(batchId)
       batchResult <- existingBatchDocument.data.as[Batch] match {
         case task: MaBatch if appConfig.maEnabled =>
           logger.info("processing MaBatch")

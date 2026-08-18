@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BatchRepositoryImpl])
 trait BatchRepository {
 
-  def getItem(batchId: BatchId)(
+  def get(batchId: BatchId)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, BatchDocument]
 
@@ -77,7 +77,7 @@ class BatchRepositoryImpl @Inject()(
 
   private val logger = new RequestAwareLogger(this.getClass)
 
-  def getItem(
+  def get(
       batchId: BatchId
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchDocument] = {
     logger.info("getItem called - Retrieving batch from Database ")

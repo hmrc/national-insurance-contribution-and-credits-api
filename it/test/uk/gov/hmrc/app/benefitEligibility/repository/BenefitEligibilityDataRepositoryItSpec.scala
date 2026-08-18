@@ -143,7 +143,7 @@ class BenefitEligibilityDataRepositoryItSpec
 
         forAll(batches) { batch =>
           repository
-            .getItem(batch.batchId)
+            .get(batch.batchId)
             .value
             .futureValue shouldBe Right(batch)
         }
@@ -152,7 +152,7 @@ class BenefitEligibilityDataRepositoryItSpec
         val unknownBatchId = BatchId(UUID.fromString("cc7df9a9-ce5b-4a51-8402-01108c88a9df"))
 
         val cursorId = CursorId.from(unknownBatchId)
-        repository.getItem(unknownBatchId).value.futureValue shouldBe Left(
+        repository.get(unknownBatchId).value.futureValue shouldBe Left(
           RecordNotFound(cursorId)
         )
       }
