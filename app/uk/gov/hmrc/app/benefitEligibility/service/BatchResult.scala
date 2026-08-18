@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{CallSystem, CorrelationId, Identifier, BatchType}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BatchType, CallSystem, CorrelationId, Identifier}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
-import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsBatching, BatchId, BatchCallback}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BatchId, BatchWithCallback, BatchWithTaxWindows}
 
 import java.util.UUID
 
-final case class ContributionCreditBatchingResult(
+final case class BatchWithTaxWindowsResult(
     contributionCreditResult: Option[ContributionCreditResult],
-    contributionAndCreditsBatching: Option[ContributionAndCreditsBatching]
+    batchWithTaxWindows: Option[BatchWithTaxWindows]
 )
 
 final case class BatchResult(
@@ -33,17 +33,17 @@ final case class BatchResult(
     nationalInsuranceNumber: Identifier,
     liabilitiesResult: List[LiabilityResult],
     marriageDetailsResult: Option[MarriageDetailsResult],
-    contributionCreditResult: ContributionCreditBatchingResult,
+    contributionCreditResult: BatchWithTaxWindowsResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
     callSystem: Option[CallSystem],
     batchId: Option[BatchId]
 ) {
 
   private def shouldBatch: Boolean =
-    (BatchCallback.fromLiabilities(liabilitiesResult) ++ List(
-      BatchCallback.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
-      BatchCallback.fromMarriageDetails(marriageDetailsResult)
-    ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsBatching.isDefined
+    (BatchWithCallback.fromLiabilities(liabilitiesResult) ++ List(
+      BatchWithCallback.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
+      BatchWithCallback.fromMarriageDetails(marriageDetailsResult)
+    ).flatten).nonEmpty || contributionCreditResult.batchWithTaxWindows.isDefined
 
   def setBatchId(uuid: UUID): BatchResult = {
     val batchId = if (shouldBatch) {

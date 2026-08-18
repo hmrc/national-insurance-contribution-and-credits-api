@@ -176,7 +176,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     Json
       .toJson(
         MaBatch(
-          List(BatchCallback(ApiName.Liabilities, "/some/url")),
+          List(BatchWithCallback(ApiName.Liabilities, "/some/url")),
           identifier
         )
       )

@@ -55,7 +55,7 @@ class BatchResultSpec
         )
       ),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditBatchingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
       batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
@@ -72,7 +72,7 @@ class BatchResultSpec
         )
       ),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditBatchingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
       batchId = None
@@ -84,7 +84,7 @@ class BatchResultSpec
       nationalInsuranceNumber,
       liabilitiesResult = List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditBatchingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
       batchId = None
@@ -102,7 +102,7 @@ class BatchResultSpec
         )
       ),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditBatchingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
       batchId = None

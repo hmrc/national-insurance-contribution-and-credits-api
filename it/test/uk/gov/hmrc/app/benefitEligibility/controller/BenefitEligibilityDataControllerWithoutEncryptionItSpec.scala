@@ -169,8 +169,8 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
           .toJson(
             MaBatch(
               List(
-                BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
-                BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
+                BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
               ),
               nationalInsuranceNumber
             )
@@ -185,10 +185,10 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
           .toJson(
             BspBatch(
               Some(
-                BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
+                BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
               ),
               Some(
-                ContributionAndCreditsBatching(
+                BatchWithTaxWindows(
                   NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
                   DateOfBirth(LocalDate.parse("2025-10-10"))
                 )
@@ -206,16 +206,16 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
           .toJson(
             GyspBatch(
               Some(
-                BatchCallback(
+                BatchWithCallback(
                   ApiName.SchemeMembershipDetails,
                   schemeMembershipDetailsPath
                 )
               ),
               Some(
-                BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
+                BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
               ),
               Some(
-                ContributionAndCreditsBatching(
+                BatchWithTaxWindows(
                   NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
                   DateOfBirth(LocalDate.parse("2025-10-10"))
                 )
@@ -234,7 +234,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
             SearchLightBatch(
               BatchType.BspSearchLightBatch,
               Some(
-                ContributionAndCreditsBatching(
+                BatchWithTaxWindows(
                   NonEmptyList
                     .of(
                       TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),

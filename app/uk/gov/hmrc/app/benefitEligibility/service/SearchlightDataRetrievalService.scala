@@ -32,7 +32,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.E
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.{
-  ContributionAndCreditsBatching,
+  BatchWithTaxWindows,
   BatchDocument,
   BatchId,
   SearchLightBatch
@@ -90,7 +90,7 @@ class SearchlightDataRetrievalService @Inject() (
               case (Some(batchType), true) =>
 
                 val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
-                  ContributionAndCreditsBatching(
+                  BatchWithTaxWindows(
                     remainingWindows,
                     eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
                   )
@@ -98,7 +98,7 @@ class SearchlightDataRetrievalService @Inject() (
 
                 val batch = SearchLightBatch(
                   batchType,
-                  contributionAndCreditsBatching = niContributionsCreditsBatch,
+                  contributionsAndCredits = niContributionsCreditsBatch,
                   eligibilityCheckDataRequest.nationalInsuranceNumber
                 )
 

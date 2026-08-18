@@ -55,7 +55,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.repository.Batch.createBatchDocument
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
-  ContributionCreditBatchingResult,
+  BatchWithTaxWindowsResult,
   BatchResult
 }
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
@@ -79,7 +79,7 @@ class BatchSpec
   val nationalInsuranceNumber = Identifier("AB123456C")
 
   "Batch" - {
-    ".createBatchingTask" - {
+    ".createBatchDocument" - {
       "should return batch if MA batch result with next cursor" in {
         val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -92,7 +92,7 @@ class BatchSpec
             )
           ),
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditBatchingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
           batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
@@ -106,7 +106,7 @@ class BatchSpec
             Json
               .toJson(
                 MaBatch(
-                  List(BatchCallback(Liabilities, "SomeUrl1")),
+                  List(BatchWithCallback(Liabilities, "SomeUrl1")),
                   nationalInsuranceNumber
                 )
               )
@@ -130,14 +130,14 @@ class BatchSpec
               )
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
@@ -152,9 +152,9 @@ class BatchSpec
             Json
               .toJson(
                 BspBatch(
-                  marriageDetailsBatchCallback = Some(BatchCallback(ApiName.MarriageDetails, "SomeURL1")),
-                  contributionAndCreditsBatching = Some(
-                    ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                  marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
                   nationalInsuranceNumber
                 )
@@ -179,14 +179,14 @@ class BatchSpec
               )
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
@@ -201,9 +201,9 @@ class BatchSpec
             Json
               .toJson(
                 BspBatch(
-                  marriageDetailsBatchCallback = Some(BatchCallback(ApiName.MarriageDetails, "SomeURL1")),
-                  contributionAndCreditsBatching = Some(
-                    ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                  marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
                   nationalInsuranceNumber
                 )
@@ -228,14 +228,14 @@ class BatchSpec
               )
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = Some(
             BenefitSchemeMembershipDetailsData(
@@ -361,11 +361,11 @@ class BatchSpec
             Json
               .toJson(
                 GyspBatch(
-                  benefitSchemeMembershipDetailsBatchcallback =
-                    Some(BatchCallback(ApiName.BenefitSchemeDetails, "SomeURL2")),
-                  marriageDetailsBatchCallback = Some(BatchCallback(ApiName.MarriageDetails, "SomeURL1")),
-                  contributionAndCreditsBatching = Some(
-                    ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                  benefitSchemeMembershipDetails =
+                    Some(BatchWithCallback(ApiName.BenefitSchemeDetails, "SomeURL2")),
+                  marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
                   nationalInsuranceNumber
                 )
@@ -383,7 +383,7 @@ class BatchSpec
           liabilitiesResult =
             List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditBatchingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
           batchId = None
@@ -405,14 +405,14 @@ class BatchSpec
               MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
@@ -435,14 +435,14 @@ class BatchSpec
               MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = Some(
             BenefitSchemeMembershipDetailsData(

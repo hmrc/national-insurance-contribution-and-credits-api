@@ -80,7 +80,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.Sche
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
-  ContributionCreditBatchingResult,
+  BatchWithTaxWindowsResult,
   LongTermBenefitCalculationDetailsData,
   BatchResult
 }
@@ -2022,8 +2022,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
 
       }
       "should return a success response if Batch resul is all Ok (MA)" in {
-        val creditsAndContributionsBatchingResult: ContributionCreditBatchingResult =
-          ContributionCreditBatchingResult(None, None)
+        val batchWithTaxWindowsResult: BatchWithTaxWindowsResult =
+          BatchWithTaxWindowsResult(None, None)
         val liabilityResult =
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)))
         val batchResult: BatchResult =
@@ -2033,7 +2033,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
             marriageDetailsResult = None,
-            contributionCreditResult = creditsAndContributionsBatchingResult,
+            contributionCreditResult = batchWithTaxWindowsResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
             batchId = None
@@ -2052,8 +2052,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should return a success response if Batch resul is all Ok (BSP)" in {
 
-        val creditsAndContributionsBatchingResult: ContributionCreditBatchingResult =
-          ContributionCreditBatchingResult(None, None)
+        val batchWithTaxWindowsResult: BatchWithTaxWindowsResult =
+          BatchWithTaxWindowsResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
         val batchResult: BatchResult =
           BatchResult(
@@ -2062,7 +2062,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
             marriageDetailsResult = None,
-            contributionCreditResult = creditsAndContributionsBatchingResult,
+            contributionCreditResult = batchWithTaxWindowsResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
             batchId = None
@@ -2081,8 +2081,8 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       }
       "should return a success response if Batch resul is all Ok (GYSP)" in {
 
-        val creditsAndContributionsBatchingResult: ContributionCreditBatchingResult =
-          ContributionCreditBatchingResult(None, None)
+        val batchWithTaxWindowsResult: BatchWithTaxWindowsResult =
+          BatchWithTaxWindowsResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
         val batchResult: BatchResult =
           BatchResult(
@@ -2091,7 +2091,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
             marriageDetailsResult = None,
-            contributionCreditResult = creditsAndContributionsBatchingResult,
+            contributionCreditResult = batchWithTaxWindowsResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
             batchId = None

@@ -22,79 +22,78 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{BenefitSchemeDetails, Liabilities, MarriageDetails}
 import uk.gov.hmrc.app.benefitEligibility.model.common.BatchType.BspSearchLightBatch
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{Class2MaReceiptsResult, LiabilityResult, MarriageDetailsResult}
-import uk.gov.hmrc.app.benefitEligibility.service.{BenefitSchemeMembershipDetailsData, BatchResult}
+import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BenefitSchemeMembershipDetailsData}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, NonEmptyListFormat}
 
 import java.util.UUID
 
-final case class BatchCallback(
+final case class BatchWithCallback(
     apiName: ApiName,
     callBackURL: String
 )
 
-object BatchCallback {
-  implicit val format: OFormat[BatchCallback] = Json.format[BatchCallback]
+object BatchWithCallback {
+  implicit val format: OFormat[BatchWithCallback] = Json.format[BatchWithCallback]
 
   def fromBenefitSchemeMembershipDetails(
       benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData]
-  ): Option[BatchCallback] =
+  ): Option[BatchWithCallback] =
     benefitSchemeMembershipDetailsData.flatMap {
       _.schemeMembershipDetailsResult.getSuccess
         .flatMap(_.callback)
         .flatMap {
-          _.callbackURL.map(url => BatchCallback(BenefitSchemeDetails, url.value))
+          _.callbackURL.map(url => BatchWithCallback(BenefitSchemeDetails, url.value))
         }
     }
 
-  def fromMarriageDetails(marriageDetailsResult: Option[MarriageDetailsResult]): Option[BatchCallback] =
+  def fromMarriageDetails(marriageDetailsResult: Option[MarriageDetailsResult]): Option[BatchWithCallback] =
     marriageDetailsResult.flatMap {
       _.getSuccess
         .map(_.marriageDetails)
         .flatMap(m => m._links.flatMap(_.self.href.map(_.value)))
-        .map(url => BatchCallback(MarriageDetails, url))
+        .map(url => BatchWithCallback(MarriageDetails, url))
     }
 
-  def fromLiabilities(liabilitiesResult: List[LiabilityResult]): List[BatchCallback] = liabilitiesResult.flatMap {
+  def fromLiabilities(liabilitiesResult: List[LiabilityResult]): List[BatchWithCallback] = liabilitiesResult.flatMap {
     _.getSuccess
       .flatMap(_.callback)
       .flatMap {
-        _.callbackURL.map(url => BatchCallback(Liabilities, url.value))
+        _.callbackURL.map(url => BatchWithCallback(Liabilities, url.value))
       }
   }
 
-  def fromClass2MAReceipts(class2MaReceiptsResult: Option[Class2MaReceiptsResult]): Option[BatchCallback] =
+  def fromClass2MAReceipts(class2MaReceiptsResult: Option[Class2MaReceiptsResult]): Option[BatchWithCallback] =
     class2MaReceiptsResult.flatMap(
       _.getSuccess
         .flatMap(_.callBack)
         .flatMap {
-          _.callbackURL.map(url => BatchCallback(Liabilities, url.value))
+          _.callbackURL.map(url => BatchWithCallback(Liabilities, url.value))
         }
     )
 
 }
 
-final case class ContributionAndCreditsBatching private (
+final case class BatchWithTaxWindows private (
     apiName: ApiName,
-    niContributionAndCreditsTaxWindows: NonEmptyList[TaxWindow],
+    taxWindows: NonEmptyList[TaxWindow],
     dateOfBirth: DateOfBirth
 ) {
 
-  def tail: Option[ContributionAndCreditsBatching] = niContributionAndCreditsTaxWindows.toList.safeTailNel.map(
-    remaining => this.copy(niContributionAndCreditsTaxWindows = remaining)
-  )
+  def tail: Option[BatchWithTaxWindows] =
+    taxWindows.toList.safeTailNel.map(remaining => this.copy(taxWindows = remaining))
 
 }
 
-object ContributionAndCreditsBatching {
+object BatchWithTaxWindows {
 
   implicit val nonEmptyListTawWindowFormat: Format[NonEmptyList[TaxWindow]] =
     NonEmptyListFormat.nonEmptyListFormat[TaxWindow]
 
-  implicit val format: OFormat[ContributionAndCreditsBatching] = Json.format[ContributionAndCreditsBatching]
+  implicit val format: OFormat[BatchWithTaxWindows] = Json.format[BatchWithTaxWindows]
 
-  def apply(niContributionAndCreditsTaxWindows: NonEmptyList[TaxWindow], dateOfBirth: DateOfBirth) =
-    new ContributionAndCreditsBatching(ApiName.NiContributionAndCredits, niContributionAndCreditsTaxWindows, dateOfBirth)
+  def apply(taxWindows: NonEmptyList[TaxWindow], dateOfBirth: DateOfBirth) =
+    new BatchWithTaxWindows(ApiName.NiContributionAndCredits, taxWindows, dateOfBirth)
 
 }
 
@@ -117,9 +116,9 @@ sealed trait Batch {
 }
 
 final case class MaBatch private (
-                                   batchType: BatchType,
-                                   liabilitiesBatchCallback: List[BatchCallback],
-                                   nationalInsuranceNumber: Identifier
+    batchType: BatchType,
+    liabilityDetails: List[BatchWithCallback],
+    nationalInsuranceNumber: Identifier
 ) extends Batch
 
 object MaBatch {
@@ -127,22 +126,22 @@ object MaBatch {
   implicit val maBatchformat: OFormat[MaBatch] = Json.format[MaBatch]
 
   def apply(
-             liabilitiesBatchCallback: List[BatchCallback],
-             nationalInsuranceNumber: Identifier
+      liabilityDetails: List[BatchWithCallback],
+      nationalInsuranceNumber: Identifier
   ) =
     new MaBatch(
       BatchType.MaBatch,
-      liabilitiesBatchCallback,
+      liabilityDetails,
       nationalInsuranceNumber
     )
 
 }
 
 final case class BspBatch private (
-                                    batchType: BatchType,
-                                    marriageDetailsBatchCallback: Option[BatchCallback],
-                                    contributionAndCreditsBatching: Option[ContributionAndCreditsBatching],
-                                    nationalInsuranceNumber: Identifier
+    batchType: BatchType,
+    marriageDetails: Option[BatchWithCallback],
+    contributionsAndCredits: Option[BatchWithTaxWindows],
+    nationalInsuranceNumber: Identifier
 ) extends Batch
 
 object BspBatch {
@@ -150,14 +149,14 @@ object BspBatch {
   implicit val bspBatchformat: OFormat[BspBatch] = Json.format[BspBatch]
 
   def apply(
-             marriageDetailsBatchCallback: Option[BatchCallback],
-             contributionAndCreditsBatching: Option[ContributionAndCreditsBatching],
-             nationalInsuranceNumber: Identifier
+      marriageDetails: Option[BatchWithCallback],
+      contributionsAndCredits: Option[BatchWithTaxWindows],
+      nationalInsuranceNumber: Identifier
   ) =
     new BspBatch(
       BatchType.BspBatch,
-      marriageDetailsBatchCallback,
-      contributionAndCreditsBatching,
+      marriageDetails,
+      contributionsAndCredits,
       nationalInsuranceNumber
     )
 
@@ -166,7 +165,7 @@ object BspBatch {
 final case class SearchLightBatch private (
     system: CallSystem,
     batchType: BatchType,
-    contributionAndCreditsBatching: Option[ContributionAndCreditsBatching],
+    contributionsAndCredits: Option[BatchWithTaxWindows],
     nationalInsuranceNumber: Identifier
 ) extends Batch
 
@@ -175,24 +174,24 @@ object SearchLightBatch {
 
   def apply(
       batchType: BatchType,
-      contributionAndCreditsBatching: Option[ContributionAndCreditsBatching],
+      contributionsAndCredits: Option[BatchWithTaxWindows],
       nationalInsuranceNumber: Identifier
   ) =
     new SearchLightBatch(
       CallSystem.SEARCHLIGHT,
       batchType,
-      contributionAndCreditsBatching,
+      contributionsAndCredits,
       nationalInsuranceNumber
     )
 
 }
 
 final case class GyspBatch private (
-                                     batchType: BatchType,
-                                     benefitSchemeMembershipDetailsBatchCallback: Option[BatchCallback],
-                                     marriageDetailsBatchCallback: Option[BatchCallback],
-                                     contributionAndCreditsBatching: Option[ContributionAndCreditsBatching],
-                                     nationalInsuranceNumber: Identifier
+    batchType: BatchType,
+    benefitSchemeMembershipDetails: Option[BatchWithCallback],
+    marriageDetails: Option[BatchWithCallback],
+    contributionsAndCredits: Option[BatchWithTaxWindows],
+    nationalInsuranceNumber: Identifier
 ) extends Batch
 
 object GyspBatch {
@@ -200,16 +199,16 @@ object GyspBatch {
   implicit val gyspBatchformat: OFormat[GyspBatch] = Json.format[GyspBatch]
 
   def apply(
-             benefitSchemeMembershipDetailsBatchcallback: Option[BatchCallback],
-             marriageDetailsBatchCallback: Option[BatchCallback],
-             contributionAndCreditsBatching: Option[ContributionAndCreditsBatching],
-             nationalInsuranceNumber: Identifier
+      benefitSchemeMembershipDetails: Option[BatchWithCallback],
+      marriageDetails: Option[BatchWithCallback],
+      contributionsAndCredits: Option[BatchWithTaxWindows],
+      nationalInsuranceNumber: Identifier
   ) =
     new GyspBatch(
       BatchType.GyspBatch,
-      benefitSchemeMembershipDetailsBatchcallback,
-      marriageDetailsBatchCallback,
-      contributionAndCreditsBatching,
+      benefitSchemeMembershipDetails,
+      marriageDetails,
+      contributionsAndCredits,
       nationalInsuranceNumber
     )
 
@@ -225,7 +224,7 @@ object Batch {
           case BatchType.BspBatch  => BspBatch.bspBatchformat.reads(json)
           case BatchType.MaBatch   => MaBatch.maBatchformat.reads(json)
           case BatchType.GyspBatch => GyspBatch.gyspBatchformat.reads(json)
-          case BspSearchLightBatch      => SearchLightBatch.searchLightBatchFormat.reads(json)
+          case BspSearchLightBatch => SearchLightBatch.searchLightBatchFormat.reads(json)
         }
     }
 
@@ -250,35 +249,35 @@ object Batch {
       val batch = (batchResult.callSystem, batchResult.batchType) match {
         case (Some(callSystem), batchType) =>
           SearchLightBatch(
-            contributionAndCreditsBatching = batchResult.contributionCreditResult.contributionAndCreditsBatching,
+            contributionsAndCredits = batchResult.contributionCreditResult.batchWithTaxWindows,
             batchType = batchType,
             nationalInsuranceNumber = batchResult.nationalInsuranceNumber
           )
 
         case (_, BatchType.MaBatch) =>
           MaBatch(
-            liabilitiesBatchCallback = BatchCallback.fromLiabilities(batchResult.liabilitiesResult),
+            liabilityDetails = BatchWithCallback.fromLiabilities(batchResult.liabilitiesResult),
             nationalInsuranceNumber = batchResult.nationalInsuranceNumber
           )
         case (_, BatchType.GyspBatch) =>
           GyspBatch(
-            benefitSchemeMembershipDetailsBatchcallback = BatchCallback.fromBenefitSchemeMembershipDetails(
+            benefitSchemeMembershipDetails = BatchWithCallback.fromBenefitSchemeMembershipDetails(
               batchResult.benefitSchemeMembershipDetailsData
             ),
-            marriageDetailsBatchCallback = BatchCallback.fromMarriageDetails(batchResult.marriageDetailsResult),
-            contributionAndCreditsBatching = batchResult.contributionCreditResult.contributionAndCreditsBatching,
+            marriageDetails = BatchWithCallback.fromMarriageDetails(batchResult.marriageDetailsResult),
+            contributionsAndCredits = batchResult.contributionCreditResult.batchWithTaxWindows,
             batchResult.nationalInsuranceNumber
           )
         case (_, BatchType.BspBatch) =>
           BspBatch(
-            marriageDetailsBatchCallback = BatchCallback.fromMarriageDetails(batchResult.marriageDetailsResult),
-            contributionAndCreditsBatching = batchResult.contributionCreditResult.contributionAndCreditsBatching,
+            marriageDetails = BatchWithCallback.fromMarriageDetails(batchResult.marriageDetailsResult),
+            contributionsAndCredits = batchResult.contributionCreditResult.batchWithTaxWindows,
             batchResult.nationalInsuranceNumber
           )
         case (None, BspSearchLightBatch) =>
           SearchLightBatch(
             batchType = batchResult.batchType,
-            contributionAndCreditsBatching = batchResult.contributionCreditResult.contributionAndCreditsBatching,
+            contributionsAndCredits = batchResult.contributionCreditResult.batchWithTaxWindows,
             nationalInsuranceNumber = batchResult.nationalInsuranceNumber
           )
       }

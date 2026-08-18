@@ -121,7 +121,7 @@ class BatchService @Inject() (
       maBatch: MaBatch
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] = {
     logger.info("Batching for MA")
-    maBatch.liabilitiesBatchCallback
+    maBatch.liabilityDetails
       .map { batchSource =>
         liabilitySummaryDetailsConnector
           .fetchData(BenefitType.from(maBatch.batchType), batchSource.callBackURL)
@@ -133,7 +133,7 @@ class BatchService @Inject() (
           batchType = maBatch.batchType,
           nationalInsuranceNumber = maBatch.nationalInsuranceNumber,
           liabilitiesResult = liabilityResult,
-          contributionCreditResult = ContributionCreditBatchingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
@@ -153,12 +153,12 @@ class BatchService @Inject() (
     (
       marriageDetailsConnectorFetchData(
         BenefitType.from(bspBatch.batchType),
-        bspBatch.marriageDetailsBatchCallback
+        bspBatch.marriageDetails
       ),
       fetchContributionsAndCreditsData(
         BenefitType.from(bspBatch.batchType),
         bspBatch.nationalInsuranceNumber,
-        bspBatch.contributionAndCreditsBatching
+        bspBatch.contributionsAndCredits
       )
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult) =>
@@ -168,9 +168,9 @@ class BatchService @Inject() (
           liabilitiesResult = Nil,
           nationalInsuranceNumber = bspBatch.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             contributionCreditResult,
-            bspBatch.contributionAndCreditsBatching.flatMap(_.tail)
+            bspBatch.contributionsAndCredits.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
@@ -194,7 +194,7 @@ class BatchService @Inject() (
     fetchContributionsAndCreditsData(
       BenefitType.from(searchLightBatch.batchType),
       searchLightBatch.nationalInsuranceNumber,
-      searchLightBatch.contributionAndCreditsBatching
+      searchLightBatch.contributionsAndCredits
     )
       .map { contributionCreditResult =>
         BatchResult(
@@ -203,9 +203,9 @@ class BatchService @Inject() (
           liabilitiesResult = Nil,
           nationalInsuranceNumber = searchLightBatch.nationalInsuranceNumber,
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             contributionCreditResult,
-            searchLightBatch.contributionAndCreditsBatching.flatMap(_.tail)
+            searchLightBatch.contributionsAndCredits.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = Some(SEARCHLIGHT),
@@ -228,7 +228,7 @@ class BatchService @Inject() (
     )(
         implicit headerCarrier: HeaderCarrier
     ): EitherT[Future, BenefitEligibilityError, Option[BenefitSchemeMembershipDetailsData]] =
-      batch.benefitSchemeMembershipDetailsBatchCallback
+      batch.benefitSchemeMembershipDetails
         .map { batchSource =>
           schemeMembershipDetailsConnector
             .fetchData(
@@ -265,12 +265,12 @@ class BatchService @Inject() (
     (
       marriageDetailsConnectorFetchData(
         BenefitType.from(gyspBatch.batchType),
-        gyspBatch.marriageDetailsBatchCallback
+        gyspBatch.marriageDetails
       ),
       fetchContributionsAndCreditsData(
         BenefitType.from(gyspBatch.batchType),
         gyspBatch.nationalInsuranceNumber,
-        gyspBatch.contributionAndCreditsBatching
+        gyspBatch.contributionsAndCredits
       ),
       fetchBenefitSchemeMembershipDetailsData(gyspBatch)
     ).parTupled
@@ -281,9 +281,9 @@ class BatchService @Inject() (
           gyspBatch.nationalInsuranceNumber,
           liabilitiesResult = Nil,
           marriageDetailsResult = marriageDetailsResult,
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             contributionCreditResult,
-            gyspBatch.contributionAndCreditsBatching.flatMap(_.tail)
+            gyspBatch.contributionsAndCredits.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
           callSystem = None,
@@ -298,12 +298,12 @@ class BatchService @Inject() (
 
   private def marriageDetailsConnectorFetchData(
       benefitType: BenefitType,
-      marriageDetailsBatchCallback: Option[BatchCallback]
+      marriageDetailsBatchWithCallback: Option[BatchWithCallback]
   )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
-    marriageDetailsBatchCallback
+    marriageDetailsBatchWithCallback
       .map(batchSource =>
         marriageDetailsConnector.fetchMarriageDetailsData(benefitType, batchSource.callBackURL)
       )
@@ -313,13 +313,13 @@ class BatchService @Inject() (
   private def fetchContributionsAndCreditsData(
       benefitType: BenefitType,
       nationInsuranceNumber: Identifier,
-      contributionAndCreditsBatching: Option[ContributionAndCreditsBatching]
+      batchWithTaxWindows: Option[BatchWithTaxWindows]
   )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Option[ContributionCreditResult]] = {
     logger.info("Contributions and Credits Connector called")
-    contributionAndCreditsBatching.map { batching =>
-      val taxWindow = batching.niContributionAndCreditsTaxWindows.head
+    batchWithTaxWindows.map { batching =>
+      val taxWindow = batching.taxWindows.head
       niContributionsAndCreditsConnector
         .fetchContributionsAndCredits(
           benefitType,

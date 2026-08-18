@@ -132,8 +132,8 @@ class BatchServiceItSpec
         .toJson(
           MaBatch(
             List(
-              BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
-              BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
+              BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+              BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
             nationalInsuranceNumber
           )
@@ -150,10 +150,10 @@ class BatchServiceItSpec
         .toJson(
           BspBatch(
             Some(
-              BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
+              BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
             ),
             Some(
-              ContributionAndCreditsBatching(
+              BatchWithTaxWindows(
                 NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
                 DateOfBirth(LocalDate.parse("2025-10-10"))
               )
@@ -172,16 +172,16 @@ class BatchServiceItSpec
       .toJson(
         GyspBatch(
           Some(
-            BatchCallback(
+            BatchWithCallback(
               ApiName.SchemeMembershipDetails,
               schemeMembershipDetailsPath
             )
           ),
           Some(
-            BatchCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
+            BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
           ),
           Some(
-            ContributionAndCreditsBatching(
+            BatchWithTaxWindows(
               NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
@@ -202,7 +202,7 @@ class BatchServiceItSpec
           SearchLightBatch(
             BatchType.BspBatch,
             Some(
-              ContributionAndCreditsBatching(
+              BatchWithTaxWindows(
                 NonEmptyList
                   .one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                 DateOfBirth(LocalDate.parse("2025-10-10"))
@@ -264,8 +264,8 @@ class BatchServiceItSpec
               .toJson(
                 MaBatch(
                   List(
-                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
-                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
                   ),
                   nationalInsuranceNumber
                 )
@@ -281,8 +281,8 @@ class BatchServiceItSpec
               .toJson(
                 MaBatch(
                   List(
-                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath),
-                    BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
                   ),
                   nationalInsuranceNumber
                 )
@@ -322,7 +322,7 @@ class BatchServiceItSpec
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
         val batchSource2 =
-          BatchCallback(Liabilities, npsLiabilitySummaryDetailsPath)
+          BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
         val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
           Some(
             List(
@@ -402,7 +402,7 @@ class BatchServiceItSpec
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditBatchingResult(None, None),
+              contributionCreditResult = BatchWithTaxWindowsResult(None, None),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
               batchId = Some(BatchId(uuidOne))
@@ -413,7 +413,7 @@ class BatchServiceItSpec
       "should process Bsp batch task successfully" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
 
-        val batchSource1 = BatchCallback(MarriageDetails, "/CallBackUrl1")
+        val batchSource1 = BatchWithCallback(MarriageDetails, "/CallBackUrl1")
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -492,7 +492,7 @@ class BatchServiceItSpec
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditBatchingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
@@ -514,7 +514,7 @@ class BatchServiceItSpec
                 SearchLightBatch(
                   BatchType.BspBatch,
                   Some(
-                    ContributionAndCreditsBatching(
+                    BatchWithTaxWindows(
                       NonEmptyList
                         .of(
                           TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
@@ -592,10 +592,10 @@ class BatchServiceItSpec
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditBatchingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 Some(
-                  ContributionAndCreditsBatching(
+                  BatchWithTaxWindows(
                     NonEmptyList(TaxWindow(StartTaxYear(2020), EndTaxYear(2022)), List()),
                     DateOfBirth(LocalDate.parse("2025-10-10"))
                   )
@@ -861,7 +861,7 @@ class BatchServiceItSpec
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditBatchingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
@@ -959,7 +959,7 @@ class BatchServiceItSpec
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditBatchingResult(None, None),
+              contributionCreditResult = BatchWithTaxWindowsResult(None, None),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
               batchId = None
@@ -1049,7 +1049,7 @@ class BatchServiceItSpec
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditBatchingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
@@ -1314,7 +1314,7 @@ class BatchServiceItSpec
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditBatchingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
@@ -1393,10 +1393,10 @@ class BatchServiceItSpec
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditBatchingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 contributionCreditResult =
                   Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-                contributionAndCreditsBatching = None
+                batchWithTaxWindows = None
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = Some(SEARCHLIGHT),

@@ -117,28 +117,28 @@ class GetYourStatePensionDataRetrievalService @Inject() (
                 }
 
               if (shouldBatch) {
-                val marriageDetailsBatchCallback = marriageDetailsResult.getSuccess.flatMap(
+                val marriageDetailsBatchWithCallback = marriageDetailsResult.getSuccess.flatMap(
                   _.marriageDetails._links
                     .flatMap(_.self.href)
-                    .map(url => BatchCallback(MarriageDetails, url.value))
+                    .map(url => BatchWithCallback(MarriageDetails, url.value))
                 )
 
                 val benefitSchemeDetailsBatch =
                   benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.flatMap(
-                    _.callback.flatMap(_.callbackURL).map(url => BatchCallback(SchemeMembershipDetails, url.value))
+                    _.callback.flatMap(_.callbackURL).map(url => BatchWithCallback(SchemeMembershipDetails, url.value))
                   )
 
                 val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
-                  ContributionAndCreditsBatching(
+                  BatchWithTaxWindows(
                     remainingWindows,
                     eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
                   )
                 }
 
                 val batch = GyspBatch(
-                  benefitSchemeMembershipDetailsBatchcallback = benefitSchemeDetailsBatch,
-                  marriageDetailsBatchCallback = marriageDetailsBatchCallback,
-                  contributionAndCreditsBatching = niContributionsCreditsBatch,
+                  benefitSchemeMembershipDetails = benefitSchemeDetailsBatch,
+                  marriageDetails = marriageDetailsBatchWithCallback,
+                  contributionsAndCredits = niContributionsCreditsBatch,
                   eligibilityCheckDataRequest.nationalInsuranceNumber
                 )
                 batchService

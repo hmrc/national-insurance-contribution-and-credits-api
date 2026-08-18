@@ -113,7 +113,7 @@ class BatchServiceSpec
     ".addTask" - {
       "should successfully add a new batch" in {
         val batchId1       = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val batchSource3 = List(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = List(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -121,7 +121,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatchCallback = batchSource3,
+                liabilityDetails = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -140,7 +140,7 @@ class BatchServiceSpec
       }
       "should return a Benefit eligibility error if upsert fails" in {
         BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val batchSource3 = List(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = List(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -148,7 +148,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatchCallback = batchSource3,
+                liabilityDetails = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -168,7 +168,7 @@ class BatchServiceSpec
       "should return a new uuid if current uuid already exists in database for MA" in {
         val batchIdOne     = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val batchIdTwo     = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val batchSource3 = List(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = List(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb775")),
@@ -176,7 +176,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatchCallback = batchSource3,
+                liabilityDetails = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -190,7 +190,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatchCallback = batchSource3,
+                liabilityDetails = batchSource3,
                 nationalInsuranceNumber
               )
             )
@@ -223,7 +223,7 @@ class BatchServiceSpec
       "should return a new uuid if current uuid already exists in database for BSP" in {
         val uuidOne           = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val uuidTwo           = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val batchSource3 = Some(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -231,8 +231,8 @@ class BatchServiceSpec
           Json
             .toJson(
               BspBatch(
-                marriageDetailsBatchCallback = batchSource3,
-                contributionAndCreditsBatching = None,
+                marriageDetails = batchSource3,
+                contributionsAndCredits = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -246,8 +246,8 @@ class BatchServiceSpec
           Json
             .toJson(
               BspBatch(
-                marriageDetailsBatchCallback = batchSource3,
-                contributionAndCreditsBatching = None,
+                marriageDetails = batchSource3,
+                contributionsAndCredits = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -280,7 +280,7 @@ class BatchServiceSpec
       "should return a new uuid if current uuid already exists in database for GYSP" in {
         val uuidOne           = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val uuidTwo           = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
-        val batchSource3 = Some(BatchCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
+        val batchSource3 = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
@@ -288,9 +288,9 @@ class BatchServiceSpec
           Json
             .toJson(
               GyspBatch(
-                benefitSchemeMembershipDetailsBatchcallback = batchSource3,
-                marriageDetailsBatchCallback = None,
-                contributionAndCreditsBatching = None,
+                benefitSchemeMembershipDetails = batchSource3,
+                marriageDetails = None,
+                contributionsAndCredits = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -304,9 +304,9 @@ class BatchServiceSpec
           Json
             .toJson(
               GyspBatch(
-                benefitSchemeMembershipDetailsBatchcallback = batchSource3,
-                marriageDetailsBatchCallback = None,
-                contributionAndCreditsBatching = None,
+                benefitSchemeMembershipDetails = batchSource3,
+                marriageDetails = None,
+                contributionsAndCredits = None,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -341,7 +341,7 @@ class BatchServiceSpec
         val uuidTwo = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val dob     = DateOfBirth(LocalDate.parse("2025-10-10"))
         val batchSource2 =
-          ContributionAndCreditsBatching(
+          BatchWithTaxWindows(
             NonEmptyList
               .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
             dob
@@ -354,7 +354,7 @@ class BatchServiceSpec
             .toJson(
               SearchLightBatch(
                 batchType = BatchType.MaBatch,
-                contributionAndCreditsBatching = Some(batchSource2),
+                contributionsAndCredits = Some(batchSource2),
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -369,7 +369,7 @@ class BatchServiceSpec
             .toJson(
               SearchLightBatch(
                 batchType = BatchType.MaBatch,
-                contributionAndCreditsBatching = Some(batchSource2),
+                contributionsAndCredits = Some(batchSource2),
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -405,7 +405,7 @@ class BatchServiceSpec
         val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         BatchId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val batchSource1       = List(BatchCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val batchSource1       = List(BatchWithCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -416,7 +416,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatchCallback = batchSource1,
+                liabilityDetails = batchSource1,
                 nationalInsuranceNumber = nationalInsuranceNumber
               )
             )
@@ -456,7 +456,7 @@ class BatchServiceSpec
             )
           ),
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditBatchingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
           batchId = Some(BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")))
@@ -475,9 +475,9 @@ class BatchServiceSpec
         val nationalInsuranceNumber            = Identifier("GD379251T")
         val dob                                = DateOfBirth(LocalDate.parse("2025-10-10"))
 
-        val batchSource1 = BatchCallback(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
+        val batchSource1 = BatchWithCallback(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
         val batchSource2 =
-          ContributionAndCreditsBatching(
+          BatchWithTaxWindows(
             NonEmptyList
               .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
             dob
@@ -497,8 +497,8 @@ class BatchServiceSpec
           Json
             .toJson(
               BspBatch(
-                marriageDetailsBatchCallback = Some(batchSource1),
-                contributionAndCreditsBatching = Some(batchSource2),
+                marriageDetails = Some(batchSource1),
+                contributionsAndCredits = Some(batchSource2),
                 nationalInsuranceNumber
               )
             )
@@ -547,14 +547,14 @@ class BatchServiceSpec
               MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
@@ -573,7 +573,7 @@ class BatchServiceSpec
         val dob                     = DateOfBirth(LocalDate.parse("2025-10-10"))
 
         val batchSource =
-          ContributionAndCreditsBatching(
+          BatchWithTaxWindows(
             NonEmptyList
               .of(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)), TaxWindow(StartTaxYear(2021), EndTaxYear(2025))),
             dob
@@ -591,7 +591,7 @@ class BatchServiceSpec
             .toJson(
               SearchLightBatch(
                 batchType = BatchType.BspBatch,
-                contributionAndCreditsBatching = Some(batchSource),
+                contributionsAndCredits = Some(batchSource),
                 nationalInsuranceNumber
               )
             )
@@ -628,14 +628,14 @@ class BatchServiceSpec
           nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = Some(SEARCHLIGHT),
@@ -658,9 +658,9 @@ class BatchServiceSpec
 
         val schemeContractedOutNumberDetails = SchemeContractedOutNumberDetails("S2345678C")
 
-        val batchSource1 = BatchCallback(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
+        val batchSource1 = BatchWithCallback(ApiName.MarriageDetails, marriageDetailsCallBackUrl)
 
-        val batchSource3 = BatchCallback(ApiName.BenefitSchemeDetails, BenefitSchemeCallBackUrl)
+        val batchSource3 = BatchWithCallback(ApiName.BenefitSchemeDetails, BenefitSchemeCallBackUrl)
 
         val marriageDetailsSuccessResponse =
           MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
@@ -791,10 +791,10 @@ class BatchServiceSpec
           Json
             .toJson(
               GyspBatch(
-                benefitSchemeMembershipDetailsBatchcallback = Some(batchSource3),
-                marriageDetailsBatchCallback = Some(batchSource1),
-                contributionAndCreditsBatching = Some(
-                  ContributionAndCreditsBatching(
+                benefitSchemeMembershipDetails = Some(batchSource3),
+                marriageDetails = Some(batchSource1),
+                contributionsAndCredits = Some(
+                  BatchWithTaxWindows(
                     NonEmptyList
                       .of(
                         TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
@@ -873,14 +873,14 @@ class BatchServiceSpec
               MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
             )
           ),
-          contributionCreditResult = ContributionCreditBatchingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2025))), dob))
           ),
           benefitSchemeMembershipDetailsData = Some(
             BenefitSchemeMembershipDetailsData(
@@ -1007,7 +1007,7 @@ class BatchServiceSpec
         val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         BatchId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val batchSource1       = List(BatchCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val batchSource1       = List(BatchWithCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -1019,7 +1019,7 @@ class BatchServiceSpec
             Json
               .toJson(
                 MaBatch(
-                  liabilitiesBatchCallback = batchSource1,
+                  liabilityDetails = batchSource1,
                   nationalInsuranceNumber
                 )
               )
@@ -1074,8 +1074,8 @@ class BatchServiceSpec
             Json
               .toJson(
                 BspBatch(
-                  marriageDetailsBatchCallback = None,
-                  contributionAndCreditsBatching = None,
+                  marriageDetails = None,
+                  contributionsAndCredits = None,
                   nationalInsuranceNumber = nationalInsuranceNumber
                 )
               )
@@ -1105,7 +1105,7 @@ class BatchServiceSpec
               .toJson(
                 SearchLightBatch(
                   batchType = BatchType.BspBatch,
-                  contributionAndCreditsBatching = None,
+                  contributionsAndCredits = None,
                   nationalInsuranceNumber
                 )
               )
@@ -1132,7 +1132,7 @@ class BatchServiceSpec
           Json
             .toJson(
               MaBatch(
-                liabilitiesBatchCallback = Nil,
+                liabilityDetails = Nil,
                 nationalInsuranceNumber
               )
             )
@@ -1161,10 +1161,10 @@ class BatchServiceSpec
             Json
               .toJson(
                 GyspBatch(
-                  benefitSchemeMembershipDetailsBatchcallback = None,
-                  marriageDetailsBatchCallback = None,
-                  contributionAndCreditsBatching = Some(
-                    ContributionAndCreditsBatching(
+                  benefitSchemeMembershipDetails = None,
+                  marriageDetails = None,
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(
                       NonEmptyList
                         .of(
                           TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
