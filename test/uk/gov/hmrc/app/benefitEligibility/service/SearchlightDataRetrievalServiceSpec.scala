@@ -54,7 +54,7 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
-  val mockPaginationService: PaginationService = mock[PaginationService]
+  val mockBatchService: BatchService = mock[BatchService]
   val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
@@ -65,7 +65,7 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
   val underTest = new SearchlightDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
-    mockPaginationService,
+    mockBatchService,
     mockUUIDService,
     currentTimeSource
   )

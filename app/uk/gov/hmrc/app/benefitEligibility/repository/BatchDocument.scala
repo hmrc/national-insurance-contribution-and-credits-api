@@ -23,22 +23,22 @@ import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter, PlainText}
 import java.time.Instant
 import scala.util.Try
 
-final case class PageTaskDocument(
+final case class BatchDocument(
     correlationId: CorrelationId,
-    pageTaskId: PageTaskId,
+    batchId: BatchId,
     data: JsObject,
     createdAt: Instant
 ) {
 
-  def encrypt(encrypterDecrypter: Encrypter & Decrypter): PageTaskDocument = {
-    val pageTask      = PlainText(Json.stringify(data))
-    val encryptedData = encrypterDecrypter.encrypt(pageTask).value
+  def encrypt(encrypterDecrypter: Encrypter & Decrypter): BatchDocument = {
+    val batch      = PlainText(Json.stringify(data))
+    val encryptedData = encrypterDecrypter.encrypt(batch).value
     this.copy(
       data = Json.obj("encrypted" -> encryptedData)
     )
   }
 
-  def decrypt(encrypterDecrypter: Encrypter & Decrypter): Option[PageTaskDocument] =
+  def decrypt(encrypterDecrypter: Encrypter & Decrypter): Option[BatchDocument] =
     Try {
       val dataAsString    = (data \ "encrypted").as[String]
       val decryptedString = encrypterDecrypter.decrypt(Crypted(dataAsString)).value
@@ -47,6 +47,6 @@ final case class PageTaskDocument(
 
 }
 
-object PageTaskDocument {
-  implicit val pageTaskDocumentFormat: Format[PageTaskDocument] = Json.format[PageTaskDocument]
+object BatchDocument {
+  implicit val batchDocumentFormat: Format[BatchDocument] = Json.format[BatchDocument]
 }

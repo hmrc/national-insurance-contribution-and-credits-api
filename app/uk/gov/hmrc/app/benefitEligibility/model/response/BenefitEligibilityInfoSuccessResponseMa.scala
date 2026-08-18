@@ -62,7 +62,7 @@ object BenefitEligibilityInfoSuccessResponseMa {
             ContributionsAndCreditsResponse.from(result.contributionCreditResult.getSuccess.get),
           liabilitySummaryDetailsResult =
             result.liabilityResult.map(r => FilteredLiabilitySummaryDetails.from(r.getSuccess.get)),
-          nextCursor = result.pageTaskId.map(CursorId.from)
+          nextCursor = result.batchId.map(CursorId.from)
         )
       )
     }

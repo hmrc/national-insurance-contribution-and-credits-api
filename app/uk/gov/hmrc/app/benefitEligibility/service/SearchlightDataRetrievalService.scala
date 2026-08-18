@@ -25,17 +25,17 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   CorrelationId,
   DataRetrievalServiceError,
-  PaginationType
+  BatchType
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.{
-  ContributionAndCreditsPaging,
-  PageTaskDocument,
-  PageTaskId,
-  SearchLightPageTask
+  ContributionAndCreditsBatching,
+  BatchDocument,
+  BatchId,
+  SearchLightBatch
 }
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
@@ -45,7 +45,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SearchlightDataRetrievalService @Inject() (
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
-    paginationService: PaginationService,
+    batchService: BatchService,
     uuidGenerator: UuidGenerator,
     currentTimeSource: CurrentTimeSource
 )(implicit ec: ExecutionContext) {
@@ -84,30 +84,30 @@ class SearchlightDataRetrievalService @Inject() (
               None
             )
 
-            val shouldPage = if (contributionCreditResult.isSuccess) taxWindows.length > 1 else false
+            val shouldBatch = if (contributionCreditResult.isSuccess) taxWindows.length > 1 else false
 
-            (PaginationType.from(eligibilityCheckDataRequest), shouldPage) match {
-              case (Some(paginationType), true) =>
+            (BatchType.from(eligibilityCheckDataRequest), shouldBatch) match {
+              case (Some(batchType), true) =>
 
-                val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
-                  ContributionAndCreditsPaging(
+                val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
+                  ContributionAndCreditsBatching(
                     remainingWindows,
                     eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
                   )
                 }
 
-                val pageTask = SearchLightPageTask(
-                  paginationType,
-                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                val batch = SearchLightBatch(
+                  batchType,
+                  contributionAndCreditsBatching = niContributionsCreditsBatch,
                   eligibilityCheckDataRequest.nationalInsuranceNumber
                 )
 
-                paginationService
+                batchService
                   .addTask(
-                    PageTaskDocument(
+                    BatchDocument(
                       correlationId,
-                      PageTaskId(uuidGenerator.generate),
-                      Json.toJson(pageTask).as[JsObject],
+                      BatchId(uuidGenerator.generate),
+                      Json.toJson(batch).as[JsObject],
                       currentTimeSource.instantNow()
                     )
                   )
@@ -115,7 +115,7 @@ class SearchlightDataRetrievalService @Inject() (
                     EligibilityCheckDataResultSearchLight(
                       benefitType = result.benefitType,
                       contributionCreditResult = result.contributionCreditResult,
-                      pageTaskId = Some(PageTaskId(id))
+                      batchId = Some(BatchId(id))
                     )
                   }
 

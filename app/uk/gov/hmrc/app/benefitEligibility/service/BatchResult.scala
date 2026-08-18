@@ -16,44 +16,44 @@
 
 package uk.gov.hmrc.app.benefitEligibility.service
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{CallSystem, CorrelationId, Identifier, PaginationType}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{CallSystem, CorrelationId, Identifier, BatchType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
-import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsPaging, PageTaskId, PaginationSource}
+import uk.gov.hmrc.app.benefitEligibility.repository.{ContributionAndCreditsBatching, BatchId, BatchSource}
 
 import java.util.UUID
 
-final case class ContributionCreditPagingResult(
+final case class ContributionCreditBatchingResult(
     contributionCreditResult: Option[ContributionCreditResult],
-    contributionAndCreditsPaging: Option[ContributionAndCreditsPaging]
+    contributionAndCreditsBatching: Option[ContributionAndCreditsBatching]
 )
 
-final case class PaginationResult(
+final case class BatchResult(
     correlationId: CorrelationId,
-    paginationType: PaginationType,
+    batchType: BatchType,
     nationalInsuranceNumber: Identifier,
     liabilitiesResult: List[LiabilityResult],
     marriageDetailsResult: Option[MarriageDetailsResult],
-    contributionCreditResult: ContributionCreditPagingResult,
+    contributionCreditResult: ContributionCreditBatchingResult,
     benefitSchemeMembershipDetailsData: Option[BenefitSchemeMembershipDetailsData],
     callSystem: Option[CallSystem],
-    pageTaskId: Option[PageTaskId]
+    batchId: Option[BatchId]
 ) {
 
-  private def shouldPage: Boolean =
-    (PaginationSource.fromLiabilities(liabilitiesResult) ++ List(
-      PaginationSource.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
-      PaginationSource.fromMarriageDetails(marriageDetailsResult)
-    ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsPaging.isDefined
+  private def shouldBatch: Boolean =
+    (BatchSource.fromLiabilities(liabilitiesResult) ++ List(
+      BatchSource.fromBenefitSchemeMembershipDetails(benefitSchemeMembershipDetailsData),
+      BatchSource.fromMarriageDetails(marriageDetailsResult)
+    ).flatten).nonEmpty || contributionCreditResult.contributionAndCreditsBatching.isDefined
 
-  def setPageTaskId(uuid: UUID): PaginationResult = {
-    val pageTaskId = if (shouldPage) {
-      Some(PageTaskId(uuid))
+  def setBatchId(uuid: UUID): BatchResult = {
+    val batchId = if (shouldBatch) {
+      Some(BatchId(uuid))
     } else None
 
-    this.copy(pageTaskId = pageTaskId)
+    this.copy(batchId = batchId)
   }
 
-  def getPageTaskId: Option[PageTaskId] = this.pageTaskId
+  def getBatchId: Option[BatchId] = this.batchId
 
   def allResults: List[ApiResult] = liabilitiesResult ++ List(
     marriageDetailsResult,

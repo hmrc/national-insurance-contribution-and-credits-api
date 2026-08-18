@@ -17,13 +17,13 @@
 package uk.gov.hmrc.app.benefitEligibility.model.common
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchId
 
 case class CursorId(value: String) extends AnyVal
 
 object CursorId {
   implicit val format: Format[CursorId] = Json.valueFormat[CursorId]
 
-  def from(pageTaskId: PageTaskId): CursorId = CursorId(pageTaskId.value.toString)
+  def from(batchId: BatchId): CursorId = CursorId(batchId.value.toString)
 
 }

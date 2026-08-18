@@ -58,7 +58,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
   val mockMarriageDetailsConnector: MarriageDetailsConnector =
     mock[MarriageDetailsConnector]
 
-  val mockPaginationService: PaginationService = mock[PaginationService]
+  val mockBatchService: BatchService = mock[BatchService]
   val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
@@ -72,7 +72,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
   val underTest = new BereavementSupportPaymentDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
     mockMarriageDetailsConnector,
-    mockPaginationService,
+    mockBatchService,
     mockUUIDService,
     currentTimeSource
   )
@@ -163,13 +163,13 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
     )
   )
 
-  val paging = PageTaskDocument(
+  val batchDocument = BatchDocument(
     correlationId,
-    PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    BatchId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Json
       .toJson(
-        BspPageTask(
-          Some(PaginationSource(ApiName.MarriageDetails, "")),
+        BspBatch(
+          Some(BatchSource(ApiName.MarriageDetails, "")),
           None,
           identifier
         )
@@ -214,9 +214,9 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           .expects()
           .returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
-        (mockPaginationService
-          .addTask(_: PageTaskDocument)(_: HeaderCarrier))
-          .expects(paging, *)
+        (mockBatchService
+          .addTask(_: BatchDocument)(_: HeaderCarrier))
+          .expects(batchDocument, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 
         underTest
@@ -226,7 +226,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
           EligibilityCheckDataResultBSP(
             niContributionAndCreditsResult,
             marriageDetailsResult,
-            Some(paging.pageTaskId)
+            Some(batchDocument.batchId)
           )
         )
 

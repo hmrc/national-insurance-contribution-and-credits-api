@@ -105,7 +105,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #     pattern: application/vnd.hmrc.[version]+[content-type]
 #     example: application/vnd.hmrc.1.0+json
 #  - name: nextCursor
-#    description: Used for pagination restart
+#    description: Used for batch restart
 #    in: query
 #    required: true
 #    schema:
@@ -156,7 +156,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
 #             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
 ###
-GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextPage(cursorId: Option[String])
+GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextBatch(cursorId: Option[String])
 
 
 POST /contribution-and-credits  uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.controllers.NICCController.postContributionsAndCredits

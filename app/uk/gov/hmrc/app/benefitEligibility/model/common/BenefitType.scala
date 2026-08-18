@@ -31,12 +31,12 @@ object BenefitType extends Enum[BenefitType] with PlayJsonEnum[BenefitType] {
   case object GYSP extends BenefitType("GYSP")
   case object BSP  extends BenefitType("BSP")
 
-  def from(paginationType: PaginationType): BenefitType =
-    paginationType match {
-      case PaginationType.MaPagination             => MA
-      case PaginationType.GyspPagination           => GYSP
-      case PaginationType.BspPagination            => BSP
-      case PaginationType.BspSearchLightPagination => BSP
+  def from(batchType: BatchType): BenefitType =
+    batchType match {
+      case BatchType.MaBatch             => MA
+      case BatchType.GyspBatch           => GYSP
+      case BatchType.BspBatch            => BSP
+      case BatchType.BspSearchLightBatch => BSP
     }
 
 }

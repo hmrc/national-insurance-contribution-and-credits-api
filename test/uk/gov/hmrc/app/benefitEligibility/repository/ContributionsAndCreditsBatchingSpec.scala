@@ -27,7 +27,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.NiContributionAnd
 
 import java.time.LocalDate
 
-class ContributionsAndCreditsPagingSpec
+class ContributionsAndCreditsBatchingSpec
     extends AnyFreeSpec
     with MockFactory
     with ScalaFutures
@@ -36,39 +36,39 @@ class ContributionsAndCreditsPagingSpec
     with EitherValues
     with BeforeAndAfterAll {
 
-  "ContributionAndCreditsPaging" - {
+  "ContributionAndCreditsBatching" - {
     ".apply" - {
-      "should successfully create ContributionAndCreditsPaging" in {
+      "should successfully create ContributionAndCreditsBatching" in {
         val taxWindow = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030)))
 
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
 
-        val result = ContributionAndCreditsPaging.apply(taxWindow, dob)
+        val result = ContributionAndCreditsBatching.apply(taxWindow, dob)
         result.dateOfBirth shouldBe dob
         result.niContributionAndCreditsTaxWindows shouldBe taxWindow
         result.apiName shouldBe NiContributionAndCredits
       }
     }
     ".tail" - {
-      "should return an updated ContributionAndCreditsPaging with the tail of the windows on the initial ContributionAndCreditsPaging object" in {
+      "should return an updated ContributionAndCreditsBatching with the tail of the windows on the initial ContributionAndCreditsBatching object" in {
         val taxWindow = NonEmptyList.of(
           TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
           TaxWindow(StartTaxYear(2021), EndTaxYear(2030))
         )
         val dob              = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationSource = ContributionAndCreditsPaging(taxWindow, dob)
+        val batchSource = ContributionAndCreditsBatching(taxWindow, dob)
 
-        val result = paginationSource.tail
+        val result = batchSource.tail
 
         result shouldBe
-          Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2030))), dob))
+          Some(ContributionAndCreditsBatching(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2030))), dob))
       }
-      "should return None if ContributionAndCreditsPaging has only one tax window" in {
+      "should return None if ContributionAndCreditsBatching has only one tax window" in {
         val taxWindow        = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)))
         val dob              = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationSource = ContributionAndCreditsPaging(taxWindow, dob)
+        val batchSource = ContributionAndCreditsBatching(taxWindow, dob)
 
-        val result = paginationSource.tail
+        val result = batchSource.tail
 
         result shouldBe None
       }

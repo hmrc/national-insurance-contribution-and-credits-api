@@ -45,7 +45,7 @@ class AppConfig @Inject() (config: ServicesConfig) {
 
   private lazy val hipServicePrefix = "microservice.services.hip"
 
-  lazy val pageTaskTtlSeconds: Int = config.getInt("mongodb.pageTaskTtlSeconds")
+  lazy val batchTTLSeconds: Int = config.getInt("mongodb.batchTTLSeconds")
 
   lazy val hipBaseUrl: String = config.baseUrl("hip")
 

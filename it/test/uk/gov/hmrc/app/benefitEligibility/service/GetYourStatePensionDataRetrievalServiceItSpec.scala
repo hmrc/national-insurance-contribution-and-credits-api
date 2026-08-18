@@ -79,7 +79,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
   LongTermBenefitCalculationRequestParams
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTaskDocument, PageTaskId}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BatchRepositoryImpl, BatchDocument, BatchId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -92,7 +92,7 @@ import scala.concurrent.ExecutionContext
 
 class GetYourStatePensionDataRetrievalServiceItSpec
     extends AnyFreeSpec
-    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
+    with DefaultPlayMongoRepositorySupport[BatchDocument]
     with EitherValues
     with WireMockHelper
     with Injecting
@@ -142,8 +142,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
   // perm fix: declare protected val repository: PlayMongoRepository[A] in PlayMongoRepositorySupport as a def (library update)
   server.start()
 
-  override protected val repository: BenefitEligibilityRepositoryImpl =
-    inject[BenefitEligibilityRepositoryImpl]
+  override protected val repository: BatchRepositoryImpl =
+    inject[BatchRepositoryImpl]
 
   override protected def checkTtlIndex = false
 
@@ -720,7 +720,7 @@ class GetYourStatePensionDataRetrievalServiceItSpec
                 ApiName.IndividualStatePension,
                 individualStatePensionInformationSuccessResponse
               ),
-              Some(PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
+              Some(BatchId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")))
             )
           )
 

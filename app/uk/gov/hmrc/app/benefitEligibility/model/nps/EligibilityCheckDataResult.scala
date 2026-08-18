@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps
 
 import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitType, CallSystem}
-import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchId
 import uk.gov.hmrc.app.benefitEligibility.service.{
   BenefitSchemeMembershipDetailsData,
   LongTermBenefitCalculationDetailsData
@@ -33,7 +33,7 @@ object EligibilityCheckDataResult {
   case class EligibilityCheckDataResultMA(
       liabilityResult: List[LiabilityResult],
       contributionCreditResult: ContributionCreditResult,
-      pageTaskId: Option[PageTaskId]
+      batchId: Option[BatchId]
   ) extends EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.MA
 
@@ -60,7 +60,7 @@ object EligibilityCheckDataResult {
       longTermBenefitCalculationDetailsData: LongTermBenefitCalculationDetailsData,
       marriageDetailsResult: MarriageDetailsResult,
       statePensionData: IndividualStatePensionResult,
-      pageTaskId: Option[PageTaskId]
+      batchId: Option[BatchId]
   ) extends EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.GYSP
 
@@ -79,7 +79,7 @@ object EligibilityCheckDataResult {
   case class EligibilityCheckDataResultBSP(
       contributionCreditResult: ContributionCreditResult,
       marriageDetailsResult: MarriageDetailsResult,
-      pageTaskId: Option[PageTaskId]
+      batchId: Option[BatchId]
   ) extends EligibilityCheckDataResult {
     def benefitType: BenefitType = BenefitType.BSP
 
@@ -91,7 +91,7 @@ object EligibilityCheckDataResult {
       callSystem: CallSystem,
       benefitType: BenefitType,
       contributionCreditResult: ContributionCreditResult,
-      pageTaskId: Option[PageTaskId]
+      batchId: Option[BatchId]
   ) extends EligibilityCheckDataResult {
     override def allResults: List[ApiResult] = List(contributionCreditResult)
   }
@@ -101,12 +101,12 @@ object EligibilityCheckDataResult {
     def apply(
         benefitType: BenefitType,
         contributionCreditResult: ContributionCreditResult,
-        pageTaskId: Option[PageTaskId]
+        batchId: Option[BatchId]
     ) = new EligibilityCheckDataResultSearchLight(
       CallSystem.SEARCHLIGHT,
       benefitType,
       contributionCreditResult,
-      pageTaskId
+      batchId
     )
 
   }
