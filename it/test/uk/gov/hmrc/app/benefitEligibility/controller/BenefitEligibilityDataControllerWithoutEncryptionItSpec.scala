@@ -161,6 +161,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
+    deleteAll().futureValue
     List(
       BatchDocument(
         correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
