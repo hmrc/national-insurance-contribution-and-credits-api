@@ -103,7 +103,7 @@ class BatchServiceSpec
     marriageDetailsConnector = mockMarriageDetailsConnector,
     schemeMembershipDetailsConnector = mockSchemeMembershipDetailsConnector,
     benefitSchemeDetailsConnector = mockBenefitSchemeDetailsConnector,
-    batchRepo = mockBenefitEligibilityRepository,
+    batchRepository = mockBenefitEligibilityRepository,
     currentTime = currentTimeSource,
     uuidGenerator = mockUuidGenerator,
     appConfig = mockAppConfig

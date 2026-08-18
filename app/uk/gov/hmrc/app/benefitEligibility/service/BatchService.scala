@@ -48,7 +48,7 @@ class BatchService @Inject() (
                                marriageDetailsConnector: MarriageDetailsConnector,
                                schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
                                benefitSchemeDetailsConnector: BenefitSchemeDetailsConnector,
-                               batchRepo: BatchRepository,
+                               batchRepository: BatchRepository,
                                currentTime: CurrentTimeSource,
                                uuidGenerator: UuidGenerator,
                                appConfig: AppConfig
@@ -67,7 +67,7 @@ class BatchService @Inject() (
       addTask(newBatchDocument)
     }
 
-    batchRepo.insert(batchDocument).recoverWith {
+    batchRepository.insert(batchDocument).recoverWith {
       case DatabaseError(dbError: com.mongodb.MongoWriteException)
           if dbError.getError.getCategory == com.mongodb.ErrorCategory.DUPLICATE_KEY =>
         logger.warn("MongoWriteException: Duplicate key error")
@@ -84,7 +84,7 @@ class BatchService @Inject() (
       batchId: BatchId
   )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] =
     for {
-      existingBatchDocument <- batchRepo.getItem(batchId)
+      existingBatchDocument <- batchRepository.getItem(batchId)
       batchResult <- existingBatchDocument.data.as[Batch] match {
         case task: MaBatch if appConfig.maEnabled =>
           logger.info("processing MaBatch")
@@ -110,8 +110,8 @@ class BatchService @Inject() (
       batchDocument = Batch.createBatchDocument(batchResult, currentTime)
 
       _ <- batchDocument
-        .fold(batchRepo.delete(existingBatchDocument.batchId.value).map(_ => ()))(newBatchDoc =>
-          batchRepo.upsert(Some(existingBatchDocument.batchId.value), newBatchDoc)
+        .fold(batchRepository.delete(existingBatchDocument.batchId.value).map(_ => ()))(newBatchDoc =>
+          batchRepository.upsert(Some(existingBatchDocument.batchId.value), newBatchDoc)
         )
         .map(_ => ())
     } yield batchResult
