@@ -717,7 +717,7 @@ paths:
           pattern: "application/vnd.hmrc.[version]+[content-type]"
           example: application/vnd.hmrc.1.0+json
       - name: nextCursor
-        description: Used for batch restart
+        description: Used for pagination restart
         in: query
         required: true
         schema:
@@ -900,10 +900,10 @@ paths:
                 $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
               examples:
                 missing_record:
-                  summary: Missing batch record
+                  summary: Missing pagination record
                   value:
                     code: NOT_FOUND
-                    reason: batch record not found
+                    reason: pagination record not found
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"

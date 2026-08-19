@@ -915,10 +915,10 @@ paths:
             application/json:
               examples:
                 missing_record:
-                  summary: Missing batch record
+                  summary: Missing pagination record
                   value:
                     code: NOT_FOUND
-                    reason: batch record not found
+                    reason: pagination record not found
         "422":
           description: Unprocessable Entity
           headers:

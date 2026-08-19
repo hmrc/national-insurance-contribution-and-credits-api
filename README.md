@@ -271,13 +271,13 @@ Following successful data retrieval from all relevant NPS endpoints, the system 
 
 All requests must include a `correlationId` header.
 
-Retrieves batched benefit eligibility data using a cursor reference. Use this endpoint when a previous POST request returned a `nextCursor` value, indicating additional data is available.
+Retrieves batched (a.k.a. paginated) benefit eligibility data using a cursor reference. Use this endpoint when a previous POST request returned a `nextCursor` value, indicating additional data is available.
 
 **Query Parameters:**
 
-| Parameter  | Description                                  | Mandatory |
-|:-----------|:---------------------------------------------|:----------|
-| nextCursor | Cursor reference for retrieving batched data | Yes       |
+| Parameter  | Description                                     | Mandatory |
+|:-----------|:------------------------------------------------|:----------|
+| nextCursor | Cursor reference for retrieving batches of data | Yes       |
 
 
 All responses include a `correlationId` header for request tracing throughout the request journey.
@@ -285,7 +285,7 @@ See OAS documentation for further detail (resources/public/api/conf/1.0/applicat
 
 ## Batch Management and Data Continuity
 
-Given that certain NPS endpoints may return data in a batched format, the service implements a batch delegation strategy that transfers the responsibility for managing batched responses to DWP. This architectural decision ensures that if NPS returns incomplete data due to batch constraints, DWP will receive correspondingly incomplete data along with the necessary tools to retrieve the remaining information.
+Given that certain NPS endpoints may return data in batches, the service implements a batch delegation strategy that transfers the responsibility for managing batched responses to DWP. This architectural decision ensures that if NPS returns incomplete data due to batch constraints, DWP will receive correspondingly incomplete data along with the necessary tools to retrieve the remaining information.
 
 When incomplete data is returned, the response will include a special identifier called **nextCursor**, which contains a reference to a MongoDB document storing all relevant batch information for the remaining data. To retrieve additional data, DWP must include this nextCursor value as a query parameter in subsequent calls to the **GET /benefit-eligibility-info** endpoint.
 
