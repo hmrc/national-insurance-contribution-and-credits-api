@@ -22,21 +22,16 @@ import com.google.inject.Inject
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BatchType,
   BenefitEligibilityError,
   CorrelationId,
-  DataRetrievalServiceError,
-  BatchType
+  DataRetrievalServiceError
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  BatchWithTaxWindows,
-  BatchDocument,
-  BatchId,
-  SearchLightBatch
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BatchDocument, BatchId, BatchWithTaxWindows, SearchLightBatch}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
 import uk.gov.hmrc.http.HeaderCarrier

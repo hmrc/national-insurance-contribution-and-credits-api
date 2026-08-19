@@ -52,7 +52,7 @@ trait BatchRepository {
 }
 
 @Singleton
-class BatchRepositoryImpl @Inject()(
+class BatchRepositoryImpl @Inject() (
     mongoComponent: MongoComponent,
     encrypterDecrypter: Encrypter & Decrypter,
     config: AppConfig

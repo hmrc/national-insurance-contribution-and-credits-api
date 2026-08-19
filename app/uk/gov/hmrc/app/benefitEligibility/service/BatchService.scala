@@ -43,15 +43,15 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BatchService @Inject() (
-                               liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
-                               niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
-                               marriageDetailsConnector: MarriageDetailsConnector,
-                               schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
-                               benefitSchemeDetailsConnector: BenefitSchemeDetailsConnector,
-                               batchRepository: BatchRepository,
-                               currentTime: CurrentTimeSource,
-                               uuidGenerator: UuidGenerator,
-                               appConfig: AppConfig
+    liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
+    niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
+    marriageDetailsConnector: MarriageDetailsConnector,
+    schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
+    benefitSchemeDetailsConnector: BenefitSchemeDetailsConnector,
+    batchRepository: BatchRepository,
+    currentTime: CurrentTimeSource,
+    uuidGenerator: UuidGenerator,
+    appConfig: AppConfig
 )(implicit ec: ExecutionContext) {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
@@ -304,9 +304,7 @@ class BatchService @Inject() (
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
     marriageDetailsBatchWithCallback
-      .map(batchSource =>
-        marriageDetailsConnector.fetchMarriageDetailsData(benefitType, batchSource.callBackURL)
-      )
+      .map(batchSource => marriageDetailsConnector.fetchMarriageDetailsData(benefitType, batchSource.callBackURL))
       .sequence
   }
 

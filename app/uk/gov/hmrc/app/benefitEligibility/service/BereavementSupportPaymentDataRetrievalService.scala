@@ -87,7 +87,8 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
               }
 
             if (shouldBatch) {
-              val marriageDetailsBatchWithCallback: Option[BatchWithCallback] = marriageDetailsResult.getSuccess.flatMap(
+              val marriageDetailsBatchWithCallback
+                  : Option[BatchWithCallback] = marriageDetailsResult.getSuccess.flatMap(
                 _.marriageDetails._links.flatMap(_.self.href).map(url => BatchWithCallback(MarriageDetails, url.value))
               )
 

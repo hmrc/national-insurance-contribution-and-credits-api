@@ -31,11 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.response.{
   ErrorReason,
   ErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.service.{
-  BenefitEligibilityDataRetrievalService,
-  BatchResult,
-  BatchService
-}
+import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchService, BenefitEligibilityDataRetrievalService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -114,7 +110,7 @@ class BenefitEligibilityDataController @Inject() (
       val maybeResult = for {
         headerValues <- EitherT.fromEither[Future](validateHeaders(request.headers))
         correlationId = headerValues
-        batchId       <- EitherT.fromEither[Future](parseBatchId(cursorId))
+        batchId     <- EitherT.fromEither[Future](parseBatchId(cursorId))
         batchResult <- batchService.processBatch(batchId)
       } yield buildResponse(batchResult).withHeaders("CorrelationId" -> correlationId.value.toString)
 

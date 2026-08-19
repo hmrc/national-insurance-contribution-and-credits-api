@@ -31,7 +31,7 @@ final case class BatchDocument(
 ) {
 
   def encrypt(encrypterDecrypter: Encrypter & Decrypter): BatchDocument = {
-    val batch      = PlainText(Json.stringify(data))
+    val batch         = PlainText(Json.stringify(data))
     val encryptedData = encrypterDecrypter.encrypt(batch).value
     this.copy(
       data = Json.obj("encrypted" -> encryptedData)
