@@ -62,7 +62,7 @@ paths:
         - The API may be called with the following query parameters:<br>
           - Marriage start date (startDate). <br>
           - Latest record only (latest). <br>
-          - Sequence number for batch of records (sequence). <br>
+          - Sequence number for pagination of records (sequence). <br>
         - NPS will return a payload holding the marriage details of the specified individual.<br>
         # Volumes & Registered Consumers
         This API is consumed by the following 'Registered Consumers' who would all need to be impacted when a new consumer with an associated new load first registers to use the service, or an uplift is required to the API. Each 'Registered Consumer' below will receive an additional Security Spec. document that outlines how to connect to the various environments as well as any consumer-specific authorisation/authentication details - this is unique to their connection. <br><p>
