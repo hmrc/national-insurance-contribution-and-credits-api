@@ -79,10 +79,10 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.service.{
-  BenefitSchemeMembershipDetailsData,
+  BatchResult,
   BatchWithTaxWindowsResult,
-  LongTermBenefitCalculationDetailsData,
-  BatchResult
+  BenefitSchemeMembershipDetailsData,
+  LongTermBenefitCalculationDetailsData
 }
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 

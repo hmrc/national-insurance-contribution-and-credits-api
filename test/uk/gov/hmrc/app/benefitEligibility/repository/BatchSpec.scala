@@ -54,9 +54,9 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 }
 import uk.gov.hmrc.app.benefitEligibility.repository.Batch.createBatchDocument
 import uk.gov.hmrc.app.benefitEligibility.service.{
-  BenefitSchemeMembershipDetailsData,
+  BatchResult,
   BatchWithTaxWindowsResult,
-  BatchResult
+  BenefitSchemeMembershipDetailsData
 }
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
@@ -361,8 +361,7 @@ class BatchSpec
             Json
               .toJson(
                 GyspBatch(
-                  benefitSchemeMembershipDetails =
-                    Some(BatchWithCallback(ApiName.BenefitSchemeDetails, "SomeURL2")),
+                  benefitSchemeMembershipDetails = Some(BatchWithCallback(ApiName.BenefitSchemeDetails, "SomeURL2")),
                   marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
                   contributionsAndCredits = Some(
                     BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)

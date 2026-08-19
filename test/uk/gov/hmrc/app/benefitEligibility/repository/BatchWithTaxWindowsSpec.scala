@@ -55,7 +55,7 @@ class BatchWithTaxWindowsSpec
           TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
           TaxWindow(StartTaxYear(2021), EndTaxYear(2030))
         )
-        val dob              = DateOfBirth(LocalDate.parse("2025-10-10"))
+        val dob         = DateOfBirth(LocalDate.parse("2025-10-10"))
         val batchSource = BatchWithTaxWindows(taxWindow, dob)
 
         val result = batchSource.tail
@@ -64,8 +64,8 @@ class BatchWithTaxWindowsSpec
           Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2030))), dob))
       }
       "should return None if BatchWithTaxWindows has only one tax window" in {
-        val taxWindow        = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)))
-        val dob              = DateOfBirth(LocalDate.parse("2025-10-10"))
+        val taxWindow   = NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020)))
+        val dob         = DateOfBirth(LocalDate.parse("2025-10-10"))
         val batchSource = BatchWithTaxWindows(taxWindow, dob)
 
         val result = batchSource.tail

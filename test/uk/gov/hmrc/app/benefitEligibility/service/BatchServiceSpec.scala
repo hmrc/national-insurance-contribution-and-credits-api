@@ -112,7 +112,7 @@ class BatchServiceSpec
   "BatchService" - {
     ".addTask" - {
       "should successfully add a new batch" in {
-        val batchId1       = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val batchId1     = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
         val batchSource3 = List(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
@@ -166,8 +166,8 @@ class BatchServiceSpec
 
       }
       "should return a new uuid if current uuid already exists in database for MA" in {
-        val batchIdOne     = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val batchIdTwo     = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val batchIdOne   = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val batchIdTwo   = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val batchSource3 = List(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
@@ -221,8 +221,8 @@ class BatchServiceSpec
         underTest.addTask(batchDocument).value.futureValue
       }
       "should return a new uuid if current uuid already exists in database for BSP" in {
-        val uuidOne           = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val uuidTwo           = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val uuidOne      = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo      = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val batchSource3 = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
@@ -278,8 +278,8 @@ class BatchServiceSpec
         underTest.addTask(batchDocument).value.futureValue
       }
       "should return a new uuid if current uuid already exists in database for GYSP" in {
-        val uuidOne           = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val uuidTwo           = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val uuidOne      = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val uuidTwo      = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
         val batchSource3 = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeCallBackURLThree"))
 
         val batchDocument = BatchDocument(
@@ -405,7 +405,7 @@ class BatchServiceSpec
         val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         BatchId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val batchSource1       = List(BatchWithCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val batchSource1            = List(BatchWithCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -648,7 +648,7 @@ class BatchServiceSpec
           .futureValue shouldBe Right(expected)
       }
       "should return batch result for GYSP" in {
-        val uuid       = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
+        val uuid    = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         val batchId = BatchId(uuid)
 
         val marriageDetailsCallBackUrl: String = "SomeCallBackURL1"
@@ -1007,7 +1007,7 @@ class BatchServiceSpec
         val uuid = UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")
         BatchId(uuid)
         val liabilitiesCallBackUrl  = "SomeCallBackURL1"
-        val batchSource1       = List(BatchWithCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
+        val batchSource1            = List(BatchWithCallback(ApiName.Liabilities, liabilitiesCallBackUrl))
         val nationalInsuranceNumber = Identifier("GD379251T")
 
         implicit val hc: HeaderCarrier = HeaderCarrier()

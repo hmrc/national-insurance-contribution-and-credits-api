@@ -60,8 +60,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
-  val mockBatchService: BatchService = mock[BatchService]
-  val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
+  val mockBatchService: BatchService        = mock[BatchService]
+  val mockUUIDService: UuidGeneratorService = mock[UuidGeneratorService]
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
