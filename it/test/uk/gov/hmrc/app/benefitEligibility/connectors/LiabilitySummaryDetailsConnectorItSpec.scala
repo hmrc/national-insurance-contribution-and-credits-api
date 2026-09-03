@@ -259,7 +259,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -320,7 +320,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
           server.verify(
@@ -369,7 +369,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -407,7 +407,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.NotFound, None)
+              ErrorReport( None)
             )
           )
 
@@ -461,7 +461,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -516,7 +516,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
         }
@@ -567,7 +567,7 @@ class LiabilitySummaryDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.Liabilities,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
         }
@@ -604,7 +604,7 @@ class LiabilitySummaryDetailsConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.Liabilities,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

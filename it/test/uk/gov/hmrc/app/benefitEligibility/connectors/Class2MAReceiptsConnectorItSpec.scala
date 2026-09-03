@@ -181,7 +181,7 @@
 //          result shouldBe Right(
 //            FailureResult(
 //              ApiName.Class2MAReceipts,
-//              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+//              ErrorReport( Some(response))
 //            )
 //          )
 //
@@ -232,7 +232,7 @@
 //          result shouldBe Right(
 //            FailureResult(
 //              ApiName.Class2MAReceipts,
-//              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+//              ErrorReport( Some(response))
 //            )
 //          )
 //          server.verify(
@@ -271,7 +271,7 @@
 //          result shouldBe Right(
 //            FailureResult(
 //              ApiName.Class2MAReceipts,
-//              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+//              ErrorReport( Some(response))
 //            )
 //          )
 //
@@ -299,7 +299,7 @@
 //          result shouldBe Right(
 //            FailureResult(
 //              ApiName.Class2MAReceipts,
-//              ErrorReport(NpsNormalizedError.NotFound, None)
+//              ErrorReport( None)
 //            )
 //          )
 //
@@ -343,7 +343,7 @@
 //          result shouldBe Right(
 //            FailureResult(
 //              ApiName.Class2MAReceipts,
-//              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+//              ErrorReport( Some(response))
 //            )
 //          )
 //
@@ -443,7 +443,7 @@
 //          result shouldBe Right(
 //            FailureResult(
 //              ApiName.Class2MAReceipts,
-//              ErrorReport(NpsNormalizedError.ServiceUnavailable, Some(response))
+//              ErrorReport( Some(response))
 //            )
 //          )
 //          server.verify(
@@ -473,7 +473,7 @@
 //            result shouldBe Right(
 //              FailureResult(
 //                ApiName.Class2MAReceipts,
-//                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+//                ErrorReport( None)
 //              )
 //            )
 //          }

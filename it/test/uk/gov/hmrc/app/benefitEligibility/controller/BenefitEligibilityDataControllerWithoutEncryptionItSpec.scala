@@ -941,18 +941,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                    |      "totalCalls":1,
                                    |      "successful":0,
                                    |      "failed":1
-                                   |   },
-                                   |   "downStreams":[
-                                   |      {
-                                   |         "apiName":"NI Contributions and credits",
-                                   |         "status":"FAILURE",
-                                   |         "error":{
-                                   |            "code":"UNEXPECTED_STATUS_CODE",
-                                   |            "message":"downstream returned an unexpected status",
-                                   |            "downstreamStatus":502
-                                   |         }
-                                   |      }
-                                   |   ]
+                                   |   }
                                    |}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
@@ -1162,18 +1151,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                    |      "totalCalls":1,
                                    |      "successful":0,
                                    |      "failed":1
-                                   |   },
-                                   |   "downStreams":[
-                                   |      {
-                                   |         "apiName":"NI Contributions and credits",
-                                   |         "status":"FAILURE",
-                                   |         "error":{
-                                   |            "code":"UNEXPECTED_STATUS_CODE",
-                                   |            "message":"downstream returned an unexpected status",
-                                   |            "downstreamStatus":502
-                                   |         }
-                                   |      }
-                                   |   ]
+                                   |   }
                                    |}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
@@ -1392,18 +1370,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
               |      "totalCalls":1,
               |      "successful":0,
               |      "failed":1
-              |   },
-              |   "downStreams":[
-              |      {
-              |         "apiName":"NI Contributions and credits",
-              |         "status":"FAILURE",
-              |         "error":{
-              |            "code":"UNEXPECTED_STATUS_CODE",
-              |            "message":"downstream returned an unexpected status",
-              |            "downstreamStatus":502
-              |         }
-              |      }
-              |   ]
+              |   }
               |}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
@@ -1660,22 +1627,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                  |      "totalCalls":2,
                                  |      "successful":1,
                                  |      "failed":1
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Liabilities",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
+                                 |   }
                                  |}""".stripMargin
 
           status(result) shouldBe 500
@@ -1747,27 +1699,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                  |      "totalCalls":2,
                                  |      "successful":0,
                                  |      "failed":2
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Liabilities",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
+                                 |   }
                                  |}""".stripMargin
 
           status(result) shouldBe 500
@@ -2059,22 +1991,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                  |      "totalCalls":2,
                                  |      "successful":1,
                                  |      "failed":1
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
+                                 |   }
                                  |}""".stripMargin
 
           status(result) shouldBe 500
@@ -2142,27 +2059,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                  |      "totalCalls":2,
                                  |      "successful":0,
                                  |      "failed":2
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
+                                 |   }
                                  |}""".stripMargin
 
           status(result) shouldBe 500
@@ -2691,47 +2588,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                  |      "totalCalls":7,
                                  |      "successful":5,
                                  |      "failed":2
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Benefit Scheme Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Long Term Benefit Notes",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Scheme Membership Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Long Term Benefit Calculation Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Individual State Pension Information",
-                                 |         "status":"SUCCESS"
-                                 |      }
-                                 |   ]
+                                 |   }
                                  |}""".stripMargin
 
           status(result) shouldBe 500
@@ -2861,54 +2718,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
                                  |      "totalCalls":5,
                                  |      "successful":0,
                                  |      "failed":5
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Scheme Membership Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Long Term Benefit Calculation Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Individual State Pension Information",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
+                                 |   }
                                  |}""".stripMargin
 
           status(result) shouldBe 500
