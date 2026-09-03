@@ -24,7 +24,6 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.{MarriageDetailsConnector, NiContributionsAndCreditsConnector}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{BadRequest, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultBSP
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
@@ -235,7 +234,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         val niContributionAndCreditsResult = FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(BadRequest, None)
+          ErrorReport(None)
         )
 
         val marriageDetailsResult = SuccessResult(
@@ -274,12 +273,12 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
         val niContributionAndCreditsResult = FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(BadRequest, None)
+          ErrorReport(None)
         )
 
         val marriageDetailsResult = FailureResult(
           ApiName.MarriageDetails,
-          ErrorReport(UnprocessableEntity, None)
+          ErrorReport(None)
         )
 
         (mockNiContributionsAndCreditsConnector
