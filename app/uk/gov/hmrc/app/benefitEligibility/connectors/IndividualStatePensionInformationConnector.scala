@@ -67,27 +67,27 @@ class IndividualStatePensionInformationConnector @Inject() (
 
             case BAD_REQUEST =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsErrorResponse400](response).map(resp => toFailureResult(BadRequest, Some(resp)))
+              attemptParse[NpsErrorResponse400](response).map(resp => toFailureResult( Some(resp)))
 
             case FORBIDDEN =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult(AccessForbidden, Some(resp)))
+              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult( Some(resp)))
 
             case SERVICE_UNAVAILABLE =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              Right(toFailureResult(ServiceUnavailable, None))
+              Right(toFailureResult( None))
 
             case NOT_FOUND =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              Right(toFailureResult(NotFound, None))
+              Right(toFailureResult( None))
 
             case INTERNAL_SERVER_ERROR =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              Right(toFailureResult(InternalServerError, None))
+              Right(toFailureResult( None))
 
             case code =>
               logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")
-              Right(toFailureResult(UnexpectedStatus(code), None))
+              Right(toFailureResult( None))
           }
 
         EitherT.fromEither[Future](individualStatePensionResult).leftMap {

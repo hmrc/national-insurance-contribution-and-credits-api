@@ -33,8 +33,8 @@ trait NpsResponseHandler {
   ): NpsApiResult[A, B] =
     npsError match {
       case Some(errorResponse) =>
-        FailureResult(apiName, ErrorReport(normalizedError, Some(errorResponse)).asInstanceOf[A])
-      case None => FailureResult(apiName, ErrorReport(normalizedError, None).asInstanceOf[A])
+        FailureResult(apiName, ErrorReport(Some(errorResponse)).asInstanceOf[A])
+      case None => FailureResult(apiName, ErrorReport(None).asInstanceOf[A])
     }
 
 }

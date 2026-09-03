@@ -120,37 +120,37 @@ class LiabilitySummaryDetailsConnector @Inject() (
         case BAD_REQUEST =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponse400](response).map { resp =>
-            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](BadRequest, Some(resp))
+            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](Some(resp))
           }
 
         case FORBIDDEN =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsSingleErrorResponse](response).map { resp =>
-            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](AccessForbidden, Some(resp))
+            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](Some(resp))
           }
 
         case UNPROCESSABLE_ENTITY =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
           attemptParse[NpsErrorResponse422Special](response).map { resp =>
-            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](UnprocessableEntity, Some(resp))
+            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](Some(resp))
           }
 
         case NOT_FOUND =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-          Right(toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](NotFound, None))
+          Right(toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](None))
 
         case INTERNAL_SERVER_ERROR =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-          Right(toFailureResult(InternalServerError, None))
+          Right(toFailureResult(None))
 
         case SERVICE_UNAVAILABLE =>
           logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-          Right(toFailureResult(ServiceUnavailable, None))
+          Right(toFailureResult(None))
 
         case code =>
           logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")
           Right(
-            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](UnexpectedStatus(code), None)
+            toFailureResult[ErrorReport, LiabilitySummaryDetailsSuccessResponse](None)
           )
       }
 
