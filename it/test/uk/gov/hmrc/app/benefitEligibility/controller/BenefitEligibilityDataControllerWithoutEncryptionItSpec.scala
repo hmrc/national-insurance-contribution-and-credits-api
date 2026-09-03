@@ -3582,11 +3582,7 @@ class BenefitEligibilityDataControllerWithoutEncryptionItSpec
           OverallResultStatus.Failure,
           nationalInsuranceNumber,
           BenefitType.MA,
-          OverallResultSummary(2, 0, 2),
-          List(
-            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest)),
-            SanitizedApiResult(ApiName.Liabilities, NpsApiResponseStatus.Failure, Some(NpsNormalizedError.BadRequest))
-          )
+          OverallResultSummary(2, 0, 2)
         )
 
         status(result) shouldBe 500

@@ -20,15 +20,6 @@ import cats.data.EitherT
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  AccessForbidden,
-  BadRequest,
-  InternalServerError,
-  NotFound,
-  ServiceUnavailable,
-  UnexpectedStatus,
-  UnprocessableEntity
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.MarriageDetailsResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{

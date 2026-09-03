@@ -22,15 +22,6 @@ import com.google.inject.Inject
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  AccessForbidden,
-  BadRequest,
-  InternalServerError,
-  NotFound,
-  ServiceUnavailable,
-  UnexpectedStatus,
-  UnprocessableEntity
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated

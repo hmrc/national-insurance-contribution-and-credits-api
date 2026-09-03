@@ -32,8 +32,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.{
   BenefitEligibilityInfoErrorResponse,
-  OverallResultSummary,
-  SanitizedApiResult
+  OverallResultSummary
 }
 
 object TestFormat {
@@ -82,7 +81,6 @@ object TestFormat {
     Json.writes[GYSPEligibilityCheckDataRequest]
 
   implicit val overallResultSummaryReads: Reads[OverallResultSummary] = Json.reads[OverallResultSummary]
-  implicit val sanitizedApiResultReads: Reads[SanitizedApiResult]     = Json.reads[SanitizedApiResult]
 
   implicit val npsNormalizedErrorReads: Reads[NpsNormalizedError] = Reads {
     case JsObject(underlying) =>

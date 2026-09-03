@@ -22,14 +22,6 @@ import com.google.inject.Inject
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  AccessForbidden,
-  BadRequest,
-  InternalServerError,
-  NotFound,
-  ServiceUnavailable,
-  UnexpectedStatus
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.IndividualStatePensionResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.IndividualStatePensionInformationSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{NpsErrorResponse400, NpsSingleErrorResponse}
