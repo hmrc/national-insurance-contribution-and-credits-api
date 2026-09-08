@@ -41,7 +41,7 @@ import java.util.UUID
 
 class BenefitEligibilityDataRepositoryItSpec
     extends AnyFreeSpecLike
-    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
+    with DefaultPlayMongoRepositorySupport[BatchDocument]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
@@ -54,8 +54,8 @@ class BenefitEligibilityDataRepositoryItSpec
     )
     .build()
 
-  override protected val repository: BenefitEligibilityRepositoryImpl =
-    app.injector.instanceOf[BenefitEligibilityRepositoryImpl]
+  override protected val repository: BatchRepositoryImpl =
+    app.injector.instanceOf[BatchRepositoryImpl]
 
   override protected def checkTtlIndex = false
 
@@ -74,37 +74,37 @@ class BenefitEligibilityDataRepositoryItSpec
     ".getItem" - {
       "should successfully return an item by id" in {
 
-        val pageTaskId1 = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val pageTaskId2 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTaskId3 = PageTaskId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
+        val batchId1 = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val batchId2 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchId3 = BatchId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val paginationSource1 = PaginationSource(Class2MAReceipts, "SomeCallBackURLOne")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
-        val paginationSource3 = PaginationSource(MarriageDetails, "SomeCallBackURLThree")
+        val batchSource1 = BatchWithCallback(Class2MAReceipts, "SomeCallBackURLOne")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource3 = BatchWithCallback(MarriageDetails, "SomeCallBackURLThree")
 
-        val pageTaskDocList = List(
-          PageTaskDocument(
+        val batchDocumentList = List(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                MaPageTask(
-                  List(paginationSource2, paginationSource2),
+                MaBatch(
+                  List(batchSource2, batchSource2),
                   nationalInsuranceNumber
                 )
               )
               .as[JsObject],
             currentTimeSource.instantNow()
           ),
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId2,
+            batchId2,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource2),
+                BspBatch(
+                  Some(batchSource2),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -115,16 +115,16 @@ class BenefitEligibilityDataRepositoryItSpec
               .as[JsObject],
             currentTimeSource.instantNow()
           ),
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId3,
+            batchId3,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource3),
-                  Some(paginationSource1),
+                GyspBatch(
+                  Some(batchSource3),
+                  Some(batchSource1),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -137,41 +137,41 @@ class BenefitEligibilityDataRepositoryItSpec
           )
         )
 
-        pageTaskDocList.foreach(task => insert(task).futureValue)
+        batchDocumentList.foreach(task => insert(task).futureValue)
 
-        val pageTasks = Table("page_task", pageTaskDocList: _*)
+        val batches = Table("page_task", batchDocumentList: _*)
 
-        forAll(pageTasks) { pageTask =>
+        forAll(batches) { batch =>
           repository
-            .getItem(pageTask.pageTaskId)
+            .get(batch.batchId)
             .value
-            .futureValue shouldBe Right(pageTask)
+            .futureValue shouldBe Right(batch)
         }
       }
       "should return a RecordNotFound error if the record being retrieved does not exist in the db" in {
-        val unknownPageTaskId = PageTaskId(UUID.fromString("cc7df9a9-ce5b-4a51-8402-01108c88a9df"))
+        val unknownBatchId = BatchId(UUID.fromString("cc7df9a9-ce5b-4a51-8402-01108c88a9df"))
 
-        val cursorId = CursorId.from(unknownPageTaskId)
-        repository.getItem(unknownPageTaskId).value.futureValue shouldBe Left(
+        val cursorId = CursorId.from(unknownBatchId)
+        repository.get(unknownBatchId).value.futureValue shouldBe Left(
           RecordNotFound(cursorId)
         )
       }
     }
     ".upsert" - {
-      "should insert a new BspPageTask" in {
-        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+      "should insert a new BspBatch" in {
+        val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val bspPageTask =
-          PageTaskDocument(
+        val bspBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId,
+            batchId,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource1),
+                BspBatch(
+                  Some(batchSource1),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -183,20 +183,20 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.upsert(None, bspPageTask).value.futureValue shouldBe Right(pageTaskId.value)
+        repository.upsert(None, bspBatch).value.futureValue shouldBe Right(batchId.value)
       }
-      "should insert a new MaPageTask" in {
-        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+      "should insert a new MaBatch" in {
+        val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val maPageTask =
-          PageTaskDocument(
+        val maBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId,
+            batchId,
             Json
               .toJson(
-                MaPageTask(
-                  List(paginationSource1, paginationSource1),
+                MaBatch(
+                  List(batchSource1, batchSource1),
                   nationalInsuranceNumber
                 )
               )
@@ -204,24 +204,24 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.upsert(None, maPageTask).value.futureValue shouldBe Right(pageTaskId.value)
+        repository.upsert(None, maBatch).value.futureValue shouldBe Right(batchId.value)
       }
-      "should insert a new GyspPageTask" in {
-        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+      "should insert a new GyspBatch" in {
+        val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val gyspPageTask =
-          PageTaskDocument(
+        val gyspBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId,
+            batchId,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource1),
-                  Some(paginationSource2),
+                GyspBatch(
+                  Some(batchSource1),
+                  Some(batchSource2),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -233,24 +233,24 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.upsert(None, gyspPageTask).value.futureValue shouldBe Right(pageTaskId.value)
+        repository.upsert(None, gyspBatch).value.futureValue shouldBe Right(batchId.value)
       }
       "should return a failure if mongo database fails" in {
-        val pageTaskId        = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val batchId        = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val gyspPageTask =
-          PageTaskDocument(
+        val gyspBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId,
+            batchId,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource1),
-                  Some(paginationSource2),
+                GyspBatch(
+                  Some(batchSource1),
+                  Some(batchSource2),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -264,24 +264,24 @@ class BenefitEligibilityDataRepositoryItSpec
 
         dropDatabase()
 
-        repository.upsert(None, gyspPageTask).value.futureValue shouldBe a[Left[DatabaseError, _]]
+        repository.upsert(None, gyspBatch).value.futureValue shouldBe a[Left[DatabaseError, _]]
       }
-      "should overwrite an existing MaPageTask" in {
+      "should overwrite an existing MaBatch" in {
 
-        val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
+        val batchId1 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchId2 = BatchId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLOne")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val maPageTask1 =
-          PageTaskDocument(
+        val maBatch1 =
+          BatchDocument(
             correlationId,
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                MaPageTask(
-                  List(paginationSource1, paginationSource1),
+                MaBatch(
+                  List(batchSource1, batchSource1),
                   nationalInsuranceNumber
                 )
               )
@@ -290,16 +290,16 @@ class BenefitEligibilityDataRepositoryItSpec
           )
 
         deleteAll().futureValue
-        insert(maPageTask1).futureValue
+        insert(maBatch1).futureValue
 
-        val maPageTask2 =
-          PageTaskDocument(
+        val maBatch2 =
+          BatchDocument(
             correlationId,
-            pageTaskId2,
+            batchId2,
             Json
               .toJson(
-                MaPageTask(
-                  List(paginationSource2, paginationSource2),
+                MaBatch(
+                  List(batchSource2, batchSource2),
                   nationalInsuranceNumber
                 )
               )
@@ -307,35 +307,35 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.upsert(Some(pageTaskId1.value), maPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
-        findAll().futureValue shouldBe List(maPageTask2)
+        repository.upsert(Some(batchId1.value), maBatch2).value.futureValue shouldBe Right(batchId2.value)
+        findAll().futureValue shouldBe List(maBatch2)
       }
-      "should overwrite an existing BspPageTask" in {
+      "should overwrite an existing BspBatch" in {
 
-        val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
+        val batchId1 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchId2 = BatchId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLOne")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val contributionAndCreditsPaging1 = ContributionAndCreditsPaging(
+        val batchWithTaxWindows1 = BatchWithTaxWindows(
           NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
-        val contributionAndCreditsPaging2 = ContributionAndCreditsPaging(
+        val batchWithTaxWindows2 = BatchWithTaxWindows(
           NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2020))),
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
 
-        val bspPageTask1 =
-          PageTaskDocument(
+        val bspBatch1 =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource1),
-                  Some(contributionAndCreditsPaging1),
+                BspBatch(
+                  Some(batchSource1),
+                  Some(batchWithTaxWindows1),
                   nationalInsuranceNumber
                 )
               )
@@ -343,17 +343,17 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
         deleteAll().futureValue
-        insert(bspPageTask1).futureValue
+        insert(bspBatch1).futureValue
 
-        val bspPageTask2 =
-          PageTaskDocument(
+        val bspBatch2 =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId2,
+            batchId2,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource2),
-                  Some(contributionAndCreditsPaging2),
+                BspBatch(
+                  Some(batchSource2),
+                  Some(batchWithTaxWindows2),
                   nationalInsuranceNumber
                 )
               )
@@ -361,36 +361,36 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.upsert(Some(pageTaskId1.value), bspPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
-        findAll().futureValue shouldBe List(bspPageTask2)
+        repository.upsert(Some(batchId1.value), bspBatch2).value.futureValue shouldBe Right(batchId2.value)
+        findAll().futureValue shouldBe List(bspBatch2)
       }
-      "should overwrite an existing GyspPageTask" in {
+      "should overwrite an existing GyspBatch" in {
 
-        val pageTaskId1 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTaskId2 = PageTaskId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
+        val batchId1 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchId2 = BatchId(UUID.fromString("501396d3-fbd7-4d04-8757-93a0c14575ce"))
 
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLOne")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLOne")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val contributionAndCreditsPaging1 = ContributionAndCreditsPaging(
+        val batchWithTaxWindows1 = BatchWithTaxWindows(
           NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
-        val contributionAndCreditsPaging2 = ContributionAndCreditsPaging(
+        val batchWithTaxWindows2 = BatchWithTaxWindows(
           NonEmptyList.one(TaxWindow(StartTaxYear(2021), EndTaxYear(2020))),
           DateOfBirth(LocalDate.parse("2025-10-10"))
         )
 
-        val gyspPageTask1 =
-          PageTaskDocument(
+        val gyspBatch1 =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource1),
-                  Some(paginationSource1),
-                  Some(contributionAndCreditsPaging1),
+                GyspBatch(
+                  Some(batchSource1),
+                  Some(batchSource1),
+                  Some(batchWithTaxWindows1),
                   nationalInsuranceNumber
                 )
               )
@@ -399,18 +399,18 @@ class BenefitEligibilityDataRepositoryItSpec
           )
 
         deleteAll().futureValue
-        insert(gyspPageTask1).futureValue
+        insert(gyspBatch1).futureValue
 
-        val gyspPageTask2 =
-          PageTaskDocument(
+        val gyspBatch2 =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId2,
+            batchId2,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource2),
-                  Some(paginationSource2),
-                  Some(contributionAndCreditsPaging2),
+                GyspBatch(
+                  Some(batchSource2),
+                  Some(batchSource2),
+                  Some(batchWithTaxWindows2),
                   nationalInsuranceNumber
                 )
               )
@@ -418,25 +418,25 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.upsert(Some(pageTaskId1.value), gyspPageTask2).value.futureValue shouldBe Right(pageTaskId2.value)
-        findAll().futureValue should contain theSameElementsAs List(gyspPageTask2)
+        repository.upsert(Some(batchId1.value), gyspBatch2).value.futureValue shouldBe Right(batchId2.value)
+        findAll().futureValue should contain theSameElementsAs List(gyspBatch2)
       }
     }
     ".insert" - {
-      "should insert a new BspPageTask" in {
-        val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+      "should insert a new BspBatch" in {
+        val batchId1       = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val bspPageTask =
-          PageTaskDocument(
+        val bspBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource1),
+                BspBatch(
+                  Some(batchSource1),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -448,21 +448,21 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.insert(bspPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
-        find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(bspPageTask)
+        repository.insert(bspBatch).value.futureValue shouldBe Right(batchId1.value)
+        find(Filters.equal("batchId", Codecs.toBson(batchId1))).futureValue shouldBe List(bspBatch)
       }
-      "should insert a new MaPageTask" in {
-        val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+      "should insert a new MaBatch" in {
+        val batchId1       = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val maPageTask =
-          PageTaskDocument(
+        val maBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                MaPageTask(
-                  List(paginationSource1, paginationSource1),
+                MaBatch(
+                  List(batchSource1, batchSource1),
                   nationalInsuranceNumber
                 )
               )
@@ -470,26 +470,26 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.insert(maPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
-        find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(maPageTask)
+        repository.insert(maBatch).value.futureValue shouldBe Right(batchId1.value)
+        find(Filters.equal("batchId", Codecs.toBson(batchId1))).futureValue shouldBe List(maBatch)
 
       }
-      "should insert a new GyspPageTask" in {
-        val pageTaskId1       = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val paginationSource1 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
+      "should insert a new GyspBatch" in {
+        val batchId1       = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchSource1 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
 
-        val gyspPageTask =
-          PageTaskDocument(
+        val gyspBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource1),
-                  Some(paginationSource2),
+                GyspBatch(
+                  Some(batchSource1),
+                  Some(batchSource2),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -501,44 +501,44 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
 
-        repository.insert(gyspPageTask).value.futureValue shouldBe Right(pageTaskId1.value)
-        find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId1))).futureValue shouldBe List(gyspPageTask)
+        repository.insert(gyspBatch).value.futureValue shouldBe Right(batchId1.value)
+        find(Filters.equal("batchId", Codecs.toBson(batchId1))).futureValue shouldBe List(gyspBatch)
 
       }
     }
     ".delete" - {
-      "should delete a PageTask" in {
-        val pageTaskId1 = PageTaskId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
-        val pageTaskId2 = PageTaskId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
-        val pageTaskId3 = PageTaskId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
+      "should delete a Batch" in {
+        val batchId1 = BatchId(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde"))
+        val batchId2 = BatchId(UUID.fromString("fa356ed8-27f2-4c62-8204-386366713356"))
+        val batchId3 = BatchId(UUID.fromString("f2968e2a-37cd-4f4e-9d66-bb0351c6dd6c"))
 
-        val paginationSource1 = PaginationSource(Class2MAReceipts, "SomeCallBackURLOne")
-        val paginationSource2 = PaginationSource(Liabilities, "SomeCallBackURLTwo")
-        val paginationSource3 = PaginationSource(MarriageDetails, "SomeCallBackURLThree")
+        val batchSource1 = BatchWithCallback(Class2MAReceipts, "SomeCallBackURLOne")
+        val batchSource2 = BatchWithCallback(Liabilities, "SomeCallBackURLTwo")
+        val batchSource3 = BatchWithCallback(MarriageDetails, "SomeCallBackURLThree")
 
-        val pageTasksList = List(
-          PageTaskDocument(
+        val batchesList = List(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId1,
+            batchId1,
             Json
               .toJson(
-                MaPageTask(
-                  List(paginationSource2, paginationSource2),
+                MaBatch(
+                  List(batchSource2, batchSource2),
                   nationalInsuranceNumber
                 )
               )
               .as[JsObject],
             currentTimeSource.instantNow()
           ),
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId2,
+            batchId2,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource2),
+                BspBatch(
+                  Some(batchSource2),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -549,16 +549,16 @@ class BenefitEligibilityDataRepositoryItSpec
               .as[JsObject],
             currentTimeSource.instantNow()
           ),
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId3,
+            batchId3,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource3),
-                  Some(paginationSource1),
+                GyspBatch(
+                  Some(batchSource3),
+                  Some(batchSource1),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -570,16 +570,16 @@ class BenefitEligibilityDataRepositoryItSpec
             currentTimeSource.instantNow()
           )
         )
-        val newPageTasksList = List(
-          PageTaskDocument(
+        val newBatchsList = List(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId2,
+            batchId2,
             Json
               .toJson(
-                BspPageTask(
-                  Some(paginationSource2),
+                BspBatch(
+                  Some(batchSource2),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -590,16 +590,16 @@ class BenefitEligibilityDataRepositoryItSpec
               .as[JsObject],
             currentTimeSource.instantNow()
           ),
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskId3,
+            batchId3,
             Json
               .toJson(
-                GyspPageTask(
-                  Some(paginationSource3),
-                  Some(paginationSource1),
+                GyspBatch(
+                  Some(batchSource3),
+                  Some(batchSource1),
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                       DateOfBirth(LocalDate.parse("2025-10-10"))
                     )
@@ -612,13 +612,13 @@ class BenefitEligibilityDataRepositoryItSpec
           )
         )
 
-        pageTasksList.foreach(task => insert(task).futureValue)
+        batchesList.foreach(task => insert(task).futureValue)
 
-        repository.delete(pageTaskId1.value).value.futureValue shouldBe Right(1)
-        findAll().futureValue should contain theSameElementsAs newPageTasksList
+        repository.delete(batchId1.value).value.futureValue shouldBe Right(1)
+        findAll().futureValue should contain theSameElementsAs newBatchsList
 
       }
-      "should try delete a PageTask that doesn't exist and return 0" in {
+      "should try delete a Batch that doesn't exist and return 0" in {
         repository.delete(UUID.fromString("54c99a34-86d9-4154-b617-5f60c7064bde")).value.futureValue shouldBe Right(0)
       }
 

@@ -24,7 +24,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDeta
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.NiContributionsAndCreditsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
+import uk.gov.hmrc.app.benefitEligibility.service.BatchResult
 
 object BenefitEligibilityInfoResponse {
 
@@ -40,63 +40,63 @@ object BenefitEligibilityInfoResponse {
     }
 
   def from(
-      paginationResult: PaginationResult
+      batchResult: BatchResult
   ): Either[BenefitEligibilityInfoErrorResponse, BenefitEligibilityInfoSuccessResponse] =
-    if (paginationResult.allResults.exists(_.isFailure))
-      Left(BenefitEligibilityInfoErrorResponse.from(paginationResult))
+    if (batchResult.allResults.exists(_.isFailure))
+      Left(BenefitEligibilityInfoErrorResponse.from(batchResult))
     else
-      paginationResult.paginationType match {
-        case PaginationType.MaPagination =>
+      batchResult.batchType match {
+        case BatchType.MaBatch =>
           Right(
             BenefitEligibilityInfoSuccessResponseMa(
-              paginationResult.nationalInsuranceNumber,
-              paginationResult.liabilitiesResult.map(toFilteredLiabilitySummaryDetails),
-              toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getPageTaskId.map(CursorId.from)
+              batchResult.nationalInsuranceNumber,
+              batchResult.liabilitiesResult.map(toFilteredLiabilitySummaryDetails),
+              toContributionCreditResult(batchResult.contributionCreditResult.contributionCreditResult),
+              batchResult.getBatchId.map(CursorId.from)
             )
           )
 
-        case PaginationType.GyspPagination =>
+        case BatchType.GyspBatch =>
 
-          val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(paginationResult)
-          val filteredSchemeMembershipDetails                  = getFilteredSchemeMembershipDetails(paginationResult)
+          val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(batchResult)
+          val filteredSchemeMembershipDetails                  = getFilteredSchemeMembershipDetails(batchResult)
 
           Right(
             BenefitEligibilityInfoSuccessResponseGysp(
-              nationalInsuranceNumber = paginationResult.nationalInsuranceNumber,
+              nationalInsuranceNumber = batchResult.nationalInsuranceNumber,
               marriageDetailsResult = filteredMarriageDetails,
               longTermBenefitCalculationDetailsResult = FilteredLongTermBenefitCalculationDetails(Nil),
               schemeMembershipDetailsResult = filteredSchemeMembershipDetails,
               individualStatePensionInfoResult = FilteredIndividualStatePensionInfo(None, Nil),
               niContributionsAndCreditsResult =
-                toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getPageTaskId.map(CursorId.from)
+                toContributionCreditResult(batchResult.contributionCreditResult.contributionCreditResult),
+              batchResult.getBatchId.map(CursorId.from)
             )
           )
-        case PaginationType.BspPagination =>
-          val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(paginationResult)
+        case BatchType.BspBatch =>
+          val filteredMarriageDetails: FilteredMarriageDetails = getFilteredMarriageDetails(batchResult)
 
           Right(
             BenefitEligibilityInfoSuccessResponseBsp(
-              paginationResult.nationalInsuranceNumber,
-              toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
+              batchResult.nationalInsuranceNumber,
+              toContributionCreditResult(batchResult.contributionCreditResult.contributionCreditResult),
               filteredMarriageDetails,
-              paginationResult.getPageTaskId.map(CursorId.from)
+              batchResult.getBatchId.map(CursorId.from)
             )
           )
-        case PaginationType.BspSearchLightPagination =>
+        case BatchType.BspSearchLightBatch =>
           Right(
             BenefitEligibilityInfoSuccessResponseSearchLight(
-              BenefitType.from(paginationResult.paginationType),
-              paginationResult.nationalInsuranceNumber,
-              toContributionCreditResult(paginationResult.contributionCreditResult.contributionCreditResult),
-              paginationResult.getPageTaskId.map(CursorId.from)
+              BenefitType.from(batchResult.batchType),
+              batchResult.nationalInsuranceNumber,
+              toContributionCreditResult(batchResult.contributionCreditResult.contributionCreditResult),
+              batchResult.getBatchId.map(CursorId.from)
             )
           )
       }
 
-  private def getFilteredMarriageDetails(paginationResult: PaginationResult) =
-    paginationResult.marriageDetailsResult match {
+  private def getFilteredMarriageDetails(batchResult: BatchResult) =
+    batchResult.marriageDetailsResult match {
       case Some(marriageDetailsResult) =>
         marriageDetailsResult match {
           case NpsApiResult.FailureResult(apiName, result) => FilteredMarriageDetails(Nil)
@@ -105,8 +105,8 @@ object BenefitEligibilityInfoResponse {
       case None => FilteredMarriageDetails(Nil)
     }
 
-  private def getFilteredSchemeMembershipDetails(paginationResult: PaginationResult) = {
-    val maybeSchemeMembershipDetails = paginationResult.benefitSchemeMembershipDetailsData
+  private def getFilteredSchemeMembershipDetails(batchResult: BatchResult) = {
+    val maybeSchemeMembershipDetails = batchResult.benefitSchemeMembershipDetailsData
 
     maybeSchemeMembershipDetails match {
       case Some(benefitSchemeMembershipDetailsData) =>

@@ -36,110 +36,110 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[BenefitEligibilityRepositoryImpl])
-trait BenefitEligibilityRepository {
+@ImplementedBy(classOf[BatchRepositoryImpl])
+trait BatchRepository {
 
-  def getItem(pageTaskId: PageTaskId)(
+  def get(batchId: BatchId)(
       implicit hc: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, PageTaskDocument]
+  ): EitherT[Future, BenefitEligibilityError, BatchDocument]
 
-  def upsert(id: Option[UUID], update: PageTaskDocument)(
+  def upsert(id: Option[UUID], update: BatchDocument)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, UUID]
 
-  def insert(pageTask: PageTaskDocument)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID]
+  def insert(batchDocument: BatchDocument)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID]
   def delete(id: UUID)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, Long]
 }
 
 @Singleton
-class BenefitEligibilityRepositoryImpl @Inject() (
+class BatchRepositoryImpl @Inject() (
     mongoComponent: MongoComponent,
     encrypterDecrypter: Encrypter & Decrypter,
     config: AppConfig
 )(
     implicit ec: ExecutionContext
-) extends PlayMongoRepository[PageTaskDocument](
-      collectionName = "page-tasks",
+) extends PlayMongoRepository[BatchDocument](
+      collectionName = "batches",
       mongoComponent = mongoComponent,
-      domainFormat = PageTaskDocument.pageTaskDocumentFormat,
+      domainFormat = BatchDocument.batchDocumentFormat,
       indexes = Seq(
-        IndexModel(Indexes.ascending("pageTaskId"), IndexOptions().unique(true)),
+        IndexModel(Indexes.ascending("batchId"), IndexOptions().unique(true)),
         IndexModel(
           Indexes.ascending("createdAt"),
           IndexOptions()
-            .expireAfter(config.pageTaskTtlSeconds.toLong, TimeUnit.SECONDS)
+            .expireAfter(config.batchTTLSeconds.toLong, TimeUnit.SECONDS)
             .unique(false)
         )
       ),
       replaceIndexes = true
     )
-    with BenefitEligibilityRepository {
+    with BatchRepository {
 
   private val logger = new RequestAwareLogger(this.getClass)
 
-  def getItem(
-      pageTaskId: PageTaskId
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PageTaskDocument] = {
-    logger.info("getItem called - Retrieving page task from Database ")
+  def get(
+      batchId: BatchId
+  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchDocument] = {
+    logger.info("getItem called - Retrieving batch from Database ")
     collection
-      .find(Filters.equal("pageTaskId", Codecs.toBson(pageTaskId)))
+      .find(Filters.equal("batchId", Codecs.toBson(batchId)))
       .headOption()
       .attemptT
       .leftMap(error => DatabaseError(error))
       .flatMap {
-        case None => EitherT.leftT(RecordNotFound(CursorId.from(pageTaskId)))
-        case Some(pageTaskDoc) =>
-          val maybePageTaskDoc =
+        case None => EitherT.leftT(RecordNotFound(CursorId.from(batchId)))
+        case Some(batchDocument) =>
+          val maybeBatchDoc =
             if (config.encryptData) {
-              pageTaskDoc.decrypt(encrypterDecrypter)
+              batchDocument.decrypt(encrypterDecrypter)
 
             } else {
-              Some(pageTaskDoc)
+              Some(batchDocument)
             }
 
-          EitherT.fromOption[Future](maybePageTaskDoc, RecordNotFound(CursorId(pageTaskId.value.toString)))
+          EitherT.fromOption[Future](maybeBatchDoc, RecordNotFound(CursorId(batchId.value.toString)))
       }
   }
 
-  def upsert(existingPageTaskId: Option[UUID], pageTaskDocument: PageTaskDocument)(
+  def upsert(existingBatchId: Option[UUID], batchDocument: BatchDocument)(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, UUID] = {
-    logger.info("Upsert called - Updating page task in database")
+    logger.info("Upsert called - Updating batch in database")
 
     val documentData = if (config.encryptData) {
-      pageTaskDocument.encrypt(encrypterDecrypter).data
+      batchDocument.encrypt(encrypterDecrypter).data
     } else {
-      pageTaskDocument.data
+      batchDocument.data
     }
 
     val updatedDocumentBson = Updates.combine(
-      Updates.set("correlationId", Codecs.toBson(pageTaskDocument.correlationId)),
-      Updates.set("pageTaskId", Codecs.toBson(pageTaskDocument.pageTaskId)),
+      Updates.set("correlationId", Codecs.toBson(batchDocument.correlationId)),
+      Updates.set("batchId", Codecs.toBson(batchDocument.batchId)),
       Updates.set("data", Codecs.toBson(documentData)),
-      Updates.set("createdAt", Codecs.toBson(pageTaskDocument.createdAt))
+      Updates.set("createdAt", Codecs.toBson(batchDocument.createdAt))
     )
 
     collection
       .findOneAndUpdate(
-        Filters.equal("pageTaskId", Codecs.toBson(existingPageTaskId.map(_.toString))),
+        Filters.equal("batchId", Codecs.toBson(existingBatchId.map(_.toString))),
         updatedDocumentBson,
         FindOneAndUpdateOptions().upsert(true)
       )
       .toFuture()
       .attemptT
-      .map(_ => pageTaskDocument.pageTaskId.value)
+      .map(_ => batchDocument.batchId.value)
       .leftMap(error => DatabaseError(error))
   }
 
   def insert(
-      pageTaskDocument: PageTaskDocument
+      batchDocument: BatchDocument
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
-    logger.info("insert called - inserting page task in database")
+    logger.info("insert called - inserting batch in database")
 
     val document = if (config.encryptData) {
-      pageTaskDocument.encrypt(encrypterDecrypter)
+      batchDocument.encrypt(encrypterDecrypter)
     } else {
-      pageTaskDocument
+      batchDocument
     }
 
     collection
@@ -148,15 +148,15 @@ class BenefitEligibilityRepositoryImpl @Inject() (
       )
       .toFuture()
       .attemptT
-      .map(_ => document.pageTaskId.value)
+      .map(_ => document.batchId.value)
       .leftMap(error => DatabaseError(error))
   }
 
   def delete(id: UUID)(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, Long] = {
-    logger.info("delete called - deleting page task from database")
+    logger.info("delete called - deleting batch from database")
 
     collection
-      .deleteOne(Filters.equal("pageTaskId", id.toString))
+      .deleteOne(Filters.equal("batchId", id.toString))
       .toFuture()
       .attemptT
       .map(_.getDeletedCount())

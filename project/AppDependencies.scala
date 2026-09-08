@@ -3,9 +3,9 @@ import sbt.*
 object AppDependencies {
 
   private val bootstrapVersion = "10.7.0"
-  private val hmrcMongoVersion = "2.12.0"
+  private val hmrcMongoVersion = "2.13.0"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30" % bootstrapVersion,
     "uk.gov.hmrc"       %% "domain-play-30"            % "11.0.0",
     "com.beachape"      %% "enumeratum-play-json"      % "1.9.7",
@@ -13,7 +13,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"        % hmrcMongoVersion
   )
 
-  val test = Seq(
+  val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"       %% "bootstrap-test-play-30"      % bootstrapVersion % Test,
     "org.scalamock"     %% "scalamock"                   % "7.5.5"          % Test,
     "org.scalatest"     %% "scalatest"                   % "3.2.20"         % Test,
@@ -25,5 +25,5 @@ object AppDependencies {
       .exclude("com.fasterxml.jackson.core", "jackson-databind" /* would be version 2.17.1 or later */ )
   )
 
-  val it = Seq.empty
+  val it: Seq[ModuleID] = Seq.empty
 }

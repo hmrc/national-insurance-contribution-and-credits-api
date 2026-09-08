@@ -26,11 +26,11 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, NiC
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
-import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchId
 
 import java.util.UUID
 
-class PaginationResultSpec
+class BatchResultSpec
     extends AnyFreeSpec
     with MockFactory
     with ScalaFutures
@@ -43,10 +43,10 @@ class PaginationResultSpec
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
-  "PaginationResult" - {
-    val paginationResultWithNextCursor = PaginationResult(
+  "BatchResult" - {
+    val batchResultWithNextCursor = BatchResult(
       correlationId,
-      paginationType = PaginationType.MaPagination,
+      batchType = BatchType.MaBatch,
       nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(
@@ -55,15 +55,15 @@ class PaginationResultSpec
         )
       ),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditPagingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+      batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
     )
 
-    val paginationResultWithoutNextCursor = PaginationResult(
+    val batchResultWithoutNextCursor = BatchResult(
       correlationId,
-      paginationType = PaginationType.MaPagination,
+      batchType = BatchType.MaBatch,
       nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(
@@ -72,27 +72,27 @@ class PaginationResultSpec
         )
       ),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditPagingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      pageTaskId = None
+      batchId = None
     )
 
-    val paginationResultNoPaging = PaginationResult(
+    val batchResultNoBatching = BatchResult(
       correlationId,
-      paginationType = PaginationType.MaPagination,
+      batchType = BatchType.MaBatch,
       nationalInsuranceNumber,
       liabilitiesResult = List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditPagingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      pageTaskId = None
+      batchId = None
     )
 
-    val paginationResultWithFailure = PaginationResult(
+    val batchResultWithFailure = BatchResult(
       correlationId,
-      paginationType = PaginationType.MaPagination,
+      batchType = BatchType.MaBatch,
       nationalInsuranceNumber,
       liabilitiesResult = List(
         SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)),
@@ -102,40 +102,40 @@ class PaginationResultSpec
         )
       ),
       marriageDetailsResult = None,
-      contributionCreditResult = ContributionCreditPagingResult(None, None),
+      contributionCreditResult = BatchWithTaxWindowsResult(None, None),
       benefitSchemeMembershipDetailsData = None,
       callSystem = None,
-      pageTaskId = None
+      batchId = None
     )
 
     ".setNextCursor" - {
-      "should return pagination result with a next cursor if paging should happen " in {
+      "should return batch result with a next cursor if batching should happen " in {
         val newResult =
-          paginationResultWithoutNextCursor.setPageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+          batchResultWithoutNextCursor.setBatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
 
-        newResult shouldBe paginationResultWithNextCursor
+        newResult shouldBe batchResultWithNextCursor
       }
-      "should return pagination result with no next cursor if paging should not happen " in {
-        val newResult = paginationResultNoPaging.setPageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
+      "should return batch result with no next cursor if batching should not happen " in {
+        val newResult = batchResultNoBatching.setBatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26"))
 
-        newResult shouldBe paginationResultNoPaging
+        newResult shouldBe batchResultNoBatching
       }
     }
     ".getNextCursor" - {
       "should return next cursor if next cursor exists" in {
-        val pageTaskId = paginationResultWithNextCursor.getPageTaskId
+        val batchId = batchResultWithNextCursor.getBatchId
 
-        pageTaskId shouldBe Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+        batchId shouldBe Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
       }
       "should return none if no next cursor" in {
-        val nextCursor = paginationResultWithoutNextCursor.getPageTaskId
+        val nextCursor = batchResultWithoutNextCursor.getBatchId
 
         nextCursor shouldBe None
       }
     }
     ".allResults" - {
-      "should return all results if given a pagination result" in {
-        val newResult = paginationResultWithoutNextCursor.allResults
+      "should return all results if given a batch result" in {
+        val newResult = batchResultWithoutNextCursor.allResults
 
         newResult shouldBe List(
           SuccessResult(
@@ -144,8 +144,8 @@ class PaginationResultSpec
           )
         )
       }
-      "should return all results including failure if given a pagination result with failure" in {
-        val newResult = paginationResultWithFailure.allResults
+      "should return all results including failure if given a batch result with failure" in {
+        val newResult = batchResultWithFailure.allResults
 
         newResult shouldBe
           List(

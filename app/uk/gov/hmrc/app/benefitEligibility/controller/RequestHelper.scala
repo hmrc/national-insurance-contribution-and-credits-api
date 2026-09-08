@@ -23,7 +23,7 @@ import play.api.mvc.{Headers, Request, Result}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorReason
-import uk.gov.hmrc.app.benefitEligibility.repository.PageTaskId
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchId
 import uk.gov.hmrc.app.benefitEligibility.util.{
   ContributionCreditTaxWindowCalculator,
   RequestAwareLogger,
@@ -57,14 +57,14 @@ object RequestHelper {
       request: Headers
   )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] = getAndValidateCorrelationId(request)
 
-  def parsePageTaskId(
+  def parseBatchId(
       cursorId: Option[String]
-  )(implicit headerCarrier: HeaderCarrier): Either[BenefitEligibilityError, PageTaskId] =
+  )(implicit headerCarrier: HeaderCarrier): Either[BenefitEligibilityError, BatchId] =
     cursorId
-      .map(id => PageTaskId.from(CursorId(id)))
-      .toRight(MissingCursorId(ErrorReason("Pagination request sent without cursorId")))
+      .map(id => BatchId.from(CursorId(id)))
+      .toRight(MissingCursorId(ErrorReason("Batch request sent without cursorId")))
       .flatMap {
-        case Some(pageTaskId) => Right(pageTaskId)
+        case Some(batchId) => Right(batchId)
         case None =>
           logger.error(s"invalid uuid used as cursor id value")
           Left(InvalidCursorId(ErrorReason(s"invalid cursorId")))
@@ -83,8 +83,8 @@ object RequestHelper {
       request: EligibilityCheckDataRequest
   ): Either[UnprocessableDataError, SuccessfulResult.type] = {
 
-    val shouldPageForContributionsAndCredits =
-      PaginationType.from(request).toList.diff(List(PaginationType.MaPagination)).nonEmpty
+    val shouldBatchForContributionsAndCredits =
+      BatchType.from(request).toList.diff(List(BatchType.MaBatch)).nonEmpty
 
     val hasOneTaxWindow = ContributionCreditTaxWindowCalculator
       .createTaxWindows(
@@ -115,7 +115,7 @@ object RequestHelper {
         "Start tax year after end tax year"
       ),
       Validated.condNel(
-        (!shouldPageForContributionsAndCredits && hasOneTaxWindow) || shouldPageForContributionsAndCredits,
+        (!shouldBatchForContributionsAndCredits && hasOneTaxWindow) || shouldBatchForContributionsAndCredits,
         SuccessfulResult,
         "Tax year range greater than six years"
       ),

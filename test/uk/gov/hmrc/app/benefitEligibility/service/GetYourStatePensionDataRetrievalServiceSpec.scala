@@ -109,8 +109,8 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
-  val mockPaginationService = mock[PaginationService]
-  val mockUUIDService       = mock[UuidGeneratorService]
+  val mockBatchService = mock[BatchService]
+  val mockUUIDService  = mock[UuidGeneratorService]
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
@@ -126,7 +126,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
     mockLongTermBenefitNotesConnector,
     mockSchemeMembershipDetailsConnector,
     mockIndividualStatePensionInformationConnector,
-    mockPaginationService,
+    mockBatchService,
     mockUUIDService,
     currentTimeSource
   )
@@ -588,14 +588,14 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
-  val paging = PageTaskDocument(
+  val batchDocument = BatchDocument(
     correlationId,
-    PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    BatchId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Json
       .toJson(
-        GyspPageTask(
-          Some(PaginationSource(ApiName.SchemeMembershipDetails, "some-url")),
-          Some(PaginationSource(ApiName.MarriageDetails, "")),
+        GyspBatch(
+          Some(BatchWithCallback(ApiName.SchemeMembershipDetails, "some-url")),
+          Some(BatchWithCallback(ApiName.MarriageDetails, "")),
           None,
           identifier
         )
@@ -724,9 +724,9 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
           .expects()
           .returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
-        (mockPaginationService
-          .addTask(_: PageTaskDocument)(_: HeaderCarrier))
-          .expects(paging, *)
+        (mockBatchService
+          .addTask(_: BatchDocument)(_: HeaderCarrier))
+          .expects(batchDocument, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 
         underTest
@@ -745,7 +745,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
             ),
             marriageDetailsResult,
             individualStatePensionInformationResult,
-            Some(paging.pageTaskId)
+            Some(batchDocument.batchId)
           )
         )
 

@@ -79,10 +79,10 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.service.{
+  BatchResult,
+  BatchWithTaxWindowsResult,
   BenefitSchemeMembershipDetailsData,
-  ContributionCreditPagingResult,
-  LongTermBenefitCalculationDetailsData,
-  PaginationResult
+  LongTermBenefitCalculationDetailsData
 }
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 
@@ -2021,22 +2021,22 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
 
       }
-      "should return a success response if Pagination resul is all Ok (MA)" in {
-        val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
-          ContributionCreditPagingResult(None, None)
+      "should return a success response if Batch resul is all Ok (MA)" in {
+        val batchWithTaxWindowsResult: BatchWithTaxWindowsResult =
+          BatchWithTaxWindowsResult(None, None)
         val liabilityResult =
           List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)))
-        val paginationResult: PaginationResult =
-          PaginationResult(
+        val batchResult: BatchResult =
+          BatchResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            paginationType = PaginationType.MaPagination,
+            batchType = BatchType.MaBatch,
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
             marriageDetailsResult = None,
-            contributionCreditResult = creditsAndContributionsPagingResult,
+            contributionCreditResult = batchWithTaxWindowsResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
-            pageTaskId = None
+            batchId = None
           )
 
         val expectedResult = Right(
@@ -2048,24 +2048,24 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         )
 
-        BenefitEligibilityInfoResponse.from(paginationResult) shouldBe expectedResult
+        BenefitEligibilityInfoResponse.from(batchResult) shouldBe expectedResult
       }
-      "should return a success response if Pagination resul is all Ok (BSP)" in {
+      "should return a success response if Batch resul is all Ok (BSP)" in {
 
-        val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
-          ContributionCreditPagingResult(None, None)
+        val batchWithTaxWindowsResult: BatchWithTaxWindowsResult =
+          BatchWithTaxWindowsResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
-        val paginationResult: PaginationResult =
-          PaginationResult(
+        val batchResult: BatchResult =
+          BatchResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            paginationType = PaginationType.BspPagination,
+            batchType = BatchType.BspBatch,
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
             marriageDetailsResult = None,
-            contributionCreditResult = creditsAndContributionsPagingResult,
+            contributionCreditResult = batchWithTaxWindowsResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
-            pageTaskId = None
+            batchId = None
           )
 
         val expectedResult = Right(
@@ -2077,24 +2077,24 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         )
 
-        BenefitEligibilityInfoResponse.from(paginationResult) shouldBe expectedResult
+        BenefitEligibilityInfoResponse.from(batchResult) shouldBe expectedResult
       }
-      "should return a success response if Pagination resul is all Ok (GYSP)" in {
+      "should return a success response if Batch resul is all Ok (GYSP)" in {
 
-        val creditsAndContributionsPagingResult: ContributionCreditPagingResult =
-          ContributionCreditPagingResult(None, None)
+        val batchWithTaxWindowsResult: BatchWithTaxWindowsResult =
+          BatchWithTaxWindowsResult(None, None)
         val liabilityResult: List[LiabilityResult] = List()
-        val paginationResult: PaginationResult =
-          PaginationResult(
+        val batchResult: BatchResult =
+          BatchResult(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            paginationType = PaginationType.GyspPagination,
+            batchType = BatchType.GyspBatch,
             nationalInsuranceNumber = nationalInsuranceNumber,
             liabilitiesResult = liabilityResult,
             marriageDetailsResult = None,
-            contributionCreditResult = creditsAndContributionsPagingResult,
+            contributionCreditResult = batchWithTaxWindowsResult,
             benefitSchemeMembershipDetailsData = None,
             callSystem = None,
-            pageTaskId = None
+            batchId = None
           )
 
         val expectedResult = Right(
@@ -2109,7 +2109,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           )
         )
 
-        BenefitEligibilityInfoResponse.from(paginationResult) shouldBe expectedResult
+        BenefitEligibilityInfoResponse.from(batchResult) shouldBe expectedResult
       }
     }
   }

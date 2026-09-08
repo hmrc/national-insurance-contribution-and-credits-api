@@ -61,9 +61,9 @@ import java.time.{Instant, LocalDate}
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 
-class PaginationServiceItSpec
+class BatchServiceItSpec
     extends AnyFreeSpec
-    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
+    with DefaultPlayMongoRepositorySupport[BatchDocument]
     with EitherValues
     with WireMockHelper
     with Injecting
@@ -113,27 +113,27 @@ class PaginationServiceItSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private lazy val service: PaginationService = app.injector.instanceOf[PaginationService]
+  private lazy val service: BatchService = app.injector.instanceOf[BatchService]
 
   // wiremock server must be started before the repo is injected else suite will fail
   // perm fix: declare protected val repository: PlayMongoRepository[A] in PlayMongoRepositorySupport as a def (library update)
   server.start()
 
-  override protected val repository: BenefitEligibilityRepositoryImpl =
-    inject[BenefitEligibilityRepositoryImpl]
+  override protected val repository: BatchRepositoryImpl =
+    inject[BatchRepositoryImpl]
 
   override protected def checkTtlIndex = false
 
-  val maPageTask =
-    PageTaskDocument(
+  val maBatch =
+    BatchDocument(
       correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-      PageTaskId(uuidOne),
+      BatchId(uuidOne),
       Json
         .toJson(
-          MaPageTask(
+          MaBatch(
             List(
-              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-              PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+              BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+              BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
             ),
             nationalInsuranceNumber
           )
@@ -142,18 +142,18 @@ class PaginationServiceItSpec
       currentTimeSource.instantNow()
     )
 
-  val bspPageTask =
-    PageTaskDocument(
+  val bspBatch =
+    BatchDocument(
       correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-      PageTaskId(uuidTwo),
+      BatchId(uuidTwo),
       Json
         .toJson(
-          BspPageTask(
+          BspBatch(
             Some(
-              PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+              BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
             ),
             Some(
-              ContributionAndCreditsPaging(
+              BatchWithTaxWindows(
                 NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
                 DateOfBirth(LocalDate.parse("2025-10-10"))
               )
@@ -165,23 +165,23 @@ class PaginationServiceItSpec
       currentTimeSource.instantNow()
     )
 
-  val gyspPageTask = PageTaskDocument(
+  val gyspBatch = BatchDocument(
     correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-    PageTaskId(uuidThree),
+    BatchId(uuidThree),
     Json
       .toJson(
-        GyspPageTask(
+        GyspBatch(
           Some(
-            PaginationSource(
+            BatchWithCallback(
               ApiName.SchemeMembershipDetails,
               schemeMembershipDetailsPath
             )
           ),
           Some(
-            PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+            BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
           ),
           Some(
-            ContributionAndCreditsPaging(
+            BatchWithTaxWindows(
               NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
               DateOfBirth(LocalDate.parse("2025-10-10"))
             )
@@ -193,16 +193,16 @@ class PaginationServiceItSpec
     currentTimeSource.instantNow()
   )
 
-  val searchLightPageTask =
-    PageTaskDocument(
+  val searchLightBatch =
+    BatchDocument(
       correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-      PageTaskId(uuidFour),
+      BatchId(uuidFour),
       Json
         .toJson(
-          SearchLightPageTask(
-            PaginationType.BspPagination,
+          SearchLightBatch(
+            BatchType.BspBatch,
             Some(
-              ContributionAndCreditsPaging(
+              BatchWithTaxWindows(
                 NonEmptyList
                   .one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))),
                 DateOfBirth(LocalDate.parse("2025-10-10"))
@@ -215,29 +215,29 @@ class PaginationServiceItSpec
       currentTimeSource.instantNow()
     )
 
-  val listOfPages: List[PageTaskDocument] = List(
-    maPageTask,
-    bspPageTask,
-    gyspPageTask,
-    searchLightPageTask
+  val listOfBatchs: List[BatchDocument] = List(
+    maBatch,
+    bspBatch,
+    gyspBatch,
+    searchLightBatch
   )
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    listOfPages.foreach(pageTask => insert(pageTask).futureValue)
+    listOfBatchs.foreach(batch => insert(batch).futureValue)
   }
 
-  "PaginationService" - {
+  "BatchService" - {
     ".addTask" - {
       "should successfully add a new task" in {
         deleteAll().futureValue
-        val pageTask: PageTaskDocument =
-          PageTaskDocument(
+        val batch: BatchDocument =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
+            BatchId(UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")),
             Json
               .toJson(
-                MaPageTask(
+                MaBatch(
                   List(),
                   nationalInsuranceNumber
                 )
@@ -246,26 +246,26 @@ class PaginationServiceItSpec
             currentTimeSource.instantNow()
           )
 
-        service.addTask(pageTask).value.futureValue shouldBe Right(
+        service.addTask(batch).value.futureValue shouldBe Right(
           UUID.fromString("839642e0-d985-4c26-bf2f-eea2364042ba")
         )
 
-        findAll().futureValue shouldBe List(pageTask)
+        findAll().futureValue shouldBe List(batch)
       }
 
       "should return a new uuid if current uuid already exists in database" in {
-        val pageTaskIdTwo = PageTaskId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
+        val batchIdTwo = BatchId(UUID.fromString("2db75f56-9975-4a8d-b315-85ef3fac2161"))
 
-        val pageTask =
-          PageTaskDocument(
+        val batch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(uuidOne),
+            BatchId(uuidOne),
             Json
               .toJson(
-                MaPageTask(
+                MaBatch(
                   List(
-                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
                   ),
                   nationalInsuranceNumber
                 )
@@ -273,16 +273,16 @@ class PaginationServiceItSpec
               .as[JsObject],
             currentTimeSource.instantNow()
           )
-        val newPageTask =
-          PageTaskDocument(
+        val newBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            pageTaskIdTwo,
+            batchIdTwo,
             Json
               .toJson(
-                MaPageTask(
+                MaBatch(
                   List(
-                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-                    PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                    BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
                   ),
                   nationalInsuranceNumber
                 )
@@ -290,15 +290,15 @@ class PaginationServiceItSpec
               .as[JsObject],
             currentTimeSource.instantNow()
           )
-        (() => mockUuidGenerator.generate).expects().returning(pageTaskIdTwo.value)
+        (() => mockUuidGenerator.generate).expects().returning(batchIdTwo.value)
 
-        findAll().futureValue should contain theSameElementsAs listOfPages
-        service.addTask(pageTask).value.futureValue shouldBe Right(pageTaskIdTwo.value)
-        findAll().futureValue should contain theSameElementsAs listOfPages :+ newPageTask
+        findAll().futureValue should contain theSameElementsAs listOfBatchs
+        service.addTask(batch).value.futureValue shouldBe Right(batchIdTwo.value)
+        findAll().futureValue should contain theSameElementsAs listOfBatchs :+ newBatch
       }
     }
-    ".paginate" - {
-      "should return a BenefitEligibilityError if paginate fails" in {
+    ".processBatch" - {
+      "should return a BenefitEligibilityError if processBatch fails" in {
         server.stubFor(
           get(urlEqualTo(npsLiabilitySummaryDetailsPath))
             .willReturn(
@@ -314,15 +314,15 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+        service.processBatch(BatchId(uuidOne)).value.futureValue shouldBe
           a[Left[BenefitEligibilityError, _]]
 
       }
-      "should process Ma pagination task successfully" in {
+      "should process Ma batch task successfully" in {
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
-        val paginationSource2 =
-          PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+        val batchSource2 =
+          BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
         val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
           Some(
             List(
@@ -349,7 +349,7 @@ class PaginationServiceItSpec
               )
             )
           ),
-          Some(Callback(Some(CallbackUrl(paginationSource2.callBackURL))))
+          Some(Callback(Some(CallbackUrl(batchSource2.callBackURL))))
         )
         val class2MAReceiptsSuccessResponse = Class2MAReceiptsSuccessResponse(
           Some(nationalInsuranceNumber),
@@ -369,7 +369,7 @@ class PaginationServiceItSpec
               )
             )
           ),
-          callBack = Some(Callback(Some(CallbackUrl(paginationSource2.callBackURL))))
+          callBack = Some(Callback(Some(CallbackUrl(batchSource2.callBackURL))))
         )
 
         server.stubFor(
@@ -391,29 +391,29 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+        service.processBatch(BatchId(uuidOne)).value.futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.MaPagination,
+              batchType = BatchType.MaBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditPagingResult(None, None),
+              contributionCreditResult = BatchWithTaxWindowsResult(None, None),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              pageTaskId = Some(PageTaskId(uuidOne))
+              batchId = Some(BatchId(uuidOne))
             )
           )
 
       }
-      "should process Bsp pagination task successfully" in {
+      "should process Bsp batch task successfully" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
 
-        val paginationSource1 = PaginationSource(MarriageDetails, "/CallBackUrl1")
+        val batchSource1 = BatchWithCallback(MarriageDetails, "/CallBackUrl1")
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -421,7 +421,7 @@ class PaginationServiceItSpec
             Some(
               MarriageDetailsSuccess.Links(
                 MarriageDetailsSuccess.SelfLink(
-                  Some(MarriageDetailsSuccess.Href(paginationSource1.callBackURL.toString)),
+                  Some(MarriageDetailsSuccess.Href(batchSource1.callBackURL.toString)),
                   Some(MarriageDetailsSuccess.Methods.get)
                 )
               )
@@ -484,37 +484,37 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
+        service.processBatch(BatchId(uuidTwo)).value.futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.BspPagination,
+              batchType = BatchType.BspBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditPagingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              pageTaskId = Some(PageTaskId(uuidTwo))
+              batchId = Some(BatchId(uuidTwo))
             )
           )
       }
-      "should process Searchlight pagination task successfully" in {
+      "should process Searchlight batch task successfully" in {
         deleteAll().futureValue
 
-        val searchLightPageTask =
-          PageTaskDocument(
+        val searchLightBatch =
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(uuidFour),
+            BatchId(uuidFour),
             Json
               .toJson(
-                SearchLightPageTask(
-                  PaginationType.BspPagination,
+                SearchLightBatch(
+                  BatchType.BspBatch,
                   Some(
-                    ContributionAndCreditsPaging(
+                    BatchWithTaxWindows(
                       NonEmptyList
                         .of(
                           TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
@@ -530,8 +530,8 @@ class PaginationServiceItSpec
             currentTimeSource.instantNow()
           )
 
-        List(maPageTask, bspPageTask, searchLightPageTask, gyspPageTask).foreach(pageTask =>
-          insert(pageTask).futureValue
+        List(maBatch, bspBatch, searchLightBatch, gyspBatch).foreach(batch =>
+          insert(batch).futureValue
         )
         (() => mockUuidGenerator.generate).expects().returning(uuidFour)
 
@@ -582,20 +582,20 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PageTaskId(uuidFour))
+          .processBatch(BatchId(uuidFour))
           .value
           .futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.BspPagination,
+              batchType = BatchType.BspBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditPagingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 Some(
-                  ContributionAndCreditsPaging(
+                  BatchWithTaxWindows(
                     NonEmptyList(TaxWindow(StartTaxYear(2020), EndTaxYear(2022)), List()),
                     DateOfBirth(LocalDate.parse("2025-10-10"))
                   )
@@ -603,11 +603,11 @@ class PaginationServiceItSpec
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = Some(SEARCHLIGHT),
-              pageTaskId = Some(PageTaskId(uuidFour))
+              batchId = Some(BatchId(uuidFour))
             )
           )
       }
-      "should process Gysp pagination task successfully" in {
+      "should process Gysp batch task successfully" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidThree)
 
         val niContributionsAndCreditsSuccessResponse = NiContributionsAndCreditsSuccessResponse(
@@ -851,31 +851,31 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PageTaskId(uuidThree))
+          .processBatch(BatchId(uuidThree))
           .value
           .futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.GyspPagination,
+              batchType = BatchType.GyspBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditPagingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
               callSystem = None,
-              pageTaskId = Some(PageTaskId(uuidThree))
+              batchId = Some(BatchId(uuidThree))
             )
           )
       }
-      "should process Ma pagination task successfully and delete MA page" in {
-        val newListOfPages = List(
-          bspPageTask,
-          gyspPageTask,
-          searchLightPageTask
+      "should process Ma batch task successfully and delete MA batch" in {
+        val newListOfBatchs = List(
+          bspBatch,
+          gyspBatch,
+          searchLightBatch
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
@@ -948,32 +948,32 @@ class PaginationServiceItSpec
             )
         )
 
-        service.paginate(PageTaskId(uuidOne)).value.futureValue shouldBe
+        service.processBatch(BatchId(uuidOne)).value.futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.MaPagination,
+              batchType = BatchType.MaBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse),
                 NpsApiResult.SuccessResult(Liabilities, liabilitySummaryDetailsSuccessResponse)
               ),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditPagingResult(None, None),
+              contributionCreditResult = BatchWithTaxWindowsResult(None, None),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              pageTaskId = None
+              batchId = None
             )
           )
 
-        findAll().futureValue should contain theSameElementsAs newListOfPages
+        findAll().futureValue should contain theSameElementsAs newListOfBatchs
 
       }
-      "should process Bsp pagination task successfully and delete BSP page" in {
-        val newListOfPages = List(
-          maPageTask,
-          gyspPageTask,
-          searchLightPageTask
+      "should process Bsp batch task successfully and delete BSP batch" in {
+        val newListOfBatchs = List(
+          maBatch,
+          gyspBatch,
+          searchLightBatch
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuidTwo)
@@ -1041,31 +1041,31 @@ class PaginationServiceItSpec
                 .withBody(Json.toJson(marriageDetailsSuccessResponse).toString)
             )
         )
-        service.paginate(PageTaskId(uuidTwo)).value.futureValue shouldBe
+        service.processBatch(BatchId(uuidTwo)).value.futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.BspPagination,
+              batchType = BatchType.BspBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditPagingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = None,
-              pageTaskId = None
+              batchId = None
             )
           )
 
-        findAll().futureValue should contain theSameElementsAs newListOfPages
+        findAll().futureValue should contain theSameElementsAs newListOfBatchs
       }
-      "should process Gysp pagination task successfully and delete GYSP page" in {
-        val newListOfPages = List(
-          bspPageTask,
-          maPageTask,
-          searchLightPageTask
+      "should process Gysp batch task successfully and delete GYSP batch" in {
+        val newListOfBatchs = List(
+          bspBatch,
+          maBatch,
+          searchLightBatch
         )
 
         (() => mockUuidGenerator.generate).expects().returning(uuidThree)
@@ -1304,33 +1304,33 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PageTaskId(uuidThree))
+          .processBatch(BatchId(uuidThree))
           .value
           .futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.GyspPagination,
+              batchType = BatchType.GyspBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = Some(NpsApiResult.SuccessResult(MarriageDetails, marriageDetailsSuccessResponse)),
-              contributionCreditResult = ContributionCreditPagingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
                 None
               ),
               benefitSchemeMembershipDetailsData = Some(benefitSchemeMembershipDetailsData),
               callSystem = None,
-              pageTaskId = None
+              batchId = None
             )
           )
 
-        findAll().futureValue should contain theSameElementsAs newListOfPages
+        findAll().futureValue should contain theSameElementsAs newListOfBatchs
       }
-      "should process Searchlight pagination task successfully and delete old Searchlight page" in {
-        val newListOfPages = List(
-          maPageTask,
-          gyspPageTask,
-          bspPageTask
+      "should process Searchlight batch task successfully and delete old Searchlight batch" in {
+        val newListOfBatchs = List(
+          maBatch,
+          gyspBatch,
+          bspBatch
         )
 
         val newId = UUID.fromString("27d18297-bfc9-47b6-b2ab-4ac8964e6027")
@@ -1383,28 +1383,28 @@ class PaginationServiceItSpec
         )
 
         service
-          .paginate(PageTaskId(uuidFour))
+          .processBatch(BatchId(uuidFour))
           .value
           .futureValue shouldBe
           Right(
-            PaginationResult(
+            BatchResult(
               correlationId = correlationId,
-              paginationType = PaginationType.BspPagination,
+              batchType = BatchType.BspBatch,
               nationalInsuranceNumber = nationalInsuranceNumber,
               liabilitiesResult = List(),
               marriageDetailsResult = None,
-              contributionCreditResult = ContributionCreditPagingResult(
+              contributionCreditResult = BatchWithTaxWindowsResult(
                 contributionCreditResult =
                   Some(NpsApiResult.SuccessResult(NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)),
-                contributionAndCreditsPaging = None
+                batchWithTaxWindows = None
               ),
               benefitSchemeMembershipDetailsData = None,
               callSystem = Some(SEARCHLIGHT),
-              pageTaskId = None
+              batchId = None
             )
           )
 
-        findAll().futureValue should contain theSameElementsAs newListOfPages
+        findAll().futureValue should contain theSameElementsAs newListOfBatchs
       }
     }
   }

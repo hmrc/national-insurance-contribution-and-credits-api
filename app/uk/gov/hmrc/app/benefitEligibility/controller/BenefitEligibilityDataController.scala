@@ -31,11 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.response.{
   ErrorReason,
   ErrorResponse
 }
-import uk.gov.hmrc.app.benefitEligibility.service.{
-  BenefitEligibilityDataRetrievalService,
-  PaginationResult,
-  PaginationService
-}
+import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchService, BenefitEligibilityDataRetrievalService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -46,7 +42,7 @@ class BenefitEligibilityDataController @Inject() (
     cc: ControllerComponents,
     identity: uk.gov.hmrc.app.benefitEligibility.controller.action.AuthAction,
     benefitEligibilityDataRetrievalService: BenefitEligibilityDataRetrievalService,
-    paginationService: PaginationService
+    batchService: BatchService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
@@ -109,14 +105,14 @@ class BenefitEligibilityDataController @Inject() (
       }
     }
 
-  def getNextPage(cursorId: Option[String]): Action[AnyContent] =
+  def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
     identity.async(parse.default) { implicit request =>
       val maybeResult = for {
         headerValues <- EitherT.fromEither[Future](validateHeaders(request.headers))
         correlationId = headerValues
-        pageTaskId       <- EitherT.fromEither[Future](parsePageTaskId(cursorId))
-        paginationResult <- paginationService.paginate(pageTaskId)
-      } yield buildResponse(paginationResult).withHeaders("CorrelationId" -> correlationId.value.toString)
+        batchId     <- EitherT.fromEither[Future](parseBatchId(cursorId))
+        batchResult <- batchService.processBatch(batchId)
+      } yield buildResponse(batchResult).withHeaders("CorrelationId" -> correlationId.value.toString)
 
       maybeResult.value.map {
         case Right(result) => result
@@ -138,10 +134,10 @@ class BenefitEligibilityDataController @Inject() (
     }
 
   private def buildResponse(
-      paginationResult: PaginationResult
+      batchResult: BatchResult
   ): Result =
     BenefitEligibilityInfoResponse
-      .from(paginationResult) match {
+      .from(batchResult) match {
       case Left(errorResponse)    => InternalServerError(Json.toJson(errorResponse))
       case Right(successResponse) => Ok(Json.toJson(successResponse))
     }
