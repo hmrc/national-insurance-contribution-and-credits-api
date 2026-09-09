@@ -19,9 +19,7 @@ package uk.gov.hmrc.app.benefitEligibility.connectors.util
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.shouldBe
-import org.scalatest.prop.TableDrivenPropertyChecks.forAll
-import org.scalatest.prop.Tables.Table
-import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, NpsErrorReason, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, NpsErrorReason}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsSuccessfulApiResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
@@ -97,32 +95,14 @@ class NpsResponseHandlerSpec extends AnyFreeSpec with MockFactory {
     }
 
     ".toFailureResult" - {
-      val errorList = List(
-        NpsNormalizedError.AccessForbidden,
-        NpsNormalizedError.NotFound,
-        NpsNormalizedError.InternalServerError,
-        NpsNormalizedError.UnprocessableEntity,
-        NpsNormalizedError.BadRequest,
-        NpsNormalizedError.ServiceUnavailable,
-        NpsNormalizedError.UnexpectedStatus(508)
-      )
       "should successfully convert to a FailureResult (with npsError)" in {
+        underTest.toFailureResult(Some(hipFailureResponse)) shouldBe
+          FailureResult(randomApiName, ErrorReport(Some(hipFailureResponse)))
 
-        val errors = Table("error", errorList: _*)
-
-        forAll(errors) { error =>
-          underTest.toFailureResult(error, Some(hipFailureResponse)) shouldBe
-            FailureResult(randomApiName, ErrorReport(error, Some(hipFailureResponse)))
-        }
       }
       "should successfully convert to a FailureResult (without npsError)" in {
-
-        val errors = Table("error", errorList: _*)
-
-        forAll(errors) { error =>
-          underTest.toFailureResult(error, None) shouldBe
-            FailureResult(randomApiName, ErrorReport(error, None))
-        }
+        underTest.toFailureResult(None) shouldBe
+          FailureResult(randomApiName, ErrorReport(None))
       }
     }
   }

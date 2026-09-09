@@ -259,7 +259,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -313,7 +313,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
           server.verify(
@@ -355,7 +355,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -396,7 +396,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -441,7 +441,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -496,7 +496,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
 
@@ -548,7 +548,7 @@ class BenefitSchemeDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.BenefitSchemeDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
         }
@@ -578,7 +578,7 @@ class BenefitSchemeDetailsConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.BenefitSchemeDetails,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

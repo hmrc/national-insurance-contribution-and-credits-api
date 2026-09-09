@@ -18,7 +18,6 @@ package uk.gov.hmrc.app.benefitEligibility.model.response
 
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.npsNormalizedErrorWrites
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.service.BatchResult
@@ -36,22 +35,11 @@ object OverallResultSummary {
 
 }
 
-case class SanitizedApiResult(
-    apiName: ApiName,
-    status: NpsApiResponseStatus,
-    error: Option[NpsNormalizedError]
-)
-
-object SanitizedApiResult {
-  implicit val sanitizedSuccessApiResult: Writes[SanitizedApiResult] = Json.writes[SanitizedApiResult]
-}
-
 case class BenefitEligibilityInfoErrorResponse(
     status: OverallResultStatus,
     nationalInsuranceNumber: Identifier,
     benefitType: BenefitType,
-    summary: OverallResultSummary,
-    downStreams: List[SanitizedApiResult]
+    summary: OverallResultSummary
 )
 
 object BenefitEligibilityInfoErrorResponse {
@@ -69,14 +57,7 @@ object BenefitEligibilityInfoErrorResponse {
       status = OverallResultStatus.fromApiResults(allResults),
       nationalInsuranceNumber = nationalInsuranceNumber,
       benefitType = benefitType,
-      summary = OverallResultSummary.from(allResults),
-      downStreams = allResults.map { result =>
-        SanitizedApiResult(
-          result.apiName,
-          if (result.isSuccess) NpsApiResponseStatus.Success else NpsApiResponseStatus.Failure,
-          result.getFailure.map(_.normalizedError)
-        )
-      }
+      summary = OverallResultSummary.from(allResults)
     )
 
   def from(

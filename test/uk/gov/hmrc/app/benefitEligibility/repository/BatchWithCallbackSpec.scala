@@ -419,7 +419,7 @@ class BatchWithCallbackSpec
         val benefitSchemeMembershipDetailsData = BenefitSchemeMembershipDetailsData(
           FailureResult(
             ApiName.SchemeMembershipDetails,
-            ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+            ErrorReport(Some(response))
           ),
           List(
             SuccessResult(
@@ -514,7 +514,7 @@ class BatchWithCallbackSpec
 
         val marriageDetailsResult = FailureResult(
           ApiName.MarriageDetails,
-          ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+          ErrorReport(Some(response))
         )
 
         val result = fromMarriageDetails(Some(marriageDetailsResult))
@@ -563,7 +563,7 @@ class BatchWithCallbackSpec
         val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
 
         val liabilitiesResult =
-          List(FailureResult(ApiName.Liabilities, ErrorReport(NpsNormalizedError.BadRequest, Some(response))))
+          List(FailureResult(ApiName.Liabilities, ErrorReport(Some(response))))
 
         val result = fromLiabilities(liabilitiesResult)
         result shouldBe List()

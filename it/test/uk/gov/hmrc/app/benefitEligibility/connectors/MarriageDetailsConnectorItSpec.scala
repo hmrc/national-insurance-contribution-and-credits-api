@@ -223,7 +223,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -277,7 +277,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
           server.verify(
@@ -323,7 +323,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -364,7 +364,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -409,7 +409,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -464,7 +464,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
 
@@ -516,7 +516,7 @@ class MarriageDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.MarriageDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
         }
@@ -546,7 +546,7 @@ class MarriageDetailsConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.MarriageDetails,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

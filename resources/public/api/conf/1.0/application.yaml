@@ -695,6 +695,12 @@ paths:
       - Benefit-eligibility-info
       summary: Request any remaining information that can be used to determine benefit eligibility (paging endpoint only)
       parameters:
+      - in: query
+        name: cursorId
+        required: false
+        schema:
+          type: string
+          nullable: true
       - name: correlationId
         description: Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.
         in: header
@@ -1124,44 +1130,6 @@ components:
           nullable: true
           items:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class2or3ContributionAndCredits"
-    uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError:
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        downstreamStatus:
-          type: integer
-          format: int32
-      required:
-      - code
-      - message
-      - downstreamStatus
-    uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult:
-      properties:
-        apiName:
-          type: string
-          enum:
-          - Class2 MA Receipts
-          - Liabilities
-          - NI Contributions and credits
-          - Marriage Details
-          - Scheme Membership Details
-          - Individual State Pension Information
-          - Long Term Benefit Notes
-          - Benefit Scheme Details
-          - Long Term Benefit Calculation Details
-        status:
-          type: string
-          enum:
-          - SUCCESS
-          - FAILURE
-        error:
-          nullable: true
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError"
-      required:
-      - apiName
-      - status
     uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary:
       properties:
         totalCalls:
@@ -1201,16 +1169,11 @@ components:
           - BSP
         summary:
           $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary"
-        downStreams:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult"
       required:
       - status
       - nationalInsuranceNumber
       - benefitType
       - summary
-      - downStreams
     uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse:
       properties:
         code:

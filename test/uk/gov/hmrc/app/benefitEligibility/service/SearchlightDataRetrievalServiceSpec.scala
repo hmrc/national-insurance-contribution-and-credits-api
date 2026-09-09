@@ -25,7 +25,6 @@ import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsCo
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.NiContributionAndCredits
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
@@ -157,7 +156,7 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
         val result = FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(BadRequest, None)
+          ErrorReport(None)
         )
 
         (mockNiContributionsAndCreditsConnector

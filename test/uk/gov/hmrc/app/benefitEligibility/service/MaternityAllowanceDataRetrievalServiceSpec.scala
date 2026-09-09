@@ -22,12 +22,8 @@ import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.app.benefitEligibility.connectors.{
-  LiabilitySummaryDetailsConnector,
-  NiContributionsAndCreditsConnector
-}
+import uk.gov.hmrc.app.benefitEligibility.connectors.{LiabilitySummaryDetailsConnector, NiContributionsAndCreditsConnector}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.UnprocessableEntity
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultMA
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
@@ -250,7 +246,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
         val liabilitySummaryDetailsResult = FailureResult(
           ApiName.Liabilities,
-          ErrorReport(UnprocessableEntity, None)
+          ErrorReport(None)
         )
 
         (mockNiContributionsAndCreditsConnector
@@ -292,12 +288,12 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
         val niContributionAndCreditsResult = FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(UnprocessableEntity, None)
+          ErrorReport(None)
         )
 
         val liabilitySummaryDetailsResult = FailureResult(
           ApiName.Liabilities,
-          ErrorReport(UnprocessableEntity, None)
+          ErrorReport(None)
         )
 
         (mockNiContributionsAndCreditsConnector

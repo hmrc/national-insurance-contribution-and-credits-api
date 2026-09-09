@@ -393,7 +393,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -447,7 +447,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
           server.verify(
@@ -489,7 +489,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -530,7 +530,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -575,7 +575,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -630,7 +630,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
 
@@ -682,7 +682,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitCalculationDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
         }
@@ -712,7 +712,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.LongTermBenefitCalculationDetails,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

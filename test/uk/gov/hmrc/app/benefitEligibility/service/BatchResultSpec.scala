@@ -23,7 +23,6 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{Liabilities, NiContributionAndCredits}
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.BadRequest
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.LiabilitySummaryDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.repository.BatchId
@@ -98,7 +97,7 @@ class BatchResultSpec
         SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)),
         FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(NpsNormalizedError.BadRequest, None)
+          ErrorReport(None)
         )
       ),
       marriageDetailsResult = None,
@@ -150,7 +149,7 @@ class BatchResultSpec
         newResult shouldBe
           List(
             SuccessResult(Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None)),
-            FailureResult(NiContributionAndCredits, ErrorReport(BadRequest, None))
+            FailureResult(NiContributionAndCredits, ErrorReport(None))
           )
 
       }

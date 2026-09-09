@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.app.benefitEligibility.connectors.util
 
-import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.NpsError
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{NpsApiResult, NpsSuccessfulApiResponse}
@@ -29,13 +29,12 @@ trait NpsResponseHandler {
     SuccessResult(apiName, response)
 
   def toFailureResult[A <: ErrorReport, B <: NpsSuccessfulApiResponse](
-      normalizedError: NpsNormalizedError,
       npsError: Option[NpsError]
   ): NpsApiResult[A, B] =
     npsError match {
       case Some(errorResponse) =>
-        FailureResult(apiName, ErrorReport(normalizedError, Some(errorResponse)).asInstanceOf[A])
-      case None => FailureResult(apiName, ErrorReport(normalizedError, None).asInstanceOf[A])
+        FailureResult(apiName, ErrorReport(Some(errorResponse)).asInstanceOf[A])
+      case None => FailureResult(apiName, ErrorReport(None).asInstanceOf[A])
     }
 
 }

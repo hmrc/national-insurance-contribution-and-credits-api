@@ -17,7 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.model.nps
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import uk.gov.hmrc.app.benefitEligibility.model.common.{ApiName, NpsNormalizedError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.BenefitSchemeDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.class2MAReceipts.Class2MAReceiptsSuccess.Class2MAReceiptsSuccessResponse
@@ -65,7 +65,7 @@ sealed trait NpsApiResult[+A <: ErrorReport, +B] {
 
 object NpsApiResult {
 
-  final case class ErrorReport(normalizedError: NpsNormalizedError, npsError: Option[NpsError])
+  final case class ErrorReport(npsError: Option[NpsError])
 
   final case class FailureResult[+A <: ErrorReport, +B](
       apiName: ApiName,

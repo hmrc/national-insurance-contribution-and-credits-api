@@ -315,7 +315,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -366,7 +366,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -406,7 +406,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -444,7 +444,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -488,7 +488,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -533,7 +533,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
         }
@@ -577,7 +577,7 @@ class SchemeMembershipDetailsConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.SchemeMembershipDetails,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
 
@@ -608,7 +608,7 @@ class SchemeMembershipDetailsConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.SchemeMembershipDetails,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

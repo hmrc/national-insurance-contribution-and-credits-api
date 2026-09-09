@@ -333,7 +333,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -384,7 +384,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -424,7 +424,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -452,7 +452,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.NotFound, None)
+              ErrorReport( None)
             )
           )
 
@@ -504,7 +504,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
 
@@ -530,7 +530,7 @@ class IndividualStatePensionInformationConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.IndividualStatePension,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
         }
@@ -557,7 +557,7 @@ class IndividualStatePensionInformationConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.IndividualStatePension,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

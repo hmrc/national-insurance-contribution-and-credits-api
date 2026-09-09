@@ -25,13 +25,6 @@ import org.scalatest.matchers.should.Matchers.*
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  AccessForbidden,
-  BadRequest,
-  ServiceUnavailable,
-  UnexpectedStatus,
-  UnprocessableEntity
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.{ErrorReport, FailureResult, SuccessResult}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -39,32 +32,19 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
-  CreditSourceType,
-  IndividualStatePensionContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{CreditSourceType, IndividualStatePensionContributionCreditType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.EnumOffidtp
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{CalculationSource, CalculationStatus, Payday}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{LongTermBenefitNotesSuccessResponse, Note}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.MarriageDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageStatus.CivilPartner
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.enums.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.{
-  NiContributionsAndCreditsRequest,
-  NiContributionsAndCreditsSuccess
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.{NiContributionsAndCreditsRequest, NiContributionsAndCreditsSuccess}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
@@ -764,12 +744,12 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         val marriageDetailsResult = FailureResult(
           ApiName.MarriageDetails,
-          ErrorReport(UnprocessableEntity, None)
+          ErrorReport(None)
         )
 
         val longTermBenefitCalculationDetailsResult = FailureResult(
           ApiName.LongTermBenefitCalculationDetails,
-          ErrorReport(BadRequest, None)
+          ErrorReport(None)
         )
 
         val schemeMembershipDetailsResult = SuccessResult(
@@ -873,27 +853,27 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
 
         val niContributionAndCreditsResult = FailureResult(
           ApiName.NiContributionAndCredits,
-          ErrorReport(BadRequest, None)
+          ErrorReport(None)
         )
 
         val marriageDetailsResult = FailureResult(
           ApiName.LongTermBenefitNotes,
-          ErrorReport(UnexpectedStatus(504), None)
+          ErrorReport(None)
         )
 
         val longTermBenefitCalculationDetailsResult = FailureResult(
           ApiName.LongTermBenefitCalculationDetails,
-          ErrorReport(ServiceUnavailable, None)
+          ErrorReport(None)
         )
 
         val schemeMembershipDetailsResult = FailureResult(
           ApiName.SchemeMembershipDetails,
-          ErrorReport(AccessForbidden, None)
+          ErrorReport(None)
         )
 
         val individualStatePensionInformationResult = FailureResult(
           ApiName.IndividualStatePension,
-          ErrorReport(UnprocessableEntity, None)
+          ErrorReport(None)
         )
 
         (mockNiContributionsAndCreditsConnector

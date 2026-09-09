@@ -22,15 +22,6 @@ import com.google.inject.Inject
 import play.api.http.Status.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.util.{NpsClient, NpsResponseHandler}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  AccessForbidden,
-  BadRequest,
-  InternalServerError,
-  NotFound,
-  ServiceUnavailable,
-  UnexpectedStatus,
-  UnprocessableEntity
-}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.BenefitSchemeDetailsResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.{
   BenefitSchemeDetailsSuccessResponse,
@@ -82,33 +73,33 @@ class BenefitSchemeDetailsConnector @Inject() (
 
             case BAD_REQUEST =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsErrorResponse400](response).map(resp => toFailureResult(BadRequest, Some(resp)))
+              attemptParse[NpsErrorResponse400](response).map(resp => toFailureResult( Some(resp)))
 
             case FORBIDDEN =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult(AccessForbidden, Some(resp)))
+              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult( Some(resp)))
 
             case NOT_FOUND =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult(NotFound, Some(resp)))
+              attemptParse[NpsSingleErrorResponse](response).map(resp => toFailureResult( Some(resp)))
 
             case UNPROCESSABLE_ENTITY =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
               attemptParse[NpsMultiErrorResponse](response).map { resp =>
-                toFailureResult(UnprocessableEntity, Some(resp))
+                toFailureResult( Some(resp))
               }
 
             case SERVICE_UNAVAILABLE =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              Right(toFailureResult(ServiceUnavailable, None))
+              Right(toFailureResult( None))
 
             case INTERNAL_SERVER_ERROR =>
               logger.warn(s"$apiName returned a ${response.status}: ${response.body}")
-              Right(toFailureResult(InternalServerError, None))
+              Right(toFailureResult( None))
 
             case code =>
               logger.warn(s"$apiName returned an unexpected status: $code: ${response.body}")
-              Right(toFailureResult(UnexpectedStatus(code), None))
+              Right(toFailureResult( None))
           }
 
         EitherT.fromEither[Future](benefitSchemeDetailsResult).leftMap {

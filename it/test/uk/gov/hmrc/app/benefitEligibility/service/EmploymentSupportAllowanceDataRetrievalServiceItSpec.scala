@@ -252,7 +252,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+                ErrorReport( Some(response))
               )
             )
           )
@@ -305,7 +305,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+                ErrorReport( Some(response))
               )
             )
           )
@@ -347,7 +347,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+                ErrorReport( Some(response))
               )
             )
           )
@@ -377,7 +377,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.NotFound, None)
+                ErrorReport( None)
               )
             )
           )
@@ -423,7 +423,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+                ErrorReport( Some(response))
               )
             )
           )
@@ -451,7 +451,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.InternalServerError, None)
+                ErrorReport( None)
               )
             )
           )
@@ -495,7 +495,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
             EligibilityCheckDataResultESA(
               FailureResult(
                 ApiName.NiContributionAndCredits,
-                ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+                ErrorReport( None)
               )
             )
           )
@@ -524,7 +524,7 @@ class EmploymentSupportAllowanceDataRetrievalServiceItSpec
               EligibilityCheckDataResultESA(
                 FailureResult(
                   ApiName.NiContributionAndCredits,
-                  ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                  ErrorReport( None)
                 )
               )
             )

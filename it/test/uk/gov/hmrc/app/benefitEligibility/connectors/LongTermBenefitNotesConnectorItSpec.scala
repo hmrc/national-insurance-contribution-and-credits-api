@@ -164,7 +164,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -215,7 +215,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.BadRequest, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -255,7 +255,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.AccessForbidden, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -295,7 +295,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.NotFound, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -339,7 +339,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.UnprocessableEntity, Some(response))
+              ErrorReport( Some(response))
             )
           )
 
@@ -391,7 +391,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.InternalServerError, None)
+              ErrorReport( None)
             )
           )
 
@@ -443,7 +443,7 @@ class LongTermBenefitNotesConnectorItSpec
           result shouldBe Right(
             FailureResult(
               ApiName.LongTermBenefitNotes,
-              ErrorReport(NpsNormalizedError.ServiceUnavailable, None)
+              ErrorReport( None)
             )
           )
 
@@ -474,7 +474,7 @@ class LongTermBenefitNotesConnectorItSpec
             result shouldBe Right(
               FailureResult(
                 ApiName.LongTermBenefitNotes,
-                ErrorReport(NpsNormalizedError.UnexpectedStatus(statusCode), None)
+                ErrorReport( None)
               )
             )
           }

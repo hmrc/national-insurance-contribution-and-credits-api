@@ -35,11 +35,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
   NiContributionAndCredits
 }
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  InternalServerError,
-  ServiceUnavailable,
-  UnprocessableEntity
-}
 import uk.gov.hmrc.app.benefitEligibility.model.common.OverallResultStatus.{Failure, PartialFailure}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
@@ -1472,7 +1467,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              UnprocessableEntity,
               Some(NpsSingleErrorResponse(NpsErrorReason("error reason"), NpsErrorCode("code")))
             )
           ),
@@ -1491,16 +1485,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               status = PartialFailure,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
-              summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
-              downStreams = List(
-                SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None),
-                SanitizedApiResult(
-                  apiName = randomApiName,
-                  status = NpsApiResponseStatus.Failure,
-                  error = Some(UnprocessableEntity)
-                ),
-                SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None)
-              )
+              summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1)
             )
         }
       }
@@ -1514,14 +1499,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              UnprocessableEntity,
               Some(NpsSingleErrorResponse(NpsErrorReason("error reason 1"), NpsErrorCode("code 1")))
             )
           ),
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              InternalServerError,
               Some(
                 NpsMultiErrorResponse(
                   Some(
@@ -1537,7 +1520,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              ServiceUnavailable,
               Some(
                 NpsErrorResponseHipOrigin(
                   Hip,
@@ -1570,24 +1552,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
             status = Failure,
             nationalInsuranceNumber = nationalInsuranceNumber,
             benefitType = benefitType,
-            summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3),
-            downStreams = List(
-              SanitizedApiResult(
-                apiName = randomApiName,
-                status = NpsApiResponseStatus.Failure,
-                error = Some(UnprocessableEntity)
-              ),
-              SanitizedApiResult(
-                apiName = randomApiName,
-                status = NpsApiResponseStatus.Failure,
-                error = Some(InternalServerError)
-              ),
-              SanitizedApiResult(
-                apiName = randomApiName,
-                status = NpsApiResponseStatus.Failure,
-                error = Some(ServiceUnavailable)
-              )
-            )
+            summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3)
           )
         }
       }
@@ -1602,15 +1567,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           status = PartialFailure,
           nationalInsuranceNumber = nationalInsuranceNumber,
           benefitType = benefitType,
-          summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
-          downStreams = List(
-            SanitizedApiResult(
-              apiName = Liabilities,
-              status = NpsApiResponseStatus.Failure,
-              error = Some(UnprocessableEntity)
-            ),
-            SanitizedApiResult(apiName = NiContributionAndCredits, status = NpsApiResponseStatus.Success, error = None)
-          )
+          summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1)
         )
 
         val expectedJson =
@@ -1622,22 +1579,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
              |      "totalCalls":3,
              |      "successful":2,
              |      "failed":1
-             |   },
-             |   "downStreams":[
-             |      {
-             |         "apiName":"Liabilities",
-             |         "status":"FAILURE",
-             |         "error":{
-             |            "code":"UNPROCESSABLE_ENTITY",
-             |            "message":"downstream could not process data in request",
-             |            "downstreamStatus":422
-             |         }
-             |      },
-             |      {
-             |         "apiName":"NI Contributions and credits",
-             |         "status":"SUCCESS"
-             |      }
-             |   ]
+             |   }
              |}""".stripMargin
 
         Json.toJson(errorResponse) shouldBe Json.parse(expectedJson)
@@ -1657,15 +1599,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
         status = PartialFailure,
         nationalInsuranceNumber = nationalInsuranceNumber,
         benefitType = MA,
-        summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
-        downStreams = List(
-          SanitizedApiResult(
-            apiName = Liabilities,
-            status = NpsApiResponseStatus.Failure,
-            error = Some(UnprocessableEntity)
-          ),
-          SanitizedApiResult(apiName = NiContributionAndCredits, status = NpsApiResponseStatus.Success, error = None)
-        )
+        summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1)
       )
 
       application502JsonSchema.validateAndGetErrors(
@@ -1687,7 +1621,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              UnprocessableEntity,
               Some(NpsSingleErrorResponse(NpsErrorReason("error reason"), NpsErrorCode("code")))
             )
           ),
@@ -1732,16 +1665,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               status = PartialFailure,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
-              summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
-              downStreams = List(
-                SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None),
-                SanitizedApiResult(
-                  apiName = randomApiName,
-                  status = NpsApiResponseStatus.Failure,
-                  error = Some(UnprocessableEntity)
-                ),
-                SanitizedApiResult(apiName = randomApiName, status = NpsApiResponseStatus.Success, error = None)
-              )
+              summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1)
             )
           )
         }
@@ -1754,14 +1678,12 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              UnprocessableEntity,
               Some(NpsSingleErrorResponse(NpsErrorReason("error reason 1"), NpsErrorCode("code 1")))
             )
           ),
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              InternalServerError,
               Some(
                 NpsMultiErrorResponse(
                   Some(
@@ -1777,7 +1699,6 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
           NpsApiResult.FailureResult[ErrorReport, DummySuccessResponse](
             randomApiName,
             ErrorReport(
-              ServiceUnavailable,
               Some(
                 NpsErrorResponseHipOrigin(
                   Hip,
@@ -1837,24 +1758,7 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
               status = Failure,
               nationalInsuranceNumber = nationalInsuranceNumber,
               benefitType = benefitType,
-              summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3),
-              downStreams = List(
-                SanitizedApiResult(
-                  apiName = randomApiName,
-                  status = NpsApiResponseStatus.Failure,
-                  error = Some(UnprocessableEntity)
-                ),
-                SanitizedApiResult(
-                  apiName = randomApiName,
-                  status = NpsApiResponseStatus.Failure,
-                  error = Some(InternalServerError)
-                ),
-                SanitizedApiResult(
-                  apiName = randomApiName,
-                  status = NpsApiResponseStatus.Failure,
-                  error = Some(ServiceUnavailable)
-                )
-              )
+              summary = OverallResultSummary(totalCalls = 3, successful = 0, failed = 3)
             )
           )
         }
