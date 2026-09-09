@@ -21,27 +21,27 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.*
 
 import scala.collection.immutable
 
-sealed abstract class PaginationType(override val entryName: String) extends EnumEntry
+sealed abstract class BatchType(override val entryName: String) extends EnumEntry
 
-object PaginationType extends Enum[PaginationType] with PlayJsonEnum[PaginationType] {
-  val values: immutable.IndexedSeq[PaginationType] = findValues
+object BatchType extends Enum[BatchType] with PlayJsonEnum[BatchType] {
+  val values: immutable.IndexedSeq[BatchType] = findValues
 
-  def from(eligibilityCheckDataRequest: EligibilityCheckDataRequest): Option[PaginationType] =
+  def from(eligibilityCheckDataRequest: EligibilityCheckDataRequest): Option[BatchType] =
     eligibilityCheckDataRequest match {
-      case req: BSPEligibilityCheckDataRequest  => Some(PaginationType.BspPagination)
-      case req: MAEligibilityCheckDataRequest   => Some(PaginationType.MaPagination)
-      case req: GYSPEligibilityCheckDataRequest => Some(PaginationType.GyspPagination)
+      case req: BSPEligibilityCheckDataRequest  => Some(BatchType.BspBatch)
+      case req: MAEligibilityCheckDataRequest   => Some(BatchType.MaBatch)
+      case req: GYSPEligibilityCheckDataRequest => Some(BatchType.GyspBatch)
       case req: SearchlightEligibilityCheckDataRequest if req.benefitType == BenefitType.BSP =>
-        Some(PaginationType.BspSearchLightPagination)
+        Some(BatchType.BspSearchLightBatch)
       case _ => None
     }
 
-  case object MaPagination extends PaginationType("MA")
+  case object MaBatch extends BatchType("MA")
 
-  case object GyspPagination extends PaginationType("GYSP")
+  case object GyspBatch extends BatchType("GYSP")
 
-  case object BspPagination extends PaginationType("BSP")
+  case object BspBatch extends BatchType("BSP")
 
-  case object BspSearchLightPagination extends PaginationType("BSP_SEARCHLIGHT")
+  case object BspSearchLightBatch extends BatchType("BSP_SEARCHLIGHT")
 
 }

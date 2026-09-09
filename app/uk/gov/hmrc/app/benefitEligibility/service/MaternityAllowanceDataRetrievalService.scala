@@ -43,7 +43,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class MaternityAllowanceDataRetrievalService @Inject() (
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
     liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
-    paginationService: PaginationService,
+    batchService: BatchService,
     uuidGenerator: UuidGenerator,
     currentTimeSource: CurrentTimeSource
 )(
@@ -85,33 +85,33 @@ class MaternityAllowanceDataRetrievalService @Inject() (
           None
         )
 
-        val shouldPaginate: Boolean =
+        val shouldBatch: Boolean =
           if (result.allResults.exists(_.isFailure))
             false
           else
             liabilityResult.exists(_.getSuccess.get.callback.isDefined)
 
-        if (shouldPaginate) {
-          val liabilityPages = liabilityResult.flatMap {
+        if (shouldBatch) {
+          val liabilityBatchs = liabilityResult.flatMap {
             case NpsApiResult.FailureResult(apiName, result) => None
             case NpsApiResult.SuccessResult(apiName, result) =>
-              result.callback.flatMap(_.callbackURL.map(_.value)).map(url => PaginationSource(apiName, url))
+              result.callback.flatMap(_.callbackURL.map(_.value)).map(url => BatchWithCallback(apiName, url))
           }
 
-          val pageTask = MaPageTask(
-            liabilityPages,
+          val batch = MaBatch(
+            liabilityBatchs,
             eligibilityCheckDataRequest.nationalInsuranceNumber
           )
-          paginationService
+          batchService
             .addTask(
-              PageTaskDocument(
+              BatchDocument(
                 correlationId,
-                PageTaskId(uuidGenerator.generate),
-                Json.toJson(pageTask).as[JsObject],
+                BatchId(uuidGenerator.generate),
+                Json.toJson(batch).as[JsObject],
                 currentTimeSource.instantNow()
               )
             )
-            .map(id => result.copy(pageTaskId = Some(PageTaskId(id))))
+            .map(id => result.copy(batchId = Some(BatchId(id))))
         } else EitherT.rightT[Future, BenefitEligibilityError](result)
       }
       .leftMap {

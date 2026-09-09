@@ -52,18 +52,18 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
   RevaluationRate,
   SchemeMembershipDebitReason
 }
-import uk.gov.hmrc.app.benefitEligibility.repository.PageTask.createPageTaskDocument
+import uk.gov.hmrc.app.benefitEligibility.repository.Batch.createBatchDocument
 import uk.gov.hmrc.app.benefitEligibility.service.{
-  BenefitSchemeMembershipDetailsData,
-  ContributionCreditPagingResult,
-  PaginationResult
+  BatchResult,
+  BatchWithTaxWindowsResult,
+  BenefitSchemeMembershipDetailsData
 }
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 
 import java.time.{Instant, LocalDate}
 import java.util.UUID
 
-class PageTaskSpec
+class BatchSpec
     extends AnyFreeSpec
     with MockFactory
     with ScalaFutures
@@ -78,12 +78,12 @@ class PageTaskSpec
 
   val nationalInsuranceNumber = Identifier("AB123456C")
 
-  "PageTask" - {
-    ".createPaginatingTask" - {
-      "should return pageTask if MA pagination result with next cursor" in {
-        val paginationResult = PaginationResult(
+  "Batch" - {
+    ".createBatchDocument" - {
+      "should return batch if MA batch result with next cursor" in {
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.MaPagination,
+          batchType = BatchType.MaBatch,
           nationalInsuranceNumber = nationalInsuranceNumber,
           liabilitiesResult = List(
             SuccessResult(
@@ -92,21 +92,21 @@ class PageTaskSpec
             )
           ),
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditPagingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe Some(
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             Json
               .toJson(
-                MaPageTask(
-                  List(PaginationSource(Liabilities, "SomeUrl1")),
+                MaBatch(
+                  List(BatchWithCallback(Liabilities, "SomeUrl1")),
                   nationalInsuranceNumber
                 )
               )
@@ -115,11 +115,11 @@ class PageTaskSpec
           )
         )
       }
-      "should return pageTask if BSP pagination result with next cursor" in {
+      "should return batch if BSP batch result with next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationResult = PaginationResult(
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BspPagination,
+          batchType = BatchType.BspBatch,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
@@ -130,31 +130,31 @@ class PageTaskSpec
               )
             )
           ),
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe Some(
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             Json
               .toJson(
-                BspPageTask(
-                  marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
-                  contributionAndCreditsPaging = Some(
-                    ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                BspBatch(
+                  marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
                   nationalInsuranceNumber
                 )
@@ -164,11 +164,11 @@ class PageTaskSpec
           )
         )
       }
-      "should return pageTask if SEARCHLIGHT pagination result with next cursor" in {
+      "should return batch if SEARCHLIGHT batch result with next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationResult = PaginationResult(
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BspPagination,
+          batchType = BatchType.BspBatch,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
@@ -179,31 +179,31 @@ class PageTaskSpec
               )
             )
           ),
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe Some(
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             Json
               .toJson(
-                BspPageTask(
-                  marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
-                  contributionAndCreditsPaging = Some(
-                    ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                BspBatch(
+                  marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
                   nationalInsuranceNumber
                 )
@@ -213,11 +213,11 @@ class PageTaskSpec
           )
         )
       }
-      "should return pageTask if GYSP pagination result with next cursor" in {
+      "should return batch if GYSP batch result with next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationResult = PaginationResult(
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.GyspPagination,
+          batchType = BatchType.GyspBatch,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
@@ -228,14 +228,14 @@ class PageTaskSpec
               )
             )
           ),
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = Some(
             BenefitSchemeMembershipDetailsData(
@@ -350,22 +350,21 @@ class PageTaskSpec
             )
           ),
           callSystem = None,
-          pageTaskId = Some(PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
+          batchId = Some(BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")))
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe Some(
-          PageTaskDocument(
+          BatchDocument(
             correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-            PageTaskId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
+            BatchId(UUID.fromString("9b0de48f-b995-4c61-aeab-8b02273a8f26")),
             Json
               .toJson(
-                GyspPageTask(
-                  benefitSchemeMembershipDetailsPaging =
-                    Some(PaginationSource(ApiName.BenefitSchemeDetails, "SomeURL2")),
-                  marriageDetailsPaging = Some(PaginationSource(ApiName.MarriageDetails, "SomeURL1")),
-                  contributionAndCreditsPaging = Some(
-                    ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
+                GyspBatch(
+                  benefitSchemeMembershipDetails = Some(BatchWithCallback(ApiName.BenefitSchemeDetails, "SomeURL2")),
+                  marriageDetails = Some(BatchWithCallback(ApiName.MarriageDetails, "SomeURL1")),
+                  contributionsAndCredits = Some(
+                    BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob)
                   ),
                   nationalInsuranceNumber
                 )
@@ -375,28 +374,28 @@ class PageTaskSpec
           )
         )
       }
-      "should return None if MA pagination result without next cursor" in {
-        val paginationResult = PaginationResult(
+      "should return None if MA batch result without next cursor" in {
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.MaPagination,
+          batchType = BatchType.MaBatch,
           nationalInsuranceNumber,
           liabilitiesResult =
             List(SuccessResult(ApiName.Liabilities, LiabilitySummaryDetailsSuccessResponse(None, None))),
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditPagingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = None
+          batchId = None
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe None
       }
-      "should return None if BSP pagination result without next cursor" in {
+      "should return None if BSP batch result without next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationResult = PaginationResult(
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.BspPagination,
+          batchType = BatchType.BspBatch,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
@@ -405,28 +404,28 @@ class PageTaskSpec
               MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
             )
           ),
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = None
+          batchId = None
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe None
       }
-      "should return None if GYSP pagination result without next cursor" in {
+      "should return None if GYSP batch result without next cursor" in {
         val dob = DateOfBirth(LocalDate.parse("2025-10-10"))
-        val paginationResult = PaginationResult(
+        val batchResult = BatchResult(
           correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-          paginationType = PaginationType.GyspPagination,
+          batchType = BatchType.GyspBatch,
           nationalInsuranceNumber,
           liabilitiesResult = List(),
           marriageDetailsResult = Some(
@@ -435,14 +434,14 @@ class PageTaskSpec
               MarriageDetailsSuccessResponse(MarriageDetails(ActiveMarriage(true), None, None))
             )
           ),
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             Some(
               SuccessResult(
                 ApiName.NiContributionAndCredits,
                 NiContributionsAndCreditsSuccessResponse(None, None, None)
               )
             ),
-            Some(ContributionAndCreditsPaging(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
+            Some(BatchWithTaxWindows(NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2020))), dob))
           ),
           benefitSchemeMembershipDetailsData = Some(
             BenefitSchemeMembershipDetailsData(
@@ -557,25 +556,25 @@ class PageTaskSpec
             )
           ),
           callSystem = None,
-          pageTaskId = None
+          batchId = None
         )
 
-        val result = createPageTaskDocument(paginationResult, currentTimeSource)
+        val result = createBatchDocument(batchResult, currentTimeSource)
         result shouldBe None
       }
     }
-    ".PageTaskId" - {
+    ".BatchId" - {
       ".from" - {
-        "should return a page taskId if a valid UUID is used as cursorId" in {
+        "should return a batchId if a valid UUID is used as cursorId" in {
           val uuidOne = UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")
-          val result  = PageTaskId.from(CursorId(uuidOne.toString))
+          val result  = BatchId.from(CursorId(uuidOne.toString))
 
-          result shouldBe Some(PageTaskId(uuidOne))
+          result shouldBe Some(BatchId(uuidOne))
         }
 
         "should return none if an invalid UUID is used as cursorId" in {
           val invalidId = "some-invalid-cursor-id"
-          val result    = PageTaskId.from(CursorId(invalidId))
+          val result    = BatchId.from(CursorId(invalidId))
 
           result shouldBe None
         }

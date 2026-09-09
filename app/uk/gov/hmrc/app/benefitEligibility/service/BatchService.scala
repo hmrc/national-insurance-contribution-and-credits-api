@@ -42,13 +42,13 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaginationService @Inject() (
+class BatchService @Inject() (
     liabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector,
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
     marriageDetailsConnector: MarriageDetailsConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
     benefitSchemeDetailsConnector: BenefitSchemeDetailsConnector,
-    pageTaskRepo: BenefitEligibilityRepository,
+    batchRepository: BatchRepository,
     currentTime: CurrentTimeSource,
     uuidGenerator: UuidGenerator,
     appConfig: AppConfig
@@ -57,88 +57,88 @@ class PaginationService @Inject() (
   private val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
   def addTask(
-      pageTaskDocument: PageTaskDocument
+      batchDocument: BatchDocument
   )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, UUID] = {
-    def createNewPageTask(pageTaskDocument: PageTaskDocument) = {
-      logger.info("Creating new page task")
-      val newPageTaskDocument = pageTaskDocument.copy(
-        pageTaskId = PageTaskId(uuidGenerator.generate)
+    def createNewBatch(batchDocument: BatchDocument) = {
+      logger.info("Creating new batch")
+      val newBatchDocument = batchDocument.copy(
+        batchId = BatchId(uuidGenerator.generate)
       )
-      addTask(newPageTaskDocument)
+      addTask(newBatchDocument)
     }
 
-    pageTaskRepo.insert(pageTaskDocument).recoverWith {
+    batchRepository.insert(batchDocument).recoverWith {
       case DatabaseError(dbError: com.mongodb.MongoWriteException)
           if dbError.getError.getCategory == com.mongodb.ErrorCategory.DUPLICATE_KEY =>
         logger.warn("MongoWriteException: Duplicate key error")
-        createNewPageTask(pageTaskDocument)
+        createNewBatch(batchDocument)
       case DatabaseError(dbError: com.mongodb.DuplicateKeyException) =>
         logger.warn("DuplicateKeyException: Duplicate key error")
-        createNewPageTask(pageTaskDocument)
+        createNewBatch(batchDocument)
       case error =>
         EitherT.leftT(error)
     }
   }
 
-  def paginate(
-      pageTaskId: PageTaskId
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] =
+  def processBatch(
+      batchId: BatchId
+  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] =
     for {
-      existingPageTaskDocument <- pageTaskRepo.getItem(pageTaskId)
-      paginationResult <- existingPageTaskDocument.data.as[PageTask] match {
-        case task: MaPageTask if appConfig.maEnabled =>
-          logger.info("processing MaPageTask")
-          processMaPageTask(existingPageTaskDocument.correlationId, task)
-        case task: BspPageTask if appConfig.bspEnabled =>
-          logger.info("processing BspPageTask")
-          processBspPageTask(existingPageTaskDocument.correlationId, task)
-        case task: GyspPageTask if appConfig.gyspEnabled =>
-          logger.info("processing GyspPageTask")
-          processGyspPageTask(existingPageTaskDocument.correlationId, task)
-        case task: SearchLightPageTask if appConfig.searchlightEnabled =>
-          logger.info("processing SearchLightPageTask")
-          processSearchlightPageTask(existingPageTaskDocument.correlationId, task)
-        case task: SearchLightPageTask if !appConfig.searchlightEnabled =>
-          EitherT.left[PaginationResult](
+      existingBatchDocument <- batchRepository.get(batchId)
+      batchResult <- existingBatchDocument.data.as[Batch] match {
+        case task: MaBatch if appConfig.maEnabled =>
+          logger.info("processing MaBatch")
+          processMaBatch(existingBatchDocument.correlationId, task)
+        case task: BspBatch if appConfig.bspEnabled =>
+          logger.info("processing BspBatch")
+          processBspBatch(existingBatchDocument.correlationId, task)
+        case task: GyspBatch if appConfig.gyspEnabled =>
+          logger.info("processing GyspBatch")
+          processGyspBatch(existingBatchDocument.correlationId, task)
+        case task: SearchLightBatch if appConfig.searchlightEnabled =>
+          logger.info("processing SearchLightBatch")
+          processSearchlightBatch(existingBatchDocument.correlationId, task)
+        case task: SearchLightBatch if !appConfig.searchlightEnabled =>
+          EitherT.left[BatchResult](
             Future.successful(FeatureDisabled("feature disabled: SEARCHLIGHT"))
           )
-        case task: PageTask =>
-          EitherT.left[PaginationResult](
-            Future.successful(FeatureDisabled(s"feature disabled: ${task.paginationType.entryName}"))
+        case task: Batch =>
+          EitherT.left[BatchResult](
+            Future.successful(FeatureDisabled(s"feature disabled: ${task.batchType.entryName}"))
           )
       }
-      pageTaskDoc = PageTask.createPageTaskDocument(paginationResult, currentTime)
+      batchDocument = Batch.createBatchDocument(batchResult, currentTime)
 
-      _ <- pageTaskDoc
-        .fold(pageTaskRepo.delete(existingPageTaskDocument.pageTaskId.value).map(_ => ()))(newPageTaskDoc =>
-          pageTaskRepo.upsert(Some(existingPageTaskDocument.pageTaskId.value), newPageTaskDoc)
+      _ <- batchDocument
+        .fold(batchRepository.delete(existingBatchDocument.batchId.value).map(_ => ()))(newBatchDoc =>
+          batchRepository.upsert(Some(existingBatchDocument.batchId.value), newBatchDoc)
         )
         .map(_ => ())
-    } yield paginationResult
+    } yield batchResult
 
-  private[service] def processMaPageTask(
+  private[service] def processMaBatch(
       correlationId: CorrelationId,
-      maPageTask: MaPageTask
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
-    logger.info("Paginating for MA")
-    maPageTask.liabilitiesPaging
-      .map { pageSource =>
+      maBatch: MaBatch
+  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] = {
+    logger.info("Batching for MA")
+    maBatch.liabilityDetails
+      .map { batchSource =>
         liabilitySummaryDetailsConnector
-          .fetchData(BenefitType.from(maPageTask.paginationType), pageSource.callBackURL)
+          .fetchData(BenefitType.from(maBatch.batchType), batchSource.callBackURL)
       }
       .sequence
       .map { liabilityResult =>
-        PaginationResult(
+        BatchResult(
           correlationId = correlationId,
-          paginationType = maPageTask.paginationType,
-          nationalInsuranceNumber = maPageTask.nationalInsuranceNumber,
+          batchType = maBatch.batchType,
+          nationalInsuranceNumber = maBatch.nationalInsuranceNumber,
           liabilitiesResult = liabilityResult,
-          contributionCreditResult = ContributionCreditPagingResult(None, None),
+          contributionCreditResult = BatchWithTaxWindowsResult(None, None),
           marriageDetailsResult = None,
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = None
-        ).setPageTaskId(uuidGenerator.generate)
+          batchId = None
+        ).setBatchId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process MA task", error)
@@ -146,36 +146,36 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processBspPageTask(correlationId: CorrelationId, bspPageTask: BspPageTask)(
+  private[service] def processBspBatch(correlationId: CorrelationId, bspBatch: BspBatch)(
       implicit headerCarrier: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
-    logger.info("Paginating for BSP")
+  ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
+    logger.info("Batching for BSP")
     (
       marriageDetailsConnectorFetchData(
-        BenefitType.from(bspPageTask.paginationType),
-        bspPageTask.marriageDetailsPaging
+        BenefitType.from(bspBatch.batchType),
+        bspBatch.marriageDetails
       ),
       fetchContributionsAndCreditsData(
-        BenefitType.from(bspPageTask.paginationType),
-        bspPageTask.nationalInsuranceNumber,
-        bspPageTask.contributionAndCreditsPaging
+        BenefitType.from(bspBatch.batchType),
+        bspBatch.nationalInsuranceNumber,
+        bspBatch.contributionsAndCredits
       )
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult) =>
-        PaginationResult(
+        BatchResult(
           correlationId = correlationId,
-          paginationType = bspPageTask.paginationType,
+          batchType = bspBatch.batchType,
           liabilitiesResult = Nil,
-          nationalInsuranceNumber = bspPageTask.nationalInsuranceNumber,
+          nationalInsuranceNumber = bspBatch.nationalInsuranceNumber,
           marriageDetailsResult = marriageDetailsResult,
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             contributionCreditResult,
-            bspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
+            bspBatch.contributionsAndCredits.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = None,
-          pageTaskId = None
-        ).setPageTaskId(uuidGenerator.generate)
+          batchId = None
+        ).setBatchId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process BSP task", error)
@@ -183,57 +183,57 @@ class PaginationService @Inject() (
       }
   }
 
-  private[service] def processSearchlightPageTask(
+  private[service] def processSearchlightBatch(
       correlationId: CorrelationId,
-      searchLightPageTask: SearchLightPageTask
+      searchLightBatch: SearchLightBatch
   )(
       implicit headerCarrier: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
-    logger.info("Paginating for BSP")
+  ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
+    logger.info("Batching for BSP")
 
     fetchContributionsAndCreditsData(
-      BenefitType.from(searchLightPageTask.paginationType),
-      searchLightPageTask.nationalInsuranceNumber,
-      searchLightPageTask.contributionAndCreditsPaging
+      BenefitType.from(searchLightBatch.batchType),
+      searchLightBatch.nationalInsuranceNumber,
+      searchLightBatch.contributionsAndCredits
     )
       .map { contributionCreditResult =>
-        PaginationResult(
+        BatchResult(
           correlationId = correlationId,
-          paginationType = searchLightPageTask.paginationType,
+          batchType = searchLightBatch.batchType,
           liabilitiesResult = Nil,
-          nationalInsuranceNumber = searchLightPageTask.nationalInsuranceNumber,
+          nationalInsuranceNumber = searchLightBatch.nationalInsuranceNumber,
           marriageDetailsResult = None,
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             contributionCreditResult,
-            searchLightPageTask.contributionAndCreditsPaging.flatMap(_.tail)
+            searchLightBatch.contributionsAndCredits.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = None,
           callSystem = Some(SEARCHLIGHT),
-          pageTaskId = None
-        ).setPageTaskId(uuidGenerator.generate)
+          batchId = None
+        ).setBatchId(uuidGenerator.generate)
       }
       .leftMap { error =>
-        logger.error(s"Failed to process ${searchLightPageTask.paginationType} searchlight task", error)
+        logger.error(s"Failed to process ${searchLightBatch.batchType} searchlight task", error)
         error
       }
   }
 
-  private[service] def processGyspPageTask(correlationId: CorrelationId, gyspPageTask: GyspPageTask)(
+  private[service] def processGyspBatch(correlationId: CorrelationId, gyspBatch: GyspBatch)(
       implicit headerCarrier: HeaderCarrier
-  ): EitherT[Future, BenefitEligibilityError, PaginationResult] = {
-    logger.info("Paginating for GYSP")
+  ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
+    logger.info("Batching for GYSP")
 
     def fetchBenefitSchemeMembershipDetailsData(
-        pageTask: GyspPageTask
+        batch: GyspBatch
     )(
         implicit headerCarrier: HeaderCarrier
     ): EitherT[Future, BenefitEligibilityError, Option[BenefitSchemeMembershipDetailsData]] =
-      pageTask.benefitSchemeMembershipDetailsPaging
-        .map { page =>
+      batch.benefitSchemeMembershipDetails
+        .map { batchSource =>
           schemeMembershipDetailsConnector
             .fetchData(
-              benefitType = BenefitType.from(pageTask.paginationType),
-              path = page.callBackURL
+              benefitType = BenefitType.from(batch.batchType),
+              path = batchSource.callBackURL
             )
             .flatMap {
               case detailsResult @ NpsApiResult.FailureResult(apiName, result) =>
@@ -245,8 +245,8 @@ class PaginationService @Inject() (
                     contractedOutNumberDetailsList
                       .map { contractedOutNumberDetails =>
                         benefitSchemeDetailsConnector.fetchBenefitSchemeDetails(
-                          BenefitType.from(pageTask.paginationType),
-                          pageTask.nationalInsuranceNumber,
+                          BenefitType.from(batch.batchType),
+                          batch.nationalInsuranceNumber,
                           SchemeContractedOutNumberDetails(contractedOutNumberDetails.value)
                         )
                       }
@@ -264,31 +264,31 @@ class PaginationService @Inject() (
 
     (
       marriageDetailsConnectorFetchData(
-        BenefitType.from(gyspPageTask.paginationType),
-        gyspPageTask.marriageDetailsPaging
+        BenefitType.from(gyspBatch.batchType),
+        gyspBatch.marriageDetails
       ),
       fetchContributionsAndCreditsData(
-        BenefitType.from(gyspPageTask.paginationType),
-        gyspPageTask.nationalInsuranceNumber,
-        gyspPageTask.contributionAndCreditsPaging
+        BenefitType.from(gyspBatch.batchType),
+        gyspBatch.nationalInsuranceNumber,
+        gyspBatch.contributionsAndCredits
       ),
-      fetchBenefitSchemeMembershipDetailsData(gyspPageTask)
+      fetchBenefitSchemeMembershipDetailsData(gyspBatch)
     ).parTupled
       .map { case (marriageDetailsResult, contributionCreditResult, benefitSchemeMembershipDetailsData) =>
-        PaginationResult(
+        BatchResult(
           correlationId = correlationId,
-          paginationType = gyspPageTask.paginationType,
-          gyspPageTask.nationalInsuranceNumber,
+          batchType = gyspBatch.batchType,
+          gyspBatch.nationalInsuranceNumber,
           liabilitiesResult = Nil,
           marriageDetailsResult = marriageDetailsResult,
-          contributionCreditResult = ContributionCreditPagingResult(
+          contributionCreditResult = BatchWithTaxWindowsResult(
             contributionCreditResult,
-            gyspPageTask.contributionAndCreditsPaging.flatMap(_.tail)
+            gyspBatch.contributionsAndCredits.flatMap(_.tail)
           ),
           benefitSchemeMembershipDetailsData = benefitSchemeMembershipDetailsData,
           callSystem = None,
-          pageTaskId = None
-        ).setPageTaskId(uuidGenerator.generate)
+          batchId = None
+        ).setBatchId(uuidGenerator.generate)
       }
       .leftMap { error =>
         logger.error(s"Failed to process GYSP task", error)
@@ -298,34 +298,32 @@ class PaginationService @Inject() (
 
   private def marriageDetailsConnectorFetchData(
       benefitType: BenefitType,
-      marriageDetailsPaging: Option[PaginationSource]
+      marriageDetailsBatchWithCallback: Option[BatchWithCallback]
   )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
-    marriageDetailsPaging
-      .map(paginationSource =>
-        marriageDetailsConnector.fetchMarriageDetailsData(benefitType, paginationSource.callBackURL)
-      )
+    marriageDetailsBatchWithCallback
+      .map(batchSource => marriageDetailsConnector.fetchMarriageDetailsData(benefitType, batchSource.callBackURL))
       .sequence
   }
 
   private def fetchContributionsAndCreditsData(
       benefitType: BenefitType,
       nationInsuranceNumber: Identifier,
-      contributionAndCreditsPaging: Option[ContributionAndCreditsPaging]
+      batchWithTaxWindows: Option[BatchWithTaxWindows]
   )(
       implicit headerCarrier: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, Option[ContributionCreditResult]] = {
     logger.info("Contributions and Credits Connector called")
-    contributionAndCreditsPaging.map { paging =>
-      val taxWindow = paging.niContributionAndCreditsTaxWindows.head
+    batchWithTaxWindows.map { batching =>
+      val taxWindow = batching.taxWindows.head
       niContributionsAndCreditsConnector
         .fetchContributionsAndCredits(
           benefitType,
           NiContributionsAndCreditsRequest(
             nationInsuranceNumber,
-            paging.dateOfBirth,
+            batching.dateOfBirth,
             taxWindow.startTaxYear,
             taxWindow.endTaxYear
           )

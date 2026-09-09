@@ -22,21 +22,16 @@ import com.google.inject.Inject
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BatchType,
   BenefitEligibilityError,
   CorrelationId,
-  DataRetrievalServiceError,
-  PaginationType
+  DataRetrievalServiceError
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{
-  ContributionAndCreditsPaging,
-  PageTaskDocument,
-  PageTaskId,
-  SearchLightPageTask
-}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BatchDocument, BatchId, BatchWithTaxWindows, SearchLightBatch}
 import uk.gov.hmrc.app.benefitEligibility.util.implicits.ListImplicits.ListSyntax
 import uk.gov.hmrc.app.benefitEligibility.util.{ContributionCreditTaxWindowCalculator, CurrentTimeSource}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SearchlightDataRetrievalService @Inject() (
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
-    paginationService: PaginationService,
+    batchService: BatchService,
     uuidGenerator: UuidGenerator,
     currentTimeSource: CurrentTimeSource
 )(implicit ec: ExecutionContext) {
@@ -84,30 +79,30 @@ class SearchlightDataRetrievalService @Inject() (
               None
             )
 
-            val shouldPage = if (contributionCreditResult.isSuccess) taxWindows.length > 1 else false
+            val shouldBatch = if (contributionCreditResult.isSuccess) taxWindows.length > 1 else false
 
-            (PaginationType.from(eligibilityCheckDataRequest), shouldPage) match {
-              case (Some(paginationType), true) =>
+            (BatchType.from(eligibilityCheckDataRequest), shouldBatch) match {
+              case (Some(batchType), true) =>
 
-                val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
-                  ContributionAndCreditsPaging(
+                val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
+                  BatchWithTaxWindows(
                     remainingWindows,
                     eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
                   )
                 }
 
-                val pageTask = SearchLightPageTask(
-                  paginationType,
-                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                val batch = SearchLightBatch(
+                  batchType,
+                  contributionsAndCredits = niContributionsCreditsBatch,
                   eligibilityCheckDataRequest.nationalInsuranceNumber
                 )
 
-                paginationService
+                batchService
                   .addTask(
-                    PageTaskDocument(
+                    BatchDocument(
                       correlationId,
-                      PageTaskId(uuidGenerator.generate),
-                      Json.toJson(pageTask).as[JsObject],
+                      BatchId(uuidGenerator.generate),
+                      Json.toJson(batch).as[JsObject],
                       currentTimeSource.instantNow()
                     )
                   )
@@ -115,7 +110,7 @@ class SearchlightDataRetrievalService @Inject() (
                     EligibilityCheckDataResultSearchLight(
                       benefitType = result.benefitType,
                       contributionCreditResult = result.contributionCreditResult,
-                      pageTaskId = Some(PageTaskId(id))
+                      batchId = Some(BatchId(id))
                     )
                   }
 

@@ -56,8 +56,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   val mockLiabilitySummaryDetailsConnector: LiabilitySummaryDetailsConnector = mock[LiabilitySummaryDetailsConnector]
 
-  val mockPaginationService: PaginationService = mock[PaginationService]
-  val mockUUIDService: UuidGeneratorService    = mock[UuidGeneratorService]
+  val mockBatchService: BatchService        = mock[BatchService]
+  val mockUUIDService: UuidGeneratorService = mock[UuidGeneratorService]
 
   val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
@@ -70,7 +70,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   val underTest = new MaternityAllowanceDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
     mockLiabilitySummaryDetailsConnector,
-    mockPaginationService,
+    mockBatchService,
     mockUUIDService,
     currentTimeSource
   )
@@ -166,13 +166,13 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     Some(Callback(Some(CallbackUrl("/some/url"))))
   )
 
-  val paging = PageTaskDocument(
+  val batchDocument = BatchDocument(
     correlationId,
-    PageTaskId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
+    BatchId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Json
       .toJson(
-        MaPageTask(
-          List(PaginationSource(ApiName.Liabilities, "/some/url")),
+        MaBatch(
+          List(BatchWithCallback(ApiName.Liabilities, "/some/url")),
           identifier
         )
       )
@@ -220,9 +220,9 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           .expects()
           .returning(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a"))
 
-        (mockPaginationService
-          .addTask(_: PageTaskDocument)(_: HeaderCarrier))
-          .expects(paging, *)
+        (mockBatchService
+          .addTask(_: BatchDocument)(_: HeaderCarrier))
+          .expects(batchDocument, *)
           .returning(EitherT.rightT(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")))
 
         underTest
@@ -232,7 +232,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
           EligibilityCheckDataResultMA(
             List(liabilitySummaryDetailsResult),
             niContributionAndCreditsResult,
-            Some(paging.pageTaskId)
+            Some(batchDocument.batchId)
           )
         )
 

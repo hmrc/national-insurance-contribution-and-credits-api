@@ -36,7 +36,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.Marria
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.NpsStandardErrorResponse400
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
-import uk.gov.hmrc.app.benefitEligibility.repository.PaginationSource.{
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchWithCallback.{
   fromBenefitSchemeMembershipDetails,
   fromLiabilities,
   fromMarriageDetails
@@ -45,7 +45,7 @@ import uk.gov.hmrc.app.benefitEligibility.service.BenefitSchemeMembershipDetails
 
 import java.time.LocalDate
 
-class PaginationSourceSpec
+class BatchWithCallbackSpec
     extends AnyFreeSpec
     with MockFactory
     with ScalaFutures
@@ -54,9 +54,9 @@ class PaginationSourceSpec
     with EitherValues
     with BeforeAndAfterAll {
 
-  "PaginationSource" - {
+  "BatchSource" - {
     ".fromBenefitSchemeMembershipDetails" - {
-      "should return PaginationSource if successful BenefitSchemeMembershipDetailsData with callback url" in {
+      "should return BatchSource if successful BenefitSchemeMembershipDetailsData with callback url" in {
         val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
           schemeMembershipDetailsSummaryList = Some(
             List(
@@ -199,7 +199,7 @@ class PaginationSourceSpec
         )
 
         val result = fromBenefitSchemeMembershipDetails(Some(benefitSchemeMembershipDetailsData))
-        result shouldBe Some(PaginationSource(ApiName.BenefitSchemeDetails, "SomeURL"))
+        result shouldBe Some(BatchWithCallback(ApiName.BenefitSchemeDetails, "SomeURL"))
       }
       "should return None if successful BenefitSchemeMembershipDetailsData with No callback url" in {
         val schemeMembershipDetailsSuccessResponse = SchemeMembershipDetailsSuccessResponse(
@@ -434,7 +434,7 @@ class PaginationSourceSpec
       }
     }
     ".fromMarriageDetails" - {
-      "should return PaginationSource if successful MarriageDetailsResult with callback url" in {
+      "should return BatchSource if successful MarriageDetailsResult with callback url" in {
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
           MarriageDetailsSuccess.MarriageDetails(
             MarriageDetailsSuccess.ActiveMarriage(true),
@@ -473,7 +473,7 @@ class PaginationSourceSpec
         )
 
         val result = fromMarriageDetails(Some(marriageDetailsResult))
-        result shouldBe Some(PaginationSource(ApiName.MarriageDetails, "SomeUrl"))
+        result shouldBe Some(BatchWithCallback(ApiName.MarriageDetails, "SomeUrl"))
       }
       "should return None if successful MarriageDetailsResult with no callback url" in {
         val marriageDetailsSuccessResponse = MarriageDetailsSuccessResponse(
@@ -522,7 +522,7 @@ class PaginationSourceSpec
       }
     }
     ".fromLiabilities" - {
-      "should return PaginationSource if successful LiabilityResult with callback url" in {
+      "should return BatchSource if successful LiabilityResult with callback url" in {
 
         val liabilitiesResult = List(
           SuccessResult(
@@ -532,7 +532,7 @@ class PaginationSourceSpec
         )
 
         val result = fromLiabilities(liabilitiesResult)
-        result shouldBe List(PaginationSource(Liabilities, "SomeUrl"))
+        result shouldBe List(BatchWithCallback(Liabilities, "SomeUrl"))
       }
       "should return EmptyList if successful LiabilityResult with no callback url" in {
         val liabilitiesResult =

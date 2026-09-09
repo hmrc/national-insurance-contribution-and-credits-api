@@ -57,7 +57,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.{
 }
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
 import uk.gov.hmrc.app.benefitEligibility.model.request.SearchlightEligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.repository.{BenefitEligibilityRepositoryImpl, PageTaskDocument, PageTaskId}
+import uk.gov.hmrc.app.benefitEligibility.repository.{BatchRepositoryImpl, BatchDocument, BatchId}
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
 import uk.gov.hmrc.app.nationalinsurancecontributionandcreditsapi.utils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
@@ -70,7 +70,7 @@ import scala.concurrent.ExecutionContext
 
 class SearchlightDataRetrievalServiceItSpec
     extends AnyFreeSpec
-    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
+    with DefaultPlayMongoRepositorySupport[BatchDocument]
     with EitherValues
     with WireMockHelper
     with Injecting
@@ -116,8 +116,8 @@ class SearchlightDataRetrievalServiceItSpec
   // perm fix: declare protected val repository: PlayMongoRepository[A] in PlayMongoRepositorySupport as a def (library update)
   server.start()
 
-  override protected val repository: BenefitEligibilityRepositoryImpl =
-    inject[BenefitEligibilityRepositoryImpl]
+  override protected val repository: BatchRepositoryImpl =
+    inject[BatchRepositoryImpl]
 
   override protected def checkTtlIndex = false
 
@@ -141,7 +141,7 @@ class SearchlightDataRetrievalServiceItSpec
       )
 
       "when a request with a tax year range great than 6 years is sent and the NiContributionsAndCredits endpoint returns OK (200) with valid response" - {
-        "should save paginated data and parse response to result successfully" in {
+        "should save batched data and parse response to result successfully" in {
           val successResponse = NiContributionsAndCreditsSuccessResponse(
             Some(TotalGraduatedPensionUnits(BigDecimal("100.0"))),
             Some(
@@ -211,7 +211,7 @@ class SearchlightDataRetrievalServiceItSpec
                 ApiName.NiContributionAndCredits,
                 successResponse
               ),
-              Some(PageTaskId(uuidOne))
+              Some(BatchId(uuidOne))
             )
           )
 

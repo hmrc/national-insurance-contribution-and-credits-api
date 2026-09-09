@@ -80,7 +80,7 @@ import scala.concurrent.Future
 class BenefitEligibilityDataControllerWithEncryptionItSpec
     extends AnyFreeSpec
     with EitherValues
-    with DefaultPlayMongoRepositorySupport[PageTaskDocument]
+    with DefaultPlayMongoRepositorySupport[BatchDocument]
     with WireMockHelper
     with Injecting
     with Matchers
@@ -128,8 +128,8 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
   server.start()
 
-  override protected val repository: BenefitEligibilityRepositoryImpl =
-    inject[BenefitEligibilityRepositoryImpl]
+  override protected val repository: BatchRepositoryImpl =
+    inject[BatchRepositoryImpl]
 
   override protected def checkTtlIndex = false
 
@@ -151,15 +151,15 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
   override protected def beforeEach(): Unit = {
     super.beforeEach()
     List(
-      PageTaskDocument(
+      BatchDocument(
         correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-        PageTaskId(uuidOne),
+        BatchId(uuidOne),
         Json
           .toJson(
-            MaPageTask(
+            MaBatch(
               List(
-                PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath),
-                PaginationSource(Liabilities, npsLiabilitySummaryDetailsPath)
+                BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath),
+                BatchWithCallback(Liabilities, npsLiabilitySummaryDetailsPath)
               ),
               nationalInsuranceNumber
             )
@@ -167,17 +167,17 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .as[JsObject],
         currentTimeSource.instantNow()
       ).encrypt(encrypterDecrypter),
-      PageTaskDocument(
+      BatchDocument(
         correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-        PageTaskId(uuidTwo),
+        BatchId(uuidTwo),
         Json
           .toJson(
-            BspPageTask(
+            BspBatch(
               Some(
-                PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+                BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
               ),
               Some(
-                ContributionAndCreditsPaging(
+                BatchWithTaxWindows(
                   NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
                   DateOfBirth(LocalDate.parse("2025-10-10"))
                 )
@@ -188,23 +188,23 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .as[JsObject],
         currentTimeSource.instantNow()
       ).encrypt(encrypterDecrypter),
-      PageTaskDocument(
+      BatchDocument(
         correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-        PageTaskId(uuidThree),
+        BatchId(uuidThree),
         Json
           .toJson(
-            GyspPageTask(
+            GyspBatch(
               Some(
-                PaginationSource(
+                BatchWithCallback(
                   ApiName.SchemeMembershipDetails,
                   schemeMembershipDetailsPath
                 )
               ),
               Some(
-                PaginationSource(MarriageDetails, npsIndividualMarriageDetailsPath)
+                BatchWithCallback(MarriageDetails, npsIndividualMarriageDetailsPath)
               ),
               Some(
-                ContributionAndCreditsPaging(
+                BatchWithTaxWindows(
                   NonEmptyList.one(TaxWindow(StartTaxYear(2015), EndTaxYear(2030))),
                   DateOfBirth(LocalDate.parse("2025-10-10"))
                 )
@@ -215,15 +215,15 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .as[JsObject],
         currentTimeSource.instantNow()
       ).encrypt(encrypterDecrypter),
-      PageTaskDocument(
+      BatchDocument(
         correlationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")),
-        PageTaskId(uuidFour),
+        BatchId(uuidFour),
         Json
           .toJson(
-            SearchLightPageTask(
-              PaginationType.BspSearchLightPagination,
+            SearchLightBatch(
+              BatchType.BspSearchLightBatch,
               Some(
-                ContributionAndCreditsPaging(
+                BatchWithTaxWindows(
                   NonEmptyList
                     .of(
                       TaxWindow(StartTaxYear(2015), EndTaxYear(2020)),
@@ -238,7 +238,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           .as[JsObject],
         currentTimeSource.instantNow()
       ).encrypt(encrypterDecrypter)
-    ).foreach(pageTask => insert(pageTask).futureValue)
+    ).foreach(batch => insert(batch).futureValue)
   }
 
   val filteredLiabilitySummaryDetails = FilteredLiabilitySummaryDetails(
@@ -3185,7 +3185,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
         status(result) shouldBe 400
       }
 
-      "should include CorrelationId header in not found responses for pagination" in {
+      "should include CorrelationId header in not found responses for batch" in {
 
         server.stubFor(
           post(urlEqualTo("/auth/authorise"))
@@ -3197,9 +3197,9 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
             )
         )
 
-        val pageTaskId = PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
+        val batchId = BatchId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
 
-        val cursorId = CursorId.from(pageTaskId)
+        val cursorId = CursorId.from(batchId)
 
         val request = FakeRequest(
           "GET",
@@ -3225,7 +3225,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
       }
 
     }
-    ".getNextPage" - {
+    ".getNextBatch" - {
       "should handle a MA request containing nextCursor successfully (200)" in {
         (() => mockUuidGenerator.generate).expects().returning(uuidOne)
         val liabilitySummaryDetailsSuccessResponse = LiabilitySummaryDetailsSuccessResponse(
@@ -3995,9 +3995,9 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
             )
         )
 
-        val pageTaskId = PageTaskId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
+        val batchId = BatchId(UUID.fromString("2e22042b-d1dd-495d-b4b5-36d734b05e02"))
 
-        val cursorId = CursorId.from(pageTaskId)
+        val cursorId = CursorId.from(batchId)
 
         val request = FakeRequest(
           "GET",
@@ -4049,7 +4049,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
         status(result) shouldBe 400
         contentAsJson(result) shouldBe Json.toJson(
-          ErrorResponse(BadRequest, ErrorReason("Pagination request sent without cursorId"))
+          ErrorResponse(BadRequest, ErrorReason("Batch request sent without cursorId"))
         )
       }
       "should return 400 if invalid next cursor is passed" in {

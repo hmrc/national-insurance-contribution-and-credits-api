@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
-import uk.gov.hmrc.app.benefitEligibility.service.PaginationResult
+import uk.gov.hmrc.app.benefitEligibility.service.BatchResult
 
 case class OverallResultSummary(totalCalls: Int, successful: Int, failed: Int)
 
@@ -72,13 +72,13 @@ object BenefitEligibilityInfoErrorResponse {
     )
 
   def from(
-      paginationResult: PaginationResult
+      batchResult: BatchResult
   ): BenefitEligibilityInfoErrorResponse =
 
     BenefitEligibilityInfoErrorResponse.from(
-      BenefitType.from(paginationResult.paginationType),
-      paginationResult.nationalInsuranceNumber,
-      paginationResult.allResults
+      BenefitType.from(batchResult.batchType),
+      batchResult.nationalInsuranceNumber,
+      batchResult.allResults
     )
 
 }

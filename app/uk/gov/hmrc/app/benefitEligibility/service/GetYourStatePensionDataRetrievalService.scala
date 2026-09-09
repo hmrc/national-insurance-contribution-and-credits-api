@@ -59,7 +59,7 @@ class GetYourStatePensionDataRetrievalService @Inject() (
     longTermBenefitNotesConnector: LongTermBenefitNotesConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
     statePensionInformationConnector: IndividualStatePensionInformationConnector,
-    paginationService: PaginationService,
+    batchService: BatchService,
     uuidGenerator: UuidGenerator,
     currentTimeSource: CurrentTimeSource
 )(implicit ec: ExecutionContext) {
@@ -109,48 +109,48 @@ class GetYourStatePensionDataRetrievalService @Inject() (
                 None
               )
 
-              val shouldPage =
+              val shouldBatch =
                 if (result.allResults.exists(_.isFailure)) false
                 else {
                   marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined ||
                   benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.get.callback.isDefined || taxWindows.length > 1
                 }
 
-              if (shouldPage) {
-                val marriageDetailsPaginate = marriageDetailsResult.getSuccess.flatMap(
+              if (shouldBatch) {
+                val marriageDetailsBatchWithCallback = marriageDetailsResult.getSuccess.flatMap(
                   _.marriageDetails._links
                     .flatMap(_.self.href)
-                    .map(url => PaginationSource(MarriageDetails, url.value))
+                    .map(url => BatchWithCallback(MarriageDetails, url.value))
                 )
 
-                val benefitSchemeDetailsPaginate =
+                val benefitSchemeDetailsBatch =
                   benefitSchemeMembershipDetailsData.schemeMembershipDetailsResult.getSuccess.flatMap(
-                    _.callback.flatMap(_.callbackURL).map(url => PaginationSource(SchemeMembershipDetails, url.value))
+                    _.callback.flatMap(_.callbackURL).map(url => BatchWithCallback(SchemeMembershipDetails, url.value))
                   )
 
-                val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
-                  ContributionAndCreditsPaging(
+                val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
+                  BatchWithTaxWindows(
                     remainingWindows,
                     eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
                   )
                 }
 
-                val pageTask = GyspPageTask(
-                  benefitSchemeMembershipDetailsPaging = benefitSchemeDetailsPaginate,
-                  marriageDetailsPaging = marriageDetailsPaginate,
-                  contributionAndCreditsPaging = niContributionsCreditsPaginate,
+                val batch = GyspBatch(
+                  benefitSchemeMembershipDetails = benefitSchemeDetailsBatch,
+                  marriageDetails = marriageDetailsBatchWithCallback,
+                  contributionsAndCredits = niContributionsCreditsBatch,
                   eligibilityCheckDataRequest.nationalInsuranceNumber
                 )
-                paginationService
+                batchService
                   .addTask(
-                    PageTaskDocument(
+                    BatchDocument(
                       correlationId,
-                      PageTaskId(uuidGenerator.generate),
-                      Json.toJson(pageTask).as[JsObject],
+                      BatchId(uuidGenerator.generate),
+                      Json.toJson(batch).as[JsObject],
                       currentTimeSource.instantNow()
                     )
                   )
-                  .map(id => result.copy(pageTaskId = Some(PageTaskId(id))))
+                  .map(id => result.copy(batchId = Some(BatchId(id))))
 
               } else EitherT.rightT[Future, BenefitEligibilityError](result)
 

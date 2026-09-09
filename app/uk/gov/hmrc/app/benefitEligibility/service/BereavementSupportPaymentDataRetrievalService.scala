@@ -38,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class BereavementSupportPaymentDataRetrievalService @Inject() (
     niContributionsAndCreditsConnector: NiContributionsAndCreditsConnector,
     marriageDetailsConnector: MarriageDetailsConnector,
-    paginationService: PaginationService,
+    batchService: BatchService,
     uuidGenerator: UuidGenerator,
     currentTimeSource: CurrentTimeSource
 )(implicit ec: ExecutionContext) {
@@ -80,39 +80,40 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
               None
             )
 
-            val shouldPage =
+            val shouldBatch =
               if (result.allResults.exists(_.isFailure)) false
               else {
                 marriageDetailsResult.getSuccess.get.marriageDetails._links.isDefined || taxWindows.length > 1
               }
 
-            if (shouldPage) {
-              val marriageDetailsPaginate: Option[PaginationSource] = marriageDetailsResult.getSuccess.flatMap(
-                _.marriageDetails._links.flatMap(_.self.href).map(url => PaginationSource(MarriageDetails, url.value))
+            if (shouldBatch) {
+              val marriageDetailsBatchWithCallback
+                  : Option[BatchWithCallback] = marriageDetailsResult.getSuccess.flatMap(
+                _.marriageDetails._links.flatMap(_.self.href).map(url => BatchWithCallback(MarriageDetails, url.value))
               )
 
-              val niContributionsCreditsPaginate = taxWindows.toList.safeTailNel.map { remainingWindows =>
-                ContributionAndCreditsPaging(
+              val niContributionsCreditsBatch = taxWindows.toList.safeTailNel.map { remainingWindows =>
+                BatchWithTaxWindows(
                   remainingWindows,
                   eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth
                 )
               }
 
-              val pageTask = BspPageTask(
-                marriageDetailsPaging = marriageDetailsPaginate,
-                contributionAndCreditsPaging = niContributionsCreditsPaginate,
+              val batch = BspBatch(
+                marriageDetails = marriageDetailsBatchWithCallback,
+                contributionsAndCredits = niContributionsCreditsBatch,
                 eligibilityCheckDataRequest.nationalInsuranceNumber
               )
-              paginationService
+              batchService
                 .addTask(
-                  PageTaskDocument(
+                  BatchDocument(
                     correlationId,
-                    PageTaskId(uuidGenerator.generate),
-                    Json.toJson(pageTask).as[JsObject],
+                    BatchId(uuidGenerator.generate),
+                    Json.toJson(batch).as[JsObject],
                     currentTimeSource.instantNow()
                   )
                 )
-                .map(id => result.copy(pageTaskId = Some(PageTaskId(id))))
+                .map(id => result.copy(batchId = Some(BatchId(id))))
             } else {
               EitherT
                 .rightT[Future, BenefitEligibilityError](result)
