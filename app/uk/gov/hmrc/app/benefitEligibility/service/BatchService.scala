@@ -79,6 +79,27 @@ class BatchService @Inject() (
         EitherT.leftT(error)
     }
   }
+  
+  /*
+    private def retrieveAndHandleResponse(correlationId: CorrelationId, eligibilityRequest: EligibilityCheckDataRequest)(
+      implicit request: Request[JsValue]
+  ): Future[Result] = {
+    val maybeResult = for {
+      response <-
+        benefitEligibilityDataRetrievalService
+          .getEligibilityData(
+            eligibilityRequest,
+            correlationId
+          )
+          .flatMap(eligibilityCheckDataResult => buildResponse(eligibilityRequest, eligibilityCheckDataResult))
+
+    } yield response
+    val futureResult = maybeResult.value.map {
+      case Right(result) => result
+      case Left(error)   => handleError(error, request.headers)
+    }
+    futureResult.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
+   */
 
   def processBatch(
       batchId: BatchId

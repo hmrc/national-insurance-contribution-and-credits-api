@@ -71,9 +71,7 @@
 #     content:
 #       application/json:
 #         schema:
-#           oneOf:
-#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
-#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
+#             $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
 ###
 POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.fetchBenefitEligibilityData()
 
@@ -152,9 +150,7 @@ POST /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.Be
 #     content:
 #       application/json:
 #         schema:
-#           oneOf:
-#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
-#             - $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse'
+#             $ref: '#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse'
 ###
 GET  /benefit-eligibility-info  uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityDataController.getNextBatch(cursorId: Option[String])
 

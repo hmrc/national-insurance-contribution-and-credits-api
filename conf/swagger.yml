@@ -696,6 +696,7 @@ paths:
                   value:
                     code: "INTERNAL_SERVER_ERROR"
                     reason: "an unexpected error occurred while processing the request"
+<<<<<<< Updated upstream
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -739,6 +740,8 @@ paths:
                           message: "invalid liability calculation parameters"
                           downstreamStatus: 400
 
+=======
+>>>>>>> Stashed changes
     get:
       tags:
         - Benefit-eligibility-info
@@ -970,6 +973,7 @@ paths:
                   value:
                     code: "INTERNAL_SERVER_ERROR"
                     reason: "an unexpected error occurred while processing the request"
+<<<<<<< Updated upstream
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -1014,6 +1018,8 @@ paths:
                           downstreamStatus: 400
 
 
+=======
+>>>>>>> Stashed changes
 components:
   securitySchemes:
     applicationRestricted:

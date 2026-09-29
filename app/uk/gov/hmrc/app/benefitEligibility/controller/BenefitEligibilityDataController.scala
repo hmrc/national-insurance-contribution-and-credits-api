@@ -18,19 +18,15 @@ package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.EitherT
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.*
 import play.api.mvc.Results.{InternalServerError, Ok}
-import play.api.mvc.{Action, AnyContent, BodyParser, ControllerComponents, RequestHeader, Result}
 import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityErrorHandler.*
 import uk.gov.hmrc.app.benefitEligibility.controller.RequestHelper.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError
+import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId, GeneralError}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
-import uk.gov.hmrc.app.benefitEligibility.model.response.{
-  BenefitEligibilityInfoResponse,
-  ErrorCode,
-  ErrorReason,
-  ErrorResponse
-}
+import uk.gov.hmrc.app.benefitEligibility.model.response.*
+import uk.gov.hmrc.app.benefitEligibility.repository.BatchId
 import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchService, BenefitEligibilityDataRetrievalService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -79,67 +75,80 @@ class BenefitEligibilityDataController @Inject() (
   }
 
   def fetchBenefitEligibilityData(): Action[JsValue] =
-
     identity.async(customJsonBodyParser()) { implicit request =>
-      val maybeResult = for {
-        headerValues <- EitherT.fromEither[Future](validateHeaders(request.headers))
-        correlationId = headerValues
-        eligibilityRequest <- EitherT.fromEither[Future](parseAndValidateRequest(request))
-        response <-
-          benefitEligibilityDataRetrievalService
-            .getEligibilityData(
-              eligibilityRequest,
-              correlationId
-            )
-            .map { eligibilityCheckDataResult =>
-              buildResponse(eligibilityRequest, eligibilityCheckDataResult).withHeaders(
-                "CorrelationId" -> correlationId.value.toString
-              )
-            }
+      def retrieveAndHandleResponse(correlationId: CorrelationId, eligibilityRequest: EligibilityCheckDataRequest) = {
+        val maybeResult = for {
+          response <-
+            benefitEligibilityDataRetrievalService
+              .getEligibilityData(eligibilityRequest, correlationId)
+              .flatMap(buildResponseForFetchData(eligibilityRequest, _))
+        } yield response
+        val futureResult = deriveFutureResult(maybeResult)
+        futureResult.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
+      }
 
-      } yield response
+      val interimResult = for {
+        correlationID               <- retrieveAndValidateCorrelationId(request.headers)
+        eligibilityCheckDataRequest <- parseAndValidateRequest(request)
+      } yield retrieveAndHandleResponse(correlationID, eligibilityCheckDataRequest)
 
-      maybeResult.value.map {
+      interimResult match {
         case Right(result) => result
-        case Left(error)   => handleError(error, request.headers)
+        case Left(error)   => Future.successful(handleError(error, request.headers))
       }
     }
 
-  def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
-    identity.async(parse.default) { implicit request =>
-      val maybeResult = for {
-        headerValues <- EitherT.fromEither[Future](validateHeaders(request.headers))
-        correlationId = headerValues
-        batchId     <- EitherT.fromEither[Future](parseBatchId(cursorId))
-        batchResult <- batchService.processBatch(batchId)
-      } yield buildResponse(batchResult).withHeaders("CorrelationId" -> correlationId.value.toString)
-
-      maybeResult.value.map {
-        case Right(result) => result
-        case Left(error)   => handleError(error, request.headers)
-      }
-    }
-
-  private def buildResponse(
+  private def buildResponseForFetchData(
       eligibilityRequest: EligibilityCheckDataRequest,
       result: EligibilityCheckDataResult
-  ): Result =
+  ): EitherT[Future, BenefitEligibilityError, Result] =
     BenefitEligibilityInfoResponse
       .from(
         eligibilityRequest.nationalInsuranceNumber,
         result
       ) match {
-      case Left(errorResponse)    => InternalServerError(Json.toJson(errorResponse))
-      case Right(successResponse) => Ok(Json.toJson(successResponse))
+      case Left(errorResponse: BenefitEligibilityInfoErrorResponse) =>
+        EitherT.fromEither(Left(GeneralError(errorResponse.status.entryName)))
+      case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
 
-  private def buildResponse(
+  def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
+    identity.async(parse.default) { implicit request =>
+      def retrieveAndHandleResponse(batchId: BatchId) = {
+        val maybeResult = for {
+          result <- batchService
+            .processBatch(batchId)
+            .map(batchResult => buildResponseForNextBatch(batchResult))
+        } yield result
+        val futureResult = deriveFutureResult(maybeResult)
+        futureResult // TODO: Do we need the correlation ID added to the header here (as retrieved from the db?)
+      }
+
+      val interimResult = for {
+        correlationID <- retrieveAndValidateCorrelationId(request.headers)
+        batchId       <- parseBatchId(cursorId)
+      } yield retrieveAndHandleResponse(batchId)
+      interimResult match {
+        case Right(result) => result
+        case Left(error)   => Future.successful(handleError(error, request.headers))
+      }
+    }
+
+  private def buildResponseForNextBatch(
       batchResult: BatchResult
   ): Result =
     BenefitEligibilityInfoResponse
       .from(batchResult) match {
       case Left(errorResponse)    => InternalServerError(Json.toJson(errorResponse))
       case Right(successResponse) => Ok(Json.toJson(successResponse))
+    }
+
+  private def deriveFutureResult(
+      maybeResult: EitherT[Future, BenefitEligibilityError, Result]
+  )(implicit request: Request[_]) =
+    maybeResult.value.map {
+      case Right(result) => result
+      case Left(error)   => handleError(error, request.headers)
     }
 
 }

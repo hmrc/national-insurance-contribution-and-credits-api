@@ -631,15 +631,14 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
+                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
               examples:
                 unexpected_error:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
                     reason: an unexpected error occurred while processing the request
+<<<<<<< Updated upstream
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -682,6 +681,8 @@ paths:
                         code: BAD_REQUEST
                         message: invalid liability calculation parameters
                         downstreamStatus: 400
+=======
+>>>>>>> Stashed changes
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
@@ -952,15 +953,14 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
+                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
               examples:
                 unexpected_error:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
                     reason: an unexpected error occurred while processing the request
+<<<<<<< Updated upstream
                 partial_failure:
                   summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
                   value:
@@ -1003,6 +1003,8 @@ paths:
                         code: BAD_REQUEST
                         message: invalid liability calculation parameters
                         downstreamStatus: 400
+=======
+>>>>>>> Stashed changes
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
@@ -1124,6 +1126,7 @@ components:
           nullable: true
           items:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class2or3ContributionAndCredits"
+<<<<<<< Updated upstream
     uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError:
       properties:
         code:
@@ -1211,6 +1214,8 @@ components:
       - benefitType
       - summary
       - downStreams
+=======
+>>>>>>> Stashed changes
     uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse:
       properties:
         code:
