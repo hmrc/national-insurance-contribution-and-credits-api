@@ -111,23 +111,6 @@ class BenefitEligibilityDataController @Inject() (
         EitherT.fromEither(Left(GeneralError(errorResponse.status.entryName)))
       case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
-    
-/*
-  def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
-    identity.async(parse.default) { implicit request =>
-      val maybeResult = for {
-        headerValues <- EitherT.fromEither[Future](validateHeaders(request.headers))
-        correlationId = headerValues
-        batchId     <- EitherT.fromEither[Future](parseBatchId(cursorId))
-        batchResult <- batchService.processBatch(batchId)
-      } yield buildResponse(batchResult).withHeaders("CorrelationId" -> correlationId.value.toString)
-
-      maybeResult.value.map {
-        case Right(result) => result
-        case Left(error)   => handleError(error, request.headers)
-      }
-    }    
- */
 
   def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
     identity.async(parse.default) { implicit request =>

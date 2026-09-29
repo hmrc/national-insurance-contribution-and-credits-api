@@ -40,23 +40,13 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
-  CreditSourceType,
-  IndividualStatePensionContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{CreditSourceType, IndividualStatePensionContributionCreditType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{CalculationSource, CalculationStatus, Payday}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{LongTermBenefitNotesSuccessResponse, Note}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
@@ -71,12 +61,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
-import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{
-  BadRequest,
-  InternalServerError,
-  Unauthorised,
-  UnprocessableEntity
-}
+import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, InternalServerError, Unauthorised, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
@@ -937,7 +922,8 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResponse = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
+          val expectedResponse =
+            """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
         }
@@ -1138,7 +1124,8 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResponse = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
+          val expectedResponse =
+            """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
 
