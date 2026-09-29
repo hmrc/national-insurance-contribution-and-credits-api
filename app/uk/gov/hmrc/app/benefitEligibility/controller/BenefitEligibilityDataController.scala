@@ -111,23 +111,40 @@ class BenefitEligibilityDataController @Inject() (
         EitherT.fromEither(Left(GeneralError(errorResponse.status.entryName)))
       case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
+    
+/*
+  def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
+    identity.async(parse.default) { implicit request =>
+      val maybeResult = for {
+        headerValues <- EitherT.fromEither[Future](validateHeaders(request.headers))
+        correlationId = headerValues
+        batchId     <- EitherT.fromEither[Future](parseBatchId(cursorId))
+        batchResult <- batchService.processBatch(batchId)
+      } yield buildResponse(batchResult).withHeaders("CorrelationId" -> correlationId.value.toString)
+
+      maybeResult.value.map {
+        case Right(result) => result
+        case Left(error)   => handleError(error, request.headers)
+      }
+    }    
+ */
 
   def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
     identity.async(parse.default) { implicit request =>
-      def retrieveAndHandleResponse(batchId: BatchId) = {
+      def retrieveAndHandleResponse(batchId: BatchId, correlationId: CorrelationId) = {
         val maybeResult = for {
           result <- batchService
             .processBatch(batchId)
             .map(batchResult => buildResponseForNextBatch(batchResult))
         } yield result
         val futureResult = deriveFutureResult(maybeResult)
-        futureResult // TODO: Do we need the correlation ID added to the header here (as retrieved from the db?)
+        futureResult.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
       }
 
       val interimResult = for {
         correlationID <- retrieveAndValidateCorrelationId(request.headers)
         batchId       <- parseBatchId(cursorId)
-      } yield retrieveAndHandleResponse(batchId)
+      } yield retrieveAndHandleResponse(batchId, correlationID)
       interimResult match {
         case Right(result) => result
         case Left(error)   => Future.successful(handleError(error, request.headers))

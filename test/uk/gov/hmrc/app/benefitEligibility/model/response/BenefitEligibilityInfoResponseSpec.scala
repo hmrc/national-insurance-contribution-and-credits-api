@@ -26,20 +26,8 @@ import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
-  IndividualStatePension,
-  Liabilities,
-  LongTermBenefitCalculationDetails,
-  LongTermBenefitNotes,
-  MarriageDetails,
-  NiContributionAndCredits
-}
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.MA
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
-  InternalServerError,
-  ServiceUnavailable,
-  UnprocessableEntity
-}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{IndividualStatePension, Liabilities, LongTermBenefitCalculationDetails, LongTermBenefitNotes, MarriageDetails, NiContributionAndCredits}
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{InternalServerError, ServiceUnavailable, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.model.common.OverallResultStatus.{Failure, PartialFailure}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
@@ -50,22 +38,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
-  CreditSourceType,
-  IndividualStatePensionContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{CreditSourceType, IndividualStatePensionContributionCreditType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{CalculationSource, CalculationStatus, Payday}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{LongTermBenefitNotesSuccessResponse, Note}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
@@ -78,12 +56,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
-import uk.gov.hmrc.app.benefitEligibility.service.{
-  BatchResult,
-  BatchWithTaxWindowsResult,
-  BenefitSchemeMembershipDetailsData,
-  LongTermBenefitCalculationDetailsData
-}
+import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchWithTaxWindowsResult, BenefitSchemeMembershipDetailsData, LongTermBenefitCalculationDetailsData}
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 
 import java.time.LocalDate
@@ -1649,23 +1622,13 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       def application502JsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecificationVersion.DRAFT_7,
-        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
 
-      val errorResponse: BenefitEligibilityInfoErrorResponse = BenefitEligibilityInfoErrorResponse(
-        status = PartialFailure,
-        nationalInsuranceNumber = nationalInsuranceNumber,
-        benefitType = MA,
-        summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
-        downStreams = List(
-          SanitizedApiResult(
-            apiName = Liabilities,
-            status = NpsApiResponseStatus.Failure,
-            error = Some(UnprocessableEntity)
-          ),
-          SanitizedApiResult(apiName = NiContributionAndCredits, status = NpsApiResponseStatus.Success, error = None)
-        )
+      val errorResponse = ErrorResponse(
+        code = ErrorCode.InternalServerError,
+        reason = ErrorReason("test")
       )
 
       application502JsonSchema.validateAndGetErrors(
