@@ -107,7 +107,7 @@ class BenefitEligibilityDataController @Inject() (
         result
       ) match {
       case Left(errorResponse: BenefitEligibilityInfoErrorResponse) =>
-        EitherT.fromEither(Left(GeneralError(errorResponse.status.entryName)))
+        EitherT.fromEither(Left(GeneralError(errorResponse.status.entryName))) // Was InternalServerError(Json.toJson(errorResponse))
       case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
 
