@@ -83,8 +83,7 @@ class BenefitEligibilityDataController @Inject() (
               .getEligibilityData(eligibilityRequest, correlationId)
               .flatMap(buildResponseForFetchData(eligibilityRequest, _))
         } yield response
-        val futureResult = deriveFutureResult(maybeResult)
-        futureResult.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
+        deriveFutureResult(maybeResult, correlationId)
       }
 
       val interimResult = for {
@@ -120,8 +119,7 @@ class BenefitEligibilityDataController @Inject() (
             .processBatch(batchId)
             .map(batchResult => buildResponseForNextBatch(batchResult))
         } yield result
-        val futureResult = deriveFutureResult(maybeResult)
-        futureResult.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
+        deriveFutureResult(maybeResult, correlationId)
       }
 
       val interimResult = for {
@@ -144,11 +142,14 @@ class BenefitEligibilityDataController @Inject() (
     }
 
   private def deriveFutureResult(
-      maybeResult: EitherT[Future, BenefitEligibilityError, Result]
-  )(implicit request: Request[_]) =
-    maybeResult.value.map {
+      maybeResult: EitherT[Future, BenefitEligibilityError, Result],
+      correlationId: CorrelationId
+  )(implicit request: Request[_]) = {
+    val result = maybeResult.value.map {
       case Right(result) => result
       case Left(error)   => handleError(error, request.headers)
     }
+    result.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
+  }
 
 }
