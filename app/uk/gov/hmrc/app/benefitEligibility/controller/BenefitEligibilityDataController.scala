@@ -87,10 +87,11 @@ class BenefitEligibilityDataController @Inject() (
       pw.close()
     }
 
-    def contentAsString(result:Result): String = {
-      Await.result(result.body.consumeData.map(_.utf8String) , Duration.Inf).mkString
-    }
-    writeToDesktop(s"\n\n$s returns status " + result.header.status + s"""\n   response body: ${contentAsString(result)}""")
+    def contentAsString(result: Result): String =
+      Await.result(result.body.consumeData.map(_.utf8String), Duration.Inf).mkString
+    writeToDesktop(
+      s"\n\n$s returns status " + result.header.status + s"""\n   response body: ${contentAsString(result)}"""
+    )
     result
   }
 
@@ -137,10 +138,20 @@ class BenefitEligibilityDataController @Inject() (
         eligibilityRequest.nationalInsuranceNumber,
         result
       ) match {
-      case Left(errorResponse: BenefitEligibilityInfoErrorResponse) =>
-        EitherT.fromEither(Left(GeneralError(errorResponse.status.entryName))) // Was InternalServerError(Json.toJson(errorResponse))
+      case Left(errorResponse) => EitherT.fromEither(Left(GeneralError(formatErrorResponseForLogging(errorResponse))))
       case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
+
+  // Provide as much information as we can find on the exceptions for logging purposes.
+  private def formatErrorResponseForLogging(errorResponse: BenefitEligibilityInfoErrorResponse): String =
+    errorResponse.downStreams
+      .map(e =>
+        "API " + e.apiName.toString + " returned " +
+          e.error
+            .map(x => "code: " + x.code + ", message: " + x.message + ", downstream status: " + x.downstreamStatus)
+            .getOrElse("N/A")
+      )
+      .mkString(",")
 
   def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
     identity.async(parse.default) { implicit request =>

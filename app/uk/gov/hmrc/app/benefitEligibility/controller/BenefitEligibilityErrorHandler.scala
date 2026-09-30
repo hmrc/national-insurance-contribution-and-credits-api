@@ -76,7 +76,7 @@ object BenefitEligibilityErrorHandler {
       case FeatureDisabled(message) =>
         logger.error(s"could not process request, $message")
         NotFound
-      case err =>
+      case err: BenefitEligibilityError =>
         logger.error(s"Error processing request", err)
         InternalServerError(
           Json.toJson(
