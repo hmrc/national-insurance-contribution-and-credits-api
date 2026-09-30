@@ -100,7 +100,8 @@ case class DatabaseError(throwable: Throwable) extends BenefitEligibilityError {
 case class FeatureDisabled(message: String) extends BenefitEligibilityError {
   override def getMessage: String = message
 }
-case class GeneralError(message: String) extends BenefitEligibilityError {
+
+case class APIFailureError(message: String) extends BenefitEligibilityError {
   override def getMessage: String = message
 }
 

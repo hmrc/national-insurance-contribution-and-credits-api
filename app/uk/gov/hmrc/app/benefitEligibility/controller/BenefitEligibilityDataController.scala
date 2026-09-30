@@ -17,13 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.EitherT
-import org.apache.pekko.stream.Materializer
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.*
 import play.api.mvc.Results.{InternalServerError, Ok}
 import uk.gov.hmrc.app.benefitEligibility.controller.BenefitEligibilityErrorHandler.*
 import uk.gov.hmrc.app.benefitEligibility.controller.RequestHelper.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId, GeneralError}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{APIFailureError, BenefitEligibilityError, CorrelationId}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
@@ -32,8 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchService, Be
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class BenefitEligibilityDataController @Inject() (
@@ -41,7 +39,7 @@ class BenefitEligibilityDataController @Inject() (
     identity: uk.gov.hmrc.app.benefitEligibility.controller.action.AuthAction,
     benefitEligibilityDataRetrievalService: BenefitEligibilityDataRetrievalService,
     batchService: BatchService
-)(implicit ec: ExecutionContext, mat: Materializer)
+)(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
   private def customJsonBodyParser(): BodyParser[JsValue] = {
@@ -76,25 +74,6 @@ class BenefitEligibilityDataController @Inject() (
     }
   }
 
-  // TODO: Make a copy of this code somewhere so I Can reuse in future
-  // Note: need to include (implicit mat: Materializer)
-  private def printResult(s: String, result: Result): Result = {
-    def writeToDesktop(content: String): Unit = {
-      import java.io.*
-      val file = new File(s"/home/digital367027/Desktop/output.txt")
-      val pw   = new PrintWriter(new FileWriter(file, true))
-      pw.write(content)
-      pw.close()
-    }
-
-    def contentAsString(result: Result): String =
-      Await.result(result.body.consumeData.map(_.utf8String), Duration.Inf).mkString
-    writeToDesktop(
-      s"\n\n$s returns status " + result.header.status + s"""\n   response body: ${contentAsString(result)}"""
-    )
-    result
-  }
-
   def fetchBenefitEligibilityData(): Action[JsValue] =
     identity.async(customJsonBodyParser()) { implicit request =>
       def retrieveAndHandleResponse(correlationId: CorrelationId, eligibilityRequest: EligibilityCheckDataRequest) = {
@@ -113,19 +92,9 @@ class BenefitEligibilityDataController @Inject() (
       } yield retrieveAndHandleResponse(correlationID, eligibilityCheckDataRequest)
 
       interimResult match {
-        case Right(result) =>
-          printResult(
-            s"fetchBenefitEligibilityData (${parseAndValidateRequest(request)}) => Right",
-            Await.result(result, Duration.Inf)
-          )
-          result
+        case Right(result) => result
         case Left(error) =>
-          Future.successful(
-            printResult(
-              s"fetchBenefitEligibilityData (${parseAndValidateRequest(request)}) => Left",
-              handleError(error, request.headers)
-            )
-          )
+          Future.successful(handleError(error, request.headers))
       }
     }
 
@@ -138,20 +107,9 @@ class BenefitEligibilityDataController @Inject() (
         eligibilityRequest.nationalInsuranceNumber,
         result
       ) match {
-      case Left(errorResponse) => EitherT.fromEither(Left(GeneralError(formatErrorResponseForLogging(errorResponse))))
+      case Left(errorResponse) => EitherT.fromEither(Left(APIFailureError(formatErrorResponseForLogging(errorResponse))))
       case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
-
-  // Provide as much information as we can find on the exceptions for logging purposes.
-  private def formatErrorResponseForLogging(errorResponse: BenefitEligibilityInfoErrorResponse): String =
-    errorResponse.downStreams
-      .map(e =>
-        "API " + e.apiName.toString + " returned " +
-          e.error
-            .map(x => "code: " + x.code + ", message: " + x.message + ", downstream status: " + x.downstreamStatus)
-            .getOrElse("N/A")
-      )
-      .mkString(",")
 
   def getNextBatch(cursorId: Option[String]): Action[AnyContent] =
     identity.async(parse.default) { implicit request =>
@@ -169,10 +127,8 @@ class BenefitEligibilityDataController @Inject() (
         batchId       <- parseBatchId(cursorId)
       } yield retrieveAndHandleResponse(batchId, correlationID)
       interimResult match {
-        case Right(result) =>
-          printResult("getNextBatch => Right", Await.result(result, Duration.Inf))
-          result
-        case Left(error) => Future.successful(printResult("getNextBatch => Right", handleError(error, request.headers)))
+        case Right(result) => result
+        case Left(error)   => Future.successful(handleError(error, request.headers))
       }
     }
 
@@ -195,5 +151,17 @@ class BenefitEligibilityDataController @Inject() (
     }
     result.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
   }
+
+
+  // Provide as much information as we can find on the exceptions for logging purposes.
+  private def formatErrorResponseForLogging(errorResponse: BenefitEligibilityInfoErrorResponse): String =
+    errorResponse.downStreams
+      .map(e =>
+        "API " + e.apiName.toString + " returned " +
+          e.error
+            .map(x => "code: " + x.code + ", message: " + x.message + ", downstream status: " + x.downstreamStatus)
+            .getOrElse("N/A")
+      )
+      .mkString(",")  
 
 }
