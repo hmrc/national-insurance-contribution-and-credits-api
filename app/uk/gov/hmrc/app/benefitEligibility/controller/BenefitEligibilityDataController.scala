@@ -107,7 +107,8 @@ class BenefitEligibilityDataController @Inject() (
         eligibilityRequest.nationalInsuranceNumber,
         result
       ) match {
-      case Left(errorResponse) => EitherT.fromEither(Left(APIFailureError(formatErrorResponseForLogging(errorResponse))))
+      case Left(errorResponse) =>
+        EitherT.fromEither(Left(APIFailureError(formatErrorResponseForLogging(errorResponse))))
       case Right(successResponse) => EitherT.fromEither(Right(Ok(Json.toJson(successResponse))))
     }
 
@@ -152,7 +153,6 @@ class BenefitEligibilityDataController @Inject() (
     result.map(_.withHeaders("CorrelationId" -> correlationId.value.toString))
   }
 
-
   // Provide as much information as we can find on the exceptions for logging purposes.
   private def formatErrorResponseForLogging(errorResponse: BenefitEligibilityInfoErrorResponse): String =
     errorResponse.downStreams
@@ -162,6 +162,6 @@ class BenefitEligibilityDataController @Inject() (
             .map(x => "code: " + x.code + ", message: " + x.message + ", downstream status: " + x.downstreamStatus)
             .getOrElse("N/A")
       )
-      .mkString(",")  
+      .mkString(",")
 
 }

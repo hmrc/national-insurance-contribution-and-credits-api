@@ -26,8 +26,19 @@ import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{IndividualStatePension, Liabilities, LongTermBenefitCalculationDetails, LongTermBenefitNotes, MarriageDetails, NiContributionAndCredits}
-import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{InternalServerError, ServiceUnavailable, UnprocessableEntity}
+import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
+  IndividualStatePension,
+  Liabilities,
+  LongTermBenefitCalculationDetails,
+  LongTermBenefitNotes,
+  MarriageDetails,
+  NiContributionAndCredits
+}
+import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
+  InternalServerError,
+  ServiceUnavailable,
+  UnprocessableEntity
+}
 import uk.gov.hmrc.app.benefitEligibility.model.common.OverallResultStatus.{Failure, PartialFailure}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
@@ -38,12 +49,22 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{CreditSourceType, IndividualStatePensionContributionCreditType}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
+  CreditSourceType,
+  IndividualStatePensionContributionCreditType
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{CalculationSource, CalculationStatus, Payday}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{LongTermBenefitNotesSuccessResponse, Note}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
+  CalculationSource,
+  CalculationStatus,
+  Payday
+}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
+  LongTermBenefitNotesSuccessResponse,
+  Note
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
@@ -56,7 +77,12 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.npsError.HipOrigin.Hip
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enums.*
-import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchWithTaxWindowsResult, BenefitSchemeMembershipDetailsData, LongTermBenefitCalculationDetailsData}
+import uk.gov.hmrc.app.benefitEligibility.service.{
+  BatchResult,
+  BatchWithTaxWindowsResult,
+  BenefitSchemeMembershipDetailsData,
+  LongTermBenefitCalculationDetailsData
+}
 import uk.gov.hmrc.app.benefitEligibility.testUtils.SchemaValidation.SimpleJsonSchema
 
 import java.time.LocalDate
