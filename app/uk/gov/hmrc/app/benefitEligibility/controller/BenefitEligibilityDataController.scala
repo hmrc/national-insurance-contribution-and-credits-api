@@ -17,6 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.controller
 
 import cats.data.EitherT
+import org.apache.pekko.stream.Materializer
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.*
 import play.api.mvc.Results.{InternalServerError, Ok}
@@ -31,7 +32,8 @@ import uk.gov.hmrc.app.benefitEligibility.service.{BatchResult, BatchService, Be
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton()
 class BenefitEligibilityDataController @Inject() (
@@ -39,7 +41,7 @@ class BenefitEligibilityDataController @Inject() (
     identity: uk.gov.hmrc.app.benefitEligibility.controller.action.AuthAction,
     benefitEligibilityDataRetrievalService: BenefitEligibilityDataRetrievalService,
     batchService: BatchService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, mat: Materializer)
     extends BackendController(cc) {
 
   private def customJsonBodyParser(): BodyParser[JsValue] = {
@@ -74,6 +76,24 @@ class BenefitEligibilityDataController @Inject() (
     }
   }
 
+  // TODO: Make a copy of this code somewhere so I Can reuse in future
+  // Note: need to include (implicit mat: Materializer)
+  private def printResult(s: String, result: Result): Result = {
+    def writeToDesktop(content: String): Unit = {
+      import java.io.*
+      val file = new File(s"/home/digital367027/Desktop/output.txt")
+      val pw   = new PrintWriter(new FileWriter(file, true))
+      pw.write(content)
+      pw.close()
+    }
+
+    def contentAsString(result:Result): String = {
+      Await.result(result.body.consumeData.map(_.utf8String) , Duration.Inf).mkString
+    }
+    writeToDesktop(s"\n\n$s returns status " + result.header.status + s"""\n   response body: ${contentAsString(result)}""")
+    result
+  }
+
   def fetchBenefitEligibilityData(): Action[JsValue] =
     identity.async(customJsonBodyParser()) { implicit request =>
       def retrieveAndHandleResponse(correlationId: CorrelationId, eligibilityRequest: EligibilityCheckDataRequest) = {
@@ -92,8 +112,19 @@ class BenefitEligibilityDataController @Inject() (
       } yield retrieveAndHandleResponse(correlationID, eligibilityCheckDataRequest)
 
       interimResult match {
-        case Right(result) => result
-        case Left(error)   => Future.successful(handleError(error, request.headers))
+        case Right(result) =>
+          printResult(
+            s"fetchBenefitEligibilityData (${parseAndValidateRequest(request)}) => Right",
+            Await.result(result, Duration.Inf)
+          )
+          result
+        case Left(error) =>
+          Future.successful(
+            printResult(
+              s"fetchBenefitEligibilityData (${parseAndValidateRequest(request)}) => Left",
+              handleError(error, request.headers)
+            )
+          )
       }
     }
 
@@ -127,8 +158,10 @@ class BenefitEligibilityDataController @Inject() (
         batchId       <- parseBatchId(cursorId)
       } yield retrieveAndHandleResponse(batchId, correlationID)
       interimResult match {
-        case Right(result) => result
-        case Left(error)   => Future.successful(handleError(error, request.headers))
+        case Right(result) =>
+          printResult("getNextBatch => Right", Await.result(result, Duration.Inf))
+          result
+        case Left(error) => Future.successful(printResult("getNextBatch => Right", handleError(error, request.headers)))
       }
     }
 
