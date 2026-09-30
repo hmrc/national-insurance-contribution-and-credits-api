@@ -637,7 +637,7 @@ paths:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
-                    reason: an unexpected error occurred while processing the request
+                    reason: Unexpected internal failure
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
@@ -920,7 +920,7 @@ paths:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
-                    reason: an unexpected error occurred while processing the request
+                    reason: Unexpected internal failure
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"

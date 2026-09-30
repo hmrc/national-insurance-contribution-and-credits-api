@@ -695,7 +695,7 @@ paths:
                   summary: Unexpected error
                   value:
                     code: "INTERNAL_SERVER_ERROR"
-                    reason: "an unexpected error occurred while processing the request"
+                    reason: "Unexpected internal failure"
     get:
       tags:
         - Benefit-eligibility-info
@@ -926,7 +926,7 @@ paths:
                   summary: Unexpected error
                   value:
                     code: "INTERNAL_SERVER_ERROR"
-                    reason: "an unexpected error occurred while processing the request"
+                    reason: "Unexpected internal failure"
 components:
   securitySchemes:
     applicationRestricted:
