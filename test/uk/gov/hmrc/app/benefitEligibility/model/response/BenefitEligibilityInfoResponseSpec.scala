@@ -34,7 +34,6 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.ApiName.{
   MarriageDetails,
   NiContributionAndCredits
 }
-import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.MA
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   InternalServerError,
   ServiceUnavailable,
@@ -1649,23 +1648,13 @@ class BenefitEligibilityInfoResponseSpec extends AnyFreeSpec with Matchers with 
       def application502JsonSchema: SimpleJsonSchema = SimpleJsonSchema(
         applicationOpenApiSpec,
         SpecificationVersion.DRAFT_7,
-        Some("uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"),
+        Some("uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"),
         metaSchemaValidation = Some(Valid(()))
       )
 
-      val errorResponse: BenefitEligibilityInfoErrorResponse = BenefitEligibilityInfoErrorResponse(
-        status = PartialFailure,
-        nationalInsuranceNumber = nationalInsuranceNumber,
-        benefitType = MA,
-        summary = OverallResultSummary(totalCalls = 3, successful = 2, failed = 1),
-        downStreams = List(
-          SanitizedApiResult(
-            apiName = Liabilities,
-            status = NpsApiResponseStatus.Failure,
-            error = Some(UnprocessableEntity)
-          ),
-          SanitizedApiResult(apiName = NiContributionAndCredits, status = NpsApiResponseStatus.Success, error = None)
-        )
+      val errorResponse = ErrorResponse(
+        code = ErrorCode.InternalServerError,
+        reason = ErrorReason("test")
       )
 
       application502JsonSchema.validateAndGetErrors(

@@ -631,57 +631,13 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
+                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
               examples:
                 unexpected_error:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
-                    reason: an unexpected error occurred while processing the request
-                partial_failure:
-                  summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
-                  value:
-                    status: PARTIAL_FAILURE
-                    benefitType: MA
-                    nationalInsuranceNumber: KL890123M
-                    summary:
-                      totalCalls: 3
-                      successful: 2
-                      failed: 1
-                    downStreams:
-                    - apiName: NiContributionsAndCredits
-                      status: SUCCESS
-                    - apiName: Liabilities
-                      status: FAILURE
-                      error:
-                        code: TIMEOUT
-                        message: liability calculation service timeout
-                        downstreamStatus: 408
-                complete_failure:
-                  summary: Complete failure - every downstream called for a given benefit responds with a failure
-                  value:
-                    status: FAILURE
-                    benefitType: MA
-                    nationalInsuranceNumber: NP012345Q
-                    summary:
-                      totalCalls: 3
-                      successful: 0
-                      failed: 3
-                    downStreams:
-                    - apiName: NiContributionsAndCredits
-                      status: FAILURE
-                      error:
-                        code: FORBIDDEN
-                        message: access denied to maternity allowance service
-                        downstreamStatus: 403
-                    - apiName: Liabilities
-                      status: FAILURE
-                      error:
-                        code: BAD_REQUEST
-                        message: invalid liability calculation parameters
-                        downstreamStatus: 400
+                    reason: Unexpected internal failure
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
@@ -695,6 +651,12 @@ paths:
       - Benefit-eligibility-info
       summary: Request any remaining information that can be used to determine benefit eligibility (paging endpoint only)
       parameters:
+      - in: query
+        name: cursorId
+        required: false
+        schema:
+          type: string
+          nullable: true
       - name: correlationId
         description: Correlation ID - used for traceability purposes - note that this value in the response matches that received in the request to allow correlation.
         in: header
@@ -952,57 +914,13 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
-                - $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse"
+                $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse"
               examples:
                 unexpected_error:
                   summary: Unexpected error
                   value:
                     code: INTERNAL_SERVER_ERROR
-                    reason: an unexpected error occurred while processing the request
-                partial_failure:
-                  summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
-                  value:
-                    status: PARTIAL_FAILURE
-                    benefitType: MA
-                    nationalInsuranceNumber: KL890123M
-                    summary:
-                      totalCalls: 3
-                      successful: 2
-                      failed: 1
-                    downStreams:
-                    - apiName: NiContributionsAndCredits
-                      status: SUCCESS
-                    - apiName: Liabilities
-                      status: FAILURE
-                      error:
-                        code: TIMEOUT
-                        message: liability calculation service timeout
-                        downstreamStatus: 408
-                complete_failure:
-                  summary: Complete failure - every downstream called for a given benefit responds with a failure
-                  value:
-                    status: FAILURE
-                    benefitType: MA
-                    nationalInsuranceNumber: NP012345Q
-                    summary:
-                      totalCalls: 3
-                      successful: 0
-                      failed: 3
-                    downStreams:
-                    - apiName: NiContributionsAndCredits
-                      status: FAILURE
-                      error:
-                        code: FORBIDDEN
-                        message: access denied to maternity allowance service
-                        downstreamStatus: 403
-                    - apiName: Liabilities
-                      status: FAILURE
-                      error:
-                        code: BAD_REQUEST
-                        message: invalid liability calculation parameters
-                        downstreamStatus: 400
+                    reason: Unexpected internal failure
           headers:
             CorrelationId:
               $ref: "#/components/headers/correlationId"
@@ -1124,93 +1042,6 @@ components:
           nullable: true
           items:
             $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsSuccess.Class2or3ContributionAndCredits"
-    uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError:
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        downstreamStatus:
-          type: integer
-          format: int32
-      required:
-      - code
-      - message
-      - downstreamStatus
-    uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult:
-      properties:
-        apiName:
-          type: string
-          enum:
-          - Class2 MA Receipts
-          - Liabilities
-          - NI Contributions and credits
-          - Marriage Details
-          - Scheme Membership Details
-          - Individual State Pension Information
-          - Long Term Benefit Notes
-          - Benefit Scheme Details
-          - Long Term Benefit Calculation Details
-        status:
-          type: string
-          enum:
-          - SUCCESS
-          - FAILURE
-        error:
-          nullable: true
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError"
-      required:
-      - apiName
-      - status
-    uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary:
-      properties:
-        totalCalls:
-          type: integer
-          format: int32
-        successful:
-          type: integer
-          format: int32
-        failed:
-          type: integer
-          format: int32
-      required:
-      - totalCalls
-      - successful
-      - failed
-    uk.gov.hmrc.app.benefitEligibility.model.response.BenefitEligibilityInfoErrorResponse:
-      properties:
-        status:
-          type: string
-          enum:
-          - FAILURE
-          - PARTIAL FAILURE
-        nationalInsuranceNumber:
-          type: string
-          description: "NINO - unique for an individual - note not all individuals qualify to be issued with one, with optional suffix."
-          maxLength: 9
-          minLength: 8
-          pattern: "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D]{0,1}$"
-          example: AB123456A
-        benefitType:
-          type: string
-          enum:
-          - MA
-          - ESA
-          - JSA
-          - GYSP
-          - BSP
-        summary:
-          $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.OverallResultSummary"
-        downStreams:
-          type: array
-          items:
-            $ref: "#/components/schemas/uk.gov.hmrc.app.benefitEligibility.model.response.SanitizedApiResult"
-      required:
-      - status
-      - nationalInsuranceNumber
-      - benefitType
-      - summary
-      - downStreams
     uk.gov.hmrc.app.benefitEligibility.model.response.ErrorResponse:
       properties:
         code:

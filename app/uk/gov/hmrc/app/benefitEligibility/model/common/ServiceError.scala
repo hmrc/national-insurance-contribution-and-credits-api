@@ -101,4 +101,8 @@ case class FeatureDisabled(message: String) extends BenefitEligibilityError {
   override def getMessage: String = message
 }
 
+case class APIFailureError(message: String) extends BenefitEligibilityError {
+  override def getMessage: String = message
+}
+
 case class ContributionCreditTaxWindowCalculatorError(message: String) extends BenefitEligibilityError

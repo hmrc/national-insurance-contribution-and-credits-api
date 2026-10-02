@@ -695,50 +695,7 @@ paths:
                   summary: Unexpected error
                   value:
                     code: "INTERNAL_SERVER_ERROR"
-                    reason: "an unexpected error occurred while processing the request"
-                partial_failure:
-                  summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
-                  value:
-                    status: "PARTIAL_FAILURE"
-                    benefitType: "MA"
-                    nationalInsuranceNumber: "KL890123M"
-                    summary:
-                      totalCalls: 3
-                      successful: 2
-                      failed: 1
-                    downStreams:
-                      - apiName: "NiContributionsAndCredits"
-                        status: "SUCCESS"
-                      - apiName: "Liabilities"
-                        status: "FAILURE"
-                        error:
-                          code: "TIMEOUT"
-                          message: "liability calculation service timeout"
-                          downstreamStatus: 408
-                complete_failure:
-                  summary: Complete failure - every downstream called for a given benefit responds with a failure
-                  value:
-                    status: "FAILURE"
-                    benefitType: "MA"
-                    nationalInsuranceNumber: "NP012345Q"
-                    summary:
-                      totalCalls: 3
-                      successful: 0
-                      failed: 3
-                    downStreams:
-                      - apiName: "NiContributionsAndCredits"
-                        status: "FAILURE"
-                        error:
-                          code: "FORBIDDEN"
-                          message: "access denied to maternity allowance service"
-                          downstreamStatus: 403
-                      - apiName: "Liabilities"
-                        status: "FAILURE"
-                        error:
-                          code: "BAD_REQUEST"
-                          message: "invalid liability calculation parameters"
-                          downstreamStatus: 400
-
+                    reason: "Unexpected internal failure"
     get:
       tags:
         - Benefit-eligibility-info
@@ -969,51 +926,7 @@ paths:
                   summary: Unexpected error
                   value:
                     code: "INTERNAL_SERVER_ERROR"
-                    reason: "an unexpected error occurred while processing the request"
-                partial_failure:
-                  summary: Partial failure - a subset of all the downstream's called for a given benefit responds with a failure while the rest are successful
-                  value:
-                    status: "PARTIAL_FAILURE"
-                    benefitType: "MA"
-                    nationalInsuranceNumber: "KL890123M"
-                    summary:
-                      totalCalls: 3
-                      successful: 2
-                      failed: 1
-                    downStreams:
-                      - apiName: "NiContributionsAndCredits"
-                        status: "SUCCESS"
-                      - apiName: "Liabilities"
-                        status: "FAILURE"
-                        error:
-                          code: "TIMEOUT"
-                          message: "liability calculation service timeout"
-                          downstreamStatus: 408
-                complete_failure:
-                  summary: Complete failure - every downstream called for a given benefit responds with a failure
-                  value:
-                    status: "FAILURE"
-                    benefitType: "MA"
-                    nationalInsuranceNumber: "NP012345Q"
-                    summary:
-                      totalCalls: 3
-                      successful: 0
-                      failed: 3
-                    downStreams:
-                      - apiName: "NiContributionsAndCredits"
-                        status: "FAILURE"
-                        error:
-                          code: "FORBIDDEN"
-                          message: "access denied to maternity allowance service"
-                          downstreamStatus: 403
-                      - apiName: "Liabilities"
-                        status: "FAILURE"
-                        error:
-                          code: "BAD_REQUEST"
-                          message: "invalid liability calculation parameters"
-                          downstreamStatus: 400
-
-
+                    reason: "Unexpected internal failure"
 components:
   securitySchemes:
     applicationRestricted:

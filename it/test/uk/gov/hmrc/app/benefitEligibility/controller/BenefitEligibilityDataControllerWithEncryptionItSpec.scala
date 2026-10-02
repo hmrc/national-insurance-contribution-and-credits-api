@@ -40,23 +40,13 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.enums.SchemeNature.UnitTrusts
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.IndividualStatePensionInformationSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{
-  CreditSourceType,
-  IndividualStatePensionContributionCreditType
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.individualStatePensionInformation.enums.{CreditSourceType, IndividualStatePensionContributionCreditType}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.LiabilitySummaryDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.liabilitySummaryDetails.enums.LiabilitySearchCategoryHyphenated.Abroad
 import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.BenefitCalculationDetailsSuccess.*
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{
-  CalculationSource,
-  CalculationStatus,
-  Payday
-}
-import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{
-  LongTermBenefitNotesSuccessResponse,
-  Note
-}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitCalculationDetails.enums.{CalculationSource, CalculationStatus, Payday}
+import uk.gov.hmrc.app.benefitEligibility.model.nps.longTermBenefitNotes.LongTermBenefitNotesSuccess.{LongTermBenefitNotesSuccessResponse, Note}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.MarriageDetailsSuccess.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.marriageDetails.enums.MarriageEndDateStatus.Verified
@@ -71,12 +61,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.enum
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.*
 import uk.gov.hmrc.app.benefitEligibility.model.response.*
-import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{
-  BadRequest,
-  InternalServerError,
-  Unauthorised,
-  UnprocessableEntity
-}
+import uk.gov.hmrc.app.benefitEligibility.model.response.ErrorCode.{BadRequest, InternalServerError, Unauthorised, UnprocessableEntity}
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.service.UuidGenerator
 import uk.gov.hmrc.app.benefitEligibility.testUtils.TestFormat.*
@@ -937,27 +922,8 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResponse = """{
-                                   |   "status":"FAILURE",
-                                   |   "nationalInsuranceNumber":"AB123456C",
-                                   |   "benefitType":"ESA",
-                                   |   "summary":{
-                                   |      "totalCalls":1,
-                                   |      "successful":0,
-                                   |      "failed":1
-                                   |   },
-                                   |   "downStreams":[
-                                   |      {
-                                   |         "apiName":"NI Contributions and credits",
-                                   |         "status":"FAILURE",
-                                   |         "error":{
-                                   |            "code":"UNEXPECTED_STATUS_CODE",
-                                   |            "message":"downstream returned an unexpected status",
-                                   |            "downstreamStatus":502
-                                   |         }
-                                   |      }
-                                   |   ]
-                                   |}""".stripMargin
+          val expectedResponse =
+            """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
         }
@@ -1158,27 +1124,8 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResponse = """{
-                                   |   "status":"FAILURE",
-                                   |   "nationalInsuranceNumber":"AB123456C",
-                                   |   "benefitType":"JSA",
-                                   |   "summary":{
-                                   |      "totalCalls":1,
-                                   |      "successful":0,
-                                   |      "failed":1
-                                   |   },
-                                   |   "downStreams":[
-                                   |      {
-                                   |         "apiName":"NI Contributions and credits",
-                                   |         "status":"FAILURE",
-                                   |         "error":{
-                                   |            "code":"UNEXPECTED_STATUS_CODE",
-                                   |            "message":"downstream returned an unexpected status",
-                                   |            "downstreamStatus":502
-                                   |         }
-                                   |      }
-                                   |   ]
-                                   |}""".stripMargin
+          val expectedResponse =
+            """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
 
@@ -1388,27 +1335,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
           val result: Future[Result] = route(app, request).get
 
           val expectedResponse =
-            """{
-              |   "status":"FAILURE",
-              |   "nationalInsuranceNumber":"AB123456C",
-              |   "benefitType":"BSP",
-              |   "summary":{
-              |      "totalCalls":1,
-              |      "successful":0,
-              |      "failed":1
-              |   },
-              |   "downStreams":[
-              |      {
-              |         "apiName":"NI Contributions and credits",
-              |         "status":"FAILURE",
-              |         "error":{
-              |            "code":"UNEXPECTED_STATUS_CODE",
-              |            "message":"downstream returned an unexpected status",
-              |            "downstreamStatus":502
-              |         }
-              |      }
-              |   ]
-              |}""".stripMargin
+            """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResponse)
         }
@@ -1656,31 +1583,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResult = """{
-                                 |   "status":"PARTIAL FAILURE",
-                                 |   "nationalInsuranceNumber":"AB123456C",
-                                 |   "benefitType":"MA",
-                                 |   "summary":{
-                                 |      "totalCalls":2,
-                                 |      "successful":1,
-                                 |      "failed":1
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Liabilities",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
-                                 |}""".stripMargin
+          val expectedResult = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
 
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
@@ -1743,36 +1646,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResult = """{
-                                 |   "status":"FAILURE",
-                                 |   "nationalInsuranceNumber":"AB123456C",
-                                 |   "benefitType":"MA",
-                                 |   "summary":{
-                                 |      "totalCalls":2,
-                                 |      "successful":0,
-                                 |      "failed":2
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Liabilities",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
-                                 |}""".stripMargin
+          val expectedResult = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
 
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
@@ -2055,31 +1929,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResult = """{
-                                 |   "status":"PARTIAL FAILURE",
-                                 |   "nationalInsuranceNumber":"AB123456C",
-                                 |   "benefitType":"BSP",
-                                 |   "summary":{
-                                 |      "totalCalls":2,
-                                 |      "successful":1,
-                                 |      "failed":1
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
-                                 |}""".stripMargin
+          val expectedResult = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
 
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
@@ -2138,36 +1988,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResult = """{
-                                 |   "status":"FAILURE",
-                                 |   "nationalInsuranceNumber":"AB123456C",
-                                 |   "benefitType":"BSP",
-                                 |   "summary":{
-                                 |      "totalCalls":2,
-                                 |      "successful":0,
-                                 |      "failed":2
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
-                                 |}""".stripMargin
+          val expectedResult = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
 
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
@@ -2687,56 +2508,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResult = """{
-                                 |   "status":"PARTIAL FAILURE",
-                                 |   "nationalInsuranceNumber":"AB123456C",
-                                 |   "benefitType":"GYSP",
-                                 |   "summary":{
-                                 |      "totalCalls":7,
-                                 |      "successful":5,
-                                 |      "failed":2
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"Benefit Scheme Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Long Term Benefit Notes",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Scheme Membership Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Long Term Benefit Calculation Details",
-                                 |         "status":"SUCCESS"
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Individual State Pension Information",
-                                 |         "status":"SUCCESS"
-                                 |      }
-                                 |   ]
-                                 |}""".stripMargin
+          val expectedResult = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
 
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)
@@ -2857,63 +2629,7 @@ class BenefitEligibilityDataControllerWithEncryptionItSpec
 
           val result: Future[Result] = route(app, request).get
 
-          val expectedResult = """{
-                                 |   "status":"FAILURE",
-                                 |   "nationalInsuranceNumber":"AB123456C",
-                                 |   "benefitType":"GYSP",
-                                 |   "summary":{
-                                 |      "totalCalls":5,
-                                 |      "successful":0,
-                                 |      "failed":5
-                                 |   },
-                                 |   "downStreams":[
-                                 |      {
-                                 |         "apiName":"NI Contributions and credits",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Marriage Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Scheme Membership Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Long Term Benefit Calculation Details",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      },
-                                 |      {
-                                 |         "apiName":"Individual State Pension Information",
-                                 |         "status":"FAILURE",
-                                 |         "error":{
-                                 |            "code":"UNEXPECTED_STATUS_CODE",
-                                 |            "message":"downstream returned an unexpected status",
-                                 |            "downstreamStatus":502
-                                 |         }
-                                 |      }
-                                 |   ]
-                                 |}""".stripMargin
+          val expectedResult = """{"code":"INTERNAL_SERVER_ERROR","reason":"Unexpected internal failure"}""".stripMargin
 
           status(result) shouldBe 500
           contentAsJson(result) shouldBe Json.parse(expectedResult)

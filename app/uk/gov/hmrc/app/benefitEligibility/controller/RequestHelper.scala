@@ -53,7 +53,7 @@ object RequestHelper {
         )
     }
 
-  def validateHeaders(
+  def retrieveAndValidateCorrelationId(
       request: Headers
   )(implicit hc: HeaderCarrier): Either[BenefitEligibilityError, CorrelationId] = getAndValidateCorrelationId(request)
 
