@@ -937,4 +937,5 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
     }
   }
+
 }

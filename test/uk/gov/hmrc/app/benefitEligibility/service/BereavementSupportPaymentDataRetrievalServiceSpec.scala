@@ -69,7 +69,7 @@ class BereavementSupportPaymentDataRetrievalServiceSpec extends AnyFreeSpec with
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
-  implicit val originatorId: OriginatorId   = OriginatorId("test-originatorId")
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
 
   val underTest = new BereavementSupportPaymentDataRetrievalService(
     mockNiContributionsAndCreditsConnector,

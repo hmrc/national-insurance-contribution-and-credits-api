@@ -21,25 +21,26 @@ import uk.gov.hmrc.app.config.AppConfig
 
 import javax.inject.Inject
 
-class OriginatorIdHelper  @Inject() (config: AppConfig){
+class OriginatorIdHelper @Inject() (config: AppConfig) {
 
   def getOriginatorId(benefitType: BenefitType, callSystem: Option[CallSystem] = None): OriginatorId =
     callSystem match {
       case Some(_) =>
         benefitType match {
-          case BenefitType.MA => OriginatorId(config.hipOriginatorIdMa.searchlightId)
-          case BenefitType.ESA => OriginatorId(config.hipOriginatorIdEsa.searchlightId)
-          case BenefitType.JSA => OriginatorId(config.hipOriginatorIdJsa.searchlightId)
+          case BenefitType.MA   => OriginatorId(config.hipOriginatorIdMa.searchlightId)
+          case BenefitType.ESA  => OriginatorId(config.hipOriginatorIdEsa.searchlightId)
+          case BenefitType.JSA  => OriginatorId(config.hipOriginatorIdJsa.searchlightId)
           case BenefitType.GYSP => OriginatorId(config.hipOriginatorIdGysp.searchlightId)
-          case BenefitType.BSP => OriginatorId(config.hipOriginatorIdBsp.searchlightId)
+          case BenefitType.BSP  => OriginatorId(config.hipOriginatorIdBsp.searchlightId)
         }
       case None =>
         benefitType match {
-          case BenefitType.MA => OriginatorId(config.hipOriginatorIdMa.standardId)
-          case BenefitType.ESA => OriginatorId(config.hipOriginatorIdEsa.standardId)
-          case BenefitType.JSA => OriginatorId(config.hipOriginatorIdJsa.standardId)
+          case BenefitType.MA   => OriginatorId(config.hipOriginatorIdMa.standardId)
+          case BenefitType.ESA  => OriginatorId(config.hipOriginatorIdEsa.standardId)
+          case BenefitType.JSA  => OriginatorId(config.hipOriginatorIdJsa.standardId)
           case BenefitType.GYSP => OriginatorId(config.hipOriginatorIdGysp.standardId)
-          case BenefitType.BSP => OriginatorId(config.hipOriginatorIdBsp.standardId)
+          case BenefitType.BSP  => OriginatorId(config.hipOriginatorIdBsp.standardId)
         }
     }
+
 }
