@@ -55,6 +55,8 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
@@ -170,7 +172,7 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
     Some(Callback(Some(CallbackUrl("/some/url"))))
   )
 
-  val batchDocument = BatchDocument(
+  val batchDocument: BatchDocument = BatchDocument(
     correlationId,
     BatchId(UUID.fromString("cd0cc67d-4732-4b8e-b103-1535b531307a")),
     Json
@@ -198,24 +200,24 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
-            _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
+          )(_: HeaderCarrier, _: OriginatorId))
+          .expects(identifier, Abroad, None, None, None, *, *)
           .returning(
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
@@ -254,24 +256,24 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
-            _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
+          )(_: HeaderCarrier, _: OriginatorId))
+          .expects(identifier, Abroad, None, None, None, *, *)
           .returning(
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
@@ -301,24 +303,24 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
-            _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
+          )(_: HeaderCarrier, _: OriginatorId))
+          .expects(identifier, Abroad, None, None, None, *, *)
           .returning(
             EitherT.rightT(liabilitySummaryDetailsResult)
           )
@@ -346,24 +348,24 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(niContributionAndCreditsResult)
           )
 
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
-            _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
+          )(_: HeaderCarrier, _: OriginatorId))
+          .expects(identifier, Abroad, None, None, None, *, *)
           .returning(EitherT.leftT(error2))
 
         underTest
@@ -381,24 +383,24 @@ class MaternityAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         val error3 = NpsClientError(new RuntimeException("error_3"))
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.MA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(error2)
           )
 
         (mockLiabilitySummaryDetailsConnector
           .fetchLiabilitySummaryDetails(
-            _: BenefitType,
             _: Identifier,
             _: LiabilitySearchCategoryHyphenated,
             _: Option[LocalDate],
             _: Option[LocalDate],
             _: Option[LocalDate]
-          )(_: HeaderCarrier))
-          .expects(BenefitType.MA, identifier, Abroad, None, None, None, *)
+          )(_: HeaderCarrier, _: OriginatorId))
+          .expects(identifier, Abroad, None, None, None, *, *)
           .returning(
             EitherT.leftT(error3)
           )

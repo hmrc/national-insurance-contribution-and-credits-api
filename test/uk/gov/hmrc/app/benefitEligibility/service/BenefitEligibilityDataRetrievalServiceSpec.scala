@@ -22,8 +22,10 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.util.OriginatorIdHelper
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitType.BSP
+import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.SuccessResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.BenefitSchemeDetailsSuccess.*
@@ -639,12 +641,16 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   private val mockBspSearchlightDataRetrievalService: SearchlightDataRetrievalService =
     mock[SearchlightDataRetrievalService]
 
+  private val mockOriginatorIdHelper: OriginatorIdHelper =
+    mock[OriginatorIdHelper]
+
   private val mockAppConfig: AppConfig = mock[AppConfig]
 
   private val underTest = new BenefitEligibilityDataRetrievalService(
     mockMaternityAllowanceDataRetrievalService,
     mockEmploymentSupportAllowanceDataRetrievalService,
     mockJobSeekersAllowanceDataRetrievalService,
+    mockOriginatorIdHelper,
     mockGetYourStatePensionDataRetrievalService,
     mockBereavementSupportPaymentDataRetrievalService,
     mockBspSearchlightDataRetrievalService,
@@ -664,10 +670,14 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
   "BenefitEligibilityDataRetrievalService" - {
     ".getEligibilityData" - {
       "should retrieve eligibility data for MA" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.MA, None)
+          .returning(OriginatorId("test-originatorId"))
 
         (mockMaternityAllowanceDataRetrievalService
-          .fetchEligibilityData(_: MAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
-          .expects(maEligibilityCheckDataRequest, *, *)
+          .fetchEligibilityData(_: MAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId, _: OriginatorId))
+          .expects(maEligibilityCheckDataRequest, *, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultMA(
@@ -690,9 +700,14 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should retrieve eligibility data for JSA" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.JSA, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockJobSeekersAllowanceDataRetrievalService
-          .fetchEligibilityData(_: JSAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
-          .expects(jsaEligibilityCheckDataRequest, *, *)
+          .fetchEligibilityData(_: JSAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId, _: OriginatorId))
+          .expects(jsaEligibilityCheckDataRequest, *, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultJSA(
@@ -711,9 +726,14 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should retrieve eligibility data for ESA" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.ESA, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockEmploymentSupportAllowanceDataRetrievalService
-          .fetchEligibilityData(_: ESAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
-          .expects(esaEligibilityCheckDataRequest, *, *)
+          .fetchEligibilityData(_: ESAEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId, _: OriginatorId))
+          .expects(esaEligibilityCheckDataRequest, *, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultESA(
@@ -732,9 +752,18 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should retrieve eligibility data for BSP Searchlight" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.BSP, Some(SEARCHLIGHT))
+          .returning(OriginatorId("test-originatorId"))
+
         (mockBspSearchlightDataRetrievalService
-          .fetchEligibilityData(_: SearchlightEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
-          .expects(bspSearchlightEligibilityCheckDataRequest, *, *)
+          .fetchEligibilityData(_: SearchlightEligibilityCheckDataRequest)(
+            _: HeaderCarrier,
+            _: CorrelationId,
+            _: OriginatorId
+          ))
+          .expects(bspSearchlightEligibilityCheckDataRequest, *, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultSearchLight(
@@ -760,9 +789,18 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should retrieve eligibility data for GYSP" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.GYSP, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockGetYourStatePensionDataRetrievalService
-          .fetchEligibilityData(_: GYSPEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
-          .expects(gyspEligibilityCheckDataRequest, *, *)
+          .fetchEligibilityData(_: GYSPEligibilityCheckDataRequest)(
+            _: HeaderCarrier,
+            _: CorrelationId,
+            _: OriginatorId
+          ))
+          .expects(gyspEligibilityCheckDataRequest, *, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultGYSP(
@@ -796,9 +834,14 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
         )
       }
       "should retrieve eligibility data for BSP" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.BSP, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockBereavementSupportPaymentDataRetrievalService
-          .fetchEligibilityData(_: BSPEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId))
-          .expects(bspEligibilityCheckDataRequest, *, *)
+          .fetchEligibilityData(_: BSPEligibilityCheckDataRequest)(_: HeaderCarrier, _: CorrelationId, _: OriginatorId))
+          .expects(bspEligibilityCheckDataRequest, *, *, *)
           .returning(
             EitherT.pure[Future, BenefitEligibilityError](
               EligibilityCheckDataResultBSP(niContributionAndCreditsResult, marriageDetailsResult, None)
@@ -813,6 +856,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should fail with FeatureDisabled is bsp is disabled" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.BSP, None)
+          .returning(OriginatorId("test-originatorId"))
 
         (() => mockAppConfig.bspEnabled).expects().returning(false)
 
@@ -822,6 +869,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should fail with FeatureDisabled is esa is disabled" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.ESA, None)
+          .returning(OriginatorId("test-originatorId"))
 
         (() => mockAppConfig.esaEnabled).expects().returning(false)
 
@@ -831,6 +882,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should fail with FeatureDisabled is jsa is disabled" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.JSA, None)
+          .returning(OriginatorId("test-originatorId"))
 
         (() => mockAppConfig.jsaEnabled).expects().returning(false)
 
@@ -840,6 +895,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should fail with FeatureDisabled is GYSP is disabled" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.GYSP, None)
+          .returning(OriginatorId("test-originatorId"))
 
         (() => mockAppConfig.gyspEnabled).expects().returning(false)
 
@@ -849,6 +908,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should fail with FeatureDisabled is MA is disabled" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.MA, None)
+          .returning(OriginatorId("test-originatorId"))
 
         (() => mockAppConfig.maEnabled).expects().returning(false)
 
@@ -858,6 +921,10 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
 
       "should fail with FeatureDisabled is SEARCHLIGHT is disabled" in {
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.BSP, Some(SEARCHLIGHT))
+          .returning(OriginatorId("test-originatorId"))
 
         (() => mockAppConfig.searchlightEnabled).expects().returning(false).twice()
 
@@ -870,5 +937,4 @@ class BenefitEligibilityDataRetrievalServiceSpec extends AnyFreeSpec with MockFa
       }
     }
   }
-
 }

@@ -26,6 +26,7 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.{BeforeAndAfterAll, EitherValues, OptionValues}
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.util.OriginatorIdHelper
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.CallSystem.SEARCHLIGHT
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult
@@ -85,13 +86,11 @@ class BatchServiceSpec
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
-  val mockMarriageDetailsConnector: MarriageDetailsConnector = mock[MarriageDetailsConnector]
-
+  val mockMarriageDetailsConnector: MarriageDetailsConnector                 = mock[MarriageDetailsConnector]
   val mockSchemeMembershipDetailsConnector: SchemeMembershipDetailsConnector = mock[SchemeMembershipDetailsConnector]
-
-  val mockBenefitSchemeDetailsConnector: BenefitSchemeDetailsConnector = mock[BenefitSchemeDetailsConnector]
-
-  val mockBenefitEligibilityRepository: BatchRepository = mock[BatchRepository]
+  val mockBenefitSchemeDetailsConnector: BenefitSchemeDetailsConnector       = mock[BenefitSchemeDetailsConnector]
+  val mockBenefitEligibilityRepository: BatchRepository                      = mock[BatchRepository]
+  val mockOriginatorIdHelper: OriginatorIdHelper                             = mock[OriginatorIdHelper]
 
   private val mockAppConfig: AppConfig = mock[AppConfig]
 
@@ -103,6 +102,7 @@ class BatchServiceSpec
     marriageDetailsConnector = mockMarriageDetailsConnector,
     schemeMembershipDetailsConnector = mockSchemeMembershipDetailsConnector,
     benefitSchemeDetailsConnector = mockBenefitSchemeDetailsConnector,
+    originatorIdHelper = mockOriginatorIdHelper,
     batchRepository = mockBenefitEligibilityRepository,
     currentTime = currentTimeSource,
     uuidGenerator = mockUuidGenerator,
@@ -433,9 +433,14 @@ class BatchServiceSpec
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
 
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.MA, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockLiabilitySummaryDetailsConnector
-          .fetchData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.MA, liabilitiesCallBackUrl, *)
+          .fetchData(_: String)(_: HeaderCarrier, _: OriginatorId))
+          .expects(liabilitiesCallBackUrl, *, *)
           .returning(EitherT.rightT(NpsApiResult.SuccessResult(ApiName.Liabilities, liabilitiesSuccessResponse)))
 
         (mockBenefitEligibilityRepository
@@ -511,23 +516,30 @@ class BatchServiceSpec
           .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
+
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: BatchDocument)(_: HeaderCarrier))
           .expects(Some(batchDocument.batchId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.BSP, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockMarriageDetailsConnector
-          .fetchMarriageDetailsData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.BSP, marriageDetailsCallBackUrl, *)
+          .fetchMarriageDetailsData(_: String)(_: HeaderCarrier, _: OriginatorId))
+          .expects(marriageDetailsCallBackUrl, *, *)
           .returning(
             EitherT.rightT(NpsApiResult.SuccessResult(ApiName.MarriageDetails, marriageDetailsSuccessResponse))
           )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
@@ -604,16 +616,23 @@ class BatchServiceSpec
           .get(_: BatchId)(_: HeaderCarrier))
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
+
         (mockBenefitEligibilityRepository
           .upsert(_: Option[UUID], _: BatchDocument)(_: HeaderCarrier))
           .expects(Some(batchDocument.batchId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.BSP, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
@@ -820,18 +839,24 @@ class BatchServiceSpec
           .expects(Some(batchDocument.batchId.value), *, *)
           .returning(EitherT.rightT(uuid))
 
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.GYSP, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockMarriageDetailsConnector
-          .fetchMarriageDetailsData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.GYSP, marriageDetailsCallBackUrl, *)
+          .fetchMarriageDetailsData(_: String)(_: HeaderCarrier, _: OriginatorId))
+          .expects(marriageDetailsCallBackUrl, *, *)
           .returning(
             EitherT.rightT(NpsApiResult.SuccessResult(ApiName.MarriageDetails, marriageDetailsSuccessResponse))
           )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.GYSP, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, niContributionsAndCreditsSuccessResponse)
@@ -839,10 +864,11 @@ class BatchServiceSpec
           )
 
         (mockSchemeMembershipDetailsConnector
-          .fetchData(_: BenefitType, _: String)(
-            _: HeaderCarrier
+          .fetchData(_: String)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.GYSP, *, *)
+          .expects(BenefitSchemeCallBackUrl, *, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, schemeMembershipDetailsSuccessResponse)
@@ -850,10 +876,11 @@ class BatchServiceSpec
           )
 
         (mockBenefitSchemeDetailsConnector
-          .fetchBenefitSchemeDetails(_: BenefitType, _: Identifier, _: SchemeContractedOutNumberDetails)(
-            _: HeaderCarrier
+          .fetchBenefitSchemeDetails(_: Identifier, _: SchemeContractedOutNumberDetails)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.GYSP, nationalInsuranceNumber, schemeContractedOutNumberDetails, *)
+          .expects(nationalInsuranceNumber, schemeContractedOutNumberDetails, *, *)
           .returning(
             EitherT.rightT(
               NpsApiResult.SuccessResult(ApiName.NiContributionAndCredits, benefitSchemeDetailsSuccessResponse)
@@ -1033,9 +1060,14 @@ class BatchServiceSpec
           .expects(batchDocument.batchId, *)
           .returning(EitherT.rightT(batchDocument))
 
+        (mockOriginatorIdHelper
+          .getOriginatorId(_: BenefitType, _: Option[CallSystem]))
+          .expects(BenefitType.MA, None)
+          .returning(OriginatorId("test-originatorId"))
+
         (mockLiabilitySummaryDetailsConnector
-          .fetchData(_: BenefitType, _: String)(_: HeaderCarrier))
-          .expects(BenefitType.MA, liabilitiesCallBackUrl, *)
+          .fetchData(_: String)(_: HeaderCarrier, _: OriginatorId))
+          .expects(liabilitiesCallBackUrl, *, *)
           .returning(EitherT.leftT(NpsClientError(error)))
 
         (() => mockAppConfig.maEnabled).expects().returning(true)
