@@ -26,7 +26,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   CorrelationId,
   DatabaseError,
   FeatureDisabled,
-  Identifier
+  Identifier,
+  OriginatorId
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.NpsApiResult.ErrorReport
@@ -34,6 +35,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.benefitSchemeDetails.Benefit
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
 import uk.gov.hmrc.app.benefitEligibility.model.nps.schemeMembershipDetails.SchemeMembershipDetailsSuccess.SchemeMembershipDetailsSuccessResponse
 import uk.gov.hmrc.app.benefitEligibility.repository.*
+import uk.gov.hmrc.app.benefitEligibility.connectors.util.OriginatorIdHelper
 import uk.gov.hmrc.app.benefitEligibility.util.{CurrentTimeSource, RequestAwareLogger}
 import uk.gov.hmrc.app.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,6 +50,7 @@ class BatchService @Inject() (
     marriageDetailsConnector: MarriageDetailsConnector,
     schemeMembershipDetailsConnector: SchemeMembershipDetailsConnector,
     benefitSchemeDetailsConnector: BenefitSchemeDetailsConnector,
+    originatorIdHelper: OriginatorIdHelper,
     batchRepository: BatchRepository,
     currentTime: CurrentTimeSource,
     uuidGenerator: UuidGenerator,
@@ -88,15 +91,19 @@ class BatchService @Inject() (
       batchResult <- existingBatchDocument.data.as[Batch] match {
         case task: MaBatch if appConfig.maEnabled =>
           logger.info("processing MaBatch")
+          implicit val originatorId: OriginatorId = originatorIdHelper.getOriginatorId(BenefitType.from(task.batchType))
           processMaBatch(existingBatchDocument.correlationId, task)
         case task: BspBatch if appConfig.bspEnabled =>
           logger.info("processing BspBatch")
+          implicit val originatorId: OriginatorId = originatorIdHelper.getOriginatorId(BenefitType.from(task.batchType))
           processBspBatch(existingBatchDocument.correlationId, task)
         case task: GyspBatch if appConfig.gyspEnabled =>
           logger.info("processing GyspBatch")
+          implicit val originatorId: OriginatorId = originatorIdHelper.getOriginatorId(BenefitType.from(task.batchType))
           processGyspBatch(existingBatchDocument.correlationId, task)
         case task: SearchLightBatch if appConfig.searchlightEnabled =>
           logger.info("processing SearchLightBatch")
+          implicit val originatorId: OriginatorId = originatorIdHelper.getOriginatorId(BenefitType.from(task.batchType))
           processSearchlightBatch(existingBatchDocument.correlationId, task)
         case task: SearchLightBatch if !appConfig.searchlightEnabled =>
           EitherT.left[BatchResult](
@@ -119,12 +126,15 @@ class BatchService @Inject() (
   private[service] def processMaBatch(
       correlationId: CorrelationId,
       maBatch: MaBatch
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, BenefitEligibilityError, BatchResult] = {
+  )(
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
+  ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
     logger.info("Batching for MA")
     maBatch.liabilityDetails
       .map { batchSource =>
         liabilitySummaryDetailsConnector
-          .fetchData(BenefitType.from(maBatch.batchType), batchSource.callBackURL)
+          .fetchData(batchSource.callBackURL)
       }
       .sequence
       .map { liabilityResult =>
@@ -147,16 +157,15 @@ class BatchService @Inject() (
   }
 
   private[service] def processBspBatch(correlationId: CorrelationId, bspBatch: BspBatch)(
-      implicit headerCarrier: HeaderCarrier
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
     logger.info("Batching for BSP")
     (
       marriageDetailsConnectorFetchData(
-        BenefitType.from(bspBatch.batchType),
         bspBatch.marriageDetails
       ),
       fetchContributionsAndCreditsData(
-        BenefitType.from(bspBatch.batchType),
         bspBatch.nationalInsuranceNumber,
         bspBatch.contributionsAndCredits
       )
@@ -187,12 +196,12 @@ class BatchService @Inject() (
       correlationId: CorrelationId,
       searchLightBatch: SearchLightBatch
   )(
-      implicit headerCarrier: HeaderCarrier
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
     logger.info("Batching for BSP")
 
     fetchContributionsAndCreditsData(
-      BenefitType.from(searchLightBatch.batchType),
       searchLightBatch.nationalInsuranceNumber,
       searchLightBatch.contributionsAndCredits
     )
@@ -219,20 +228,21 @@ class BatchService @Inject() (
   }
 
   private[service] def processGyspBatch(correlationId: CorrelationId, gyspBatch: GyspBatch)(
-      implicit headerCarrier: HeaderCarrier
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, BatchResult] = {
     logger.info("Batching for GYSP")
 
     def fetchBenefitSchemeMembershipDetailsData(
         batch: GyspBatch
     )(
-        implicit headerCarrier: HeaderCarrier
+        implicit headerCarrier: HeaderCarrier,
+        originatorId: OriginatorId
     ): EitherT[Future, BenefitEligibilityError, Option[BenefitSchemeMembershipDetailsData]] =
       batch.benefitSchemeMembershipDetails
         .map { batchSource =>
           schemeMembershipDetailsConnector
             .fetchData(
-              benefitType = BenefitType.from(batch.batchType),
               path = batchSource.callBackURL
             )
             .flatMap {
@@ -245,7 +255,6 @@ class BatchService @Inject() (
                     contractedOutNumberDetailsList
                       .map { contractedOutNumberDetails =>
                         benefitSchemeDetailsConnector.fetchBenefitSchemeDetails(
-                          BenefitType.from(batch.batchType),
                           batch.nationalInsuranceNumber,
                           SchemeContractedOutNumberDetails(contractedOutNumberDetails.value)
                         )
@@ -264,11 +273,9 @@ class BatchService @Inject() (
 
     (
       marriageDetailsConnectorFetchData(
-        BenefitType.from(gyspBatch.batchType),
         gyspBatch.marriageDetails
       ),
       fetchContributionsAndCreditsData(
-        BenefitType.from(gyspBatch.batchType),
         gyspBatch.nationalInsuranceNumber,
         gyspBatch.contributionsAndCredits
       ),
@@ -297,30 +304,29 @@ class BatchService @Inject() (
   }
 
   private def marriageDetailsConnectorFetchData(
-      benefitType: BenefitType,
       marriageDetailsBatchWithCallback: Option[BatchWithCallback]
   )(
-      implicit headerCarrier: HeaderCarrier
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, Option[MarriageDetailsResult]] = {
     logger.info("Marriage Details Connector called")
     marriageDetailsBatchWithCallback
-      .map(batchSource => marriageDetailsConnector.fetchMarriageDetailsData(benefitType, batchSource.callBackURL))
+      .map(batchSource => marriageDetailsConnector.fetchMarriageDetailsData(batchSource.callBackURL))
       .sequence
   }
 
   private def fetchContributionsAndCreditsData(
-      benefitType: BenefitType,
       nationInsuranceNumber: Identifier,
       batchWithTaxWindows: Option[BatchWithTaxWindows]
   )(
-      implicit headerCarrier: HeaderCarrier
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, Option[ContributionCreditResult]] = {
     logger.info("Contributions and Credits Connector called")
     batchWithTaxWindows.map { batching =>
       val taxWindow = batching.taxWindows.head
       niContributionsAndCreditsConnector
         .fetchContributionsAndCredits(
-          benefitType,
           NiContributionsAndCreditsRequest(
             nationInsuranceNumber,
             batching.dateOfBirth,

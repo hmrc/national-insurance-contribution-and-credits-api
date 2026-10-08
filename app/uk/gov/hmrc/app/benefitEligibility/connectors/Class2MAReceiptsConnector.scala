@@ -60,26 +60,26 @@ class Class2MAReceiptsConnector @Inject() (
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchClass2MAReceipts(
-      benefitType: BenefitType,
       identifier: Identifier
   )(
-      implicit hc: HeaderCarrier
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] = {
 
     val path = s"/ni/class-2/${identifier.value}/maternity-allowance/receipts"
-    fetchData(benefitType, path)
+    fetchData(path)
   }
 
   def fetchData(
-      benefitType: BenefitType,
       path: String
   )(
-      implicit hc: HeaderCarrier
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, Class2MaReceiptsResult] =
     npsClient
-      .get(benefitType, s"${appConfig.baseUrl(apiName)}$path")
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
-        logger.info(s"attempting to parse response from $apiName for $benefitType")
+        logger.info(s"attempting to parse response from $apiName for $originatorId.value")
 
         val class2MAReceiptsResult =
           response.status match {

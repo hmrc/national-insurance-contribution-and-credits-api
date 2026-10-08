@@ -51,19 +51,19 @@ class IndividualStatePensionInformationConnector @Inject() (
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchIndividualStatePensionInformation(
-      benefitType: BenefitType,
       identifier: Identifier
   )(
-      implicit hc: HeaderCarrier
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, IndividualStatePensionResult] = {
 
     val path =
       s"${appConfig.baseUrl(apiName)}/ni/long-term-benefits/${identifier.value}/contributions"
 
     npsClient
-      .get(benefitType, path)
+      .get(path)
       .flatMap { response =>
-        logger.info(s"attempting to parse response from $apiName for $benefitType")
+        logger.info(s"attempting to parse response from $apiName for $originatorId.value")
 
         val individualStatePensionResult =
           response.status match {

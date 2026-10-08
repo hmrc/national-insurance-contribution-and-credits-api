@@ -25,7 +25,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BatchType,
   BenefitEligibilityError,
   CorrelationId,
-  DataRetrievalServiceError
+  DataRetrievalServiceError,
+  OriginatorId
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultSearchLight
@@ -49,7 +50,8 @@ class SearchlightDataRetrievalService @Inject() (
       eligibilityCheckDataRequest: SearchlightEligibilityCheckDataRequest
   )(
       implicit hc: HeaderCarrier,
-      correlationId: CorrelationId
+      correlationId: CorrelationId,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultSearchLight] = {
 
     val maybeTaxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
@@ -63,14 +65,12 @@ class SearchlightDataRetrievalService @Inject() (
 
         niContributionsAndCreditsConnector
           .fetchContributionsAndCredits(
-            eligibilityCheckDataRequest.benefitType,
             NiContributionsAndCreditsRequest(
               eligibilityCheckDataRequest.nationalInsuranceNumber,
               eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
               taxWindows.head.startTaxYear,
               taxWindows.head.endTaxYear
-            ),
-            Some(eligibilityCheckDataRequest.system)
+            )
           )
           .flatMap { contributionCreditResult =>
             val result = EligibilityCheckDataResultSearchLight(
