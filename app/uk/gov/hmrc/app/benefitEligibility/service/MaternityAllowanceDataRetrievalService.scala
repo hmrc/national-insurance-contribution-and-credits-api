@@ -28,7 +28,8 @@ import uk.gov.hmrc.app.benefitEligibility.model.common.BenefitEligibilityError.b
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   CorrelationId,
-  DataRetrievalServiceError
+  DataRetrievalServiceError,
+  OriginatorId
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.*
 import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.NiContributionsAndCreditsRequest
@@ -54,11 +55,11 @@ class MaternityAllowanceDataRetrievalService @Inject() (
       eligibilityCheckDataRequest: MAEligibilityCheckDataRequest
   )(
       implicit hc: HeaderCarrier,
-      correlationId: CorrelationId
+      correlationId: CorrelationId,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultMA] =
     (
       niContributionsAndCreditsConnector.fetchContributionsAndCredits(
-        eligibilityCheckDataRequest.benefitType,
         NiContributionsAndCreditsRequest(
           eligibilityCheckDataRequest.nationalInsuranceNumber,
           eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
@@ -68,7 +69,6 @@ class MaternityAllowanceDataRetrievalService @Inject() (
       ),
       eligibilityCheckDataRequest.liabilities.searchCategories.map { searchCategory =>
         liabilitySummaryDetailsConnector.fetchLiabilitySummaryDetails(
-          eligibilityCheckDataRequest.benefitType,
           eligibilityCheckDataRequest.nationalInsuranceNumber,
           searchCategory,
           eligibilityCheckDataRequest.liabilities.earliestLiabilityStartDate,

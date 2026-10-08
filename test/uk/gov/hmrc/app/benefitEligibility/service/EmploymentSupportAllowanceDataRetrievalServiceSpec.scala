@@ -47,6 +47,8 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
@@ -111,10 +113,11 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(
               SuccessResult(
@@ -142,10 +145,11 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(result)
           )
@@ -161,10 +165,11 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
 
       "should propagate the error returned from the connector (ValidationError)" in {
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(JsonParsingError(List.empty))
           )
@@ -179,10 +184,11 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
 
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(InvalidJsonError(error))
           )
@@ -196,10 +202,11 @@ class EmploymentSupportAllowanceDataRetrievalServiceSpec extends AnyFreeSpec wit
       "should propagate the error returned from the connector (NpsClientError)" in {
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.ESA, niContributionsAndCreditsRequest, None, *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(NpsClientError(error))
           )

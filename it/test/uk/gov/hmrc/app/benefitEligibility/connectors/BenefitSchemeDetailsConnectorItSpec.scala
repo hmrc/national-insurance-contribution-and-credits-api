@@ -77,6 +77,8 @@ class BenefitSchemeDetailsConnectorItSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = Seq(("CorrelationId", "testing-correlationId")))
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   "BenefitSchemeDetailsConnector" - {
 
     ".fetchBenefitSchemeDetails" - {
@@ -198,10 +200,9 @@ class BenefitSchemeDetailsConnectorItSpec
                   .withBody(responseBody)
               )
           )
-
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -211,7 +212,6 @@ class BenefitSchemeDetailsConnectorItSpec
           server.verify(
             getRequestedFor(urlEqualTo(testPath))
           )
-
         }
       }
 
@@ -249,7 +249,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -303,7 +303,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -345,7 +345,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -386,7 +386,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -431,7 +431,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -489,7 +489,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -541,7 +541,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -571,7 +571,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
             val result =
               connector
-                .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+                .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
                 .value
                 .futureValue
 
@@ -588,6 +588,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
       "when the BenefitSchemeDetails endpoint returns malformed JSON" - {
         "should return parsing error" in {
+
           server.stubFor(
             get(urlEqualTo(testPath))
               .willReturn(
@@ -600,7 +601,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -631,7 +632,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 
@@ -642,6 +643,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
       "when the request to the downstream fails unexpectedly" - {
         "should return downstream error" in {
+
           server.stubFor(
             get(urlEqualTo(testPath))
               .willReturn(
@@ -653,7 +655,7 @@ class BenefitSchemeDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitSchemeDetails(MA, identifier, SchemeContractedOutNumberDetails("S2345678C"))
+              .fetchBenefitSchemeDetails(identifier, SchemeContractedOutNumberDetails("S2345678C"))
               .value
               .futureValue
 

@@ -59,14 +59,15 @@ class NiContributionsAndCreditsConnector @Inject() (
   def path = s"${appConfig.baseUrl(apiName)}/ni/national-insurance/contributions-and-credits"
 
   def fetchContributionsAndCredits(
-      benefitType: BenefitType,
-      request: NiContributionsAndCreditsRequest,
-      callSystem: Option[CallSystem] = None
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, ContributionCreditResult] =
+      request: NiContributionsAndCreditsRequest
+  )(
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
+  ): EitherT[Future, BenefitEligibilityError, ContributionCreditResult] =
     npsClient
-      .post(benefitType, path, request, callSystem)
+      .post(path, request)
       .flatMap { response =>
-        logger.info(s"attempting to parse response from $apiName for $benefitType")
+        logger.info(s"attempting to parse response from $apiName for ${originatorId.value}")
 
         val contributionsAndCreditsResult =
           response.status match {

@@ -82,6 +82,8 @@ class JobSeekersAllowanceDataRetrievalServiceItSpec
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(

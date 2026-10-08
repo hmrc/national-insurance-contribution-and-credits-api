@@ -61,6 +61,8 @@ class IndividualStatePensionInformationConnectorItSpec
     with ScalaFutures {
 
   implicit val ec: ExecutionContext = ExecutionContext.global
+  
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
 
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
@@ -280,7 +282,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe Right(
             SuccessResult(IndividualStatePension, individualStatePensionInformationSuccessResponse)
@@ -325,7 +327,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
@@ -376,7 +378,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
@@ -416,7 +418,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -447,7 +449,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -499,7 +501,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -525,7 +527,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -552,7 +554,7 @@ class IndividualStatePensionInformationConnectorItSpec
             )
 
             val result =
-              connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+              connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
             result shouldBe Right(
               FailureResult(
@@ -578,7 +580,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[InvalidJsonError]
@@ -606,7 +608,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[JsonParsingError]
@@ -625,7 +627,7 @@ class IndividualStatePensionInformationConnectorItSpec
           )
 
           val result =
-            connector.fetchIndividualStatePensionInformation(MA, identifier).value.futureValue
+            connector.fetchIndividualStatePensionInformation(identifier).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[NpsClientError]
