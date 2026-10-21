@@ -5,3 +5,4 @@ tags: ['api']
 test-repositories:
   - ni-contribution-and-credits-performance-tests
   - ni-contribution-and-credits-api-tests
+serviceNowMapping: SNSVC0021707
