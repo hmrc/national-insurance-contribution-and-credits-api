@@ -48,12 +48,12 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchBenefitCalculationDetails(
-      benefitType: BenefitType,
       identifier: Identifier,
       longTermBenefitType: Option[LongTermBenefitType],
       pensionProcessingArea: Option[PensionProcessingArea]
   )(
-      implicit hc: HeaderCarrier
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, LongTermBenefitCalculationDetailsResult] = {
 
     def typeFilter: Option[String]        = longTermBenefitType.map(t => t.entryName)
@@ -71,9 +71,9 @@ class LongTermBenefitCalculationDetailsConnector @Inject() (
       )
 
     npsClient
-      .get(benefitType, path)
+      .get(path)
       .flatMap { response =>
-        logger.info(s"attempting to parse response from $apiName for $benefitType")
+        logger.info(s"attempting to parse response from $apiName for ${originatorId.value}")
 
         val benefitCalculationDetailsResult =
           response.status match {

@@ -109,6 +109,8 @@ class GetYourStatePensionDataRetrievalServiceItSpec
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
     interval = Span(100, Millis)

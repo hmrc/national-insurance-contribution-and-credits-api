@@ -75,6 +75,8 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
     interval = Span(100, Millis)
   )
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(
@@ -335,7 +337,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -383,7 +385,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -437,7 +439,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -479,7 +481,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -520,7 +522,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -565,7 +567,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -623,7 +625,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -675,7 +677,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -705,7 +707,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
             val result =
               connector
-                .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+                .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
                 .value
                 .futureValue
 
@@ -734,7 +736,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -855,7 +857,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 
@@ -877,7 +879,7 @@ class LongTermBenefitCalculationDetailsConnectorItSpec
 
           val result =
             connector
-              .fetchBenefitCalculationDetails(MA, identifier, longTermBenefitType, pensionProcessingArea)
+              .fetchBenefitCalculationDetails(identifier, longTermBenefitType, pensionProcessingArea)
               .value
               .futureValue
 

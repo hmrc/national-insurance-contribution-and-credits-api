@@ -47,7 +47,8 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
       eligibilityCheckDataRequest: BSPEligibilityCheckDataRequest
   )(
       implicit hc: HeaderCarrier,
-      correlationId: CorrelationId
+      correlationId: CorrelationId,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultBSP] = {
 
     val maybeTaxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
@@ -60,7 +61,6 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
       case Right(taxWindows) =>
         (
           niContributionsAndCreditsConnector.fetchContributionsAndCredits(
-            eligibilityCheckDataRequest.benefitType,
             NiContributionsAndCreditsRequest(
               eligibilityCheckDataRequest.nationalInsuranceNumber,
               eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,
@@ -69,7 +69,6 @@ class BereavementSupportPaymentDataRetrievalService @Inject() (
             )
           ),
           marriageDetailsConnector.fetchMarriageDetails(
-            eligibilityCheckDataRequest.benefitType,
             eligibilityCheckDataRequest.nationalInsuranceNumber
           )
         ).parTupled

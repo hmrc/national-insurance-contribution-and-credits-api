@@ -49,6 +49,8 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
@@ -128,10 +130,11 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(
               SuccessResult(
@@ -161,10 +164,11 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
         )
 
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.rightT(result)
           )
@@ -180,10 +184,11 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
       "should propagate the error returned from the connector (ValidationError)" in {
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(JsonParsingError(List.empty))
           )
@@ -198,10 +203,11 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
 
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(InvalidJsonError(error))
           )
@@ -215,10 +221,11 @@ class SearchlightDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
       "should propagate the error returned from the connector (NpsClientError)" in {
         val error = new RuntimeException()
         (mockNiContributionsAndCreditsConnector
-          .fetchContributionsAndCredits(_: BenefitType, _: NiContributionsAndCreditsRequest, _: Option[CallSystem])(
-            _: HeaderCarrier
+          .fetchContributionsAndCredits(_: NiContributionsAndCreditsRequest)(
+            _: HeaderCarrier,
+            _: OriginatorId
           ))
-          .expects(BenefitType.BSP, niContributionsAndCreditsRequest, Some(CallSystem.SEARCHLIGHT), *)
+          .expects(niContributionsAndCreditsRequest, *, *)
           .returning(
             EitherT.leftT(NpsClientError(error))
           )

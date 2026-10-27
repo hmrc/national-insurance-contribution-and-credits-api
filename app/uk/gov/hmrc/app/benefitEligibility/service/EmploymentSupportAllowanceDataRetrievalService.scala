@@ -23,7 +23,8 @@ import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsCo
 import uk.gov.hmrc.app.benefitEligibility.model.common.{
   BenefitEligibilityError,
   CorrelationId,
-  DataRetrievalServiceError
+  DataRetrievalServiceError,
+  OriginatorId
 }
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult.EligibilityCheckDataResultESA
@@ -44,12 +45,12 @@ class EmploymentSupportAllowanceDataRetrievalService @Inject() (
       eligibilityCheckDataRequest: ESAEligibilityCheckDataRequest
   )(
       implicit hc: HeaderCarrier,
-      correlationId: CorrelationId
+      correlationId: CorrelationId,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultESA] =
 
     niContributionsAndCreditsConnector
       .fetchContributionsAndCredits(
-        eligibilityCheckDataRequest.benefitType,
         NiContributionsAndCreditsRequest(
           eligibilityCheckDataRequest.nationalInsuranceNumber,
           eligibilityCheckDataRequest.niContributionsAndCredits.dateOfBirth,

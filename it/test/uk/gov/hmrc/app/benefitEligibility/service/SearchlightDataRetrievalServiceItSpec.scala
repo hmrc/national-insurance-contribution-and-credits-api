@@ -87,6 +87,8 @@ class SearchlightDataRetrievalServiceItSpec
 
   implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   val uuidOne   = UUID.fromString("67ef7500-4d9f-4e4e-a87b-0828293f9f08")
   val uuidTwo   = UUID.fromString("4a566a78-b195-4546-86e9-0a7ac89632ac")
   val uuidThree = UUID.fromString("5b0e3451-475d-46c0-997e-00eb799250e2")

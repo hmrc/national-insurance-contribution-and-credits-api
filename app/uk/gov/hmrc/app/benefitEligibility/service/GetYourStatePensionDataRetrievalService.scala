@@ -39,7 +39,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.{JsObject, Json}
 
-final case class RequestKey(benefitType: BenefitType, nationalInsuranceNumber: Identifier)
+final case class RequestKey(nationalInsuranceNumber: Identifier)
 
 final case class BenefitSchemeMembershipDetailsData(
     schemeMembershipDetailsResult: SchemeMembershipDetailsResult,
@@ -68,11 +68,12 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       eligibilityCheckDataRequest: GYSPEligibilityCheckDataRequest
   )(
       implicit hc: HeaderCarrier,
-      correlationId: CorrelationId
+      correlationId: CorrelationId,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResultGYSP] = {
 
     implicit val requestKey: RequestKey =
-      RequestKey(eligibilityCheckDataRequest.benefitType, eligibilityCheckDataRequest.nationalInsuranceNumber)
+      RequestKey(eligibilityCheckDataRequest.nationalInsuranceNumber)
     val maybeTaxWindows = ContributionCreditTaxWindowCalculator.createTaxWindows(
       eligibilityCheckDataRequest.niContributionsAndCredits.startTaxYear,
       eligibilityCheckDataRequest.niContributionsAndCredits.endTaxYear
@@ -166,10 +167,9 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       dateOfBirth: DateOfBirth,
       startTaxYear: StartTaxYear,
       endTaxYear: EndTaxYear
-  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
+  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey, originatorId: OriginatorId) =
 
     niContributionsAndCreditsConnector.fetchContributionsAndCredits(
-      requestKey.benefitType,
       NiContributionsAndCreditsRequest(
         requestKey.nationalInsuranceNumber,
         dateOfBirth,
@@ -178,22 +178,25 @@ class GetYourStatePensionDataRetrievalService @Inject() (
       )
     )
 
-  private[service] def fetchMarriageDetailsData(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey) =
+  private[service] def fetchMarriageDetailsData(
+      implicit headerCarrier: HeaderCarrier,
+      requestKey: RequestKey,
+      originatorId: OriginatorId
+  ) =
     marriageDetailsConnector.fetchMarriageDetails(
-      requestKey.benefitType,
       requestKey.nationalInsuranceNumber
     )
 
   private[service] def fetchBenefitSchemeMembershipDetailsData()(
       implicit headerCarrier: HeaderCarrier,
-      requestKey: RequestKey
+      requestKey: RequestKey,
+      originatorId: OriginatorId
   ): EitherT[
     Future,
     BenefitEligibilityError,
     BenefitSchemeMembershipDetailsData
   ] = for {
     detailsResult <- schemeMembershipDetailsConnector.fetchSchemeMembershipDetails(
-      benefitType = requestKey.benefitType,
       nationalInsuranceNumber = requestKey.nationalInsuranceNumber
     )
     resultTuple <-
@@ -212,7 +215,6 @@ class GetYourStatePensionDataRetrievalService @Inject() (
               contractedOutNumberDetailsList
                 .map { contractedOutNumberDetails =>
                   benefitSchemeDetailsConnector.fetchBenefitSchemeDetails(
-                    requestKey.benefitType,
                     requestKey.nationalInsuranceNumber,
                     SchemeContractedOutNumberDetails(contractedOutNumberDetails)
                   )
@@ -228,14 +230,13 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
   private[service] def fetchLongTermBenefitCalculationDetailsData(
       longTermBenefitCalculation: Option[LongTermBenefitCalculationRequestParams]
-  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey): EitherT[
+  )(implicit headerCarrier: HeaderCarrier, requestKey: RequestKey, originatorId: OriginatorId): EitherT[
     Future,
     BenefitEligibilityError,
     LongTermBenefitCalculationDetailsData
   ] = for {
     longTermBenefitCalculationDetailsResult <- longTermBenefitCalculationDetailsConnector
       .fetchBenefitCalculationDetails(
-        requestKey.benefitType,
         requestKey.nationalInsuranceNumber,
         longTermBenefitCalculation.flatMap(_.longTermBenefitType),
         longTermBenefitCalculation.flatMap(_.pensionProcessingArea)
@@ -258,7 +259,6 @@ class GetYourStatePensionDataRetrievalService @Inject() (
             .map { case (longTermBenefitType, sequenceNumber) =>
               longTermBenefitNotesConnector
                 .fetchLongTermBenefitNotes(
-                  requestKey.benefitType,
                   requestKey.nationalInsuranceNumber,
                   longTermBenefitType,
                   sequenceNumber
@@ -272,10 +272,10 @@ class GetYourStatePensionDataRetrievalService @Inject() (
 
   private[service] def fetchIndividualStatePensionInformation()(
       implicit headerCarrier: HeaderCarrier,
-      requestKey: RequestKey
+      requestKey: RequestKey,
+      originatorId: OriginatorId
   ) =
     statePensionInformationConnector.fetchIndividualStatePensionInformation(
-      requestKey.benefitType,
       requestKey.nationalInsuranceNumber
     )
 

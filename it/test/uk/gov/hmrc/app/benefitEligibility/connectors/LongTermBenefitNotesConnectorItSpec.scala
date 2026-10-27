@@ -59,6 +59,8 @@ class LongTermBenefitNotesConnectorItSpec
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
     interval = Span(100, Millis)
@@ -111,7 +113,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
             SuccessResult(LongTermBenefitNotes, longTermBenefitNotesSuccessResponse)
@@ -156,7 +158,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
@@ -207,7 +209,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
@@ -247,7 +249,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -287,7 +289,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -331,7 +333,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
           val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -386,7 +388,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -438,7 +440,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -469,7 +471,7 @@ class LongTermBenefitNotesConnectorItSpec
             )
 
             val result =
-              connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+              connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
             result shouldBe Right(
               FailureResult(
@@ -495,7 +497,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[InvalidJsonError]
@@ -514,7 +516,7 @@ class LongTermBenefitNotesConnectorItSpec
           )
 
           val result =
-            connector.fetchLongTermBenefitNotes(GYSP, identifier, longTermBenefitType, seqNo).value.futureValue
+            connector.fetchLongTermBenefitNotes(identifier, longTermBenefitType, seqNo).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[NpsClientError]

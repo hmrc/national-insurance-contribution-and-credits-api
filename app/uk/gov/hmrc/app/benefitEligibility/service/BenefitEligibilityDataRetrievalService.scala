@@ -18,10 +18,16 @@ package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
 import cats.syntax.all.*
-import uk.gov.hmrc.app.benefitEligibility.model.common.{BenefitEligibilityError, CorrelationId, FeatureDisabled}
+import uk.gov.hmrc.app.benefitEligibility.model.common.{
+  BenefitEligibilityError,
+  CorrelationId,
+  FeatureDisabled,
+  OriginatorId
+}
 import uk.gov.hmrc.app.benefitEligibility.model.nps.EligibilityCheckDataResult
 import uk.gov.hmrc.app.benefitEligibility.model.request.*
 import uk.gov.hmrc.app.config.AppConfig
+import uk.gov.hmrc.app.benefitEligibility.connectors.util.OriginatorIdHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -31,6 +37,7 @@ class BenefitEligibilityDataRetrievalService @Inject() (
     maternityAllowanceDataRetrievalService: MaternityAllowanceDataRetrievalService,
     employmentSupportAllowanceDataRetrievalService: EmploymentSupportAllowanceDataRetrievalService,
     jobSeekersAllowanceDataRetrievalService: JobSeekersAllowanceDataRetrievalService,
+    originatorIdHelper: OriginatorIdHelper,
     getYourStatePensionDataRetrievalService: GetYourStatePensionDataRetrievalService,
     bspDataRetrievalService: BereavementSupportPaymentDataRetrievalService,
     searchlightDataRetrievalService: SearchlightDataRetrievalService,
@@ -43,7 +50,16 @@ class BenefitEligibilityDataRetrievalService @Inject() (
   )(
       implicit hc: HeaderCarrier
   ): EitherT[Future, BenefitEligibilityError, EligibilityCheckDataResult] = {
+
     implicit val cid: CorrelationId = correlationId
+
+    implicit val originatorId: OriginatorId = request match {
+
+      case req: SearchlightEligibilityCheckDataRequest =>
+        originatorIdHelper.getOriginatorId(req.benefitType, Some(req.system))
+      case _ => originatorIdHelper.getOriginatorId(request.benefitType, None)
+    }
+
     request match {
       case request: MAEligibilityCheckDataRequest if appConfig.maEnabled =>
         maternityAllowanceDataRetrievalService.fetchEligibilityData(request).widen[EligibilityCheckDataResult]

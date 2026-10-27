@@ -72,6 +72,8 @@ class SchemeMembershipDetailsConnectorItSpec
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
     interval = Span(100, Millis)
@@ -261,7 +263,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           result shouldBe Right(
             SuccessResult(ApiName.SchemeMembershipDetails, schemeMembershipDetailsSuccessResponse)
@@ -307,7 +309,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
@@ -358,7 +360,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
@@ -398,7 +400,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -436,7 +438,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -480,7 +482,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
           val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -528,7 +530,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -572,7 +574,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -603,7 +605,7 @@ class SchemeMembershipDetailsConnectorItSpec
             )
 
             val result =
-              connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+              connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
             result shouldBe Right(
               FailureResult(
@@ -629,7 +631,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[InvalidJsonError]
@@ -648,7 +650,7 @@ class SchemeMembershipDetailsConnectorItSpec
           )
 
           val result =
-            connector.fetchSchemeMembershipDetails(MA, Identifier("AB123456C")).value.futureValue
+            connector.fetchSchemeMembershipDetails(Identifier("AB123456C")).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[NpsClientError]

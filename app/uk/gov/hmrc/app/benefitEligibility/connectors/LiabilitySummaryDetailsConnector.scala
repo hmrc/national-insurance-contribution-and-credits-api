@@ -59,14 +59,14 @@ class LiabilitySummaryDetailsConnector @Inject() (
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchLiabilitySummaryDetails(
-      benefitType: BenefitType,
       identifier: Identifier,
       liabilitySearchCategoryHyphenated: LiabilitySearchCategoryHyphenated,
       earliestLiabilityStartDate: Option[LocalDate],
       startDate: Option[LocalDate],
       endDate: Option[LocalDate]
   )(
-      implicit hc: HeaderCarrier
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, LiabilityResult] = {
 
     def earliestStartDate: Option[String] = earliestLiabilityStartDate.map(d => d.toString)
@@ -87,18 +87,17 @@ class LiabilitySummaryDetailsConnector @Inject() (
         options
       )
 
-    fetchData(benefitType, path)
+    fetchData(path)
   }
 
   def fetchData(
-      benefitType: BenefitType,
       path: String
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, LiabilityResult] =
+  )(implicit hc: HeaderCarrier, originatorId: OriginatorId): EitherT[Future, BenefitEligibilityError, LiabilityResult] =
 
     npsClient
-      .get(benefitType, s"${appConfig.baseUrl(apiName)}$path")
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
-        logger.info(s"attempting to parse response from $apiName for $benefitType")
+        logger.info(s"attempting to parse response from $apiName for $originatorId.value")
 
         response.status match {
           case OK =>

@@ -73,6 +73,8 @@ class NiContributionsAndCreditsConnectorItSpec
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
+  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+  
   implicit val defaultPatience: PatienceConfig = PatienceConfig(
     timeout = Span(10, Seconds),
     interval = Span(100, Millis)
@@ -185,7 +187,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(SuccessResult(NiContributionAndCredits, successResponse))
           server.verify(
@@ -228,7 +230,7 @@ class NiContributionsAndCreditsConnectorItSpec
           )
 
           val result =
-            connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+            connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           val jsonReads                             = implicitly[Reads[NpsStandardErrorResponse400]]
           val response: NpsStandardErrorResponse400 = jsonReads.reads(Json.parse(errorResponse)).get
@@ -279,7 +281,7 @@ class NiContributionsAndCreditsConnectorItSpec
           )
 
           val result =
-            connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+            connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           val jsonReads                           = implicitly[Reads[NpsErrorResponseHipOrigin]]
           val response: NpsErrorResponseHipOrigin = jsonReads.reads(Json.parse(errorResponse)).get
@@ -318,7 +320,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           val jsonReads                        = implicitly[Reads[NpsSingleErrorResponse]]
           val response: NpsSingleErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -348,7 +350,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -388,7 +390,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           val jsonReads                       = implicitly[Reads[NpsMultiErrorResponse]]
           val response: NpsMultiErrorResponse = jsonReads.reads(Json.parse(errorResponse)).get
@@ -416,7 +418,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -455,7 +457,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe Right(
             FailureResult(
@@ -481,7 +483,7 @@ class NiContributionsAndCreditsConnectorItSpec
                 )
             )
 
-            val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+            val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
             result shouldBe Right(
               FailureResult(
@@ -506,7 +508,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[InvalidJsonError]
@@ -524,7 +526,7 @@ class NiContributionsAndCreditsConnectorItSpec
               )
           )
 
-          val result = connector.fetchContributionsAndCredits(MA, requestBody).value.futureValue
+          val result = connector.fetchContributionsAndCredits(requestBody).value.futureValue
 
           result shouldBe a[Left[_, _]]
           result.left.value shouldBe a[NpsClientError]

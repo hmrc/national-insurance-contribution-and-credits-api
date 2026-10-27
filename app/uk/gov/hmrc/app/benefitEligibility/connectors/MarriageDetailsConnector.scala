@@ -55,20 +55,23 @@ class MarriageDetailsConnector @Inject() (
   private val logger = new RequestAwareLogger(this.getClass)
 
   def fetchMarriageDetails(
-      benefitType: BenefitType,
       identifier: Identifier
-  )(implicit hc: HeaderCarrier): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
+  )(
+      implicit hc: HeaderCarrier,
+      originatorId: OriginatorId
+  ): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] = {
 
     val path = s"/paye/individual/${identifier.value}/marriage-cp"
 
-    fetchMarriageDetailsData(benefitType, path)
+    fetchMarriageDetailsData(path)
   }
 
-  def fetchMarriageDetailsData(benefitType: BenefitType, path: String)(
-      implicit headerCarrier: HeaderCarrier
+  def fetchMarriageDetailsData(path: String)(
+      implicit headerCarrier: HeaderCarrier,
+      originatorId: OriginatorId
   ): EitherT[Future, BenefitEligibilityError, MarriageDetailsResult] =
     npsClient
-      .get(benefitType, s"${appConfig.baseUrl(apiName)}$path")
+      .get(s"${appConfig.baseUrl(apiName)}$path")
       .flatMap { response =>
         logger.info(s"attempting to parse response from $apiName")
 
