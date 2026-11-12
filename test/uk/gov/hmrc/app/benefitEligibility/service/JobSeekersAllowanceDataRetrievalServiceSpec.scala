@@ -17,9 +17,7 @@
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.*
 import uk.gov.hmrc.app.benefitEligibility.connectors.NiContributionsAndCreditsConnector
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
@@ -35,25 +33,13 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.JSAEligibilityCheckDataR
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import java.util.UUID
-import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
-class JobSeekersAllowanceDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
-
-  implicit val ec: ExecutionContextExecutorService =
-    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+class JobSeekersAllowanceDataRetrievalServiceSpec extends BaseSpec {
 
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
 
   val underTest = new JobSeekersAllowanceDataRetrievalService(mockNiContributionsAndCreditsConnector)
-
-  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
-
-  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
 
   private val niContributionsAndCreditsRequest = NiContributionsAndCreditsRequest(
     nationalInsuranceNumber = Identifier("GD379251T"),

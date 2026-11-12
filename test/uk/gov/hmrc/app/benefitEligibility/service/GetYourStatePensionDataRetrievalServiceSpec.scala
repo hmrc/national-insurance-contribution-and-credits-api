@@ -17,13 +17,12 @@
 package uk.gov.hmrc.app.benefitEligibility.service
 
 import cats.data.EitherT
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.should.Matchers.*
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.app.benefitEligibility.connectors.*
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.app.benefitEligibility.model.common.*
 import uk.gov.hmrc.app.benefitEligibility.model.common.NpsNormalizedError.{
   AccessForbidden,
@@ -72,21 +71,11 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
 import uk.gov.hmrc.app.benefitEligibility.model.request.GYSPEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
-import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Instant, LocalDate}
+import java.time.LocalDate
 import java.util.UUID
-import java.util.concurrent.Executors
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 
-class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockFactory {
-
-  implicit val ec: ExecutionContextExecutorService =
-    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+class GetYourStatePensionDataRetrievalServiceSpec extends BaseSpec {
 
   val mockNiContributionsAndCreditsConnector: NiContributionsAndCreditsConnector =
     mock[NiContributionsAndCreditsConnector]
@@ -114,11 +103,7 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
   val mockBatchService: BatchService        = mock[BatchService]
   val mockUUIDService: UuidGeneratorService = mock[UuidGeneratorService]
 
-  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
-
-  val currentTimeSource: CurrentTimeSource = new CurrentTimeSource {
-    override def instantNow(): Instant = testInstant
-  }
+  val currentTimeSource: CurrentTimeSource = createCurrentTimeSource(testInstant)
 
   val underTest = new GetYourStatePensionDataRetrievalService(
     mockNiContributionsAndCreditsConnector,
@@ -587,8 +572,6 @@ class GetYourStatePensionDataRetrievalServiceSpec extends AnyFreeSpec with MockF
       )
     )
   )
-
-  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
   val batchDocument: BatchDocument = BatchDocument(
     correlationId,
