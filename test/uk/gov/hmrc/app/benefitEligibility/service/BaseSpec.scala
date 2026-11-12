@@ -29,15 +29,14 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 
 trait BaseSpec extends AnyFreeSpec with MockFactory {
 
-  export uk.gov.hmrc.http.HeaderCarrier
-  export uk.gov.hmrc.app.benefitEligibility.model.common.OriginatorId
-
   protected implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   protected implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  protected implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+  protected implicit val correlationId: CorrelationId = CorrelationId(
+    UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764")
+  )
 
   protected implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
 

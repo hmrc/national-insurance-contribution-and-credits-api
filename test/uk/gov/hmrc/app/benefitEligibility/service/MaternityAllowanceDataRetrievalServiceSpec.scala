@@ -39,6 +39,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequ
 import uk.gov.hmrc.app.benefitEligibility.model.request.MAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.repository.*
 import uk.gov.hmrc.app.benefitEligibility.util.CurrentTimeSource
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.util.UUID

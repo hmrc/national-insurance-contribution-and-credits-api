@@ -31,6 +31,7 @@ import uk.gov.hmrc.app.benefitEligibility.model.nps.niContributionsAndCredits.en
 import uk.gov.hmrc.app.benefitEligibility.model.nps.{EligibilityCheckDataResult, NpsApiResult}
 import uk.gov.hmrc.app.benefitEligibility.model.request.ESAEligibilityCheckDataRequest
 import uk.gov.hmrc.app.benefitEligibility.model.request.EligibilityCheckDataRequestParams.ContributionsAndCreditsRequestParams
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 
