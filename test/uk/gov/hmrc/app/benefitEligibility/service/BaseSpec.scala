@@ -32,19 +32,18 @@ trait BaseSpec extends AnyFreeSpec with MockFactory {
   export uk.gov.hmrc.http.HeaderCarrier
   export uk.gov.hmrc.app.benefitEligibility.model.common.OriginatorId
 
-  implicit val ec: ExecutionContextExecutorService =
+  protected implicit val ec: ExecutionContextExecutorService =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  protected implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
+  protected implicit val correlationId: CorrelationId = CorrelationId(UUID.fromString("434369a5-e0b9-4fb0-97db-c5e2753eb764"))
 
-  implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
-  
-  def createCurrentTimeSource(instant: Instant): CurrentTimeSource = new CurrentTimeSource {
+  protected implicit val originatorId: OriginatorId = OriginatorId("test-originatorId")
+
+  protected def createCurrentTimeSource(instant: Instant): CurrentTimeSource = new CurrentTimeSource {
     override def instantNow(): Instant = instant
   }
-  
-  val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 
+  protected val testInstant: Instant = Instant.parse("2007-12-03T10:15:30.00Z")
 }
